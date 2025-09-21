@@ -6,13 +6,13 @@ import { auth } from "./auth/index.js";
 
 const app = new Hono();
 
-app.use(
-  "*",
-  cors({
-    origin: `http://localhost:${appConfig.clientPort}`,
-    credentials: true,
-  })
-);
+// app.use(
+//   "*",
+//   cors({
+//     origin: `http://localhost:${appConfig.clientPort}`,
+//     credentials: true,
+//   })
+// );
 
 app.route("/", auth);
 

@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useLayoutEffect } from "react";
 import { LangSwitcher, ThemeSwitcher } from "~/features";
 import { authManager, AuthUserAvatar, useAuthStore } from "~/features/auth";
+import { NotificationButton } from "~/features/notifications";
 import { Flex, PageLayout } from "~/shared/ui";
 import { Header, NavBar, useHeaderStore } from "~/widgets";
 
@@ -53,10 +54,13 @@ export function PrivateLayout() {
     setContent(
       "right",
       <Flex justifyContent="end" gap={2}>
-        <LangSwitcher />
-        <ThemeSwitcher />
+        {/* <LangSwitcher /> */}
+        {/* <ThemeSwitcher /> */}
+        <NotificationButton />
       </Flex>
     );
+
+    // TODO: Унести LangSwitcher и ThemeSwitcher в настройки
   }, [setContent]);
 
   return (

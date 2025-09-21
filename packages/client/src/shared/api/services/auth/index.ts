@@ -3,32 +3,27 @@ import type { RequestResponse } from "../types";
 import axios from "axios";
 import { axiosInstance } from "../../../config/axios";
 
-const apiEndpoint = import.meta.env.VITE_API_ENDPOINT;
-
 class AuthService {
   signInByLogin(data: { login: string; password: string }) {
     return axiosInstance.post<
       RequestResponse<{ user: AuthUserDTO; accessToken: string }>
-    >(`${apiEndpoint}/auth/sign-in`, data);
+    >(`/api/auth/sign-in`, data);
   }
 
   signUp(data: { login: string; name?: string; password: string }) {
-    return axiosInstance.post<RequestResponse>(
-      `${apiEndpoint}/auth/sign-up`,
-      data
-    );
+    return axiosInstance.post<RequestResponse>(`/api/auth/sign-up`, data);
   }
 
   checkIsAuth() {
     return axios.get<
       RequestResponse<{ user: AuthUserDTO; accessToken?: string }>
-    >(`${apiEndpoint}/auth`, {
+    >(`/api/auth`, {
       withCredentials: true,
     });
   }
 
   signOut() {
-    return axiosInstance.post<RequestResponse>(`${apiEndpoint}/auth/sign-out`);
+    return axiosInstance.post<RequestResponse>(`/api/auth/sign-out`);
   }
 
   // checkRefresh() {
@@ -42,7 +37,7 @@ class AuthService {
 
   refresh() {
     return axios.get<RequestResponse<{ accessToken: string }>>(
-      `${apiEndpoint}/auth/refresh`,
+      `/api/auth/refresh`,
       {
         withCredentials: true,
       }

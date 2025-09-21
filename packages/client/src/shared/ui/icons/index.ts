@@ -7,11 +7,14 @@ export * from "./ArrowLeft";
 export * from "./Bookmark";
 export * from "./Home";
 export * from "./ArrowLeft";
-export * from "./More";
+export * from "./MoreHorizontal";
+export * from "./MoreVertical";
 export * from "./User";
 export * from "./SafeLock";
 export * from "./UserCircle";
 export * from "./ChevronLeft";
 export * from "./ChevronRight";
+export * from "./Bell";
+export * from "./Clock";
 
 export * from "./withIconProps";
