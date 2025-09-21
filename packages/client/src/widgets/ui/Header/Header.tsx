@@ -11,12 +11,17 @@ export const Header = () => {
       as="header"
       width="full"
       display="flex"
-      justifyContent="space-between"
+      justifyContent="center"
       alignItems="center"
+      position="relative"
     >
-      {leftContent}
+      <Box position="absolute" left={0} top="50%" transform="translateY(-50%)">
+        {leftContent}
+      </Box>
       {centerContent}
-      {rightContent}
+      <Box position="absolute" right={0} top="50%" transform="translateY(-50%)">
+        {rightContent}
+      </Box>
     </Box>
   );
 };

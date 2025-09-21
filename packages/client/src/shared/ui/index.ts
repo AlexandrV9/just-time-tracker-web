@@ -18,6 +18,8 @@ export * from "./List";
 export * from "./Avatar";
 export * from "./PageLayout";
 export * from "./ScrollArea";
+export * from "./Card";
+export * from "./Badge";
 
 export * from "./icons";
 export * from "./controls";
