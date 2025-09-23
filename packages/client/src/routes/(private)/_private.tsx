@@ -54,8 +54,8 @@ export function PrivateLayout() {
     setContent(
       "right",
       <Flex justifyContent="end" gap={2}>
-        {/* <LangSwitcher /> */}
-        {/* <ThemeSwitcher /> */}
+        <LangSwitcher />
+        <ThemeSwitcher />
         <NotificationButton />
       </Flex>
     );
@@ -77,10 +77,7 @@ export function PrivateLayout() {
       <PageLayout.MainContainer>
         <Outlet />
       </PageLayout.MainContainer>
-      <PageLayout.BottomContainer
-        borderTop="1px solid"
-        borderColor="border.emphasized"
-      >
+      <PageLayout.BottomContainer>
         <NavBar />
       </PageLayout.BottomContainer>
     </PageLayout>

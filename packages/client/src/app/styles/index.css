@@ -2,22 +2,6 @@ html {
   font-family: var(--fonts-font-family-default);
 }
 
-/* TODO Вынести это другое в другое место */
-/* Это настройка для Safari */
-body {
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-}
-
-/* TODO убрать после адаптива */
-#root {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 /* :root,
 [data-theme="light"] { */
 /* Light theme */

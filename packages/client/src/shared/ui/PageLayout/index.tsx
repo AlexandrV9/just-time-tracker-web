@@ -9,9 +9,7 @@ export interface PageLayoutProps extends BoxProps {
 }
 
 export const PageLayout = ({ className, ...props }: PageLayoutProps) => {
-  return (
-    <Box className={clsx(styles.container, className)} bg="bg" {...props} />
-  );
+  return <Box className={clsx(styles.container, className)} {...props} />;
 };
 
 PageLayout.BottomContainer = BottomContainer;
