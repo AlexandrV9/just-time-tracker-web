@@ -1,3 +1,9 @@
 import { Dialog as BaseDialog } from "@chakra-ui/react";
+import { SafeContent } from "./SafeContent";
 
-export const Dialog = BaseDialog;
+export const Dialog = Object.assign(
+  {
+    SafeContent,
+  },
+  BaseDialog
+);

@@ -59,5 +59,25 @@
       "goToSignInButton": "Start Using Now",
       "title": "Welcome!"
     }
+  },
+  "widgets": {
+    "navbar": {
+      "menuItems": {
+        "Home": "Home",
+        "Tasks": "Tasks",
+        "Notes": "Notes",
+        "Settings": "Settings"
+      }
+    },
+    "accountSettings": {
+      "title": "Account Settings"
+    }
+  },
+  "features": {
+    "auth": {
+      "signOut": {
+        "textButton": "Sign Out"
+      }
+    }
   }
 }

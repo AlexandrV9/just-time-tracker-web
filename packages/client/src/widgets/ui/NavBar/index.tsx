@@ -1,22 +1,34 @@
 import { memo, type ReactNode } from "react";
-import { List, Box, type IconProps } from "~/shared/ui";
+import { List, Box, type IconProps, type BoxProps } from "~/shared/ui";
 import { navItems } from "./constants";
 import { NavBarItem } from "./Item";
 import { useLocation } from "@tanstack/react-router";
+import { useTranslation } from "~/shared/hooks";
 
 export type NavBarItemProps = {
   children: ReactNode;
   icon: (props: IconProps) => ReactNode;
 };
 
-export const NavBar = memo(() => {
+export interface NavBarProps extends BoxProps {
+  isVertical?: boolean;
+}
+
+export const NavBar = memo(({ isVertical = false, ...props }: NavBarProps) => {
+  const { t } = useTranslation();
   const location = useLocation();
 
   return (
-    <Box as="nav">
+    <Box as="nav" {...props}>
       <List.Root
         display="grid"
-        gridTemplateColumns={`repeat(${navItems.length}, minmax(40px, 200px))`}
+        {...(isVertical
+          ? {
+              gridTemplateRows: `repeat(${navItems.length}, minmax(40px, 100px))`,
+            }
+          : {
+              gridTemplateColumns: `repeat(${navItems.length}, minmax(40px, 200px))`,
+            })}
         listStyleType="none"
         justifyContent="center"
       >
@@ -24,6 +36,7 @@ export const NavBar = memo(() => {
           <NavBarItem
             key={item.href}
             {...item}
+            title={t(`widgets.navbar.menuItems.${item.title}`)}
             isActive={checkIsActive(item.href, location.pathname)}
           />
         ))}

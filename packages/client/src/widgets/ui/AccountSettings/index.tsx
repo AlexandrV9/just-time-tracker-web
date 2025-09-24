@@ -1,3 +1,4 @@
+import { useTranslation } from "~/shared/hooks";
 import {
   Box,
   ChevronRightIcon,
@@ -10,6 +11,8 @@ import {
 } from "~/shared/ui";
 
 export const AccountSettings = () => {
+  const { t } = useTranslation();
+
   return (
     <Box
       display="flex"
@@ -21,7 +24,7 @@ export const AccountSettings = () => {
       p="0.5rem"
     >
       <Text textStyle="xl" fontWeight="bold">
-        Account Settings
+        {t("widgets.accountSettings.title")}
       </Text>
       <List.Root>
         <List.Item display="flex" alignItems="center" gap="0.5rem">

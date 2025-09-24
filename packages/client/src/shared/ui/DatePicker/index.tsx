@@ -10,15 +10,14 @@ import "react-datepicker/dist/react-datepicker.css";
 
 interface ChakraDatePickerProps {
   label?: string;
-  selected: Date;
+  value: Date | null;
   onChange: (date: Date | null) => void;
 }
-
 
 // https://reactdatepicker.com/
 export const DatePicker = ({
   label,
-  selected,
+  value,
   onChange,
 }: ChakraDatePickerProps) => {
   return (
@@ -27,8 +26,7 @@ export const DatePicker = ({
       <Box>
         <BaseDatePicker
           locale={ru}
-          selected={selected}
-          //   onChange={onChange}
+          selected={value}
           onChange={(date) => {
             console.log(date);
             onChange(date);

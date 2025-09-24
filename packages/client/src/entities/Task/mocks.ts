@@ -64,5 +64,97 @@ export const mockTasks: Task[] = [
     estimatedTime: 120, // 2 часа
     actualTime: 150, // 2.5 часа
   },
-  
+  {
+    id: "task-5",
+    title: "Исправить баг с отображением дат",
+    description:
+      "В мобильной версии даты задач отображаются некорректно на iOS устройствах",
+    status: "review",
+    priority: "urgent",
+    createdAt: "2024-01-14T16:45:00Z",
+    updatedAt: "2024-01-17T11:20:00Z",
+    createdById: "user-456",
+    projectId: "project-123",
+    tags: ["bug", "mobile", "ios"],
+    estimatedTime: 60, // 1 час
+    actualTime: 45, // 45 минут
+    startDate: "2024-01-16T09:15:00Z",
+  },
+  {
+    id: "task-6",
+    title: "Добавить фильтрацию задач по тегам",
+    description:
+      "Реализовать функционал фильтрации задач по выбранным тегам в боковой панели",
+    status: "done",
+    priority: "low",
+    createdAt: "2024-01-10T13:20:00Z",
+    updatedAt: "2024-01-15T16:30:00Z",
+    createdById: "user-456",
+    projectId: "project-789",
+    tags: ["feature", "filter", "ui"],
+    estimatedTime: 120, // 2 часа
+    actualTime: 150, // 2.5 часа
+  },
+    {
+    id: "task-7",
+    title: "Исправить баг с отображением дат",
+    description:
+      "В мобильной версии даты задач отображаются некорректно на iOS устройствах",
+    status: "review",
+    priority: "urgent",
+    createdAt: "2024-01-14T16:45:00Z",
+    updatedAt: "2024-01-17T11:20:00Z",
+    createdById: "user-456",
+    projectId: "project-123",
+    tags: ["bug", "mobile", "ios"],
+    estimatedTime: 60, // 1 час
+    actualTime: 45, // 45 минут
+    startDate: "2024-01-16T09:15:00Z",
+  },
+  {
+    id: "task-8",
+    title: "Добавить фильтрацию задач по тегам",
+    description:
+      "Реализовать функционал фильтрации задач по выбранным тегам в боковой панели",
+    status: "done",
+    priority: "low",
+    createdAt: "2024-01-10T13:20:00Z",
+    updatedAt: "2024-01-15T16:30:00Z",
+    createdById: "user-456",
+    projectId: "project-789",
+    tags: ["feature", "filter", "ui"],
+    estimatedTime: 120, // 2 часа
+    actualTime: 150, // 2.5 часа
+  },
+    {
+    id: "task-9",
+    title: "Исправить баг с отображением дат",
+    description:
+      "В мобильной версии даты задач отображаются некорректно на iOS устройствах",
+    status: "review",
+    priority: "urgent",
+    createdAt: "2024-01-14T16:45:00Z",
+    updatedAt: "2024-01-17T11:20:00Z",
+    createdById: "user-456",
+    projectId: "project-123",
+    tags: ["bug", "mobile", "ios"],
+    estimatedTime: 60, // 1 час
+    actualTime: 45, // 45 минут
+    startDate: "2024-01-16T09:15:00Z",
+  },
+  {
+    id: "task-10",
+    title: "Добавить фильтрацию задач по тегам",
+    description:
+      "Реализовать функционал фильтрации задач по выбранным тегам в боковой панели",
+    status: "done",
+    priority: "low",
+    createdAt: "2024-01-10T13:20:00Z",
+    updatedAt: "2024-01-15T16:30:00Z",
+    createdById: "user-456",
+    projectId: "project-789",
+    tags: ["feature", "filter", "ui"],
+    estimatedTime: 120, // 2 часа
+    actualTime: 150, // 2.5 часа
+  },
 ];

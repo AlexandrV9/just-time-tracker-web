@@ -71,26 +71,28 @@ class AuthManager {
     }
   }
 
-  signOut = async () => {
+  async signOut() {
     const currentStatus = useAuthStore.getState().status;
 
     try {
       authActions.setStatus("PENDING");
 
       const response = await authService.signOut();
-      const { data, message, success } = response.data;
+      const { message, success } = response.data;
 
-      if (!success || !data) {
+      if (!success) {
         throw new Error(message || "Request failed");
       }
 
       tokenManager.removeAccessToken();
       authActions.setStatus("UNAUTHENTICATED");
+
+      return response.data;
     } catch (error) {
       console.log(error);
       authActions.setStatus(currentStatus);
     }
-  };
+  }
 }
 
 export const authManager = new AuthManager();

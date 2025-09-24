@@ -195,7 +195,7 @@ auth.get("/refresh", async (c) => {
 });
 
 auth.post("/sign-out", (c) => {
-  deleteCookie(c, tokens.refresh.secret);
+  deleteCookie(c, tokens.refresh.cookie);
 
   return c.json({ success: true });
 });

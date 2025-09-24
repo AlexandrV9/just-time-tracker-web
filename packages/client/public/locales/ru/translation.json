@@ -59,5 +59,25 @@
       "goToSignInButton": "Начать использовать",
       "title": "Добро пожаловать!"
     }
+  },
+  "widgets": {
+    "navbar": {
+      "menuItems": {
+        "Home": "Главная",
+        "Tasks": "Задачи",
+        "Notes": "Заметки",
+        "Settings": "Настройки"
+      }
+    },
+    "accountSettings": {
+      "title": "Настройки аккаунта"
+    }
+  },
+  "features": {
+    "auth": {
+      "signOut": {
+        "textButton": "Выйти"
+      }
+    }
   }
 }

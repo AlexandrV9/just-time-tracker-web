@@ -22,6 +22,7 @@ export * from "./Card";
 export * from "./Badge";
 export * from "./Dialog";
 export * from "./DatePicker";
+export * from "./SafeArea";
 
 export * from "./icons";
 export * from "./controls";

@@ -3,7 +3,8 @@ import { useLayoutEffect } from "react";
 import { LangSwitcher, ThemeSwitcher } from "~/features";
 import { authManager, AuthUserAvatar, useAuthStore } from "~/features/auth";
 import { NotificationButton } from "~/features/notifications";
-import { Flex, PageLayout } from "~/shared/ui";
+import { useOrientation } from "~/shared/hooks";
+import { Box, Flex, PageLayout } from "~/shared/ui";
 import { Header, NavBar, useHeaderStore } from "~/widgets";
 
 export const Route = createFileRoute("/(private)/_private")({
@@ -59,9 +60,98 @@ export function PrivateLayout() {
         <NotificationButton />
       </Flex>
     );
-
-    // TODO: Унести LangSwitcher и ThemeSwitcher в настройки
   }, [setContent]);
+
+  const { orientation } = useOrientation();
+
+  if (orientation === "landscape-secondary") {
+    return (
+      <PageLayout
+        display="flex"
+        paddingRight="var(--safe-area-inset-right, 0px)"
+      >
+        <Box
+          display="flex"
+          justifyContent="center"
+          borderRight="1px solid"
+          borderColor="border.emphasized"
+        >
+          <NavBar
+            isVertical
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            paddingLeft="10px"
+          />
+        </Box>
+        <Box
+          flexGrow={1}
+          display="flex"
+          flexDirection="column"
+          overflow="hidden"
+          borderRight="1px solid"
+          borderColor="border.emphasized"
+        >
+          <PageLayout.TopContainer
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            borderBottom="1px solid"
+            borderColor="border.emphasized"
+          >
+            <Header />
+          </PageLayout.TopContainer>
+          <PageLayout.MainContainer>
+            <Outlet />
+          </PageLayout.MainContainer>
+        </Box>
+      </PageLayout>
+    );
+  }
+
+  if (orientation === "landscape-primary") {
+    return (
+      <PageLayout
+        display="flex"
+        paddingLeft="var(--safe-area-inset-right, 0px)"
+      >
+        <Box
+          flexGrow={1}
+          display="flex"
+          flexDirection="column"
+          overflow="hidden"
+          borderLeft="1px solid"
+          borderColor="border.emphasized"
+        >
+          <PageLayout.TopContainer
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            borderBottom="1px solid"
+            borderColor="border.emphasized"
+          >
+            <Header />
+          </PageLayout.TopContainer>
+          <PageLayout.MainContainer>
+            <Outlet />
+          </PageLayout.MainContainer>
+        </Box>
+        <Box
+          display="flex"
+          justifyContent="center"
+          borderLeft="1px solid"
+          borderColor="border.emphasized"
+        >
+          <NavBar
+            isVertical
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          />
+        </Box>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
