@@ -58,3 +58,8 @@
 ### Удалить все неиспользуемые образы
 
 ```docker image prune -a```
+
+
+### Подключиться к БД из консоли
+
+```docker exec -it {DOCKER_CONTAINER_NAME} psql -U {DB_USER} -d {DB_NAME}```
