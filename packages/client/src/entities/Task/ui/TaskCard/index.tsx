@@ -26,7 +26,7 @@ const statusColors: Partial<
 };
 
 export const TaskCard = memo(({ data }: TaskCardProps) => {
-  const { title, startDate, status, tags } = data;
+  const { title, startDate, status, tags, id: taskId } = data;
 
   return (
     <Card.Root
@@ -39,7 +39,12 @@ export const TaskCard = memo(({ data }: TaskCardProps) => {
       <Stack.HStack justifyContent="space-between">
         <Stack.HStack justifyContent="space-between">
           {tags.map((tag) => (
-            <Badge flexShrink={0} colorPalette="gray" borderRadius="12px">
+            <Badge
+              key={`${taskId}_${tag}`}
+              flexShrink={0}
+              colorPalette="gray"
+              borderRadius="12px"
+            >
               {tag}
             </Badge>
           ))}

@@ -11,6 +11,7 @@ import {
   IOSTimePicker,
   PlusIcon,
   Portal,
+  ScrollArea,
   Stack,
   useForm,
 } from "~/shared/ui";
@@ -52,36 +53,44 @@ export const CreateTaskDialog = () => {
               <Dialog.Title fontSize="2xl">Create New Task</Dialog.Title>
             </Dialog.Header>
 
-            <Dialog.Body>
-              <Box as="form" display="flex" flexDirection="column" gap="1rem">
-                <Field.Root invalid={!!errors.title}>
-                  <Field.Label color="fg">Title</Field.Label>
-                  <Input
-                    color="fg"
-                    truncate
-                    {...register("title")}
-                    placeholder="Please enter name new task"
-                  />
-                  <Field.ErrorText color="fg.error">
-                    {errors.title?.message}
-                  </Field.ErrorText>
-                </Field.Root>
+            <Dialog.Body overflow="auto">
+              <ScrollArea.Root as="main" p="1rem" display="flex" size="xs">
+                <ScrollArea.Viewport>
+                  <ScrollArea.Content>
+                    <Box
+                      as="form"
+                      display="flex"
+                      flexDirection="column"
+                      gap="1rem"
+                    >
+                      <Field.Root invalid={!!errors.title}>
+                        <Field.Label color="fg">Title</Field.Label>
+                        <Input
+                          color="fg"
+                          truncate
+                          {...register("title")}
+                          placeholder="Please enter name new task"
+                        />
+                        <Field.ErrorText color="fg.error">
+                          {errors.title?.message}
+                        </Field.ErrorText>
+                      </Field.Root>
 
-                <Field.Root invalid={!!errors.description}>
-                  <Field.Label color="fg">Description</Field.Label>
-                  <Input
-                    color="fg"
-                    truncate
-                    {...register("description")}
-                    placeholder="Please enter description new task"
-                  />
-                  <Field.ErrorText color="fg.error">
-                    {errors.description?.message}
-                  </Field.ErrorText>
-                </Field.Root>
+                      <Field.Root invalid={!!errors.description}>
+                        <Field.Label color="fg">Description</Field.Label>
+                        <Input
+                          color="fg"
+                          truncate
+                          {...register("description")}
+                          placeholder="Please enter description new task"
+                        />
+                        <Field.ErrorText color="fg.error">
+                          {errors.description?.message}
+                        </Field.ErrorText>
+                      </Field.Root>
 
-                <Stack.HStack>
-                  {/* <Field.Root invalid={!!errors.startDate}>
+                      <Stack.HStack>
+                        {/* <Field.Root invalid={!!errors.startDate}>
                     <Field.Label color="fg">Start Date</Field.Label>
                     <DatePicker onChange={() => {}} value={null} />
                     <Field.ErrorText color="fg.error">
@@ -89,17 +98,24 @@ export const CreateTaskDialog = () => {
                     </Field.ErrorText>
                   </Field.Root> */}
 
-                  <IOSTimePicker loop/>
+                        <IOSTimePicker loop />
 
-                  {/* <Field.Root invalid={!!errors.endDate}>
+                        {/* <Field.Root invalid={!!errors.endDate}>
                     <Field.Label color="fg">End Date</Field.Label>
                     <DatePicker onChange={() => {}} value={null} />
                     <Field.ErrorText color="fg.error">
                       {errors.endDate?.message}
                     </Field.ErrorText>
                   </Field.Root> */}
-                </Stack.HStack>
-              </Box>
+                      </Stack.HStack>
+                    </Box>
+                  </ScrollArea.Content>
+                </ScrollArea.Viewport>
+                <ScrollArea.Scrollbar>
+                  <ScrollArea.Thumb />
+                </ScrollArea.Scrollbar>
+                <ScrollArea.Corner />
+              </ScrollArea.Root>
             </Dialog.Body>
 
             <Dialog.Footer>
