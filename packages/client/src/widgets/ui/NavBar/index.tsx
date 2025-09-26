@@ -1,4 +1,4 @@
-import { memo, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { List, Box, type IconProps, type BoxProps } from "~/shared/ui";
 import { navItems } from "./constants";
 import { NavBarItem } from "./Item";
@@ -14,12 +14,12 @@ export interface NavBarProps extends BoxProps {
   isVertical?: boolean;
 }
 
-export const NavBar = memo(({ isVertical = false, ...props }: NavBarProps) => {
+export function NavBar({ isVertical = false, ...props }: NavBarProps) {
   const { t } = useTranslation();
   const location = useLocation();
 
   return (
-    <Box as="nav" {...props}>
+    <Box as="nav" p={1} {...props}>
       <List.Root
         display="grid"
         {...(isVertical
@@ -43,7 +43,10 @@ export const NavBar = memo(({ isVertical = false, ...props }: NavBarProps) => {
       </List.Root>
     </Box>
   );
-});
+}
+
+NavBar.Item = NavBarItem;
+
 
 function checkIsActive(href: string, path: string) {
   return href === "/" ? path === "/" : path.startsWith(href);

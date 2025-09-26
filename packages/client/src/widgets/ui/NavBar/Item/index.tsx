@@ -24,13 +24,12 @@ export const NavBarItem = memo(
         alignContent="center"
         justifyContent="center"
         alignItems="center"
-        padding={3}
       >
         <Box display="flex" justifyContent="center" alignItems="center">
           <Button
             variant="ghost"
             height="auto"
-            padding={0}
+            padding={3}
             color={isActive ? "purple.focusRing" : "gray"}
           >
             <Link to={href}>

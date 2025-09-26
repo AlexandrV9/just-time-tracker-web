@@ -3,7 +3,7 @@ import { useLayoutEffect } from "react";
 import { LangSwitcher, ThemeSwitcher } from "~/features";
 import { authManager, AuthUserAvatar, useAuthStore } from "~/features/auth";
 import { NotificationButton } from "~/features/notifications";
-import { useOrientation } from "~/shared/hooks";
+import { useDeviceDetect, useOrientation } from "~/shared/hooks";
 import { Box, Flex, PageLayout } from "~/shared/ui";
 import { Header, NavBar, useHeaderStore } from "~/widgets";
 
@@ -62,97 +62,21 @@ export function PrivateLayout() {
     );
   }, [setContent]);
 
-  const { orientation } = useOrientation();
+  const { type: deviceType } = useDeviceDetect();
 
-  if (orientation === "landscape-secondary") {
-    return (
-      <PageLayout
-        display="flex"
-        paddingRight="var(--safe-area-inset-right, 0px)"
-      >
-        <Box
-          display="flex"
-          justifyContent="center"
-          borderRight="1px solid"
-          borderColor="border.emphasized"
-        >
-          <NavBar
-            isVertical
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            paddingLeft="10px"
-          />
-        </Box>
-        <Box
-          flexGrow={1}
-          display="flex"
-          flexDirection="column"
-          overflow="hidden"
-          borderRight="1px solid"
-          borderColor="border.emphasized"
-        >
-          <PageLayout.TopContainer
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            borderBottom="1px solid"
-            borderColor="border.emphasized"
-          >
-            <Header />
-          </PageLayout.TopContainer>
-          <PageLayout.MainContainer>
-            <Outlet />
-          </PageLayout.MainContainer>
-        </Box>
-      </PageLayout>
-    );
+  switch (deviceType) {
+    case "desktop":
+      return <DesktopLayout />;
+    case "tablet":
+      return <TabletLayout />;
+    case "mobile":
+      return <MobileLayout />;
+    default:
+      return null;
   }
+}
 
-  if (orientation === "landscape-primary") {
-    return (
-      <PageLayout
-        display="flex"
-        paddingLeft="var(--safe-area-inset-right, 0px)"
-      >
-        <Box
-          flexGrow={1}
-          display="flex"
-          flexDirection="column"
-          overflow="hidden"
-          borderLeft="1px solid"
-          borderColor="border.emphasized"
-        >
-          <PageLayout.TopContainer
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            borderBottom="1px solid"
-            borderColor="border.emphasized"
-          >
-            <Header />
-          </PageLayout.TopContainer>
-          <PageLayout.MainContainer>
-            <Outlet />
-          </PageLayout.MainContainer>
-        </Box>
-        <Box
-          display="flex"
-          justifyContent="center"
-          borderLeft="1px solid"
-          borderColor="border.emphasized"
-        >
-          <NavBar
-            isVertical
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-          />
-        </Box>
-      </PageLayout>
-    );
-  }
-
+function DesktopLayout() {
   return (
     <PageLayout>
       <PageLayout.TopContainer
@@ -172,4 +96,185 @@ export function PrivateLayout() {
       </PageLayout.BottomContainer>
     </PageLayout>
   );
+}
+
+function TabletLayout() {
+  return (
+    <PageLayout>
+      <PageLayout.TopContainer
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        borderBottom="1px solid"
+        borderColor="border.emphasized"
+      >
+        <Header />
+      </PageLayout.TopContainer>
+      <PageLayout.MainContainer>
+        <Outlet />
+      </PageLayout.MainContainer>
+      <PageLayout.BottomContainer>
+        <NavBar />
+      </PageLayout.BottomContainer>
+    </PageLayout>
+  );
+}
+
+function MobileLayout() {
+  const { orientation } = useOrientation();
+
+  console.log(orientation);
+
+  switch (orientation) {
+    case "landscape-primary":
+      return (
+        <PageLayout
+          display="flex"
+          paddingLeft="var(--safe-area-inset-right, 0px)"
+        >
+          <Box
+            flexGrow={1}
+            display="flex"
+            flexDirection="column"
+            overflow="hidden"
+            borderLeft="1px solid"
+            borderColor="border.emphasized"
+          >
+            <PageLayout.TopContainer
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              borderBottom="1px solid"
+              borderColor="border.emphasized"
+            >
+              <Header />
+            </PageLayout.TopContainer>
+            <PageLayout.MainContainer>
+              <Outlet />
+            </PageLayout.MainContainer>
+          </Box>
+          <Box
+            display="flex"
+            justifyContent="center"
+            borderLeft="1px solid"
+            borderColor="border.emphasized"
+          >
+            <NavBar
+              isVertical
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+            />
+          </Box>
+        </PageLayout>
+      );
+    case "landscape-secondary":
+      return (
+        <PageLayout
+          display="flex"
+          paddingRight="var(--safe-area-inset-right, 0px)"
+        >
+          <Box
+            display="flex"
+            justifyContent="center"
+            borderRight="1px solid"
+            borderColor="border.emphasized"
+          >
+            <NavBar
+              isVertical
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              paddingLeft="10px"
+            />
+          </Box>
+          <Box
+            flexGrow={1}
+            display="flex"
+            flexDirection="column"
+            overflow="hidden"
+            borderRight="1px solid"
+            borderColor="border.emphasized"
+          >
+            <PageLayout.TopContainer
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              borderBottom="1px solid"
+              borderColor="border.emphasized"
+            >
+              <Header />
+            </PageLayout.TopContainer>
+            <PageLayout.MainContainer>
+              <Outlet />
+            </PageLayout.MainContainer>
+          </Box>
+        </PageLayout>
+      );
+    case "portrait-secondary":
+      return (
+        <PageLayout
+          display="flex"
+          paddingLeft="var(--safe-area-inset-right, 0px)"
+        >
+          <Box
+            flexGrow={1}
+            display="flex"
+            flexDirection="column"
+            overflow="hidden"
+            borderLeft="1px solid"
+            borderColor="border.emphasized"
+          >
+            <PageLayout.TopContainer
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              borderBottom="1px solid"
+              borderColor="border.emphasized"
+            >
+              <Header />
+            </PageLayout.TopContainer>
+            <PageLayout.MainContainer>
+              <Outlet />
+            </PageLayout.MainContainer>
+          </Box>
+          <Box
+            display="flex"
+            justifyContent="center"
+            borderLeft="1px solid"
+            borderColor="border.emphasized"
+          >
+            <NavBar
+              isVertical
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+            />
+          </Box>
+        </PageLayout>
+      );
+    case "portrait-primary": {
+      return (
+        <PageLayout>
+          <PageLayout.TopContainer
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            borderBottom="1px solid"
+            borderColor="border.emphasized"
+          >
+            <Header />
+          </PageLayout.TopContainer>
+          <PageLayout.MainContainer>
+            <Outlet />
+          </PageLayout.MainContainer>
+          <PageLayout.BottomContainer>
+            <NavBar />
+          </PageLayout.BottomContainer>
+        </PageLayout>
+      );
+    }
+    default:
+      return null;
+  }
 }

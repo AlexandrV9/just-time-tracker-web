@@ -17,5 +17,6 @@ export * from "./ChevronRight";
 export * from "./Bell";
 export * from "./Clock";
 export * from "./Plus";
+export * from "./Logo";
 
 export * from "./withIconProps";
