@@ -4,11 +4,11 @@ import {
   Box,
   Button,
   CloseButton,
-  DatePicker,
   Dialog,
   Field,
   IconButton,
   Input,
+  IOSTimePicker,
   PlusIcon,
   Portal,
   Stack,
@@ -81,21 +81,23 @@ export const CreateTaskDialog = () => {
                 </Field.Root>
 
                 <Stack.HStack>
-                  <Field.Root invalid={!!errors.startDate}>
+                  {/* <Field.Root invalid={!!errors.startDate}>
                     <Field.Label color="fg">Start Date</Field.Label>
                     <DatePicker onChange={() => {}} value={null} />
                     <Field.ErrorText color="fg.error">
                       {errors.startDate?.message}
                     </Field.ErrorText>
-                  </Field.Root>
+                  </Field.Root> */}
 
-                  <Field.Root invalid={!!errors.endDate}>
+                  <IOSTimePicker loop/>
+
+                  {/* <Field.Root invalid={!!errors.endDate}>
                     <Field.Label color="fg">End Date</Field.Label>
                     <DatePicker onChange={() => {}} value={null} />
                     <Field.ErrorText color="fg.error">
                       {errors.endDate?.message}
                     </Field.ErrorText>
-                  </Field.Root>
+                  </Field.Root> */}
                 </Stack.HStack>
               </Box>
             </Dialog.Body>
