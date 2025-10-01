@@ -24,6 +24,8 @@ export * from "./Dialog";
 export * from "./DatePicker";
 export * from "./SafeArea";
 export * from "./TimePicker";
+export * from "./TextArea";
+export * from "./Accordion";
 
 export * from "./icons";
 export * from "./controls";

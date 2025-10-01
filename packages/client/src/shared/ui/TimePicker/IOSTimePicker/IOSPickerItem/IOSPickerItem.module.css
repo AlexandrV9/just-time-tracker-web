@@ -27,7 +27,7 @@ html[data-theme="dark"] {
 .label {
   font-weight: 700;
   font-size: 20px;
-  transform: translateX(-60px);
+  transform: translateX(-50px);
   pointer-events: none;
 }
 
@@ -72,12 +72,17 @@ html[data-theme="dark"] {
   -webkit-tap-highlight-color: transparent;
 }
 
+.viewport--perspective-center {
+  perspective-origin: 50 50%;
+  transform: 0;
+}
+
 .viewport--perspective-left {
-  perspective-origin: calc(50% + 130px) 50%;
-  transform: translateX(27px);
+  perspective-origin: 50 50%;
+  transform: translateX(30px);
 }
 
 .viewport--perspective-right {
-  perspective-origin: calc(50% - 130px) 50%;
-  transform: translateX(-27px);
+  perspective-origin: 50% 50%;
+  transform: translateX(-30px);
 }

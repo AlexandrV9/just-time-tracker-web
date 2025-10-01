@@ -11,7 +11,8 @@ type IOSPickerItemProps = {
   loop?: boolean;
   label: string;
   slideCount: number;
-  perspective: "left" | "right";
+  perspective: "left" | "right" | "center";
+  value?: number;
   onValueChange?: (value: number) => void;
 };
 
@@ -20,6 +21,7 @@ export const IOSPickerItem = ({
   perspective,
   label,
   loop = false,
+  value,
   onValueChange,
 }: IOSPickerItemProps) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -28,6 +30,7 @@ export const IOSPickerItem = ({
     dragFree: true,
     containScroll: false,
     watchSlides: false,
+    dragThreshold: 5,
   });
 
   const rootNodeRef = useRef<HTMLDivElement>(null);
@@ -42,6 +45,15 @@ export const IOSPickerItem = ({
     const selectedIndex = emblaApi.selectedScrollSnap();
     return selectedIndex;
   }, []);
+
+  useEffect(() => {
+    if (!emblaApi || value === undefined) return;
+
+    const currentIndex = emblaApi.selectedScrollSnap();
+    if (currentIndex !== value) {
+      emblaApi.scrollTo(value, true);
+    }
+  }, [emblaApi, value]);
 
   // Обработчик изменения выбранного элемента
   const handleSelectionChange = useCallback(
@@ -87,24 +99,25 @@ export const IOSPickerItem = ({
   useEffect(() => {
     if (!emblaApi) return;
 
-    emblaApi.on("pointerUp", (emblaApi) => {
+    const handleReInit = (emblaApi: EmblaCarouselType) => {
+      inactivateEmblaTransform(emblaApi);
+      rotateWheel(emblaApi);
+      handleSelectionChange(emblaApi);
+    };
+
+    const handlePointerUp = (emblaApi: EmblaCarouselType) => {
       const { scrollTo, target, location } = emblaApi.internalEngine();
 
       const diffToTarget = target.get() - location.get();
       const factor = Math.abs(diffToTarget) < WHEEL_ITEM_SIZE / 2.5 ? 10 : 0.1;
       const distance = diffToTarget * factor;
       scrollTo.distance(distance, true);
-    });
+    };
 
+    emblaApi.on("pointerUp", handlePointerUp);
     emblaApi.on("scroll", rotateWheel);
-
     emblaApi.on("select", handleSelectionChange);
-
-    emblaApi.on("reInit", (emblaApi) => {
-      inactivateEmblaTransform(emblaApi);
-      rotateWheel(emblaApi);
-      handleSelectionChange(emblaApi);
-    });
+    emblaApi.on("reInit", handleReInit);
 
     inactivateEmblaTransform(emblaApi);
     rotateWheel(emblaApi);

@@ -8,31 +8,48 @@ import {
   Field,
   IconButton,
   Input,
-  IOSTimePicker,
   PlusIcon,
   Portal,
   ScrollArea,
-  Stack,
+  TextArea,
   useForm,
 } from "~/shared/ui";
 
 import styles from "./CreateTaskDialog.module.css";
+import { useState } from "react";
+import { DateWithTimeSelect } from "./DateWithTimeSelect";
+import { useController } from "react-hook-form";
+
+type OpenAccordion = "start" | "end" | null;
 
 const formSchema = z.object({
   title: z.string(),
   description: z.string(),
-  startDate: z.date(),
-  endDate: z.date(),
+  startTime: z.string(),
+  startDate: z.string(),
+  endTime: z.string(),
+  endDate: z.string(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
 
 export const CreateTaskDialog = () => {
   const {
+    control,
     register,
+    watch,
     // handleSubmit,
     formState: { errors },
   } = useForm<FormSchema>({ resolver: zodResolver(formSchema) });
+
+  const [openAccordion, setOpenAccordion] = useState<OpenAccordion>(null);
+
+  const startTimeConfig = useController({ control, name: "startTime" });
+  const endTimeConfig = useController({ control, name: "endTime" });
+
+  const formData = watch();
+
+  console.log("formData", formData);
 
   return (
     <Dialog.Root size="full">
@@ -53,7 +70,7 @@ export const CreateTaskDialog = () => {
               <Dialog.Title fontSize="2xl">Create New Task</Dialog.Title>
             </Dialog.Header>
 
-            <Dialog.Body overflow="auto">
+            <Dialog.Body overflow="auto" p={0}>
               <ScrollArea.Root as="main" p="1rem" display="flex" size="xs">
                 <ScrollArea.Viewport>
                   <ScrollArea.Content>
@@ -62,6 +79,7 @@ export const CreateTaskDialog = () => {
                       display="flex"
                       flexDirection="column"
                       gap="1rem"
+                      px="0.1rem"
                     >
                       <Field.Root invalid={!!errors.title}>
                         <Field.Label color="fg">Title</Field.Label>
@@ -78,9 +96,10 @@ export const CreateTaskDialog = () => {
 
                       <Field.Root invalid={!!errors.description}>
                         <Field.Label color="fg">Description</Field.Label>
-                        <Input
+                        <TextArea
                           color="fg"
                           truncate
+                          minH="4rem"
                           {...register("description")}
                           placeholder="Please enter description new task"
                         />
@@ -89,25 +108,29 @@ export const CreateTaskDialog = () => {
                         </Field.ErrorText>
                       </Field.Root>
 
-                      <Stack.HStack>
-                        {/* <Field.Root invalid={!!errors.startDate}>
-                    <Field.Label color="fg">Start Date</Field.Label>
-                    <DatePicker onChange={() => {}} value={null} />
-                    <Field.ErrorText color="fg.error">
-                      {errors.startDate?.message}
-                    </Field.ErrorText>
-                  </Field.Root> */}
+                      <DateWithTimeSelect
+                        label="Start"
+                        time={startTimeConfig.field.value}
+                        onChangeTime={(value) => {
+                          startTimeConfig.field.onChange(value);
+                        }}
+                        isExpanded={openAccordion === "start"}
+                        onExpandedChange={(isExpanded) => {
+                          setOpenAccordion(isExpanded ? "start" : null);
+                        }}
+                      />
 
-                        <IOSTimePicker loop />
-
-                        {/* <Field.Root invalid={!!errors.endDate}>
-                    <Field.Label color="fg">End Date</Field.Label>
-                    <DatePicker onChange={() => {}} value={null} />
-                    <Field.ErrorText color="fg.error">
-                      {errors.endDate?.message}
-                    </Field.ErrorText>
-                  </Field.Root> */}
-                      </Stack.HStack>
+                      <DateWithTimeSelect
+                        label="End"
+                        time={endTimeConfig.field.value}
+                        onChangeTime={(value) => {
+                          endTimeConfig.field.onChange(value);
+                        }}
+                        isExpanded={openAccordion === "end"}
+                        onExpandedChange={(isExpanded) => {
+                          setOpenAccordion(isExpanded ? "end" : null);
+                        }}
+                      />
                     </Box>
                   </ScrollArea.Content>
                 </ScrollArea.Viewport>
