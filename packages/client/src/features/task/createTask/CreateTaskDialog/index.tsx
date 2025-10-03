@@ -17,8 +17,9 @@ import {
 
 import styles from "./CreateTaskDialog.module.css";
 import { useState } from "react";
-import { DateWithTimeSelect } from "./DateWithTimeSelect";
-import { useController } from "react-hook-form";
+import { DateTimePicker } from "./DateTimePicker";
+import { useController, type SubmitHandler } from "react-hook-form";
+import dayjs from "dayjs";
 
 type OpenAccordion = "start" | "end" | null;
 
@@ -37,19 +38,29 @@ export const CreateTaskDialog = () => {
   const {
     control,
     register,
-    watch,
-    // handleSubmit,
+    handleSubmit,
     formState: { errors },
-  } = useForm<FormSchema>({ resolver: zodResolver(formSchema) });
+  } = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      startDate: dayjs().format("YYYY-MM-DD"),
+      startTime: dayjs().format("HH:mm:ss"),
+      endDate: dayjs().format("YYYY-MM-DD"),
+      endTime: dayjs().format("HH:mm:ss"),
+    },
+  });
 
   const [openAccordion, setOpenAccordion] = useState<OpenAccordion>(null);
+
+  const startDateConfig = useController({ control, name: "startDate" });
+  const endDateConfig = useController({ control, name: "endDate" });
 
   const startTimeConfig = useController({ control, name: "startTime" });
   const endTimeConfig = useController({ control, name: "endTime" });
 
-  const formData = watch();
-
-  console.log("formData", formData);
+  const onSubmit: SubmitHandler<FormSchema> = (data) => {
+    alert(JSON.stringify(data));
+  };
 
   return (
     <Dialog.Root size="full">
@@ -108,9 +119,13 @@ export const CreateTaskDialog = () => {
                         </Field.ErrorText>
                       </Field.Root>
 
-                      <DateWithTimeSelect
+                      <DateTimePicker
                         label="Start"
                         time={startTimeConfig.field.value}
+                        date={startDateConfig.field.value}
+                        onChangeDate={(value) => {
+                          startDateConfig.field.onChange(value);
+                        }}
                         onChangeTime={(value) => {
                           startTimeConfig.field.onChange(value);
                         }}
@@ -120,9 +135,11 @@ export const CreateTaskDialog = () => {
                         }}
                       />
 
-                      <DateWithTimeSelect
+                      <DateTimePicker
                         label="End"
                         time={endTimeConfig.field.value}
+                        date={endDateConfig.field.value}
+                        onChangeDate={endDateConfig.field.onChange}
                         onChangeTime={(value) => {
                           endTimeConfig.field.onChange(value);
                         }}
@@ -134,20 +151,23 @@ export const CreateTaskDialog = () => {
                     </Box>
                   </ScrollArea.Content>
                 </ScrollArea.Viewport>
-                <ScrollArea.Scrollbar>
+                {/* <ScrollArea.Scrollbar>
                   <ScrollArea.Thumb />
-                </ScrollArea.Scrollbar>
+                </ScrollArea.Scrollbar> */}
                 <ScrollArea.Corner />
               </ScrollArea.Root>
             </Dialog.Body>
 
-            <Dialog.Footer>
+            <Dialog.Footer
+              borderTop="1px solid"
+              borderColor="border.emphasized"
+              p="1rem"
+            >
               <Dialog.ActionTrigger asChild>
                 <Button variant="outline">Cancel</Button>
               </Dialog.ActionTrigger>
-              <Button>Save</Button>
+              <Button onClick={handleSubmit(onSubmit)}>Save</Button>
             </Dialog.Footer>
-
             <Dialog.CloseTrigger asChild className={styles.closeButton}>
               <CloseButton size="2xl" />
             </Dialog.CloseTrigger>

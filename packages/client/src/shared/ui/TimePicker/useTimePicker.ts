@@ -47,17 +47,22 @@ export const useTimePicker = (initialTime = "00:00:00") => {
 
 export type GetTimeStringOptions = {
   separator?: string;
+  formater?: (time: { h: string; m: string; s: string | undefined }) => string;
 };
 
 export const getTimeString = (
   time: Omit<TimeType, "seconds"> & { seconds?: undefined | number },
   options?: GetTimeStringOptions
 ) => {
-  const { separator = ":" } = options || {};
+  const { separator = ":", formater } = options || {};
 
   const _hours = time.hours.toString().padStart(2, "0");
   const _minutes = time.minutes.toString().padStart(2, "0");
   const _seconds = time.seconds?.toString().padStart(2, "0");
+
+  if (formater) {
+    return formater({ h: _hours, m: _minutes, s: _seconds });
+  }
 
   return [_hours, _minutes, _seconds].filter(Boolean).join(separator);
 };

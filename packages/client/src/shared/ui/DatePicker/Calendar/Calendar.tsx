@@ -38,6 +38,7 @@ export const Calendar = ({
             <DatePicker.Context>
               {(datePicker) => {
                 const currentDisplayMonth = datePicker.visibleRange.start.month;
+                const visibleWeeks = datePicker.weeks;
 
                 return (
                   <Box>
@@ -154,7 +155,7 @@ export const Calendar = ({
                           </DatePicker.TableRow>
                         </DatePicker.TableHead>
                         <DatePicker.TableBody>
-                          {datePicker.weeks.map((week, id) => (
+                          {visibleWeeks.map((week, id) => (
                             <DatePicker.TableRow key={id}>
                               {week.map((day, id) => (
                                 <DatePicker.TableCell value={day} key={id}>
