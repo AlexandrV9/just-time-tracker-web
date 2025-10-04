@@ -1,6 +1,17 @@
 import { DatePicker, parseDate } from "@ark-ui/react/date-picker";
 import { Box } from "../../Box";
 import { Text } from "../../Text";
+import { useTranslation } from "~/shared/hooks";
+import { PrevButton } from "./PrevButton";
+import { NextButton } from "./NextButton";
+import { useCallback } from "react";
+// import type { HighlightedDate } from "./types";
+import { DateCell } from "./DateCell";
+import {
+  converDateValueToDate,
+  getDefaultDateCellStyles,
+  isDateDisabled,
+} from "./utils";
 
 // react-datepicker - https://www.npmjs.com/package/react-datepicker
 // react-day-picker - https://daypicker.dev/start
@@ -8,21 +19,45 @@ import { Text } from "../../Text";
 export type CalendarProps = {
   selectedDate?: Date | null;
   onChangeSelectedDate?: (date: Date | null) => void;
+  minDate?: Date;
+  maxDate?: Date;
+  // highlightedDates?: HighlightedDate[];
+  getDateCellStyles?: (value: {
+    date: Date;
+    isDisabled?: boolean;
+    isHighlighted?: boolean;
+    isCurrentMonth?: boolean;
+  }) => Record<string, unknown>;
 };
 
 export const Calendar = ({
   selectedDate,
   onChangeSelectedDate,
+  minDate,
+  maxDate,
+  getDateCellStyles = getDefaultDateCellStyles,
 }: CalendarProps) => {
+  const { i18n } = useTranslation();
+
+  const handleValueChange = useCallback(
+    (e: DatePicker.ValueChangeDetails) => {
+      const resultDate = converDateValueToDate(e.value[0]);
+      onChangeSelectedDate?.(resultDate);
+    },
+    [onChangeSelectedDate]
+  );
+
   return (
     <DatePicker.Root
       open
       fixedWeeks
       selectionMode="single"
-      onValueChange={(e) => {
-        onChangeSelectedDate?.(new Date(e.valueAsString[0]));
-      }}
+      locale={i18n.language}
       value={selectedDate ? [parseDate(selectedDate)] : []}
+      onValueChange={handleValueChange}
+      min={minDate ? parseDate(minDate) : undefined}
+      max={maxDate ? parseDate(maxDate) : undefined}
+      outsideDaySelectable
     >
       <Box
         asChild
@@ -50,35 +85,10 @@ export const Calendar = ({
                         w="100%"
                         p="3"
                       >
-                        {/* Кнопка назад */}
-                        <DatePicker.PrevTrigger asChild>
-                          <Box
-                            as="button"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                            w="8"
-                            h="8"
-                            borderRadius="md"
-                            bg="transparent"
-                            color="fg.muted"
-                            _hover={{
-                              bg: "gray.100",
-                              color: "fg.default",
-                              transform: "scale(1.1)",
-                            }}
-                            _active={{ transform: "scale(0.95)" }}
-                            transition="all 0.2s"
-                            cursor="pointer"
-                          >
-                            <Text fontSize="lg" fontWeight="bold">
-                              ‹
-                            </Text>
-                          </Box>
-                        </DatePicker.PrevTrigger>
+                        <PrevButton />
 
                         {/* Текущий период */}
-                        <DatePicker.ViewTrigger asChild>
+                        <DatePicker.ViewTrigger asChild disabled>
                           <Box
                             as="button"
                             px="4"
@@ -99,32 +109,7 @@ export const Calendar = ({
                           </Box>
                         </DatePicker.ViewTrigger>
 
-                        {/* Кнопка вперед */}
-                        <DatePicker.NextTrigger asChild>
-                          <Box
-                            as="button"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                            w="8"
-                            h="8"
-                            borderRadius="md"
-                            bg="transparent"
-                            color="fg.muted"
-                            _hover={{
-                              bg: "gray.100",
-                              color: "fg.default",
-                              transform: "scale(1.1)",
-                            }}
-                            _active={{ transform: "scale(0.95)" }}
-                            transition="all 0.2s"
-                            cursor="pointer"
-                          >
-                            <Text fontSize="lg" fontWeight="bold">
-                              ›
-                            </Text>
-                          </Box>
-                        </DatePicker.NextTrigger>
+                        <NextButton />
                       </Box>
                     </DatePicker.ViewControl>
                     <Box
@@ -157,65 +142,31 @@ export const Calendar = ({
                         <DatePicker.TableBody>
                           {visibleWeeks.map((week, id) => (
                             <DatePicker.TableRow key={id}>
-                              {week.map((day, id) => (
-                                <DatePicker.TableCell value={day} key={id}>
-                                  <Box
-                                    display="grid"
-                                    asChild
-                                    placeItems="center"
-                                    w="30px"
-                                    h="30px"
-                                    borderRadius="l3"
-                                    bg={
-                                      day.month !== currentDisplayMonth
-                                        ? "bg.subtle"
-                                        : "transparent"
-                                    }
-                                    _selected={{
-                                      bg: "blue.500",
-                                      color: "white",
-                                      _hover: {
-                                        bg: "blue.600",
-                                      },
-                                    }}
-                                    _today={{
-                                      border: "2px solid",
-                                      borderColor: "blue.300",
-                                    }}
-                                    _hover={{
-                                      bg:
-                                        day.month !== currentDisplayMonth
-                                          ? "gray.100"
-                                          : "gray.500",
-                                      cursor: "pointer",
-                                    }}
-                                    opacity={
-                                      day.month !== currentDisplayMonth
-                                        ? 0.4
-                                        : 1
-                                    }
-                                    pointerEvents={
-                                      day.month !== currentDisplayMonth
-                                        ? "none"
-                                        : "auto"
-                                    }
-                                  >
-                                    <DatePicker.TableCellTrigger asChild>
-                                      <Text
-                                        as="span"
-                                        fontSize="sm"
-                                        fontWeight={
-                                          day.month === currentDisplayMonth
-                                            ? "medium"
-                                            : "normal"
-                                        }
-                                      >
-                                        {day.day}
-                                      </Text>
-                                    </DatePicker.TableCellTrigger>
-                                  </Box>
-                                </DatePicker.TableCell>
-                              ))}
+                              {week.map((date, id) => {
+                                const isCurrentMonth =
+                                  date.month === currentDisplayMonth;
+                                const isDisabled = isDateDisabled({
+                                  date,
+                                  minDate,
+                                  maxDate,
+                                });
+                                const styles = getDateCellStyles({
+                                  date: converDateValueToDate(date),
+                                  isCurrentMonth,
+                                  isDisabled,
+                                  // isHighlighted,
+                                });
+
+                                return (
+                                  <DateCell
+                                    key={id}
+                                    date={date}
+                                    disabled={isDisabled}
+                                    isCurrentMonth={isCurrentMonth}
+                                    styles={styles}
+                                  />
+                                );
+                              })}
                             </DatePicker.TableRow>
                           ))}
                         </DatePicker.TableBody>

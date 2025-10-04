@@ -86,3 +86,21 @@ html[data-theme="dark"] {
   perspective-origin: 50% 50%;
   transform: translateX(-30px);
 }
+
+.slideDisabled {
+  opacity: 0.3;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Можно добавить визуальное разделение */
+.slideDisabled::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.2);
+  transform: translateY(-50%);
+}

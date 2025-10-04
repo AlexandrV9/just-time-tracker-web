@@ -2,30 +2,46 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Accordion,
   Calendar,
-  getDateString,
+  convertDayjsDateToTimeObject,
   getTimeString,
   IOSTimePicker,
   Stack,
   useTimePicker,
+  type HighlightedDate,
+  type TimeObject,
 } from "~/shared/ui";
 
 import dayjs from "dayjs";
 
 import { AccordionItemTrigger } from "./AccordionItemTrigger";
+import { formatDate, type Locale } from "~/shared/libs";
+import { useTranslation } from "~/shared/hooks";
 
 export type ActiveTrigger = "date" | "time";
 
 export interface DateTimePickerProps {
   label?: string;
-  date?: string | null;
-  onChangeDate?: (value: string | null) => void;
-  time?: string | null;
-  onChangeTime?: (value: string | null) => void;
+
+  // date
+  date?: Date | null;
+  onChangeDate?: (value: Date | null) => void;
+
+  // time
+  time?: TimeObject | null;
+  onChangeTime?: (value: TimeObject | null) => void;
+
+  // expanded
   isExpanded?: boolean;
   onExpandedChange?: (isExpanded: boolean) => void;
-}
 
-const getCurrectTime = () => dayjs().format("HH:mm:ss");
+  // rules
+  minDate?: Date;
+  maxDate?: Date;
+  isValidTime?: boolean;
+
+  // other options
+  highlightedDates?: HighlightedDate[];
+}
 
 export const DateTimePicker = ({
   label,
@@ -35,7 +51,14 @@ export const DateTimePicker = ({
   onChangeDate,
   isExpanded = false,
   onExpandedChange,
-}: DateTimePickerProps) => {
+  minDate,
+  maxDate,
+  isValidTime,
+}: // highlightedDates,
+DateTimePickerProps) => {
+  const { i18n } = useTranslation();
+  const locale = i18n.language as Locale;
+
   const [activeTrigger, setActiveTrigger] = useState<ActiveTrigger>("date");
 
   const [selectedDate, setSelectedDate] = useState<Date>(
@@ -50,7 +73,7 @@ export const DateTimePicker = ({
     time: _time,
     setHours,
     setMinutes,
-  } = useTimePicker(time || getCurrectTime());
+  } = useTimePicker(time || convertDayjsDateToTimeObject(dayjs()));
   const { hours = 0, minutes = 0 } = _time;
 
   const handleChangeAccordionValue = useCallback(
@@ -81,7 +104,7 @@ export const DateTimePicker = ({
     (date: Date | null) => {
       if (!date) return;
 
-      onChangeDate?.(dayjs(date).format("YYYY-MM-DD"));
+      onChangeDate?.(date);
       setSelectedDate(date);
     },
     [onChangeDate]
@@ -94,6 +117,16 @@ export const DateTimePicker = ({
           <Calendar
             selectedDate={selectedDate}
             onChangeSelectedDate={handleChangeSelectedDate}
+            minDate={minDate}
+            maxDate={maxDate}
+            // highlightedDates={highlightedDates}
+            // [
+            //   {
+            //     color: "red.200",
+            //     date: new Date(), // 15 октября
+            //     tooltip: "Важное событие",
+            //   },
+            // ]}
           />
         );
       }
@@ -117,9 +150,7 @@ export const DateTimePicker = ({
 
   // Update externam time state after changes in local _time state
   useEffect(() => {
-    onChangeTime?.(
-      getTimeString({ hours: _time.hours, minutes: _time.minutes })
-    );
+    onChangeTime?.(_time);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_time.hours, _time.minutes, _time.seconds]);
 
@@ -153,7 +184,7 @@ export const DateTimePicker = ({
               flexGrow={1}
               justifyContent="space-between"
               label={label}
-              badgeText={getDateString(selectedDate, "D MMMM YYYY")}
+              badgeText={formatDate(selectedDate, "D MMMM YYYY", locale)}
               isActive={activeTrigger === "date"}
               isExpanded={isExpanded}
               onClickTrigger={() => handleClickAccorionTrigger("date")}
@@ -167,6 +198,7 @@ export const DateTimePicker = ({
                 isActive={activeTrigger === "time"}
                 isExpanded={isExpanded}
                 onClickTrigger={() => handleClickAccorionTrigger("time")}
+                isValid={isValidTime}
               />
             )}
           </Stack.HStack>

@@ -12,6 +12,7 @@ export interface AccordionItemTriggerProps
   isExpanded?: boolean;
   badgeText?: string;
   onClickTrigger?: () => void;
+  isValid?: boolean;
 }
 
 export function AccordionItemTrigger({
@@ -19,6 +20,7 @@ export function AccordionItemTrigger({
   label,
   isActive = false,
   isExpanded = false,
+  isValid = true,
   onClickTrigger,
   ...props
 }: AccordionItemTriggerProps) {
@@ -34,6 +36,9 @@ export function AccordionItemTrigger({
           isActive && {
             borderColor: "border.inverted",
           })}
+        {...(!isValid && {
+          borderColor: "border.error",
+        })}
       >
         {badgeText}
       </Badge>

@@ -6,7 +6,7 @@ export * from "./Chip";
 export * from "./ArrowLeft";
 export * from "./Bookmark";
 export * from "./Home";
-export * from "./ArrowLeft";
+export * from "./ArrowRight";
 export * from "./MoreHorizontal";
 export * from "./MoreVertical";
 export * from "./User";

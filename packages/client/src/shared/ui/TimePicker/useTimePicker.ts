@@ -1,16 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
+import type { TimeObject } from "./types";
 
-export type TimeType = {
-  hours: number;
-  minutes: number;
-  seconds: number;
-};
-
-export const useTimePicker = (initialTime = "00:00:00") => {
-  const [value, setValue] = useState<TimeType>(() => {
-    const [h, m, s] = initialTime.split(":").map(Number);
-    return { hours: h, minutes: m, seconds: s };
-  });
+export const useTimePicker = (initialTimeObj: TimeObject) => {
+  const [value, setValue] = useState<TimeObject>(() => initialTimeObj);
 
   const setTime = useCallback(
     (value: { hours: number; minutes: number; seconds: number }) => {
@@ -51,7 +43,7 @@ export type GetTimeStringOptions = {
 };
 
 export const getTimeString = (
-  time: Omit<TimeType, "seconds"> & { seconds?: undefined | number },
+  time: Omit<TimeObject, "seconds"> & { seconds?: undefined | number },
   options?: GetTimeStringOptions
 ) => {
   const { separator = ":", formater } = options || {};

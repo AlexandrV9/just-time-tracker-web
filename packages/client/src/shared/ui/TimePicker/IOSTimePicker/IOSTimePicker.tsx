@@ -10,45 +10,71 @@ export type IOSTimeTimeUnit = {
   handler?: (value: number) => void;
   slideCount: number;
   perspective: "left" | "center" | "right";
+  max?: number;
+  min?: number;
 };
 
 export type IOSTimePickerProps = {
   loop?: EmblaOptionsType["loop"];
+
+  // hours
   hours?: number;
-  minutes?: number;
-  seconds?: number;
   onChangeHours?: (value: number) => void;
+  // minHours?: number;
+  // maxHours?: number;
+
+  // minutes
+  minutes?: number;
   onChangeMinutes?: (value: number) => void;
+  // maxMinutes?: number;
+  // minMinutes?: number;
+
+  // seconds
+  seconds?: number;
   onChangeSeconds?: (value: number) => void;
+  // minSeconds?: number;
+  // maxSeconds?: number;
 };
 
 export const IOSTimePicker = ({
   loop,
-  hours,
-  minutes,
-  seconds,
   onChangeHours,
+  hours,
+  // minHours = 0,
+  // maxHours = 23,
   onChangeMinutes,
+  minutes,
+  // minMinutes = 0,
+  // maxMinutes = 59,
   onChangeSeconds,
-}: IOSTimePickerProps) => {
+  seconds,
+}: // minSeconds = 0,
+// maxSeconds = 59,
+IOSTimePickerProps) => {
   const allTimeUnits: IOSTimeTimeUnit[] = [
     {
       value: hours,
       handler: onChangeHours,
       slideCount: 24,
       perspective: "left",
+      // min: minHours,
+      // max: maxHours,
     },
     {
       value: minutes,
       handler: onChangeMinutes,
       slideCount: 60,
       perspective: "center",
+      // min: minMinutes,
+      // max: maxMinutes,
     },
     {
       value: seconds,
       handler: onChangeSeconds,
       slideCount: 60,
       perspective: "right",
+      // min: minSeconds,
+      // max: maxSeconds,
     },
   ];
   const activeTimeUnits = allTimeUnits.filter((unit) => unit.handler);

@@ -1,6 +1,10 @@
 import { Table, TableBody, TableHead, ViewControl } from "./components";
 
-export const Calendar = {
+/**
+ * @deprecated Используем Calendar.
+ * Этот самописный календарь, нуждается в доработке
+ */
+export const MyCalendar = {
   Table,
   TableBody,
   TableHead,

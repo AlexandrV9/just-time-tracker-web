@@ -16,20 +16,30 @@ import {
 } from "~/shared/ui";
 
 import styles from "./CreateTaskDialog.module.css";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DateTimePicker } from "./DateTimePicker";
 import { useController, type SubmitHandler } from "react-hook-form";
 import dayjs from "dayjs";
+import {
+  convertDayjsDateToTimeObject,
+  applyTimeObjectToDate,
+} from "~/shared/ui/TimePicker";
 
 type OpenAccordion = "start" | "end" | null;
+
+const timeSchema = z.object({
+  hours: z.number(),
+  minutes: z.number(),
+  seconds: z.number(),
+});
 
 const formSchema = z.object({
   title: z.string(),
   description: z.string(),
-  startTime: z.string(),
-  startDate: z.string(),
-  endTime: z.string(),
-  endDate: z.string(),
+  startTime: timeSchema,
+  startDate: z.date(),
+  endTime: timeSchema,
+  endDate: z.date(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -43,24 +53,56 @@ export const CreateTaskDialog = () => {
   } = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      startDate: dayjs().format("YYYY-MM-DD"),
-      startTime: dayjs().format("HH:mm:ss"),
-      endDate: dayjs().format("YYYY-MM-DD"),
-      endTime: dayjs().format("HH:mm:ss"),
+      startDate: new Date(),
+      startTime: convertDayjsDateToTimeObject(dayjs()),
+      endDate: new Date(),
+      endTime: convertDayjsDateToTimeObject(dayjs().add(10, "minute")),
     },
   });
 
   const [openAccordion, setOpenAccordion] = useState<OpenAccordion>(null);
 
   const startDateConfig = useController({ control, name: "startDate" });
+  const startDate = startDateConfig.field.value;
+
   const endDateConfig = useController({ control, name: "endDate" });
+  const endDate = endDateConfig.field.value;
 
   const startTimeConfig = useController({ control, name: "startTime" });
+  const startTime = startTimeConfig.field.value;
+
   const endTimeConfig = useController({ control, name: "endTime" });
+  const endTime = endTimeConfig.field.value;
 
   const onSubmit: SubmitHandler<FormSchema> = (data) => {
-    alert(JSON.stringify(data));
+    const requestData = {
+      title: data.title,
+      description: data.description,
+      startDate: applyTimeObjectToDate(data.startTime, data.startDate).format(
+        "YYYY-MM-DDTHH:mm"
+      ),
+      endDate: applyTimeObjectToDate(data.endTime, data.endDate).format(
+        "YYYY-MM-DDTHH:mm"
+      ),
+    };
+
+    console.log("requestData", requestData);
   };
+
+  const isTimeRangeValid = useMemo(() => {
+    if (!startDate || !startTime || !endDate || !endTime) {
+      return true;
+    }
+
+    const _startDate = applyTimeObjectToDate(startTime, startDate);
+    const _endDate = applyTimeObjectToDate(endTime, endDate);
+
+    if (!dayjs(_startDate).isSame(_endDate, "day")) {
+      return true;
+    }
+
+    return _endDate.isAfter(_startDate) || _endDate.isSame(_startDate);
+  }, [startDate, startTime, endDate, endTime]);
 
   return (
     <Dialog.Root size="full">
@@ -121,32 +163,30 @@ export const CreateTaskDialog = () => {
 
                       <DateTimePicker
                         label="Start"
-                        time={startTimeConfig.field.value}
-                        date={startDateConfig.field.value}
-                        onChangeDate={(value) => {
-                          startDateConfig.field.onChange(value);
-                        }}
-                        onChangeTime={(value) => {
-                          startTimeConfig.field.onChange(value);
-                        }}
+                        time={startTime}
+                        onChangeTime={startTimeConfig.field.onChange}
+                        date={startDate}
+                        onChangeDate={startDateConfig.field.onChange}
                         isExpanded={openAccordion === "start"}
                         onExpandedChange={(isExpanded) => {
                           setOpenAccordion(isExpanded ? "start" : null);
                         }}
+                        maxDate={endDateConfig.field.value}
+                        isValidTime={isTimeRangeValid}
                       />
 
                       <DateTimePicker
                         label="End"
-                        time={endTimeConfig.field.value}
-                        date={endDateConfig.field.value}
+                        time={endTime}
+                        onChangeTime={endTimeConfig.field.onChange}
+                        date={endDate}
                         onChangeDate={endDateConfig.field.onChange}
-                        onChangeTime={(value) => {
-                          endTimeConfig.field.onChange(value);
-                        }}
                         isExpanded={openAccordion === "end"}
                         onExpandedChange={(isExpanded) => {
                           setOpenAccordion(isExpanded ? "end" : null);
                         }}
+                        isValidTime={isTimeRangeValid}
+                        minDate={startDateConfig.field.value}
                       />
                     </Box>
                   </ScrollArea.Content>
@@ -166,7 +206,12 @@ export const CreateTaskDialog = () => {
               <Dialog.ActionTrigger asChild>
                 <Button variant="outline">Cancel</Button>
               </Dialog.ActionTrigger>
-              <Button onClick={handleSubmit(onSubmit)}>Save</Button>
+              <Button
+                disabled={!isTimeRangeValid}
+                onClick={handleSubmit(onSubmit)}
+              >
+                Save
+              </Button>
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild className={styles.closeButton}>
               <CloseButton size="2xl" />

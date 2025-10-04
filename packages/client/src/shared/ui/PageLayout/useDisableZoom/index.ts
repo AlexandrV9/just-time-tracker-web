@@ -11,19 +11,31 @@ export function useDisableZoom() {
     document.addEventListener("gesturechange", preventDefault);
     document.addEventListener("gestureend", preventDefault);
 
-    // Блокируем двойной тап (zoom)
     let lastTouchEnd = 0;
+    let isScrolling = false;
+
+    const handleTouchStart = () => {
+      isScrolling = false;
+    };
+
+    const handleTouchMove = () => {
+      isScrolling = true;
+    };
 
     const handleTouchEnd = (event: TouchEvent) => {
       const now = Date.now();
 
-      if (now - lastTouchEnd <= 300) {
+      if (!isScrolling && now - lastTouchEnd <= 300) {
         event.preventDefault();
       }
 
       lastTouchEnd = now;
     };
 
+    document.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    });
+    document.addEventListener("touchmove", handleTouchMove, { passive: true });
     document.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     return () => {

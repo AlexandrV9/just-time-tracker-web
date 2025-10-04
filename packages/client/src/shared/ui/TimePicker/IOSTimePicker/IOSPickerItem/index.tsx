@@ -7,7 +7,7 @@ import clsx from "clsx";
 import { WHEEL_ITEM_RADIUS, WHEEL_ITEM_SIZE } from "./constants";
 import { setContainerStyles, setSlideStyles } from "./utils";
 
-type IOSPickerItemProps = {
+export type IOSPickerItemProps = {
   loop?: boolean;
   label: string;
   slideCount: number;
@@ -30,7 +30,7 @@ export const IOSPickerItem = ({
     dragFree: true,
     containScroll: false,
     watchSlides: false,
-    dragThreshold: 5,
+    dragThreshold: 1,
   });
 
   const rootNodeRef = useRef<HTMLDivElement>(null);
