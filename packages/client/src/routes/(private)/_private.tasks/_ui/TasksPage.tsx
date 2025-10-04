@@ -1,5 +1,5 @@
 import { TaskList } from "~/entities/Task";
-import { CreateTaskDialog } from "~/features/task";
+import { CreateTaskDialog } from "~/features/tasks";
 import { Box, Input, Stack } from "~/shared/ui";
 
 export function TasksPage() {
