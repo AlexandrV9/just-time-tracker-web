@@ -1,7 +1,9 @@
+import { useOnline } from "~/shared/hooks";
 import { Box } from "~/shared/ui";
 import { SignInByLoginForm } from "~/widgets";
 
 export function SignInPage() {
+  const { isOnline } = useOnline();
   return (
     <Box
       padding="1.5rem"
@@ -14,6 +16,7 @@ export function SignInPage() {
       border="1px solid"
       borderColor="border.emphasized"
     >
+      {isOnline ? "online" : "offline"}
       <SignInByLoginForm />
     </Box>
   );

@@ -24,6 +24,8 @@ import {
   convertDayjsDateToTimeObject,
   applyTimeObjectToDate,
 } from "~/shared/ui/TimePicker";
+import { useTranslation } from "~/shared/hooks";
+// import { useTasksStore } from "~/features/tasks/model/useTasksStore";
 
 type OpenAccordion = "start" | "end" | null;
 
@@ -34,7 +36,7 @@ const timeSchema = z.object({
 });
 
 const formSchema = z.object({
-  title: z.string(),
+  title: z.string().min(1, "Это поле обязательно"),
   description: z.string(),
   startTime: timeSchema,
   startDate: z.date(),
@@ -45,12 +47,18 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 export const CreateTaskDialog = () => {
+  const { t } = useTranslation();
+
+  const [isOpen, setIsOpen] = useState(false);
+
   const {
     control,
     register,
     handleSubmit,
-    formState: { errors },
+    reset,
+    formState: { errors, isValid, isDirty },
   } = useForm<FormSchema>({
+    mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
       startDate: new Date(),
@@ -74,6 +82,8 @@ export const CreateTaskDialog = () => {
   const endTimeConfig = useController({ control, name: "endTime" });
   const endTime = endTimeConfig.field.value;
 
+  // const createTask = useTasksStore((state) => state.createTask);
+
   const onSubmit: SubmitHandler<FormSchema> = (data) => {
     const requestData = {
       title: data.title,
@@ -85,6 +95,10 @@ export const CreateTaskDialog = () => {
         "YYYY-MM-DDTHH:mm"
       ),
     };
+
+    // createTask(requestData);
+    reset();
+    setIsOpen(false);
 
     console.log("requestData", requestData);
   };
@@ -104,8 +118,15 @@ export const CreateTaskDialog = () => {
     return _endDate.isAfter(_startDate) || _endDate.isSame(_startDate);
   }, [startDate, startTime, endDate, endTime]);
 
+  const disableSubmitButton = !isValid || !isDirty || !isTimeRangeValid;
+
   return (
-    <Dialog.Root size="full">
+    <Dialog.Root
+      size="full"
+      lazyMount
+      open={isOpen}
+      onOpenChange={(e) => setIsOpen(e.open)}
+    >
       <Dialog.Trigger asChild>
         <IconButton variant="outline" borderRadius="8px" size="md">
           <PlusIcon />
@@ -120,7 +141,9 @@ export const CreateTaskDialog = () => {
             flexDirection="column"
           >
             <Dialog.Header>
-              <Dialog.Title fontSize="2xl">Create New Task</Dialog.Title>
+              <Dialog.Title fontSize="2xl">
+                {t("features.tasks.create.dialogTitle")}
+              </Dialog.Title>
             </Dialog.Header>
 
             <Dialog.Body overflow="auto" p={0}>
@@ -135,12 +158,17 @@ export const CreateTaskDialog = () => {
                       px="0.1rem"
                     >
                       <Field.Root invalid={!!errors.title}>
-                        <Field.Label color="fg">Title</Field.Label>
+                        <Field.Label color="fg">
+                          {t("features.tasks.create.inputTitle.label")}
+                        </Field.Label>
                         <Input
+                          autoFocus
                           color="fg"
                           truncate
                           {...register("title")}
-                          placeholder="Please enter name new task"
+                          placeholder={t(
+                            "features.tasks.create.inputTitle.placeholder"
+                          )}
                         />
                         <Field.ErrorText color="fg.error">
                           {errors.title?.message}
@@ -148,13 +176,17 @@ export const CreateTaskDialog = () => {
                       </Field.Root>
 
                       <Field.Root invalid={!!errors.description}>
-                        <Field.Label color="fg">Description</Field.Label>
+                        <Field.Label color="fg">
+                          {t("features.tasks.create.inputDescription.label")}
+                        </Field.Label>
                         <TextArea
                           color="fg"
                           truncate
                           minH="4rem"
                           {...register("description")}
-                          placeholder="Please enter description new task"
+                          placeholder={t(
+                            "features.tasks.create.inputDescription.placeholder"
+                          )}
                         />
                         <Field.ErrorText color="fg.error">
                           {errors.description?.message}
@@ -162,7 +194,7 @@ export const CreateTaskDialog = () => {
                       </Field.Root>
 
                       <DateTimePicker
-                        label="Start"
+                        label={t("features.tasks.create.startDate.label")}
                         time={startTime}
                         onChangeTime={startTimeConfig.field.onChange}
                         date={startDate}
@@ -176,7 +208,7 @@ export const CreateTaskDialog = () => {
                       />
 
                       <DateTimePicker
-                        label="End"
+                        label={t("features.tasks.create.endDate.label")}
                         time={endTime}
                         onChangeTime={endTimeConfig.field.onChange}
                         date={endDate}
@@ -204,13 +236,15 @@ export const CreateTaskDialog = () => {
               p="1rem"
             >
               <Dialog.ActionTrigger asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button variant="outline">
+                  {t("features.tasks.create.cancelButtonText")}
+                </Button>
               </Dialog.ActionTrigger>
               <Button
-                disabled={!isTimeRangeValid}
+                disabled={disableSubmitButton}
                 onClick={handleSubmit(onSubmit)}
               >
-                Save
+                {t("features.tasks.create.createButtonText")}
               </Button>
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild className={styles.closeButton}>

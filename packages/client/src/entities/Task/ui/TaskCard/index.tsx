@@ -3,18 +3,17 @@ import {
   Box,
   Card,
   ClockIcon,
-  IconButton,
-  MoreVerticalIcon,
   Stack,
   Text,
   type BadgeProps,
 } from "~/shared/ui";
 import type { Task } from "../../types";
 import dayjs from "dayjs";
-import { memo } from "react";
+import { memo, type ReactNode } from "react";
 
 export interface TaskCardProps {
   data: Task;
+  actionSlot?: ReactNode;
 }
 
 const statusColors: Partial<
@@ -25,8 +24,8 @@ const statusColors: Partial<
   todo: "orange",
 };
 
-export const TaskCard = memo(({ data }: TaskCardProps) => {
-  const { title, startDate, status, tags, id: taskId } = data;
+export const TaskCard = memo(({ data, actionSlot }: TaskCardProps) => {
+  const { title, description, startDate, status, tags, id: taskId } = data;
 
   return (
     <Card.Root
@@ -37,28 +36,31 @@ export const TaskCard = memo(({ data }: TaskCardProps) => {
       gap="0.5rem"
     >
       <Stack.HStack justifyContent="space-between">
-        <Stack.HStack justifyContent="space-between">
-          {tags.map((tag) => (
-            <Badge
-              key={`${taskId}_${tag}`}
-              flexShrink={0}
-              colorPalette="gray"
-              borderRadius="12px"
-            >
-              {tag}
-            </Badge>
-          ))}
-        </Stack.HStack>
-        <IconButton variant="outline" borderRadius="8px" size="xs">
-          <MoreVerticalIcon />
-        </IconButton>
+        {tags && (
+          <Stack.HStack justifyContent="space-between">
+            {tags.map((tag) => (
+              <Badge
+                px="0.7rem"
+                py="0.2rem"
+                key={`${taskId}_${tag}`}
+                flexShrink={0}
+                colorPalette="gray"
+                borderRadius="12px"
+              >
+                {tag}
+              </Badge>
+            ))}
+          </Stack.HStack>
+        )}
+
+        {actionSlot}
       </Stack.HStack>
 
       <Text fontSize="l">{title}</Text>
 
       <Stack.HStack justifyContent="space-between">
         <Text color="gray" fontSize="small">
-          Grovecy shopping app design
+          {description}
         </Text>
       </Stack.HStack>
 
@@ -80,14 +82,16 @@ export const TaskCard = memo(({ data }: TaskCardProps) => {
             {dayjs(startDate).format("HH:mm")}
           </Text>
         </Box>
-        <Badge
-          flexShrink={0}
-          colorPalette={statusColors[status]}
-          borderRadius="12px"
-          size="md"
-        >
-          {status}
-        </Badge>
+        {status && (
+          <Badge
+            flexShrink={0}
+            colorPalette={statusColors[status]}
+            borderRadius="12px"
+            size="md"
+          >
+            {status}
+          </Badge>
+        )}
       </Stack.HStack>
     </Card.Root>
   );
@@ -101,6 +105,7 @@ function arePropsEqual(oldProps: TaskCardProps, newProps: TaskCardProps) {
     oldData.id === newData.id &&
     oldData.title === newProps.data.title &&
     oldData.startDate === newData.startDate &&
-    oldData.status === newData.status
+    oldData.status === newData.status &&
+    oldProps.actionSlot === newProps.actionSlot
   );
 }

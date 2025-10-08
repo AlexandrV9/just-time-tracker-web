@@ -78,6 +78,32 @@
       "signOut": {
         "textButton": "Выйти"
       }
+    },
+    "tasks": {
+      "create": {
+        "dialogTitle": "Создание новой задачи",
+        "inputTitle": {
+          "label": "Название",
+          "placeholder": "Введите название задачи"
+        },
+        "inputDescription": {
+          "label": "Описание",
+          "placeholder": "Введите описание задачи"
+        },
+        "startDate": {
+          "label": "Начало"
+        },
+        "endDate": {
+          "label": "Конец"
+        },
+        "createButtonText": "Создать",
+        "cancelButtonText": "Отмена"
+      },
+      "search": {
+        "input": {
+          "placeholder": "Введите название задачи"
+        }
+      }
     }
   }
 }

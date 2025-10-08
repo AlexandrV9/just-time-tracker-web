@@ -1,10 +1,10 @@
 import { useState, useMemo } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { CalendarProvider } from "../useCalendar";
-import { Calendar } from "../Calendar";
 import { Box } from "~/shared/ui/Box";
 import { Text } from "~/shared/ui/Text";
 import { Button } from "~/shared/ui/Button";
+import { Table, TableBody, TableHead, ViewControl } from "../components";
 
 interface BaseCalendarProps {
   selectedDate?: Date | null;
@@ -59,6 +59,8 @@ export const BaseCalendar = ({
 
     // Если weekStart = 1 (понедельник), и 1 число попало на воскресенье,
     // нужно начать с предыдущего понедельника
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     if (weekStart === 1 && startDate.date() !== 1) {
       startDate = startDate.add(1, "day");
     }
@@ -153,9 +155,9 @@ export const BaseCalendar = ({
         width="full"
         maxWidth="360px"
       >
-        <Calendar.ViewControl />
-        <Calendar.Table>
-          <Calendar.TableHead>
+        <ViewControl />
+        <Table>
+          <TableHead>
             {weekDays.map((day, index) => (
               <Text
                 key={index}
@@ -168,8 +170,8 @@ export const BaseCalendar = ({
                 {day}
               </Text>
             ))}
-          </Calendar.TableHead>
-          <Calendar.TableBody>
+          </TableHead>
+          <TableBody>
             {calendarDays.map((day, index) => {
               const isTodayDate = isToday(day.date);
               const isSelectedDate = isSelected(day.date);
@@ -225,8 +227,8 @@ export const BaseCalendar = ({
                 </Button>
               );
             })}
-          </Calendar.TableBody>
-        </Calendar.Table>
+          </TableBody>
+        </Table>
       </Box>
     </CalendarProvider>
   );

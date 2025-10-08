@@ -95,7 +95,7 @@ export const mockTasks: Task[] = [
     estimatedTime: 120, // 2 часа
     actualTime: 150, // 2.5 часа
   },
-    {
+  {
     id: "task-7",
     title: "Исправить баг с отображением дат",
     description:
@@ -126,7 +126,7 @@ export const mockTasks: Task[] = [
     estimatedTime: 120, // 2 часа
     actualTime: 150, // 2.5 часа
   },
-    {
+  {
     id: "task-9",
     title: "Исправить баг с отображением дат",
     description:

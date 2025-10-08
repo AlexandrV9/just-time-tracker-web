@@ -18,61 +18,17 @@ export default defineConfig(({ mode }) => {
       react(),
       VitePWA({
         registerType: "autoUpdate",
-        manifest: {
-          name: "TrackNotePro",
-          short_name: "Noties",
-          description:
-            "Web application for tracking your tasks and taking notes",
-          theme_color: "#ffffff",
-          background_color: "#ffffff",
-          display: "standalone",
-          scope: "/",
-          start_url: "/",
-          icons: [
-            {
-              src: "icons/logo.svg",
-              type: "image/svg+xml",
-              sizes: "512x512",
-              purpose: "any maskable",
-            },
-            {
-              src: "icons/logo-192x192.png",
-              sizes: "192x192",
-              type: "image/png",
-              purpose: "any maskable",
-            },
-            {
-              src: "icons/logo-512x512.png",
-              sizes: "512x512",
-              type: "image/png",
-              purpose: "any maskable",
-            },
-            {
-              src: "icons/apple-touch-logo-180x180.png",
-              sizes: "180x180",
-              type: "image/png",
-              purpose: "apple touch icon",
-            },
-          ],
-        },
-        workbox: {
-          navigateFallback: "/index.html",
-          runtimeCaching: [
-            {
-              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-              handler: "CacheFirst",
-              options: {
-                cacheName: "google-fonts-cache",
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-                },
-                cacheableResponse: {
-                  statuses: [0, 200],
-                },
-              },
-            },
-          ],
+
+        strategies: "injectManifest", // для кастомного сервис-воркера
+        srcDir: "src", // это папка в которой находится сервис-воркера
+        filename: "sw.js", // это название файла сервис-воркера
+
+        // Говорим, чтобы sw работал и в dev режиме
+        devOptions: {
+          enabled: true,
+          type: "module",
+          navigateFallback: "index.html",
+          suppressWarnings: true,
         },
       }),
     ],

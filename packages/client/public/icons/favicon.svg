@@ -1,0 +1,22 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" rx="20" fill="url(#gradient)"/>
+  
+  <rect x="28" y="32" width="10" height="10" rx="2" fill="white"/>
+  <rect x="48" y="34" width="44" height="6" rx="3" fill="white"/>
+  
+  <rect x="28" y="49" width="10" height="10" rx="2" fill="white"/>
+  <rect x="48" y="51" width="44" height="6" rx="3" fill="white"/>
+  
+  <rect x="28" y="66" width="10" height="10" rx="2" fill="white"/>
+  <rect x="48" y="68" width="44" height="6" rx="3" fill="white"/>
+  
+  <rect x="28" y="83" width="10" height="10" rx="2" fill="white"/>
+  <rect x="48" y="85" width="29" height="6" rx="3" fill="white"/>
+  
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -18,5 +18,7 @@ export * from "./Bell";
 export * from "./Clock";
 export * from "./Plus";
 export * from "./Logo";
+export * from "./Trash";
+export * from "./Edit";
 
 export * from "./withIconProps";

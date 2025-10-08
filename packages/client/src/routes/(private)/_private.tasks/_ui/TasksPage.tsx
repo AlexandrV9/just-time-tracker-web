@@ -1,6 +1,6 @@
 import { TaskList } from "~/entities/Task";
-import { CreateTaskDialog } from "~/features/tasks";
-import { Box, Input, Stack } from "~/shared/ui";
+import { CreateTaskDialog, SearchTasks } from "~/features/tasks";
+import { Box, Stack } from "~/shared/ui";
 
 export function TasksPage() {
   return (
@@ -8,7 +8,7 @@ export function TasksPage() {
       display="flex"
       flexDirection="column"
       justifyContent="stretch"
-      alignItems="center"
+      // alignItems="center"
       flexGrow={1}
       gap="1rem"
     >
@@ -17,13 +17,7 @@ export function TasksPage() {
         justifyContent="space-between"
         width="full"
       >
-        <Input
-          color="fg"
-          truncate
-          placeholder="Enter name your task"
-          variant="subtle"
-          width="70%"
-        />
+        <SearchTasks />
         <CreateTaskDialog />
       </Stack.HStack>
       <TaskList />
