@@ -80,6 +80,25 @@
       }
     },
     "tasks": {
+      "update": {
+        "dialogTitle": "Update Task",
+        "inputTitle": {
+          "label": "Title",
+          "placeholder": "Enter task title"
+        },
+        "inputDescription": {
+          "label": "Description",
+          "placeholder": "Enter task description"
+        },
+        "startDate": {
+          "label": "Start"
+        },
+        "endDate": {
+          "label": "End"
+        },
+        "submitButtonText": "Update",
+        "cancelButtonText": "Cancel"
+      },
       "create": {
         "dialogTitle": "Create New Task",
         "inputTitle": {
@@ -96,7 +115,7 @@
         "endDate": {
           "label": "End"
         },
-        "createButtonText": "Create",
+        "submitButtonText": "Create",
         "cancelButtonText": "Cancel"
       },
       "search": {

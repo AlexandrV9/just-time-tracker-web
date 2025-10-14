@@ -1,28 +1,28 @@
-import { TaskCard } from "~/entities/Task";
-// import { mockTasks } from "~/entities/Task/mocks";
+import { useCallback } from "react";
+import { TaskCard, useDeleteTask, useTasks, type Task } from "~/entities/Task";
 import {
-  EditIcon,
+  // EditIcon,
   IconButton,
   List,
   Stack,
   Text,
   TrashIcon,
 } from "~/shared/ui";
-import { useTasksStore } from "../model/useTasksStore";
-import { useEffect } from "react";
+import { EditTaskDialog } from "../actions/updateTask";
 
 export const TaskList = () => {
-  const { tasks: data } = useTasksStore();
+  const { data: tasks } = useTasks();
 
-  useEffect(() => {
-    // setTasks(mockTasks);
-  }, []);
+  const deleteTaskMutation = useDeleteTask();
 
-  console.log("tasks", data);
+  const handleDeleteTask = useCallback(
+    (taskId: Task["id"]) => {
+      deleteTaskMutation.mutate(taskId);
+    },
+    [deleteTaskMutation]
+  );
 
-  console.log("data", data);
-
-  if (!data) {
+  if (!tasks) {
     return (
       <Stack.VStack flex={1} alignItems="center" justifyContent="center">
         <Text>Список задач пуст </Text>
@@ -30,20 +30,25 @@ export const TaskList = () => {
     );
   }
 
-  const tasks = Array.from(data.values());
+  // const tasks = Array.from(data.values());
 
   return (
     <List.Root display="flex" flexDirection="column" w="full" gap="1rem">
-      {tasks.map((item) => (
-        <li key={item.id}>
+      {tasks.map((task) => (
+        <li key={task.id}>
           <TaskCard
-            data={item}
+            data={task}
             actionSlot={
               <Stack.HStack ml="auto">
-                <IconButton variant="outline" size="sm">
+                {/* <IconButton variant="outline" size="sm">
                   <EditIcon size={20} />
-                </IconButton>
-                <IconButton variant="outline" size="sm">
+                </IconButton> */}
+                <EditTaskDialog task={task} />
+                <IconButton
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDeleteTask(task.id)}
+                >
                   <TrashIcon size={20} />
                 </IconButton>
               </Stack.HStack>

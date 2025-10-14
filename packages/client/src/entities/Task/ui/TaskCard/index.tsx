@@ -10,6 +10,7 @@ import {
 import type { Task } from "../../types";
 import dayjs from "dayjs";
 import { memo, type ReactNode } from "react";
+import { TagList } from "./TagList";
 
 export interface TaskCardProps {
   data: Task;
@@ -25,7 +26,11 @@ const statusColors: Partial<
 };
 
 export const TaskCard = memo(({ data, actionSlot }: TaskCardProps) => {
-  const { title, description, startDate, status, tags, id: taskId } = data;
+  const { title, description, startDate, status, tags = [], id: taskId } = data;
+
+  const isHasTags = tags.length !== 0;
+
+  const titleElement = <Text fontSize="l">{title}</Text>;
 
   return (
     <Card.Root
@@ -36,27 +41,11 @@ export const TaskCard = memo(({ data, actionSlot }: TaskCardProps) => {
       gap="0.5rem"
     >
       <Stack.HStack justifyContent="space-between">
-        {tags && (
-          <Stack.HStack justifyContent="space-between">
-            {tags.map((tag) => (
-              <Badge
-                px="0.7rem"
-                py="0.2rem"
-                key={`${taskId}_${tag}`}
-                flexShrink={0}
-                colorPalette="gray"
-                borderRadius="12px"
-              >
-                {tag}
-              </Badge>
-            ))}
-          </Stack.HStack>
-        )}
-
+        {isHasTags ? <TagList tags={tags} /> : titleElement}
         {actionSlot}
       </Stack.HStack>
 
-      <Text fontSize="l">{title}</Text>
+      {isHasTags && titleElement}
 
       <Stack.HStack justifyContent="space-between">
         <Text color="gray" fontSize="small">

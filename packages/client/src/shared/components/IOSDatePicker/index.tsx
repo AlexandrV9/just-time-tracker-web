@@ -19,12 +19,12 @@ import { useTranslation } from "~/shared/hooks";
 
 export type ActiveTrigger = "date" | "time";
 
-export interface DateTimePickerProps {
+export interface IOSDatePickerProps {
   label?: string;
 
   // date
-  date?: Date | null;
-  onChangeDate?: (value: Date | null) => void;
+  date: Date | null;
+  onChangeDate: (value: Date | null) => void;
 
   // time
   time?: TimeObject | null;
@@ -37,13 +37,14 @@ export interface DateTimePickerProps {
   // rules
   minDate?: Date;
   maxDate?: Date;
+  isValidDate?: boolean;
   isValidTime?: boolean;
 
   // other options
   highlightedDates?: HighlightedDate[];
 }
 
-export const DateTimePicker = ({
+export const IOSDatePicker = ({
   label,
   time,
   onChangeTime,
@@ -53,21 +54,19 @@ export const DateTimePicker = ({
   onExpandedChange,
   minDate,
   maxDate,
-  isValidTime,
-}: // highlightedDates,
-DateTimePickerProps) => {
+  isValidTime = true,
+  isValidDate = true,
+}: IOSDatePickerProps) => {
   const { i18n } = useTranslation();
   const locale = i18n.language as Locale;
 
   const [activeTrigger, setActiveTrigger] = useState<ActiveTrigger>("date");
-
-  const [selectedDate, setSelectedDate] = useState<Date>(
-    date ? new Date(date) : new Date()
-  );
-
-  const triggerRef = useRef<ActiveTrigger>("date");
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    return date ? new Date(date) : new Date();
+  });
 
   const accordionRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<ActiveTrigger>("date");
 
   const {
     time: _time,
@@ -109,6 +108,36 @@ DateTimePickerProps) => {
     },
     [onChangeDate]
   );
+
+  const renderAccorionTriggerContent = () => {
+    return (
+      <Stack.HStack>
+        <AccordionItemTrigger
+          display="flex"
+          flexGrow={1}
+          justifyContent="space-between"
+          label={label}
+          badgeText={formatDate(selectedDate, "D MMMM YYYY", locale)}
+          isActive={activeTrigger === "date"}
+          isExpanded={isExpanded}
+          onClickTrigger={() => handleClickAccorionTrigger("date")}
+          isValid={isValidDate}
+        />
+        {_time && onChangeTime && (
+          <AccordionItemTrigger
+            w="fit-content"
+            badgeText={getTimeString(_time, {
+              formater: ({ h, m }) => `${h}:${m}`,
+            })}
+            isActive={activeTrigger === "time"}
+            isExpanded={isExpanded}
+            onClickTrigger={() => handleClickAccorionTrigger("time")}
+            isValid={isValidTime}
+          />
+        )}
+      </Stack.HStack>
+    );
+  };
 
   const renderAccorionBodyContent = () => {
     switch (activeTrigger) {
@@ -167,6 +196,7 @@ DateTimePickerProps) => {
   //   }
   // }, [isExpanded, activeTrigger]);
 
+  const accordionTriggerContent = renderAccorionTriggerContent();
   const accorionBodyContent = renderAccorionBodyContent();
 
   return (
@@ -178,30 +208,7 @@ DateTimePickerProps) => {
         ref={accordionRef}
       >
         <Accordion.Item value="dateSelector" border="none">
-          <Stack.HStack>
-            <AccordionItemTrigger
-              display="flex"
-              flexGrow={1}
-              justifyContent="space-between"
-              label={label}
-              badgeText={formatDate(selectedDate, "D MMMM YYYY", locale)}
-              isActive={activeTrigger === "date"}
-              isExpanded={isExpanded}
-              onClickTrigger={() => handleClickAccorionTrigger("date")}
-            />
-            {_time && (
-              <AccordionItemTrigger
-                w="fit-content"
-                badgeText={getTimeString(_time, {
-                  formater: ({ h, m }) => `${h}:${m}`,
-                })}
-                isActive={activeTrigger === "time"}
-                isExpanded={isExpanded}
-                onClickTrigger={() => handleClickAccorionTrigger("time")}
-                isValid={isValidTime}
-              />
-            )}
-          </Stack.HStack>
+          {accordionTriggerContent}
           <Accordion.ItemContent>
             <Accordion.ItemBody display="flex" justifyContent="center">
               {accorionBodyContent}

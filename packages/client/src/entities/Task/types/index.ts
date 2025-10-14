@@ -28,7 +28,7 @@ export type Task = {
   assignedToId?: string; // Id пользователя кому назначен задача (Исполнитель)
 
   projectId?: string;
-  tags: string[];
+  tags?: string[];
   estimatedTime?: number; // сколько потребуется времени для выполнения задачи (Планируемое время)
   actualTime?: number; // сколько времени затраченно по факту (Фактическое время)
 };

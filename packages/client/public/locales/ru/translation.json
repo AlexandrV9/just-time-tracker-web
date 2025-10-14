@@ -80,6 +80,25 @@
       }
     },
     "tasks": {
+      "update": {
+        "dialogTitle": "Обновление задачи",
+        "inputTitle": {
+          "label": "Название",
+          "placeholder": "Введите название задачи"
+        },
+        "inputDescription": {
+          "label": "Описание",
+          "placeholder": "Введите описание задачи"
+        },
+        "startDate": {
+          "label": "Начало"
+        },
+        "endDate": {
+          "label": "Конец"
+        },
+        "createButtonText": "Обновить",
+        "cancelButtonText": "Отмена"
+      },
       "create": {
         "dialogTitle": "Создание новой задачи",
         "inputTitle": {

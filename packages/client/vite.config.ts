@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
 
         // Говорим, чтобы sw работал и в dev режиме
         devOptions: {
-          enabled: true,
+          enabled: false,
           type: "module",
           navigateFallback: "index.html",
           suppressWarnings: true,
