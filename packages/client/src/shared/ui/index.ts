@@ -26,6 +26,7 @@ export * from "./SafeArea";
 export * from "./TimePicker";
 export * from "./TextArea";
 export * from "./Accordion";
+export * from "./Toast";
 
 export * from "./icons";
 export * from "./controls";

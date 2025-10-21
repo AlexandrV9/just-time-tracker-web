@@ -10,7 +10,7 @@ export const SearchTasks = () => {
       truncate
       placeholder={t("features.tasks.search.input.placeholder")}
       variant="subtle"
-      width="70%"
+      width="full"
     />
   );
 };

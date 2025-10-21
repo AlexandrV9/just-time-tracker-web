@@ -11,8 +11,7 @@ const theme: ThemingConfig = {
     ...defaultConfig.theme?.tokens,
     colors: {
       ...defaultConfig.theme?.tokens?.colors,
-      // exapmple
-      // testColor: { value: "var(--test-color)" },
+      // toastSuccessTextColor: { value: "var(--toast-success-color)" },
     },
   },
 };

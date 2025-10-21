@@ -4,48 +4,6 @@
     "ru": "Русский"
   },
   "pages": {
-    "signIn": {
-      "form": {
-        "firstName": {
-          "placeholder": "Please enter your first name"
-        },
-        "linkText": "Create",
-        "loginInput": {
-          "label": "Login",
-          "placeholder": "Please enter your login"
-        },
-        "passwordInput": {
-          "label": "Password",
-          "placeholder": "Please enter your password"
-        },
-        "submitButton": "Enter",
-        "subtitleText": "Don't you have an account?",
-        "title": "Autorization"
-      }
-    },
-    "signUp": {
-      "form": {
-        "firstName": {
-          "label": "First name"
-        },
-        "linkText": "Sign in",
-        "loginInput": {
-          "label": "Login",
-          "placeholder": "Create a login"
-        },
-        "passwordInput": {
-          "label": "Password",
-          "placeholder": "Create a strong password"
-        },
-        "repeatPasswordInput": {
-          "label": "Repeat password",
-          "placeholder": "Please enter password again"
-        },
-        "submitButton": "Enter",
-        "subtitleText": "Do you have an account?",
-        "title": "Registration"
-      }
-    },
     "welcome": {
       "description": "We're glad to have you in our app! Here you'll find all the tools you need for productive work and easy task management.",
       "featureList": [
@@ -77,6 +35,66 @@
     "auth": {
       "signOut": {
         "textButton": "Sign Out"
+      },
+      "signInByLoginForm": {
+        "firstNameInput": {
+          "placeholder": "Please enter your first name"
+        },
+        "loginInput": {
+          "label": "Login",
+          "placeholder": "Please enter your login",
+          "errors": {
+            "required": "Login is required"
+          }
+        },
+        "passwordInput": {
+          "label": "Password",
+          "placeholder": "Please enter your password",
+          "errors": {
+            "minLength": "The password is short, the minimum length of {{count}} symbols"
+          }
+        },
+        "linkText": "Create",
+        "submitButton": "Enter",
+        "submitButtonLoadingText": "Authorization...",
+        "subtitleText": "Don't you have an account?",
+        "title": "Autorization"
+      },
+      "signUpForm": {
+        "firstNameInput": {
+          "label": "First name",
+          "placeholder": "Please enter your first name",
+          "errors": {
+            "required": "First name is required"
+          }
+        },
+        "loginInput": {
+          "label": "Login",
+          "placeholder": "Create a login",
+          "errors": {
+            "required": "Login is required"
+          }
+        },
+        "passwordInput": {
+          "label": "Password",
+          "placeholder": "Create a strong password",
+          "errors": {
+            "minLength": "The password is short, the minimum length of {{count}} symbols"
+          }
+        },
+        "repeatPasswordInput": {
+          "label": "Repeat password",
+          "placeholder": "Please enter password again",
+          "errors": {
+            "mismatch": "Passwords don't match",
+            "required": "Field is required"
+          }
+        },
+        "linkText": "Sign in",
+        "submitButton": "Enter",
+        "submitButtonLoadingText": "Registration...",
+        "subtitleText": "Do you have an account?",
+        "title": "Registration"
       }
     },
     "tasks": {

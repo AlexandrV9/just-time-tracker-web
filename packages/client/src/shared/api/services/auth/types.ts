@@ -5,3 +5,10 @@ export type AuthUserDTO = {
   email: string | null;
   avatar: string | null;
 };
+
+export type ErrorField = {
+  code: string;
+  expected: string;
+  message: string;
+  name: string;
+};

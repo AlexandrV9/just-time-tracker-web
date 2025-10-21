@@ -1,8 +1,10 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { appConfig } from "./constants/index.js";
-import { auth } from "./auth/index.js";
+// import { cors } from "hono/cors";
+import { authRouter } from "./auth/index.js";
+import { tasksRouter } from "./tasks/index.js";
+import { config } from "./shared/index.js";
+import { healthRouter } from "./health/health.routes.js";
 
 const app = new Hono();
 
@@ -14,12 +16,14 @@ const app = new Hono();
 //   })
 // );
 
-app.route("/", auth);
+app.route("/auth", authRouter);
+app.route("/tasks", tasksRouter);
+app.route("/health", healthRouter);
 
 serve(
   {
     fetch: app.fetch,
-    port: Number(appConfig.serverPort),
+    port: Number(config.app.serverPort),
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);

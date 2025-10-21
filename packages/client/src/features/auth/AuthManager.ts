@@ -1,6 +1,8 @@
-import { authService } from "~/shared/api";
+import { authService, type ErrorField } from "~/shared/api";
 import { authActions, useAuthStore } from "./useAuthStore";
 import { tokenManager } from "~/shared/utils";
+import axios from "axios";
+import { ApiError } from "~/shared/config/error";
 
 class AuthManager {
   async checkAuth(): Promise<boolean> {
@@ -50,24 +52,52 @@ class AuthManager {
       tokenManager.setAccessToken(data.accessToken);
       return response;
     } catch (error) {
-      console.log(error);
       authActions.setStatus("UNAUTHENTICATED");
-      throw error;
+
+      if (axios.isAxiosError(error)) {
+        throw ApiError.fromResponse({
+          message: error.response?.data?.message,
+          code: error.response?.status,
+        });
+      } else {
+        console.log("another error", error);
+        throw error;
+      }
     }
   }
 
   async signUp(value: { name?: string; login: string; password: string }) {
     try {
       const response = await authService.signUp(value);
+
       const { data, message, success } = response.data;
 
-      if (!success || !data) {
-        throw new Error(message || "Request failed");
+      if (!success) {
+        throw ApiError.fromResponse<ErrorField[] | null>({
+          message: message,
+          code: response.status,
+          data: response.data.data,
+        });
       }
 
       return data;
     } catch (error) {
-      console.log(error);
+      if (error instanceof ApiError) {
+        throw error as ApiError<ErrorField[] | null>;
+      }
+
+      if (axios.isAxiosError(error)) {
+        throw ApiError.fromResponse<ErrorField[] | null>({
+          message: error.response?.data?.message,
+          code: error.response?.status,
+          data: error.response?.data?.data || [],
+        });
+      }
+
+      console.log("Unknown error", error);
+      throw ApiError.fromResponse<null>({
+        message: "Unknown error",
+      });
     }
   }
 

@@ -14,7 +14,7 @@ class TaskRepository extends BaseRepository<Task> {
       //   syncStatus: "pending" as SyncStatus,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      status: "done",
+      status: "todo",
       priority: "low",
       createdById: "test_createdById",
     };

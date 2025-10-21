@@ -2,3 +2,13 @@
   --fonts-font-family-default: "Inter";
   --fonts-font-family-accent: "Hagrid Text";
 }
+
+[data-theme="light"] {
+  /* --toast-success-color: red; */
+  /* --toast-bg: rgba(255, 255, 255, 1); */
+}
+
+[data-theme="dark"] {
+  /* --toast-success-color: blue; */
+  /* --toast-bg: rgba(0, 0, 0, 1); */
+}

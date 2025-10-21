@@ -1,17 +1,22 @@
-import type { AuthUserDTO } from "./types";
+import type { AuthUserDTO, ErrorField } from "./types";
 import type { RequestResponse } from "../types";
 import axios from "axios";
 import { axiosInstance } from "../../../config/axios";
+import { tokenManager } from "~/shared/utils";
+import type { UserDTO } from "../users";
 
 class AuthService {
   signInByLogin(data: { login: string; password: string }) {
-    return axiosInstance.post<
+    return axios.post<
       RequestResponse<{ user: AuthUserDTO; accessToken: string }>
     >(`/api/auth/sign-in`, data);
   }
 
   signUp(data: { login: string; name?: string; password: string }) {
-    return axiosInstance.post<RequestResponse>(`/api/auth/sign-up`, data);
+    return axiosInstance.post<RequestResponse<UserDTO, ErrorField[]>>(
+      `/api/auth/sign-up`,
+      data
+    );
   }
 
   checkIsAuth() {
@@ -19,6 +24,9 @@ class AuthService {
       RequestResponse<{ user: AuthUserDTO; accessToken?: string }>
     >(`/api/auth`, {
       withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${tokenManager.getAccessToken()}`,
+      },
     });
   }
 

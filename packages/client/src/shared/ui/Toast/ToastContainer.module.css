@@ -1,0 +1,80 @@
+/* stylelint-disable */
+.container {
+  --toastify-toast-min-height: auto;
+  --toastify-toast-offset: 24px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 10px;
+
+  :global(.Toastify__toast) {
+    width: auto;
+    max-width: var(--toast-text-max_width, 480px);
+    min-height: var(--toast-text-min_height, 16px);
+    margin: 0;
+    padding: 8px 20px;
+    border-radius: var(--toast-radius, 25px);
+    border: var(--toast-border-size, 1px) solid transparent;
+    background: var(--chakra-colors-bg);
+    backdrop-filter: blur(10px) brightness(0.8);
+    -webkit-backdrop-filter: blur(10px) brightness(0.8);
+    transition: all 0.2s;
+
+    &:hover {
+      cursor: pointer;
+      box-shadow: var(--toast-shadow, -2px 2px 20px 0 rgb(0 0 0 / 10%));
+    }
+  }
+
+  :global(.Toastify__toast--success) {
+    color: var(--chakra-colors-fg-success);
+    border-color: var(--chakra-colors-border-success);
+
+    &:hover {
+      border-color: var(
+        --toast-bg-hover-success,
+        var(--chakra-colors-green-50)
+      );
+    }
+  }
+
+  :global(.Toastify__toast--error) {
+    color: var(--chakra-colors-fg-error);
+    border-color: var(--chakra-colors-border-error);
+
+    &:hover {
+      border-color: var(--toast-border-error, var(--chakra-colors-red-200));
+    }
+  }
+
+  :global(.Toastify__toast--default) {
+    color: var(--chakra-colors-fg);
+    border-color: var(--chakra-colors-border-info);
+
+    &:hover {
+      border-color: var(
+        --toast-border-hover-default,
+        var(--chakra-colors-gray-400)
+      );
+    }
+  }
+}
+
+.toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.message {
+  user-select: none;
+}
+
+.closeButton {
+  border-radius: 50%;
+
+  &:hover {
+    cursor: pointer;
+  }
+}

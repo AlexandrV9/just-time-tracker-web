@@ -21,7 +21,7 @@ export function WelcomePage() {
       borderRadius="xl"
       width="full"
       minWidth={320}
-      maxWidth={380}
+      maxWidth={400}
     >
       <Text
         as="h1"

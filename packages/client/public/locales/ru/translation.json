@@ -4,48 +4,6 @@
     "ru": "Русский"
   },
   "pages": {
-    "signIn": {
-      "form": {
-        "firstName": {
-          "placeholder": "Пожалуйста введите ваше имя"
-        },
-        "linkText": "Создать",
-        "loginInput": {
-          "label": "Логин",
-          "placeholder": "Пожалуйста введите ваш логин"
-        },
-        "passwordInput": {
-          "label": "Пароль",
-          "placeholder": "Пожалуйста введите ваш пароль"
-        },
-        "submitButton": "Войти",
-        "subtitleText": "У вас еще нет аккаунта?",
-        "title": "Авторизация"
-      }
-    },
-    "signUp": {
-      "form": {
-        "firstName": {
-          "label": "Имя"
-        },
-        "linkText": "Войти",
-        "loginInput": {
-          "label": "Логин",
-          "placeholder": "Придумайте логин"
-        },
-        "passwordInput": {
-          "label": "Пароль",
-          "placeholder": "Придумайте надежный пароль"
-        },
-        "repeatPasswordInput": {
-          "label": "Повторите пароль",
-          "placeholder": "Повторите новый пароль"
-        },
-        "submitButton": "Создать",
-        "subtitleText": "У вас есть аккаунт",
-        "title": "Регистрация"
-      }
-    },
     "welcome": {
       "description": "Мы рады видеть вас в нашем приложении. Здесь вы найдете все необходимое для эффективной работы и удобного управления вашими задачами.",
       "featureList": [
@@ -77,6 +35,66 @@
     "auth": {
       "signOut": {
         "textButton": "Выйти"
+      },
+      "signInByLoginForm": {
+        "firstNameInput": {
+          "placeholder": "Пожалуйста введите ваше имя"
+        },
+        "loginInput": {
+          "label": "Логин",
+          "placeholder": "Пожалуйста введите ваш логин",
+          "errors": {
+            "required": "Логин обязателен"
+          }
+        },
+        "passwordInput": {
+          "label": "Пароль",
+          "placeholder": "Пожалуйста введите ваш пароль",
+          "errors": {
+            "minLength": "Пароль должен содержать минимум {{count}} символов"
+          }
+        },
+        "linkText": "Создать",
+        "submitButton": "Войти",
+        "submitButtonLoadingText": "Авторизация...",
+        "subtitleText": "У вас еще нет аккаунта?",
+        "title": "Авторизация"
+      },
+      "signUpForm": {
+        "firstNameInput": {
+          "label": "Имя",
+          "placeholder": "Введите свое имя",
+          "errors": {
+            "required": "Имя обязательно"
+          }
+        },
+        "loginInput": {
+          "label": "Логин",
+          "placeholder": "Придумайте логин",
+          "errors": {
+            "required": "Логин обязателен"
+          }
+        },
+        "passwordInput": {
+          "label": "Пароль",
+          "placeholder": "Придумайте надежный пароль",
+          "errors": {
+            "minLength": "Пароль должен содержать минимум {{count}} символов"
+          }
+        },
+        "repeatPasswordInput": {
+          "label": "Повторите пароль",
+          "placeholder": "Повторите новый пароль",
+          "errors": {
+            "mismatch": "Пароли не совпадают",
+            "required": "Поле обязательно"
+          }
+        },
+        "linkText": "Войти",
+        "submitButton": "Создать",
+        "submitButtonLoadingText": "Регистрация...",
+        "subtitleText": "У вас есть аккаунт",
+        "title": "Регистрация"
       }
     },
     "tasks": {

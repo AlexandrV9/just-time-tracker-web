@@ -14,6 +14,7 @@ import { ThemeProvider } from "~/shared/theme";
 import { chakraConfig } from "~/shared/config";
 import { TanstackProvider, RouterProvider } from "./providers";
 import { useDisableZoom } from "~/shared/ui/PageLayout/useDisableZoom";
+import { ToastContainer } from "~/shared/ui";
 
 export const App = () => {
   useDisableZoom();
@@ -23,6 +24,7 @@ export const App = () => {
       <ThemeProvider>
         <ChakraProvider value={chakraConfig}>
           <RouterProvider />
+          <ToastContainer limit={1} />
         </ChakraProvider>
       </ThemeProvider>
     </TanstackProvider>
