@@ -114,7 +114,7 @@
         "endDate": {
           "label": "Конец"
         },
-        "createButtonText": "Обновить",
+        "submitButtonText": "Обновить",
         "cancelButtonText": "Отмена"
       },
       "create": {
@@ -133,7 +133,7 @@
         "endDate": {
           "label": "Конец"
         },
-        "createButtonText": "Создать",
+        "submitButtonText": "Создать",
         "cancelButtonText": "Отмена"
       },
       "search": {

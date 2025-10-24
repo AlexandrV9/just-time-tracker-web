@@ -3,8 +3,6 @@ import { useMutation } from "@tanstack/react-query";
 import type { TFunction } from "i18next";
 import z from "zod";
 import { authManager } from "~/features/auth";
-import type { ErrorField, UserDTO } from "~/shared/api";
-import type { ApiError } from "~/shared/config/error";
 import { useTranslation } from "~/shared/hooks";
 import {
   Box,
@@ -37,14 +35,9 @@ export type SignUpFormSchema = z.infer<typeof signUpFormSchema>;
 export const SignUpForm = () => {
   const { t } = useTranslation();
 
-  const signUpMutatuin = useMutation<
-    UserDTO,
-    ApiError<ErrorField[] | null>,
-    SignUpFormSchema
-  >({
+  const signUpMutatuin = useMutation({
     mutationFn: (data: SignUpFormSchema) => authManager.signUp(data),
-    onSuccess: (data) => {
-      console.log(data);
+    onSuccess: () => {
       toast.success("Success", {
         position: "top-center",
         draggable: true,
@@ -81,47 +74,6 @@ export const SignUpForm = () => {
   const submitHandler = handleSubmit((data) => {
     signUpMutatuin.mutate(data);
   });
-
-  // if (true) {
-  //   return (
-  //     <Box
-  //       as="form"
-  //       display="flex"
-  //       flexDirection="column"
-  //       gap="1rem"
-  //       onSubmit={submitHandler}
-  //     >
-  //       <Text
-  //         as="h1"
-  //         textStyle="4xl"
-  //         fontWeight="semibold"
-  //         bg="linear-gradient(135deg, #7ea670ff 20%, #8307fe 40%, #07fe66ff 70%)"
-  //         bgClip="text"
-  //         m={0}
-  //       >
-  //         {t(`${baseLocale}.title`)}
-  //       </Text>
-
-  //       <Text as="h2" fontSize="1.2rem" fontWeight="semibold">
-  //         ✅ прошла успешно!
-  //       </Text>
-
-  //       <Text as="p" color="gray.400" lineHeight={1.3}>
-  //         Через несколько секунд мы перенаправим вас на страницу входа, где вы
-  //         сможете начать пользоваться всеми возможностями нашего приложения
-  //       </Text>
-
-  //       <Button
-  //         mt="1rem"
-  //         type="submit"
-  //         loading={signUpMutatuin.isPending}
-  //         loadingText={t(`${baseLocale}.submitButtonLoadingText`)}
-  //       >
-  //         Перейти к входу
-  //       </Button>
-  //     </Box>
-  //   );
-  // }
 
   return (
     <Box

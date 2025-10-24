@@ -1,4 +1,4 @@
-import { authService, type ErrorField } from "~/shared/api";
+import { authService, type AuthUserDTO, type ErrorField } from "~/shared/api";
 import { authActions, useAuthStore } from "./useAuthStore";
 import { tokenManager } from "~/shared/utils";
 import axios from "axios";
@@ -10,18 +10,19 @@ class AuthManager {
       authActions.setStatus("PENDING");
 
       const response = await authService.checkIsAuth();
-      const { data, success, message } = response.data;
 
-      if (!success) {
-        throw new Error(message || "Authentication failed");
+      if (!response.success) {
+        console.log("error", response.message);
+        tokenManager.removeAccessToken();
+        return false;
       }
 
-      if (data?.accessToken) {
-        tokenManager.setAccessToken(data.accessToken);
+      if (response.data.accessToken) {
+        tokenManager.setAccessToken(response.data.accessToken);
       }
 
-      if (data?.user) {
-        authActions.setUser(data.user);
+      if (response.data.user) {
+        authActions.setUser(response.data.user);
       }
 
       authActions.setStatus("AUTHENTICATED");
@@ -41,15 +42,14 @@ class AuthManager {
       authActions.setStatus("PENDING");
 
       const response = await authService.signInByLogin(credentials);
-      const { data, message, success } = response.data;
 
-      if (!success || !data) {
-        throw new Error(message || "Request failed");
+      if (!response.success) {
+        return response;
       }
 
-      authActions.setUser(data.user);
+      authActions.setUser(response.data.user);
       authActions.setStatus("AUTHENTICATED");
-      tokenManager.setAccessToken(data.accessToken);
+      tokenManager.setAccessToken(response.data.accessToken);
       return response;
     } catch (error) {
       authActions.setStatus("UNAUTHENTICATED");
@@ -66,21 +66,10 @@ class AuthManager {
     }
   }
 
-  async signUp(value: { name?: string; login: string; password: string }) {
+  async signUp(value: { firstName: string; login: string; password: string }) {
     try {
       const response = await authService.signUp(value);
-
-      const { data, message, success } = response.data;
-
-      if (!success) {
-        throw ApiError.fromResponse<ErrorField[] | null>({
-          message: message,
-          code: response.status,
-          data: response.data.data,
-        });
-      }
-
-      return data;
+      return response;
     } catch (error) {
       if (error instanceof ApiError) {
         throw error as ApiError<ErrorField[] | null>;
@@ -108,16 +97,15 @@ class AuthManager {
       authActions.setStatus("PENDING");
 
       const response = await authService.signOut();
-      const { message, success } = response.data;
 
-      if (!success) {
-        throw new Error(message || "Request failed");
+      if (!response.success) {
+        return response;
       }
 
       tokenManager.removeAccessToken();
       authActions.setStatus("UNAUTHENTICATED");
 
-      return response.data;
+      return response;
     } catch (error) {
       console.log(error);
       authActions.setStatus(currentStatus);

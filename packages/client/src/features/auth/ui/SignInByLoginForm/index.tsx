@@ -35,7 +35,7 @@ export const SignInByLoginForm = () => {
   const signInMutatuin = useMutation({
     mutationFn: (data: SignInFormSchema) => authManager.signInByLogin(data),
     onSuccess: (response) => {
-      if (response.data.success) {
+      if (response.success) {
         navigate({ to: redirect || "/" });
       }
     },
@@ -52,7 +52,10 @@ export const SignInByLoginForm = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignInFormSchema>({ resolver: zodResolver(signInFormSchema) });
+  } = useForm<SignInFormSchema>({
+    resolver: zodResolver(signInFormSchema),
+    disabled: signInMutatuin.isPending,
+  });
 
   const submitHandler = handleSubmit(async (data) => {
     signInMutatuin.mutate(data);
@@ -75,7 +78,6 @@ export const SignInByLoginForm = () => {
       >
         {t(`${baseLocale}.title`)}
       </Text>
-
       <Field.Root invalid={!!errors.login}>
         <Field.Label color="fg">
           {t(`${baseLocale}.loginInput.label`)}
@@ -124,7 +126,9 @@ export const SignInByLoginForm = () => {
             {t(`${baseLocale}.subtitleText`)}
           </Text>
           <Text asChild color="purple.500" fontWeight="600">
-            <Link to="/signup">{t(`${baseLocale}.linkText`)}</Link>
+            <Link disabled={signInMutatuin.isPending} to="/signup">
+              {t(`${baseLocale}.linkText`)}
+            </Link>
           </Text>
         </Text>
       </Stack.HStack>

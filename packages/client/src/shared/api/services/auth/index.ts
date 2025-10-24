@@ -1,37 +1,37 @@
 import type { AuthUserDTO, ErrorField } from "./types";
 import type { RequestResponse } from "../types";
-import axios from "axios";
-import { axiosInstance } from "../../../config/axios";
 import { tokenManager } from "~/shared/utils";
 import type { UserDTO } from "../users";
+import { authApi, baseApi } from "../base";
 
 class AuthService {
   signInByLogin(data: { login: string; password: string }) {
-    return axios.post<
-      RequestResponse<{ user: AuthUserDTO; accessToken: string }>
-    >(`/api/auth/sign-in`, data);
-  }
-
-  signUp(data: { login: string; name?: string; password: string }) {
-    return axiosInstance.post<RequestResponse<UserDTO, ErrorField[]>>(
-      `/api/auth/sign-up`,
-      data
+    return authApi.post<{ user: AuthUserDTO; accessToken: string }>(
+      `/api/auth/sign-in`,
+      { data }
     );
   }
 
-  checkIsAuth() {
-    return axios.get<
-      RequestResponse<{ user: AuthUserDTO; accessToken?: string }>
-    >(`/api/auth`, {
-      withCredentials: true,
-      headers: {
-        Authorization: `Bearer ${tokenManager.getAccessToken()}`,
-      },
+  signUp(data: { firstName: string; login: string; password: string }) {
+    return authApi.post<UserDTO, ErrorField[]>(`/api/auth/sign-up`, {
+      data,
     });
   }
 
+  checkIsAuth() {
+    return authApi.get<{ user: AuthUserDTO; accessToken?: string }, unknown>(
+      `/api/auth`,
+      {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${tokenManager.getAccessToken()}`,
+        },
+      }
+    );
+  }
+
   signOut() {
-    return axiosInstance.post<RequestResponse>(`/api/auth/sign-out`);
+    return baseApi.post<RequestResponse>(`/api/auth/sign-out`);
   }
 
   // checkRefresh() {
@@ -44,12 +44,9 @@ class AuthService {
   // }
 
   refresh() {
-    return axios.get<RequestResponse<{ accessToken: string }>>(
-      `/api/auth/refresh`,
-      {
-        withCredentials: true,
-      }
-    );
+    return baseApi.get<{ accessToken: string }>(`/api/auth/refresh`, {
+      withCredentials: true,
+    });
   }
 }
 

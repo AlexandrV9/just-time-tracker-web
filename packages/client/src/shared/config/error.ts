@@ -28,7 +28,7 @@ export class ApiError<TError = unknown> extends Error {
     }
   ) {
     return new ApiError({
-      message: responseData.message || "Unknown error",
+      message: responseData.message,
       code: responseData.code,
       data: responseData.data,
     });
