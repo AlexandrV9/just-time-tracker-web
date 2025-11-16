@@ -1,4 +1,4 @@
-import { authService, type AuthUserDTO, type ErrorField } from "~/shared/api";
+import { authService, type ErrorField } from "~/shared/api";
 import { authActions, useAuthStore } from "./useAuthStore";
 import { tokenManager } from "~/shared/utils";
 import axios from "axios";
@@ -22,7 +22,10 @@ class AuthManager {
       }
 
       if (response.data.user) {
-        authActions.setUser(response.data.user);
+        authActions.setUser({
+          ...response.data.user,
+          id: response.data.user.id.toString(),
+        });
       }
 
       authActions.setStatus("AUTHENTICATED");
@@ -47,7 +50,10 @@ class AuthManager {
         return response;
       }
 
-      authActions.setUser(response.data.user);
+      authActions.setUser({
+        ...response.data.user,
+        id: response.data.user.id.toString(),
+      });
       authActions.setStatus("AUTHENTICATED");
       tokenManager.setAccessToken(response.data.accessToken);
       return response;

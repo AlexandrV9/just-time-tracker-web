@@ -1,160 +1,85 @@
-import type { Task } from "./types";
+import type { TaskDTO } from "@to-do-list/shared";
 
-export const mockTasks: Task[] = [
+export const mockTasks: TaskDTO[] = [
   {
     id: "task-1",
+    localId: "local-task-1",
     title: "Разработать интерфейс задачи",
     description:
       "Создать компоненты для отображения и редактирования задач в соответствии с макетом Figma",
     status: "in_progress",
     priority: "high",
+    createdById: "user-456",
     createdAt: "2024-01-15T10:00:00Z",
     updatedAt: "2024-01-16T14:30:00Z",
-    createdById: "user-456",
-    projectId: "project-789",
-    tags: ["ui", "frontend", "component"],
-    estimatedTime: 240, // 4 часа
-    actualTime: 120, // 2 часа
     startDate: "2024-01-16T09:15:00Z",
+    endDate: "2024-01-16T13:15:00Z",
+    tags: [
+      { id: "tag-1", title: "UI", label: "ui" },
+      { id: "tag-2", title: "Frontend", label: "frontend" },
+      { id: "tag-3", title: "Component", label: "component" },
+    ],
+    isDeleting: false,
   },
   {
     id: "task-2",
+    localId: "local-task-2",
     title: "Написать тесты для API задач",
     description:
       "Добавить unit и integration тесты для эндпоинтов работы с задачами",
     status: "todo",
     priority: "medium",
-    createdAt: "2024-01-16T09:15:00Z",
-    updatedAt: "2024-01-16T09:15:00Z",
     createdById: "user-789",
-    projectId: "project-789",
-    tags: ["backend", "testing", "api"],
-    estimatedTime: 180, // 3 часа
-    actualTime: 0,
-    startDate: "2024-01-16T09:15:00Z",
+    createdAt: "2024-01-16T09:15:00Z",
+    updatedAt: null,
+    startDate: "2024-01-16T10:00:00Z",
+    endDate: null,
+    tags: [
+      { id: "tag-4", title: "Backend", label: "backend" },
+      { id: "tag-5", title: "Testing", label: "testing" },
+      { id: "tag-6", title: "API", label: "api" },
+    ],
+    isDeleting: false,
   },
   {
     id: "task-3",
+    localId: "local-task-3",
     title: "Исправить баг с отображением дат",
     description:
       "В мобильной версии даты задач отображаются некорректно на iOS устройствах",
     status: "review",
     priority: "urgent",
+    createdById: "user-456",
     createdAt: "2024-01-14T16:45:00Z",
     updatedAt: "2024-01-17T11:20:00Z",
-    createdById: "user-456",
-    projectId: "project-123",
-    tags: ["bug", "mobile", "ios"],
-    estimatedTime: 60, // 1 час
-    actualTime: 45, // 45 минут
-    startDate: "2024-01-16T09:15:00Z",
+    startDate: "2024-01-15T09:15:00Z",
+    actualStartDate: "2024-01-15T09:30:00Z",
+    actualEndDate: "2024-01-15T10:15:00Z",
+    tags: [
+      { id: "tag-7", title: "Bug", label: "bug" },
+      { id: "tag-8", title: "Mobile", label: "mobile" },
+      { id: "tag-9", title: "iOS", label: "ios" },
+    ],
+    isDeleting: false,
   },
   {
     id: "task-4",
+    localId: "local-task-4",
     title: "Добавить фильтрацию задач по тегам",
     description:
       "Реализовать функционал фильтрации задач по выбранным тегам в боковой панели",
     status: "done",
     priority: "low",
+    createdById: "user-456",
     createdAt: "2024-01-10T13:20:00Z",
     updatedAt: "2024-01-15T16:30:00Z",
-    createdById: "user-456",
-    projectId: "project-789",
-    tags: ["feature", "filter", "ui"],
-    estimatedTime: 120, // 2 часа
-    actualTime: 150, // 2.5 часа
-  },
-  {
-    id: "task-5",
-    title: "Исправить баг с отображением дат",
-    description:
-      "В мобильной версии даты задач отображаются некорректно на iOS устройствах",
-    status: "review",
-    priority: "urgent",
-    createdAt: "2024-01-14T16:45:00Z",
-    updatedAt: "2024-01-17T11:20:00Z",
-    createdById: "user-456",
-    projectId: "project-123",
-    tags: ["bug", "mobile", "ios"],
-    estimatedTime: 60, // 1 час
-    actualTime: 45, // 45 минут
-    startDate: "2024-01-16T09:15:00Z",
-  },
-  {
-    id: "task-6",
-    title: "Добавить фильтрацию задач по тегам",
-    description:
-      "Реализовать функционал фильтрации задач по выбранным тегам в боковой панели",
-    status: "done",
-    priority: "low",
-    createdAt: "2024-01-10T13:20:00Z",
-    updatedAt: "2024-01-15T16:30:00Z",
-    createdById: "user-456",
-    projectId: "project-789",
-    tags: ["feature", "filter", "ui"],
-    estimatedTime: 120, // 2 часа
-    actualTime: 150, // 2.5 часа
-  },
-  {
-    id: "task-7",
-    title: "Исправить баг с отображением дат",
-    description:
-      "В мобильной версии даты задач отображаются некорректно на iOS устройствах",
-    status: "review",
-    priority: "urgent",
-    createdAt: "2024-01-14T16:45:00Z",
-    updatedAt: "2024-01-17T11:20:00Z",
-    createdById: "user-456",
-    projectId: "project-123",
-    tags: ["bug", "mobile", "ios"],
-    estimatedTime: 60, // 1 час
-    actualTime: 45, // 45 минут
-    startDate: "2024-01-16T09:15:00Z",
-  },
-  {
-    id: "task-8",
-    title: "Добавить фильтрацию задач по тегам",
-    description:
-      "Реализовать функционал фильтрации задач по выбранным тегам в боковой панели",
-    status: "done",
-    priority: "low",
-    createdAt: "2024-01-10T13:20:00Z",
-    updatedAt: "2024-01-15T16:30:00Z",
-    createdById: "user-456",
-    projectId: "project-789",
-    tags: ["feature", "filter", "ui"],
-    estimatedTime: 120, // 2 часа
-    actualTime: 150, // 2.5 часа
-  },
-  {
-    id: "task-9",
-    title: "Исправить баг с отображением дат",
-    description:
-      "В мобильной версии даты задач отображаются некорректно на iOS устройствах",
-    status: "review",
-    priority: "urgent",
-    createdAt: "2024-01-14T16:45:00Z",
-    updatedAt: "2024-01-17T11:20:00Z",
-    createdById: "user-456",
-    projectId: "project-123",
-    tags: ["bug", "mobile", "ios"],
-    estimatedTime: 60, // 1 час
-    actualTime: 45, // 45 минут
-    startDate: "2024-01-16T09:15:00Z",
-  },
-  {
-    id: "task-10",
-    title: "Добавить фильтрацию задач по тегам",
-    description:
-      "Реализовать функционал фильтрации задач по выбранным тегам в боковой панели",
-    status: "done",
-    priority: "low",
-    createdAt: "2024-01-10T13:20:00Z",
-    updatedAt: "2024-01-15T16:30:00Z",
-    createdById: "user-456",
-    projectId: "project-789",
-    tags: ["feature", "filter", "ui"],
-    estimatedTime: 120, // 2 часа
-    actualTime: 150, // 2.5 часа
+    startDate: "2024-01-11T09:00:00Z",
+    endDate: "2024-01-11T11:00:00Z",
+    tags: [
+      { id: "tag-10", title: "Feature", label: "feature" },
+      { id: "tag-11", title: "Filter", label: "filter" },
+      { id: "tag-12", title: "UI", label: "ui" },
+    ],
+    isDeleting: false,
   },
 ];

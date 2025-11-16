@@ -7,13 +7,13 @@ import {
   Text,
   type BadgeProps,
 } from "~/shared/ui";
-import type { Task } from "../../types";
 import dayjs from "dayjs";
-import { memo, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { TagList } from "./TagList";
+import type { Task } from "~/shared/api/services/task";
 
 export interface TaskCardProps {
-  data: Task;
+  task: Task;
   actionSlot?: ReactNode;
 }
 
@@ -25,8 +25,8 @@ const statusColors: Partial<
   todo: "orange",
 };
 
-export const TaskCard = memo(({ data, actionSlot }: TaskCardProps) => {
-  const { title, description, startDate, status, tags = [], id: taskId } = data;
+export const TaskCard = ({ task, actionSlot }: TaskCardProps) => {
+  const { title, description, startDate, status, tags = [], isDeleting } = task;
 
   const isHasTags = tags.length !== 0;
 
@@ -59,6 +59,9 @@ export const TaskCard = memo(({ data, actionSlot }: TaskCardProps) => {
         justifyContent="space-between"
         color="purple.focusRing"
       >
+        {task.syncStatus}
+        {" "}
+        {task.isDeleting && "Удаление"}
         <Box
           display="flex"
           gap="0.1rem"
@@ -84,17 +87,18 @@ export const TaskCard = memo(({ data, actionSlot }: TaskCardProps) => {
       </Stack.HStack>
     </Card.Root>
   );
-}, arePropsEqual);
+};
+// }, arePropsEqual);
 
-function arePropsEqual(oldProps: TaskCardProps, newProps: TaskCardProps) {
-  const oldData = oldProps.data;
-  const newData = newProps.data;
+// function arePropsEqual(oldProps: TaskCardProps, newProps: TaskCardProps) {
+//   const oldData = oldProps.task;
+//   const newData = newProps.task;
 
-  return (
-    oldData.id === newData.id &&
-    oldData.title === newProps.data.title &&
-    oldData.startDate === newData.startDate &&
-    oldData.status === newData.status &&
-    oldProps.actionSlot === newProps.actionSlot
-  );
-}
+//   return (
+//     oldData.id === newData.id &&
+//     oldData.title === newProps.task.title &&
+//     oldData.startDate === newData.startDate &&
+//     oldData.status === newData.status &&
+//     oldProps.actionSlot === newProps.actionSlot
+//   );
+// }

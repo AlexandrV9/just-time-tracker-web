@@ -2,7 +2,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 // import { cors } from "hono/cors";
 import { authRouter } from "./auth/index.js";
-import { tasksRouter } from "./tasks/index.js";
+import { tasksRouter } from "./task/index.js";
 import { config } from "./shared/index.js";
 import { healthRouter } from "./health/health.routes.js";
 

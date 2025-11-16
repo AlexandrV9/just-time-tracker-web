@@ -1,6 +1,6 @@
 import dayjs, { type Dayjs } from "dayjs";
 import {
-  applyTimeObjectToDate,
+  applyTimeObjectToDayjsDate,
   convertDayjsDateToTimeObject,
   type TimeObject,
 } from "~/shared/ui";
@@ -21,5 +21,5 @@ export const prepareDateToRequest = (
   date: Date,
   format: string = "YYYY-MM-DDTHH:mm"
 ) => {
-  return applyTimeObjectToDate(time, date).format(format);
+  return applyTimeObjectToDayjsDate(time, date).format(format);
 };

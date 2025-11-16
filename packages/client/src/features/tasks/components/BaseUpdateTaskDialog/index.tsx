@@ -1,9 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import {
+  applyTimeObjectToDayjsDate,
   Box,
   Button,
   CloseButton,
+  convertDayjsDateToDate,
   Dialog,
   EditIcon,
   Field,
@@ -20,15 +22,10 @@ import styles from "./BaseUpdateTaskDialog.module.css";
 import { useMemo, useState } from "react";
 import { useController, type SubmitHandler } from "react-hook-form";
 import dayjs from "dayjs";
-import { applyTimeObjectToDate } from "~/shared/ui/TimePicker";
 import { useTranslation } from "~/shared/hooks";
-import { type Task } from "~/entities/Task";
 import { IOSDatePicker } from "~/shared/components";
-import {
-  getCorrectInitialDate,
-  getCorrectInitialTime,
-  prepareDateToRequest,
-} from "./utils";
+import { getCorrectInitialDate, getCorrectInitialTime } from "./utils";
+import type { Task } from "~/shared/api/services/task";
 
 type OpenAccordion = "start" | "end" | null;
 
@@ -54,9 +51,9 @@ export type BaseUpdateTaskDialogProps = Partial<Task> & {
   onSubmit?: (data: {
     title: string;
     description: string;
-    startDate: string;
-    endDate: string;
-  }) => Promise<Task>;
+    startDate: Date;
+    endDate: Date;
+  }) => Promise<Task | null>;
 };
 
 export const BaseUpdateTaskDialog = ({
@@ -122,8 +119,12 @@ export const BaseUpdateTaskDialog = ({
     const requestData = {
       title: formData.title,
       description: formData.description,
-      startDate: prepareDateToRequest(formData.startTime, formData.startDate),
-      endDate: prepareDateToRequest(formData.endTime, formData.endDate),
+      startDate: convertDayjsDateToDate(
+        applyTimeObjectToDayjsDate(formData.startTime, formData.startDate)
+      ),
+      endDate: convertDayjsDateToDate(
+        applyTimeObjectToDayjsDate(formData.endTime, formData.endDate)
+      ),
     };
 
     setIsPendingRequest(true);
@@ -156,8 +157,8 @@ export const BaseUpdateTaskDialog = ({
       return true;
     }
 
-    const _startDate = applyTimeObjectToDate(startTime, startDate);
-    const _endDate = applyTimeObjectToDate(endTime, endDate);
+    const _startDate = applyTimeObjectToDayjsDate(startTime, startDate);
+    const _endDate = applyTimeObjectToDayjsDate(endTime, endDate);
 
     if (!dayjs(_startDate).isSame(_endDate, "day")) {
       return true;

@@ -1,96 +1,48 @@
-import { BaseRepository } from "~/shared/services";
-import type { Task } from "../../types";
-// import { v4 as uuidv4 } from "uuid";
+import { IndexedDB } from "~/shared/services/IndexedDB";
+import type {
+  LocalCreateTaskData,
+  LocalDeleteTaskData,
+  LocalUpdateTaskData,
+} from "./types";
+import type { Task } from "~/shared/api/services/task";
 
-import type { CreateTaskData, UpdateTaskData } from "./types";
+export class TaskRepository {
+  private tableName = "tasks";
+  private localDatabase: IndexedDB<Task>;
 
-class TaskRepository extends BaseRepository<Task> {
-  protected storeName = "tasks" as const;
+  constructor() {
+    this.localDatabase = new IndexedDB<Task>({ tableName: "tasks" });
+  }
 
-  async create(taskData: CreateTaskData): Promise<Task> {
-    const task: Omit<Task, "id"> = {
+  getTaskByLocalId = (taskId: Task["localId"]) => {
+    return this.localDatabase.getByLocalId(taskId);
+  };
+
+  async getAllTasks(): Promise<Task[]> {
+    return this.localDatabase.getAll();
+  }
+
+  async createTask(taskData: LocalCreateTaskData) {
+    return this.localDatabase.create({
       ...taskData,
-      // id: uuidv4(),
-      //   syncStatus: "pending" as SyncStatus,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      status: "todo",
-      priority: "low",
-      createdById: "test_createdById",
-    };
-
-    const id = await this.executeTransaction<number>(
-      this.storeName,
-      "readwrite",
-      (store) => store.add(task)
-    );
-
-    // Добавляем в очередь синхронизации
-    // await this.addToSyncQueue("tasks", "create", { ...task, id });
-
-    return { ...task, id: id.toString() };
+      syncStatus: "pending",
+    });
   }
 
-  async update(data: UpdateTaskData): Promise<Task> {
-    console.log("data.id", data.id);
-    const task = await this.getById(data.id);
-
-    if (!task) {
-      throw new Error("Task not found");
-    }
-
-    const updatedTask: Task = {
-      ...task,
-      ...data,
-      updatedAt: new Date().toISOString(),
-      // syncStatus: "pending" as SyncStatus,
-    };
-
-    await this.executeTransaction(this.storeName, "readwrite", (store) =>
-      store.put(updatedTask)
-    );
-
-    // await this.addToSyncQueue("tasks", "update", updatedTask);
-
-    return updatedTask;
+  async updateTask(taskData: LocalUpdateTaskData): Promise<Task | null> {
+    return this.localDatabase.update(taskData);
   }
 
-  async delete(id: string): Promise<void> {
-    const task = await this.getById(id);
-
-    if (!task) {
-      throw new Error("Task not found");
-    }
-
-    await this.executeTransaction(this.storeName, "readwrite", (store) =>
-      store.delete(id)
-    );
-
-    // await this.addToSyncQueue("tasks", "delete", { id });
+  async deleteTask(taskData: LocalDeleteTaskData): Promise<boolean> {
+    return this.localDatabase.deleteByLocalId(taskData.localId);
   }
 
-  async getById(id: string): Promise<Task | null> {
-    return this.executeTransaction<Task | null>(
-      this.storeName,
-      "readonly",
-      (store) => store.get(id)
-    );
-  }
-
-  async getAll(): Promise<Task[]> {
-    return this.executeTransaction<Task[]>(
-      this.storeName,
-      "readonly",
-      (store) => store.getAll()
-    );
-  }
-
-  async getByStatus(status: string): Promise<Task[]> {
-    const db = await this.getDB();
+  async getTasksByStatus(status: Task["status"]): Promise<Task[]> {
+    const db = await this.localDatabase.getDatabaseInstance();
 
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction([this.storeName], "readonly");
-      const store = transaction.objectStore(this.storeName);
+      const transaction = db.transaction([this.tableName], "readonly");
+      const store = transaction.objectStore(this.tableName);
       const index = store.index("status");
       const request = index.getAll(status);
 
@@ -98,24 +50,6 @@ class TaskRepository extends BaseRepository<Task> {
       request.onerror = () => reject(request.error);
     });
   }
-
-  // private async addToSyncQueue(
-  //   entityType: string,
-  //   operation: string,
-  //   data: any
-  // ): Promise<void> {
-  //   const syncItem = {
-  //     entityType,
-  //     operation,
-  //     data,
-  //     createdAt: new Date().toISOString(),
-  //     retryCount: 0,
-  //   };
-
-  //   await this.executeTransaction("syncQueue", "readwrite", (store) =>
-  //     store.add(syncItem)
-  //   );
-  // }
 }
 
 export const taskRepository = new TaskRepository();

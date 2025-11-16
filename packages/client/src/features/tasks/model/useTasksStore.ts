@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import type { Task } from "~/entities/Task";
 import { v4 as uuidv4 } from "uuid";
 import dayjs from "dayjs";
+import type { Task } from "~/shared/api/services/task";
 
 type TasksStore = {
   tasks: Map<string, Task> | undefined;

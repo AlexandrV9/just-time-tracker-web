@@ -11,6 +11,7 @@ export type RequestConfig = {
   data?: any;
   withCredentials?: boolean;
   headers?: Record<string, any>;
+  params?: any;
 };
 
 export class HttpService {
@@ -24,7 +25,7 @@ export class HttpService {
     url: string,
     config?: Omit<RequestConfig, "data" | "url" | "method">
   ): Promise<RequestResponse<TData, TError>> {
-    return this.adapter.request({
+    return this.adapter.request<TData, TError>({
       method: "GET",
       url,
       ...config,
@@ -44,13 +45,22 @@ export class HttpService {
 
   async put<TData = unknown, TError = unknown>(
     url: string,
-    data?: TData,
-    config?: Omit<RequestConfig, "method" | "url" | "data">
+    config?: Omit<RequestConfig, "method" | "url">
   ): Promise<RequestResponse<TData, TError>> {
     return this.adapter.request({
       method: "PUT",
       url,
-      data,
+      ...config,
+    });
+  }
+
+  async patch<TData = unknown, TError = unknown>(
+    url: string,
+    config?: Omit<RequestConfig, "method" | "url">
+  ): Promise<RequestResponse<TData, TError>> {
+    return this.adapter.request({
+      method: "PATCH",
+      url,
       ...config,
     });
   }

@@ -109,7 +109,7 @@ export const IOSDatePicker = ({
     [onChangeDate]
   );
 
-  const renderAccorionTriggerContent = () => {
+  const renderAccordionTriggerContent = () => {
     return (
       <Stack.HStack>
         <AccordionItemTrigger
@@ -139,7 +139,7 @@ export const IOSDatePicker = ({
     );
   };
 
-  const renderAccorionBodyContent = () => {
+  const renderAccordionBodyContent = () => {
     switch (activeTrigger) {
       case "date": {
         return (
@@ -196,8 +196,8 @@ export const IOSDatePicker = ({
   //   }
   // }, [isExpanded, activeTrigger]);
 
-  const accordionTriggerContent = renderAccorionTriggerContent();
-  const accorionBodyContent = renderAccorionBodyContent();
+  const accordionTriggerContent = renderAccordionTriggerContent();
+  const accordionBodyContent = renderAccordionBodyContent();
 
   return (
     <Stack.HStack justifyContent="space-between">
@@ -211,7 +211,7 @@ export const IOSDatePicker = ({
           {accordionTriggerContent}
           <Accordion.ItemContent>
             <Accordion.ItemBody display="flex" justifyContent="center">
-              {accorionBodyContent}
+              {accordionBodyContent}
             </Accordion.ItemBody>
           </Accordion.ItemContent>
         </Accordion.Item>

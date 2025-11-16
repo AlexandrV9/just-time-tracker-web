@@ -1,22 +1,26 @@
-import { useUpdateTask, type Task } from "~/entities/Task";
+import { useUpdateTask } from "~/entities/Task";
 import { BaseUpdateTaskDialog } from "~/features/tasks/components";
+import type { Task } from "~/shared/api/services/task";
 
 export type EditTaskDialogProps = {
   task: Task;
 };
 
 export const EditTaskDialog = ({ task }: EditTaskDialogProps) => {
-  const createTaskMutation = useUpdateTask();
+  const updateTaskMutation = useUpdateTask();
 
   const handleSubmit = (data: {
     title: string;
     description: string;
-    startDate: string;
-    endDate: string;
+    startDate: Date;
+    endDate: Date;
   }) => {
-    return createTaskMutation.mutateAsync({
-      id: task.id,
-      ...data,
+    return updateTaskMutation.mutateAsync({
+      localId: task.localId,
+      title: data.title,
+      description: data.description,
+      startDate: data.startDate.toISOString(),
+      endDate: data.endDate.toISOString(),
     });
   };
 

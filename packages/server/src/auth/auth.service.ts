@@ -1,4 +1,4 @@
-import { pool, tokenService } from "../shared/index.js";
+import { tokenService } from "../shared/index.js";
 import type { ErrorResponse, SuccessResponse } from "../shared/types.js";
 import { authRepository } from "./auth.repository.js";
 

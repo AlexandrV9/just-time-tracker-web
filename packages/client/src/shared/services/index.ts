@@ -1,1 +1,2 @@
-export * from "./indexedDB";
+export * from "./EventBus";
+export * from "./IndexedDB";

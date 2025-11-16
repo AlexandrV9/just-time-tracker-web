@@ -16,6 +16,8 @@ import {
   useForm,
 } from "~/shared/ui";
 
+import styles from "./SignUpForm.module.css";
+
 const minLengthPassword = 8;
 const baseLocale = "features.auth.signUpForm";
 const signUpFormSchema = z
@@ -87,8 +89,9 @@ export const SignUpForm = () => {
         as="h1"
         textStyle="4xl"
         fontWeight="semibold"
-        bg="linear-gradient(135deg, #7ea670ff 20%, #8307fe 40%, #07fe66ff 70%)"
-        bgClip="text"
+        // bg="linear-gradient(135deg, #7ea670ff 20%, #8307fe 40%, #07fe66ff 70%)"
+        // bgClip="text"
+        className={styles.shineText}
       >
         {t(`${baseLocale}.title`)}
       </Text>

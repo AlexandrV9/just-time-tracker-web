@@ -5,17 +5,18 @@ import type { TFunction } from "i18next";
 import z from "zod";
 import { authManager } from "~/features/auth";
 import { useTranslation } from "~/shared/hooks";
+import styles from "./SignInByLoginForm.module.css";
 
 import {
   Button,
   Field,
   Input,
   Stack,
-  Text,
   Link,
   Box,
   useForm,
   toast,
+  Text,
 } from "~/shared/ui";
 
 const minLengthPassword = 1;
@@ -73,8 +74,9 @@ export const SignInByLoginForm = () => {
         as="h1"
         textStyle="4xl"
         fontWeight="semibold"
-        bg="linear-gradient(135deg, #7ea670ff 20%, #8307fe 40%, #07fe66ff 70%)"
-        bgClip="text"
+        // bg="linear-gradient(135deg, #7ea670ff 20%, #8307fe 40%, #07fe66ff 70%)"
+        // bgClip="text"
+        className={styles.shineText}
       >
         {t(`${baseLocale}.title`)}
       </Text>
