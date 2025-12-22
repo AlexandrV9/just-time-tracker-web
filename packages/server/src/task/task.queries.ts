@@ -8,7 +8,6 @@ import { pool } from "../shared/index.js";
 
 const createTask = async (data: CreateTaskDataDTO) => {
   const {
-    localId,
     title,
     description,
     status,
@@ -25,7 +24,6 @@ const createTask = async (data: CreateTaskDataDTO) => {
 
   const query = `
     INSERT INTO tasks (
-      local_id, 
       title, 
       description, 
       status, 
@@ -40,10 +38,9 @@ const createTask = async (data: CreateTaskDataDTO) => {
       tags, 
       is_deleting
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
     RETURNING 
       id,
-      local_id as "localId",
       title,
       description,
       status,
@@ -60,7 +57,6 @@ const createTask = async (data: CreateTaskDataDTO) => {
   `;
 
   const { rows } = await pool.query(query, [
-    localId,
     title,
     description,
     status,
@@ -78,7 +74,6 @@ const createTask = async (data: CreateTaskDataDTO) => {
 
   return rows[0] as {
     id: string;
-    localId: string;
     title: string;
     description?: string;
     status: string;
@@ -99,7 +94,6 @@ const getTaskById = async (id: TaskDTO["id"]) => {
   const query = `
     SELECT 
       id,
-      local_id as "localId",
       title,
       description,
       status,
@@ -185,7 +179,6 @@ const getTasks = async (filters: GetTasksQueryDTO) => {
   const query = `
     SELECT 
       id,
-      local_id AS "localId",
       title,
       description,
       status,
@@ -246,7 +239,6 @@ const getTasks = async (filters: GetTasksQueryDTO) => {
 const updateTask = async (data: UpdateTaskDataDTO) => {
   const {
     id,
-    localId,
     title,
     description,
     status,
@@ -271,7 +263,6 @@ const updateTask = async (data: UpdateTaskDataDTO) => {
     }
   };
 
-  addUpdate("localId", localId, "local_id");
   addUpdate("title", title);
   addUpdate("description", description);
   addUpdate("status", status);
@@ -294,7 +285,6 @@ const updateTask = async (data: UpdateTaskDataDTO) => {
     WHERE id = $${params.length + 1}
     RETURNING 
       id,
-      local_id as "localId",
       title,
       description,
       status,
@@ -330,7 +320,6 @@ const updateTask = async (data: UpdateTaskDataDTO) => {
 
   return task as {
     id: string;
-    localId: string;
     title: string;
     description?: string;
     status: string;
@@ -354,7 +343,6 @@ const deleteTask = async (id: TaskDTO["id"]) => {
     WHERE id = $1
     RETURNING 
       id,
-      local_id as "localId",
       title,
       description,
       status,
@@ -390,7 +378,6 @@ const deleteTask = async (id: TaskDTO["id"]) => {
 
   return task as {
     id: string;
-    localId: string;
     title: string;
     description?: string;
     status: string;

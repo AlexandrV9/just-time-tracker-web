@@ -7,10 +7,10 @@ export type TaskSyncStatus =
   | "error"; // Ошибка синхронизации
 
 export interface Task extends TaskDTO {
-  /**
-   * Статус сихронизации
-   */
-  syncStatus: TaskSyncStatus;
+  // /**
+  //  * Статус сихронизации
+  //  */
+  // syncStatus: TaskSyncStatus;
 }
 
 export interface TaskHistory {

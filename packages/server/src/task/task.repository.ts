@@ -13,7 +13,6 @@ const getTaskById = async (id: string): Promise<TaskDTO | null> => {
 
   return {
     id: task.id,
-    localId: task.localId,
     title: task.title,
     description: task.description,
     status: task.status as any,
@@ -36,7 +35,6 @@ const createTask = async (data: CreateTaskDataDTO): Promise<TaskDTO> => {
 
   return {
     id: task.id,
-    localId: task.localId,
     title: task.title,
     description: task.description,
     status: task.status as any,
@@ -58,7 +56,6 @@ const updateTask = async (data: UpdateTaskDataDTO): Promise<TaskDTO> => {
 
   return {
     id: task.id,
-    localId: task.localId,
     title: task.title,
     description: task.description,
     status: task.status as any,

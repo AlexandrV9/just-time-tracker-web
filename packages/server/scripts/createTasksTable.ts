@@ -8,7 +8,6 @@ export const createTasksTable = async () => {
   const query = `
     CREATE TABLE IF NOT EXISTS tasks (
       id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-      local_id TEXT NOT NULL,
       title TEXT NOT NULL,
       description TEXT,
       status TEXT NOT NULL,

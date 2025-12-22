@@ -107,6 +107,19 @@ export class IndexedDB<TEntity extends BaseEntity> {
     }
   }
 
+  async clear() {
+    const db = await this.getDatabaseInstance();
+
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction([this.tableName], "readwrite");
+      const store = tx.objectStore(this.tableName);
+      const request = store.clear();
+
+      request.onsuccess = () => resolve(true);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
   async deleteByLocalId(localId: TEntity["localId"]): Promise<boolean> {
     try {
       const originalRecord = await this.getByLocalId(localId);

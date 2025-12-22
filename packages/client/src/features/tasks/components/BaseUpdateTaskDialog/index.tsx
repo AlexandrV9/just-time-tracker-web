@@ -25,7 +25,7 @@ import dayjs from "dayjs";
 import { useTranslation } from "~/shared/hooks";
 import { IOSDatePicker } from "~/shared/components";
 import { getCorrectInitialDate, getCorrectInitialTime } from "./utils";
-import type { Task } from "~/shared/api/services/task";
+import type { TaskDTO } from "@to-do-list/shared";
 
 type OpenAccordion = "start" | "end" | null;
 
@@ -46,14 +46,14 @@ const updateTaskFormSchema = z.object({
 
 export type UpdateTaskFormSchema = z.infer<typeof updateTaskFormSchema>;
 
-export type BaseUpdateTaskDialogProps = Partial<Task> & {
+export type BaseUpdateTaskDialogProps = Partial<TaskDTO> & {
   mode?: "add" | "edit";
   onSubmit?: (data: {
     title: string;
     description: string;
     startDate: Date;
     endDate: Date;
-  }) => Promise<Task | null>;
+  }) => Promise<TaskDTO | null>;
 };
 
 export const BaseUpdateTaskDialog = ({

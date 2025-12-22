@@ -1,38 +1,16 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { taskRepository } from "../model/store";
-import { type Task } from "~/shared/api/services/task";
-import { taskSyncManager } from "~/shared/services/SyncManager";
-import type { CreateTaskData } from "./types";
-import { useAuthStore } from "~/features/auth";
+import { taskApiService } from "~/shared/api/services/task";
+import type { CreateTaskDataDTO } from "@to-do-list/shared";
 
 export const useCreateTask = () => {
   const queryClient = useQueryClient();
-  const { user } = useAuthStore();
 
   return useMutation({
-    mutationFn: async (taskData: CreateTaskData): Promise<Task | null> => {
-      const localTask = await taskRepository.createTask({
-        ...taskData,
-        createdById: user!.id,
-      });
-
-      if (!localTask) {
-        return null;
-      }
-
-      taskSyncManager.createOperation({
-        type: "CREATE",
-        priority: "medium",
-        entity: "task",
-        data: localTask,
-      });
-
-      return localTask;
+    mutationFn: async (taskData: CreateTaskDataDTO) => {
+      return taskApiService.createTask(taskData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      // Запускаем синхронизацию в фоне
-      // syncService.syncAll().catch(console.error);
     },
   });
 };

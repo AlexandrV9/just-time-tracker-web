@@ -9,8 +9,8 @@ import {
 } from "~/shared/ui";
 import dayjs from "dayjs";
 import { type ReactNode } from "react";
-import { TagList } from "./TagList";
 import type { Task } from "~/shared/api/services/task";
+import { TagList } from "./TagList";
 
 export interface TaskCardProps {
   task: Task;
@@ -28,8 +28,7 @@ const statusColors: Partial<
 export const TaskCard = ({ task, actionSlot }: TaskCardProps) => {
   const { title, description, startDate, status, tags = [], isDeleting } = task;
 
-  const isHasTags = tags.length !== 0;
-
+  const isHasTags = !!tags && tags.length !== 0;
   const titleElement = <Text fontSize="l">{title}</Text>;
 
   return (
@@ -59,9 +58,6 @@ export const TaskCard = ({ task, actionSlot }: TaskCardProps) => {
         justifyContent="space-between"
         color="purple.focusRing"
       >
-        {task.syncStatus}
-        {" "}
-        {task.isDeleting && "Удаление"}
         <Box
           display="flex"
           gap="0.1rem"

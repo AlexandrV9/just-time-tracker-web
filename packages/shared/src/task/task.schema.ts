@@ -31,7 +31,6 @@ export type TaskPriorityDTO = z.infer<typeof taskPrioritySchema>;
 // *********************** TaskBase ***************************
 
 export const taskBaseSchema = z.object({
-  localId: z.string().min(1, "localId is required").max(255),
   title: z.string().min(1, "title is required").max(255),
   description: z.string().max(1000).optional(),
   status: taskStatusSchema,
@@ -65,7 +64,6 @@ export type CreateTaskDataDTO = z.infer<typeof createTaskSchema>;
 
 export const updateTaskSchema = z.object({
   id: z.string().min(1, "id is required"),
-  localId: z.string().min(1).max(255).optional(),
   title: z.string().min(1).max(255).optional(),
   description: z.string().max(1000).optional(),
   status: taskStatusSchema.optional(),

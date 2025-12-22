@@ -20,7 +20,6 @@ export const CreateTaskDialog = () => {
       status: "todo",
       priority: "low",
       createdById: user!.id,
-      isDeleting: false,
     });
   };
 
