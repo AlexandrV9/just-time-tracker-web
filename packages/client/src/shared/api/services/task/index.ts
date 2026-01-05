@@ -1,9 +1,14 @@
 import type {
   CreateTaskDataDTO,
   DeleteTaskDataDTO,
+  GetFreeSlotsQueryDTO,
   GetTaskDataDTO,
+  GetTasksCountQueryDTO,
+  GetTasksCountResponseDTO,
+  GetTasksQueryDTO,
   GetTasksResponseDTO,
   TaskDTO,
+  TimeSlotDTO,
   UpdateTaskDataDTO,
 } from "@to-do-list/shared";
 import { baseApi } from "../base";
@@ -16,8 +21,8 @@ export class TaskService {
     return baseApi.get<TaskDTO>(`/api/tasks/${taskId}`);
   }
 
-  getTasks() {
-    return baseApi.get<GetTasksResponseDTO>(`/api/tasks`);
+  getTasks(data?: GetTasksQueryDTO) {
+    return baseApi.get<GetTasksResponseDTO>(`/api/tasks`, { params: data });
   }
 
   createTask(data: CreateTaskDataDTO) {
@@ -30,6 +35,16 @@ export class TaskService {
 
   deleteTask(data: DeleteTaskDataDTO) {
     return baseApi.delete<boolean>(`/api/tasks/${data.id}`);
+  }
+
+  getFreeSlots(data: GetFreeSlotsQueryDTO) {
+    return baseApi.post<TimeSlotDTO[]>(`/api/tasks/free-slots`, { data });
+  }
+
+  getTasksCount(data?: GetTasksCountQueryDTO) {
+    return baseApi.get<GetTasksCountResponseDTO>(`/api/tasks/count`, {
+      params: data,
+    });
   }
 }
 

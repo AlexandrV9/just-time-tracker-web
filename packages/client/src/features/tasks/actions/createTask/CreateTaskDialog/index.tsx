@@ -1,8 +1,16 @@
 import { useCreateTask } from "~/entities/Task";
 import { useAuthStore } from "~/features/auth";
-import { BaseUpdateTaskDialog } from "~/features/tasks/components";
+import {
+  BaseUpdateTaskDialog,
+  type BaseUpdateTaskDialogProps,
+} from "~/features/tasks/components";
 
-export const CreateTaskDialog = () => {
+export type CreateTaskDialogProps = Omit<
+  BaseUpdateTaskDialogProps,
+  "mode" | "onSubmit" | "task"
+>;
+
+export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
   const createTaskMutation = useCreateTask();
   const user = useAuthStore((state) => state.user);
 
@@ -23,5 +31,5 @@ export const CreateTaskDialog = () => {
     });
   };
 
-  return <BaseUpdateTaskDialog onSubmit={handleSubmit} />;
+  return <BaseUpdateTaskDialog {...props} onSubmit={handleSubmit} />;
 };

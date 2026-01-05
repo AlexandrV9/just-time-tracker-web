@@ -1,10 +1,14 @@
 import type {
   CreateTaskDataDTO,
   DeleteTaskDataDTO,
+  GetFreeSlotsQueryDTO,
   GetTaskDataDTO,
+  GetTasksCountQueryDTO,
+  GetTasksCountResponseDTO,
   GetTasksQueryDTO,
   TaskDTO,
   TasksResponseDTO,
+  TimeSlotDTO,
   UpdateTaskDataDTO,
 } from "@to-do-list/shared";
 import { taskRepository } from "./task.repository.js";
@@ -163,10 +167,58 @@ const getTasks = async (
   }
 };
 
+type GetFreeSlotsResponse = SuccessResponse<TimeSlotDTO[]> | ErrorResponse;
+
+const getFreeSlots = async (
+  data: GetFreeSlotsQueryDTO
+): Promise<GetFreeSlotsResponse> => {
+  try {
+    const result = await taskQueries.getFreeSlots(data);
+
+    return {
+      success: true,
+      data: result,
+    };
+  } catch (error) {
+    console.error("Error getting free slots:", error);
+
+    return {
+      success: false,
+      message: "Failed to fetch free slots",
+    };
+  }
+};
+
+type GetTasksCountResponse =
+  | SuccessResponse<GetTasksCountResponseDTO>
+  | ErrorResponse;
+
+const getTasksCount = async (
+  data: GetTasksCountQueryDTO
+): Promise<GetTasksCountResponse> => {
+  try {
+    const result = await taskQueries.getTasksCount(data);
+
+    return {
+      success: true,
+      data: result,
+    };
+  } catch (error) {
+    console.error("Error getting tasks: ", error);
+
+    return {
+      success: false,
+      message: "Failed to fetch tasks",
+    };
+  }
+};
+
 export const tasksService = {
   createTask,
   updateTask,
   deleteTask,
   getTaskById,
   getTasks,
+  getFreeSlots,
+  getTasksCount,
 };

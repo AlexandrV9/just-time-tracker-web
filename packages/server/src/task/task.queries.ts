@@ -1,7 +1,10 @@
 import type {
   CreateTaskDataDTO,
+  GetFreeSlotsQueryDTO,
+  GetTasksCountQueryDTO,
   GetTasksQueryDTO,
   TaskDTO,
+  TimeSlotDTO,
   UpdateTaskDataDTO,
 } from "@to-do-list/shared";
 import { pool } from "../shared/index.js";
@@ -139,9 +142,11 @@ const getTasks = async (filters: GetTasksQueryDTO) => {
     limit = 10,
     sortBy = "createdAt",
     sortOrder = "desc",
+    fromDate,
+    toDate,
   } = filters;
 
-  // Сопоставление полей сортировки
+  // Сопоставление полей сортировки (безопасно)
   const sortFieldMap: Record<string, string> = {
     createdAt: "created_at",
     updatedAt: "updated_at",
@@ -151,31 +156,41 @@ const getTasks = async (filters: GetTasksQueryDTO) => {
     startDate: "start_date",
     endDate: "end_date",
   };
-
   const sortField = sortFieldMap[sortBy] || "created_at";
   const order = sortOrder.toUpperCase() === "ASC" ? "ASC" : "DESC";
 
-  // Универсальная сборка условий WHERE
+  // Условия WHERE
   const conditions: string[] = ["is_deleting = false"];
   const params: any[] = [];
 
-  const addFilter = (condition: string, value: any) => {
-    params.push(value);
-    conditions.push(condition.replace("$", `$${params.length}`));
+  // Универсальная функция добавления фильтров
+  const addFilter = (sql: string, ...values: any[]) => {
+    values.forEach((value) => {
+      params.push(value);
+      sql = sql.replace("?", `$${params.length}`);
+    });
+    conditions.push(sql);
   };
 
-  if (status) addFilter("status = $", status);
-  if (priority) addFilter("priority = $", priority);
-  if (createdById) addFilter("created_by_id = $", createdById);
-  if (tags?.length) addFilter("tags ?| $", tags);
+  // Применяем фильтры
+  if (status) addFilter("status = ?", status);
+  if (priority) addFilter("priority = ?", priority);
+  if (createdById) addFilter("created_by_id = ?", createdById);
+  if (tags?.length) addFilter("tags ?| ?", tags); // tags как string[]
   if (search)
-    addFilter("(title ILIKE $ OR description ILIKE $)", `%${search}%`);
+    addFilter(
+      "(title ILIKE ? OR description ILIKE ?)",
+      `%${search}%`,
+      `%${search}%`
+    );
+  if (fromDate) addFilter("end_date > ?", fromDate);
+  if (toDate) addFilter("start_date < ?", toDate);
 
   const whereClause = conditions.length
     ? `WHERE ${conditions.join(" AND ")}`
     : "";
 
-  // Основной запрос
+  // Основной SELECT
   const query = `
     SELECT 
       id,
@@ -198,19 +213,21 @@ const getTasks = async (filters: GetTasksQueryDTO) => {
     LIMIT $${params.length + 1}
     OFFSET $${params.length + 2}
   `;
-
   const queryParams = [...params, limit, (page - 1) * limit];
 
-  // Запускаем оба запроса параллельно
+  // Запускаем SELECT и COUNT параллельно
   const [dataResult, countResult] = await Promise.all([
     pool.query(query, queryParams),
-    pool.query(`SELECT COUNT(*) FROM tasks ${whereClause}`, params),
+    pool.query(
+      `SELECT COUNT(*)::int AS count FROM tasks ${whereClause}`,
+      params
+    ),
   ]);
 
-  const totalCount = parseInt(countResult.rows[0].count, 10);
+  const totalCount = countResult.rows[0]?.count ?? 0;
   const totalPages = Math.ceil(totalCount / limit);
 
-  // Безопасный парсинг JSON тегов
+  // Парсим JSON теги
   const tasks = dataResult.rows.map((task) => {
     if (typeof task.tags === "string") {
       try {
@@ -405,6 +422,88 @@ const hardDeleteTask = async (id: string) => {
   return { id: rows[0].id, deleted: true };
 };
 
+const getFreeSlots = async ({
+  startDate,
+  endDate,
+  excludeTaskIds,
+}: GetFreeSlotsQueryDTO) => {
+  const query = `
+    SELECT 
+      start_date AS "startDate",
+      end_date AS "endDate"
+    FROM tasks
+    WHERE 
+      is_deleting = false
+      AND start_date < $2
+      AND end_date > $1
+      AND (
+        $3::uuid[] IS NULL
+        OR id != ALL($3)
+      )
+    ORDER BY start_date ASC
+  `;
+
+  const { rows: tasks } = await pool.query(query, [
+    startDate,
+    endDate,
+    excludeTaskIds?.length ? excludeTaskIds : null,
+  ]);
+
+  const rangeStart = new Date(startDate).getTime();
+  const rangeEnd = new Date(endDate).getTime();
+
+  if (tasks.length === 0) {
+    return [{ startDate, endDate }];
+  }
+
+  const freeSlots: TimeSlotDTO[] = [];
+  let cursor = rangeStart;
+
+  for (const task of tasks) {
+    const taskStart = Math.max(new Date(task.startDate).getTime(), rangeStart);
+    const taskEnd = Math.min(new Date(task.endDate).getTime(), rangeEnd);
+
+    if (cursor < taskStart) {
+      freeSlots.push({
+        startDate: new Date(cursor).toISOString(),
+        endDate: new Date(taskStart).toISOString(),
+      });
+    }
+
+    cursor = Math.max(cursor, taskEnd);
+  }
+
+  if (cursor < rangeEnd) {
+    freeSlots.push({
+      startDate: new Date(cursor).toISOString(),
+      endDate: new Date(rangeEnd).toISOString(),
+    });
+  }
+
+  return freeSlots;
+};
+
+const getTasksCount = async ({
+  fromDate,
+  toDate,
+}: GetTasksCountQueryDTO): Promise<{ count: number }> => {
+  const query = `
+    SELECT 
+      COUNT(*)::int AS count
+    FROM tasks
+    WHERE 
+      is_deleting = false
+      AND start_date < $2
+      AND end_date > $1
+  `;
+
+  const { rows } = await pool.query(query, [fromDate, toDate]);
+
+  return {
+    count: rows[0]?.count ?? 0,
+  };
+};
+
 export const taskQueries = {
   createTask,
   getTasks,
@@ -412,4 +511,6 @@ export const taskQueries = {
   updateTask,
   deleteTask,
   hardDeleteTask,
+  getFreeSlots,
+  getTasksCount,
 };

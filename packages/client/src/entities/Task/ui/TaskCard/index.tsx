@@ -1,100 +1,62 @@
-import {
-  Badge,
-  Box,
-  Card,
-  ClockIcon,
-  Stack,
-  Text,
-  type BadgeProps,
-} from "~/shared/ui";
-import dayjs from "dayjs";
-import { type ReactNode } from "react";
+import { Badge, Card, Flex, Stack, Text } from "~/shared/ui";
 import type { Task } from "~/shared/api/services/task";
 import { TagList } from "./TagList";
+import { Skeleton } from "./Skeleton";
+import { TimeAxis } from "./TimeAxis";
+import { Box, Grid } from "@chakra-ui/react";
+import { type ReactNode } from "react";
 
 export interface TaskCardProps {
   task: Task;
+  withTimeAxis?: boolean;
   actionSlot?: ReactNode;
 }
 
-const statusColors: Partial<
-  Record<Task["status"], BadgeProps["colorPalette"]>
-> = {
-  done: "green",
-  in_progress: "cyan",
-  todo: "orange",
-};
-
-export const TaskCard = ({ task, actionSlot }: TaskCardProps) => {
-  const { title, description, startDate, status, tags = [], isDeleting } = task;
-
-  const isHasTags = !!tags && tags.length !== 0;
-  const titleElement = <Text fontSize="l">{title}</Text>;
+export function TaskCard({
+  task,
+  actionSlot,
+  withTimeAxis = true,
+}: TaskCardProps) {
+  const { title, description, priority, startDate, endDate, tags = [] } = task;
 
   return (
-    <Card.Root
-      p="0.6rem"
-      w="full"
-      display="flex"
-      flexDirection="column"
-      gap="0.5rem"
-    >
-      <Stack.HStack justifyContent="space-between">
-        {isHasTags ? <TagList tags={tags} /> : titleElement}
-        {actionSlot}
-      </Stack.HStack>
-
-      {isHasTags && titleElement}
-
-      <Stack.HStack justifyContent="space-between">
-        <Text color="gray" fontSize="small">
-          {description}
-        </Text>
-      </Stack.HStack>
-
-      <Stack.HStack
-        gap="0.1rem"
-        align="center"
-        justifyContent="space-between"
-        color="purple.focusRing"
+    <Grid templateColumns={withTimeAxis ? "auto 1fr" : "auto"}>
+      {withTimeAxis && startDate && endDate && (
+        <TimeAxis startDate={startDate} endDate={endDate} />
+      )}
+      <Card.Root
+        p="1rem"
+        w="full"
+        display="flex"
+        gap="0.8rem"
+        flexDirection="column"
+        borderRadius="1rem"
       >
-        <Box
-          display="flex"
-          gap="0.1rem"
-          alignItems="center"
-          justifyContent="space-between"
-          color="purple.focusRing"
-        >
-          <ClockIcon size={18} />
-          <Text fontSize={15} fontWeight="medium">
-            {dayjs(startDate).format("HH:mm")}
-          </Text>
-        </Box>
-        {status && (
-          <Badge
-            flexShrink={0}
-            colorPalette={statusColors[status]}
-            borderRadius="12px"
-            size="md"
-          >
-            {status}
-          </Badge>
-        )}
-      </Stack.HStack>
-    </Card.Root>
+        <Stack.HStack justifyContent="space-between">
+          {tags && <TagList tags={tags} />}
+          <Box ml="auto">{actionSlot}</Box>
+        </Stack.HStack>
+        <Grid templateColumns="1fr min-content" gap="1rem" alignItems="center">
+          <Stack.VStack alignItems="start" overflow="hidden">
+            <Text fontSize="xl" fontWeight="semibold" truncate w="full">
+              {title}
+            </Text>
+            <Text color="gray" fontSize="small" lineClamp={4}>
+              {description}
+            </Text>
+          </Stack.VStack>
+        </Grid>
+        <Flex justifyContent="start">
+          <Stack.HStack>
+            Priority:
+            <Badge size="lg" borderRadius="full" px="1rem">
+              {priority}
+            </Badge>
+          </Stack.HStack>
+        </Flex>
+      </Card.Root>
+    </Grid>
   );
-};
-// }, arePropsEqual);
+}
 
-// function arePropsEqual(oldProps: TaskCardProps, newProps: TaskCardProps) {
-//   const oldData = oldProps.task;
-//   const newData = newProps.task;
-
-//   return (
-//     oldData.id === newData.id &&
-//     oldData.title === newProps.task.title &&
-//     oldData.startDate === newData.startDate &&
-//     oldData.status === newData.status &&
-//     oldProps.actionSlot === newProps.actionSlot
-//   );
-// }
+TaskCard.Skeleton = Skeleton;

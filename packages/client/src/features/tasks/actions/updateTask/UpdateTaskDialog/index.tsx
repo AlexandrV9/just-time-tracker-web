@@ -1,36 +1,45 @@
+import dayjs from "dayjs";
+import { useCallback } from "react";
 import { useUpdateTask } from "~/entities/Task";
-import { BaseUpdateTaskDialog } from "~/features/tasks/components";
-import type { Task } from "~/shared/api/services/task";
+import {
+  BaseUpdateTaskDialog,
+  type BaseUpdateTaskDialogProps,
+} from "~/features/tasks/components";
 
-export type EditTaskDialogProps = {
-  task: Task;
-};
+export type UpdateTaskDialogProps = Omit<
+  BaseUpdateTaskDialogProps,
+  "mode" | "onSubmit"
+>;
 
-export const EditTaskDialog = ({ task }: EditTaskDialogProps) => {
+export const UpdateTaskDialog = ({ task, ...props }: UpdateTaskDialogProps) => {
   const updateTaskMutation = useUpdateTask();
 
-  const handleSubmit = (data: {
-    title: string;
-    description: string;
-    startDate: Date;
-    endDate: Date;
-  }) => {
-    return updateTaskMutation.mutateAsync({
-      localId: task.localId,
-      title: data.title,
-      description: data.description,
-      startDate: data.startDate.toISOString(),
-      endDate: data.endDate.toISOString(),
-    });
-  };
+  const handleUpdateTask = useCallback(
+    (data: {
+      title: string;
+      description: string;
+      startDate: Date;
+      endDate: Date;
+    }) => {
+      if (!task?.id) return;
+
+      return updateTaskMutation.mutateAsync({
+        id: task.id,
+        title: data.title,
+        description: data.description,
+        startDate: dayjs(data.startDate).second(0).millisecond(0).toISOString(),
+        endDate: dayjs(data.endDate).second(0).millisecond(0).toISOString(),
+      });
+    },
+    [updateTaskMutation, task?.id]
+  );
 
   return (
     <BaseUpdateTaskDialog
       mode="edit"
-      onSubmit={handleSubmit}
-      title={task.title}
-      description={task.description}
-      startDate={task.startDate}
+      task={task}
+      onSubmit={handleUpdateTask}
+      {...props}
     />
   );
 };

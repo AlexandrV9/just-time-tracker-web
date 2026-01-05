@@ -23,8 +23,8 @@ export interface IOSDatePickerProps {
   label?: string;
 
   // date
-  date: Date | null;
-  onChangeDate: (value: Date | null) => void;
+  date?: Date | null;
+  onChangeDate?: (value: Date | null) => void;
 
   // time
   time?: TimeObject | null;
@@ -112,17 +112,19 @@ export const IOSDatePicker = ({
   const renderAccordionTriggerContent = () => {
     return (
       <Stack.HStack>
-        <AccordionItemTrigger
-          display="flex"
-          flexGrow={1}
-          justifyContent="space-between"
-          label={label}
-          badgeText={formatDate(selectedDate, "D MMMM YYYY", locale)}
-          isActive={activeTrigger === "date"}
-          isExpanded={isExpanded}
-          onClickTrigger={() => handleClickAccorionTrigger("date")}
-          isValid={isValidDate}
-        />
+        {date && (
+          <AccordionItemTrigger
+            display="flex"
+            flexGrow={1}
+            justifyContent="space-between"
+            label={label}
+            badgeText={formatDate(selectedDate, "D MMMM YYYY", locale)}
+            isActive={activeTrigger === "date"}
+            isExpanded={isExpanded}
+            onClickTrigger={() => handleClickAccorionTrigger("date")}
+            isValid={isValidDate}
+          />
+        )}
         {_time && onChangeTime && (
           <AccordionItemTrigger
             w="fit-content"

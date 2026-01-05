@@ -60,3 +60,7 @@ export const setContainerStyles = (
 ): void => {
   emblaApi.containerNode().style.transform = `translateZ(${WHEEL_RADIUS}px) rotateX(${wheelRotation}deg)`;
 };
+
+export const formatTime = (val: number): string => {
+  return val.toString().padStart(2, "0");
+};

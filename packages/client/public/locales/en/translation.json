@@ -16,6 +16,9 @@
       "featureListTitle": "All your productivity tools in a single platform:",
       "goToSignInButton": "Start Using Now",
       "title": "Welcome!"
+    },
+    "tasksPage": {
+      "title": "Schedule Today"
     }
   },
   "widgets": {
@@ -29,6 +32,24 @@
     },
     "accountSettings": {
       "title": "Account Settings"
+    },
+    "todayOverview": {
+      "title": "Today`s Analysis",
+      "tasksForToday_one": "You have <CountWrapper>{{count}}</CountWrapper> task for today",
+      "tasksForToday_other": "You have <CountWrapper>{{count}}</CountWrapper> tasks for today"
+    },
+    "priorityTasks": {
+      "title": "Priority Tasks",
+      "notTasks": "You don't have any priorities.",
+      "goToAllTasks": "See all tasks"
+    },
+    "inProgressTasksCount": {
+      "title": "In Progress",
+      "count_one": "{{count}} task",
+      "count_other": "{{count}} tasks"
+    },
+    "completedTasksChart": {
+      "title": "Completed"
     }
   },
   "features": {

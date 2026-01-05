@@ -16,6 +16,9 @@
       "featureListTitle": "В одном месте — всё для вашей продуктивности:",
       "goToSignInButton": "Начать использовать",
       "title": "Добро пожаловать!"
+    },
+    "tasksPage": {
+      "title": "Очередь задач"
     }
   },
   "widgets": {
@@ -29,6 +32,27 @@
     },
     "accountSettings": {
       "title": "Настройки аккаунта"
+    },
+    "todayOverview": {
+      "title": "Дневная аналитика",
+      "tasksForToday_one": "У вас <CountWrapper>{{count}}</CountWrapper> задача на сегодня",
+      "tasksForToday_few": "У вас <CountWrapper>{{count}}</CountWrapper> задачи на сегодня",
+      "tasksForToday_many": "У вас <CountWrapper>{{count}}</CountWrapper> задач на сегодня"
+    },
+    "priorityTasks": {
+      "title": "Важные задачи",
+      "notTasks": "У вас нету приоритетных задач",
+      "goToAllTasks": "Посмотреть все задачи"
+    },
+    "inProgressTasksCount": {
+      "title": "В процессе",
+      "count_one": "{{count}} задача",
+      "count_few": "{{count}} задачи",
+      "count_many": "{{count}} задач",
+      "count_other": "{{count}} задач"
+    },
+    "completedTasksChart": {
+      "title": "Завершено"
     }
   },
   "features": {

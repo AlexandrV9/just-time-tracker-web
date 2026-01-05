@@ -10,8 +10,7 @@ export type IOSTimeTimeUnit = {
   handler?: (value: number) => void;
   slideCount: number;
   perspective: "left" | "center" | "right";
-  max?: number;
-  min?: number;
+  step?: number;
 };
 
 export type IOSTimePickerProps = {
@@ -20,69 +19,63 @@ export type IOSTimePickerProps = {
   // hours
   hours?: number;
   onChangeHours?: (value: number) => void;
-  // minHours?: number;
-  // maxHours?: number;
 
   // minutes
   minutes?: number;
+  minuteStep?: number;
   onChangeMinutes?: (value: number) => void;
-  // maxMinutes?: number;
-  // minMinutes?: number;
 
   // seconds
   seconds?: number;
   onChangeSeconds?: (value: number) => void;
-  // minSeconds?: number;
-  // maxSeconds?: number;
 };
 
 export const IOSTimePicker = ({
   loop,
   onChangeHours,
   hours,
-  // minHours = 0,
-  // maxHours = 23,
   onChangeMinutes,
   minutes,
-  // minMinutes = 0,
-  // maxMinutes = 59,
+  minuteStep = 1,
   onChangeSeconds,
   seconds,
-}: // minSeconds = 0,
-// maxSeconds = 59,
-IOSTimePickerProps) => {
+}: IOSTimePickerProps) => {
   const allTimeUnits: IOSTimeTimeUnit[] = [
     {
       value: hours,
       handler: onChangeHours,
       slideCount: 24,
+      step: 1,
       perspective: "left",
-      // min: minHours,
-      // max: maxHours,
     },
     {
       value: minutes,
       handler: onChangeMinutes,
       slideCount: 60,
+      step: minuteStep,
       perspective: "center",
-      // min: minMinutes,
-      // max: maxMinutes,
     },
     {
       value: seconds,
       handler: onChangeSeconds,
       slideCount: 60,
+      step: 1,
       perspective: "right",
-      // min: minSeconds,
-      // max: maxSeconds,
     },
   ];
+
   const activeTimeUnits = allTimeUnits.filter((unit) => unit.handler);
   const countActiveTimeUnits = activeTimeUnits.length;
 
   const getAdjustedPerspective = (index: number) => {
-    if (countActiveTimeUnits === 1) return "center" as const;
-    if (countActiveTimeUnits === 2) return index === 0 ? "left" : "right";
+    if (countActiveTimeUnits === 1) {
+      return "center" as const;
+    }
+
+    if (countActiveTimeUnits === 2) {
+      return index === 0 ? "left" : "right";
+    }
+
     return activeTimeUnits[index].perspective;
   };
 
@@ -103,6 +96,7 @@ IOSTimePickerProps) => {
           perspective={getAdjustedPerspective(index)}
           loop={loop}
           label=""
+          step={unit.step}
           value={unit.value}
           onValueChange={unit.handler}
         />

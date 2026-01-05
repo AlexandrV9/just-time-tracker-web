@@ -1,3 +1,8 @@
-import { Menu as BaseMenu } from "@chakra-ui/react";
+import {
+  Menu as BaseMenu,
+  type MenuRootProps as BaseMenuRootProps,
+} from "@chakra-ui/react";
+
+export type MenuRootProps = BaseMenuRootProps;
 
 export const Menu = BaseMenu;

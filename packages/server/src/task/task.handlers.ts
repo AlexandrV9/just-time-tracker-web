@@ -4,6 +4,8 @@ import { validationUtils } from "../shared/index.js";
 import { tasksService } from "./task.service.js";
 import {
   createTaskSchema,
+  getFreeSlotsSchema,
+  getTasksCountSchema,
   getTasksQuerySchema,
   taskIdSchema,
   updateTaskSchema,
@@ -75,10 +77,22 @@ const deleteTask = createHandler(
   tasksService.deleteTask
 );
 
+const getFreeSlots = createHandler(
+  { type: "json", validator: getFreeSlotsSchema },
+  tasksService.getFreeSlots
+);
+
+const getTasksCount = createHandler(
+  { type: "query", validator: getTasksCountSchema },
+  tasksService.getTasksCount
+);
+
 export const tasksHandlers = {
   getTaskById,
   getTasks,
   createTask,
   updateTask,
   deleteTask,
+  getFreeSlots,
+  getTasksCount,
 };

@@ -1,5 +1,5 @@
 import type { Task } from "~/shared/api/services/task";
-import { Badge, Stack } from "~/shared/ui";
+import { Badge, Stack, Text } from "~/shared/ui";
 
 export type TagListProps = {
   tags: Task["tags"];
@@ -17,7 +17,7 @@ export const TagList = ({ tags = [] }: TagListProps) => {
           colorPalette="gray"
           borderRadius="12px"
         >
-          {tag.title}
+          <Text textStyle="lg">{tag.title}</Text>
         </Badge>
       ))}
     </Stack.HStack>

@@ -152,8 +152,10 @@ export const getTasksQuerySchema = z.object({
   createdById: z.string().optional(),
   tags: z.array(tagSchema).optional(),
   search: z.string().optional(),
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().max(100).default(10),
+  page: z.number().int().positive().default(1).optional(),
+  limit: z.number().int().positive().max(50).default(10).optional(),
+  fromDate: z.iso.datetime().optional(),
+  toDate: z.iso.datetime().optional(),
   sortBy: z
     .enum([
       "createdAt",
@@ -164,8 +166,34 @@ export const getTasksQuerySchema = z.object({
       "startDate",
       "endDate",
     ])
-    .default("createdAt"),
-  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+    .default("createdAt")
+    .optional(),
+  sortOrder: z.enum(["asc", "desc"]).default("desc").optional(),
 });
 
 export type GetTasksQueryDTO = z.infer<typeof getTasksQuerySchema>;
+
+// *********************** GetFreeSlotsQueryDTO ***************************
+
+export const getFreeSlotsSchema = z.object({
+  startDate: z.iso.datetime(),
+  endDate: z.iso.datetime(),
+  excludeTaskIds: z.array(z.string()).optional(),
+});
+
+export type GetFreeSlotsQueryDTO = z.infer<typeof getFreeSlotsSchema>;
+
+export type TimeSlotDTO = {
+  startDate: string;
+  endDate: string;
+};
+
+// *********************** GetFreeSlotsQueryDTO ***************************
+
+export const getTasksCountSchema = z.object({
+  fromDate: z.iso.datetime(),
+  toDate: z.iso.datetime(),
+});
+
+export type GetTasksCountQueryDTO = z.infer<typeof getTasksCountSchema>;
+export type GetTasksCountResponseDTO = { count: number };

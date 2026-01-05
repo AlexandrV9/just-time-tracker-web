@@ -20,5 +20,10 @@ export * from "./Plus";
 export * from "./Logo";
 export * from "./Trash";
 export * from "./Edit";
+export * from "./Circle";
+export * from "./Calendar";
+export * from "./ShareForward";
+
+export * from "./CircularLinesLoader";
 
 export * from "./withIconProps";

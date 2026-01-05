@@ -48,11 +48,11 @@ export const isDayjs = (date: unknown): date is Dayjs => {
 
 export const applyTimeObjectToDayjsDate = (
   timeObj: TimeObject,
-  date: Dayjs | Date
+  date?: Dayjs | Date
 ): Dayjs => {
   const { hours, minutes, seconds } = timeObj;
 
-  const dateInstance = isDayjs(date) ? date : dayjs(date);
+  const dateInstance = isDayjs(date) ? date : dayjs(date ?? null);
 
   return dateInstance
     .set("hour", hours)

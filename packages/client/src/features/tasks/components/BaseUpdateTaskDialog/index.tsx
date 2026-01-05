@@ -9,6 +9,7 @@ import {
   Dialog,
   EditIcon,
   Field,
+  Flex,
   IconButton,
   Input,
   PlusIcon,
@@ -19,56 +20,54 @@ import {
 } from "~/shared/ui";
 
 import styles from "./BaseUpdateTaskDialog.module.css";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useController, type SubmitHandler } from "react-hook-form";
 import dayjs from "dayjs";
 import { useTranslation } from "~/shared/hooks";
-import { IOSDatePicker } from "~/shared/components";
-import { getCorrectInitialDate, getCorrectInitialTime } from "./utils";
+import {
+  getDayInterval,
+  getInitialFormValues,
+  isStartDateBeforeEndDate,
+  isTimeSlotAvailable,
+} from "./utils";
 import type { TaskDTO } from "@to-do-list/shared";
-
-type OpenAccordion = "start" | "end" | null;
-
-const timeSchema = z.object({
-  hours: z.number(),
-  minutes: z.number(),
-  seconds: z.number(),
-});
-
-const updateTaskFormSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  startTime: timeSchema,
-  startDate: z.date(),
-  endTime: timeSchema,
-  endDate: z.date(),
-});
+import type { RequestResponse } from "~/shared/api/services/types";
+import type { UseDialogReturn } from "@ark-ui/react";
+import { formDefaultValues, updateTaskFormSchema } from "./constants";
+import { IOSRangeDatePickers } from "~/shared/components";
+import { useQuery } from "@tanstack/react-query";
+import { taskApiService } from "~/shared/api/services/task";
+import type { ValidationResult } from "~/shared/types";
 
 export type UpdateTaskFormSchema = z.infer<typeof updateTaskFormSchema>;
 
-export type BaseUpdateTaskDialogProps = Partial<TaskDTO> & {
+export type BaseUpdateTaskDialogProps = {
+  dialog: UseDialogReturn;
+  task?: TaskDTO | null;
   mode?: "add" | "edit";
+  showTrigger?: boolean;
+  initialStartDate?: Date | null;
   onSubmit?: (data: {
     title: string;
     description: string;
     startDate: Date;
     endDate: Date;
-  }) => Promise<TaskDTO | null>;
+  }) => Promise<RequestResponse<TaskDTO>> | undefined;
 };
 
 export const BaseUpdateTaskDialog = ({
+  dialog,
   mode = "add",
-  title,
-  description,
-  startDate: _startDate,
-  endDate: _endDate,
+  task,
   onSubmit: _onSubmit,
+  initialStartDate,
+  showTrigger = false,
 }: BaseUpdateTaskDialogProps) => {
   const { t } = useTranslation();
 
-  const baseLocale = `features.tasks.${mode === "add" ? "create" : "update"}`;
+  const isEdit = mode === "edit";
 
-  const [isOpen, setIsOpen] = useState(false);
+  const baseLocale = `features.tasks.${isEdit ? "update" : "create"}`;
 
   const [isPendingRequest, setIsPendingRequest] = useState(false);
 
@@ -82,23 +81,32 @@ export const BaseUpdateTaskDialog = ({
   } = useForm<UpdateTaskFormSchema>({
     mode: "onChange",
     resolver: zodResolver(updateTaskFormSchema),
-    defaultValues: {
-      title: title || "",
-      description: description || "",
-      startDate: getCorrectInitialDate(_startDate),
-      startTime: getCorrectInitialTime(_startDate, dayjs()),
-      endDate: getCorrectInitialDate(_endDate),
-      endTime: getCorrectInitialTime(_endDate, dayjs().add(10, "minute")),
-    },
+    defaultValues: formDefaultValues,
   });
 
-  const [openAccordion, setOpenAccordion] = useState<OpenAccordion>(null);
+  useEffect(() => {
+    if (dialog.open) {
+      reset(
+        getInitialFormValues(
+          isEdit
+            ? task
+            : {
+                startDate: dayjs(initialStartDate)
+                  .hour(10)
+                  .minute(0)
+                  .second(0)
+                  .millisecond(0)
+                  .toISOString(),
+              }
+        )
+      );
+    }
+  }, [dialog.open, reset, task, initialStartDate, mode, isEdit]);
+
+  const [openAccordion, setOpenAccordion] = useState(true);
 
   const startDateConfig = useController({ control, name: "startDate" });
   const startDate = startDateConfig.field.value;
-
-  const endDateConfig = useController({ control, name: "endDate" });
-  const endDate = endDateConfig.field.value;
 
   const startTimeConfig = useController({ control, name: "startTime" });
   const startTime = startTimeConfig.field.value;
@@ -106,7 +114,29 @@ export const BaseUpdateTaskDialog = ({
   const endTimeConfig = useController({ control, name: "endTime" });
   const endTime = endTimeConfig.field.value;
 
-  const onSubmit: SubmitHandler<UpdateTaskFormSchema> = (formData) => {
+  const startDateWithTime = applyTimeObjectToDayjsDate(
+    startTime,
+    startDate
+  ).toDate();
+
+  const endDateWithTime = applyTimeObjectToDayjsDate(
+    endTime,
+    startDate
+  ).toDate();
+
+  const { data: response } = useQuery({
+    queryKey: ["tasks", "free-slots", startDate?.toISOString()],
+    queryFn: () =>
+      taskApiService.getFreeSlots({
+        ...getDayInterval(startDate),
+        excludeTaskIds: isEdit ? [task!.id] : undefined,
+      }),
+    retry: false,
+  });
+
+  const availableTimeIntervals = response?.success ? response.data : [];
+
+  const onSubmit: SubmitHandler<UpdateTaskFormSchema> = async (formData) => {
     if (!formData.title || formData.title.length < 2) {
       setError("title", {
         type: "min",
@@ -123,17 +153,22 @@ export const BaseUpdateTaskDialog = ({
         applyTimeObjectToDayjsDate(formData.startTime, formData.startDate)
       ),
       endDate: convertDayjsDateToDate(
-        applyTimeObjectToDayjsDate(formData.endTime, formData.endDate)
+        applyTimeObjectToDayjsDate(formData.endTime, formData.startDate)
       ),
     };
 
     setIsPendingRequest(true);
 
-    _onSubmit?.(requestData).finally(() => {
+    try {
+      const response = await _onSubmit?.(requestData);
+      if (response === undefined) return;
+    } catch (error) {
+      console.log(error);
+    } finally {
       setIsPendingRequest(false);
       reset();
-      setIsOpen(false);
-    });
+      dialog.setOpen(false);
+    }
   };
 
   const renderDialogTrigger = () => {
@@ -152,37 +187,46 @@ export const BaseUpdateTaskDialog = ({
     );
   };
 
-  const isTimeRangeValid = useMemo(() => {
-    if (!startDate || !startTime || !endDate || !endTime) {
-      return true;
+  const isValidTimeRange: ValidationResult = useMemo(() => {
+    if (!isStartDateBeforeEndDate(startDateWithTime, endDateWithTime)) {
+      return {
+        isValid: false,
+        error: "Время начала позже времени окончания",
+      };
     }
 
-    const _startDate = applyTimeObjectToDayjsDate(startTime, startDate);
-    const _endDate = applyTimeObjectToDayjsDate(endTime, endDate);
-
-    if (!dayjs(_startDate).isSame(_endDate, "day")) {
-      return true;
+    if (
+      !isTimeSlotAvailable(
+        {
+          startDate: startDateWithTime,
+          endDate: endDateWithTime,
+        },
+        availableTimeIntervals
+      )
+    ) {
+      return {
+        isValid: false,
+        error:
+          "В заданном промежутке времени уже есть задача, выберите другое время или день",
+      };
     }
 
-    return _endDate.isAfter(_startDate) || _endDate.isSame(_startDate);
-  }, [startDate, startTime, endDate, endTime]);
+    return {
+      isValid: true,
+    };
+  }, [availableTimeIntervals, endDateWithTime, startDateWithTime]);
 
   const dialogTrigger = renderDialogTrigger();
 
   const disableSubmitButton =
     !isValid ||
-    (mode === "add" && !isDirty) ||
-    !isTimeRangeValid ||
+    (!isEdit && !isDirty) ||
+    !isValidTimeRange.isValid ||
     isPendingRequest;
 
   return (
-    <Dialog.Root
-      size="full"
-      lazyMount
-      open={isOpen}
-      onOpenChange={(e) => setIsOpen(e.open)}
-    >
-      <Dialog.Trigger asChild>{dialogTrigger}</Dialog.Trigger>
+    <Dialog.RootProvider size="full" lazyMount value={dialog}>
+      {showTrigger && <Dialog.Trigger asChild>{dialogTrigger}</Dialog.Trigger>}
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
@@ -196,7 +240,6 @@ export const BaseUpdateTaskDialog = ({
                 {t(`${baseLocale}.dialogTitle`)}
               </Dialog.Title>
             </Dialog.Header>
-
             <Dialog.Body overflow="auto" p={0}>
               <ScrollArea.Root as="main" p="1rem" display="flex" size="xs">
                 <ScrollArea.Viewport>
@@ -225,7 +268,6 @@ export const BaseUpdateTaskDialog = ({
                           {errors.title?.message}
                         </Field.ErrorText>
                       </Field.Root>
-
                       <Field.Root invalid={!!errors.description}>
                         <Field.Label color="fg">
                           {t(`${baseLocale}.inputDescription.label`)}
@@ -243,34 +285,39 @@ export const BaseUpdateTaskDialog = ({
                           {errors.description?.message}
                         </Field.ErrorText>
                       </Field.Root>
-
-                      <IOSDatePicker
-                        label={t(`${baseLocale}.startDate.label`)}
-                        time={startTime}
-                        onChangeTime={startTimeConfig.field.onChange}
-                        date={startDate}
-                        onChangeDate={startDateConfig.field.onChange}
-                        isExpanded={openAccordion === "start"}
-                        onExpandedChange={(isExpanded) => {
-                          setOpenAccordion(isExpanded ? "start" : null);
-                        }}
-                        maxDate={endDateConfig.field.value}
-                        isValidTime={isTimeRangeValid}
-                      />
-
-                      <IOSDatePicker
-                        label={t(`${baseLocale}.endDate.label`)}
-                        time={endTime}
-                        onChangeTime={endTimeConfig.field.onChange}
-                        date={endDate}
-                        onChangeDate={endDateConfig.field.onChange}
-                        isExpanded={openAccordion === "end"}
-                        onExpandedChange={(isExpanded) => {
-                          setOpenAccordion(isExpanded ? "end" : null);
-                        }}
-                        isValidTime={isTimeRangeValid}
-                        minDate={startDateConfig.field.value}
-                      />
+                      <Flex direction="column" gap={1}>
+                        {/* <div>
+                          <Text>Свободные слоты</Text>
+                          {response?.success &&
+                            response.data.map((item, index) => {
+                              return (
+                                <Flex key={index} gap={2}>
+                                  <div>
+                                    С {dayjs(item.startDate).format("HH:mm")}
+                                  </div>
+                                  <div>
+                                    по {dayjs(item.endDate).format("HH:mm")}
+                                  </div>
+                                </Flex>
+                              );
+                            })}
+                        </div> */}
+                        <Flex alignItems="center" gap={1}>
+                          <IOSRangeDatePickers
+                            label="Duration"
+                            isExpanded={openAccordion}
+                            date={startDate}
+                            onChangeDate={startDateConfig.field.onChange}
+                            startTime={startTime}
+                            onChangeStartTime={startTimeConfig.field.onChange}
+                            endTime={endTime}
+                            onChangeEndTime={endTimeConfig.field.onChange}
+                            onExpandedChange={setOpenAccordion}
+                            isValidTime={isValidTimeRange.isValid}
+                            errorMessage={isValidTimeRange.error}
+                          />
+                        </Flex>
+                      </Flex>
                     </Box>
                   </ScrollArea.Content>
                 </ScrollArea.Viewport>
@@ -304,6 +351,6 @@ export const BaseUpdateTaskDialog = ({
           </Dialog.SafeContent>
         </Dialog.Positioner>
       </Portal>
-    </Dialog.Root>
+    </Dialog.RootProvider>
   );
 };

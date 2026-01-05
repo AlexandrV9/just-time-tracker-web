@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { DeleteTaskData } from "./types";
+import type { DeleteTaskDataDTO } from "@to-do-list/shared";
 import { taskApiService } from "~/shared/api/services/task";
 
 export const useDeleteTask = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (taskData: DeleteTaskData) => {
+    mutationFn: async (taskData: DeleteTaskDataDTO) => {
       return taskApiService.deleteTask(taskData);
     },
     onSuccess: () => {

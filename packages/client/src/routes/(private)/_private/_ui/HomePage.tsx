@@ -1,4 +1,9 @@
 import { Box } from "~/shared/ui";
+import {
+  CompletedTasksChart,
+  PriorityTasks,
+  TodayOverview,
+} from "~/widgets";
 
 export function HomePage() {
   return (
@@ -6,11 +11,12 @@ export function HomePage() {
       display="flex"
       flexDirection="column"
       justifyContent="stretch"
-      alignItems="center"
       flexGrow={1}
-      gap="1rem"
+      gap="0.8rem"
     >
-      MainPage
+      <TodayOverview />
+      <PriorityTasks />
+      <CompletedTasksChart />
     </Box>
   );
 }
