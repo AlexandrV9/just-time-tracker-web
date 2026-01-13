@@ -1,9 +1,6 @@
-import { Box } from "~/shared/ui";
-import {
-  CompletedTasksChart,
-  PriorityTasks,
-  TodayOverview,
-} from "~/widgets";
+import { Box, Flex } from "~/shared/ui";
+import { CircularProgress } from "./CircularProgress";
+import { TrackingHistory } from "./TrackingHistory";
 
 export function HomePage() {
   return (
@@ -12,11 +9,15 @@ export function HomePage() {
       flexDirection="column"
       justifyContent="stretch"
       flexGrow={1}
-      gap="0.8rem"
+      gap={5}
     >
-      <TodayOverview />
-      <PriorityTasks />
-      <CompletedTasksChart />
+      <Flex justifyContent="center">
+        <CircularProgress />
+      </Flex>
+      <TrackingHistory />
+      {/* <TodayOverview /> */}
+      {/* <PriorityTasks /> */}
+      {/* <CompletedTasksChart /> */}
     </Box>
   );
 }

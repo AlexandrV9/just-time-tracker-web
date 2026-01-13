@@ -1,7 +1,7 @@
 import { CreateTaskDialog } from "~/features/tasks";
 import { TaskList } from "~/features/tasks/TaskList";
 import { Box, Flex, Text } from "~/shared/ui";
-import { WeekDatePicker } from "./WeekDatePicker";
+import { DateNavigator } from "./DateNavigator";
 import { useDialog } from "@ark-ui/react";
 import { useTranslation } from "~/shared/hooks";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
@@ -41,7 +41,7 @@ export function TasksPage() {
       flexGrow={1}
       gap="1rem"
     >
-      <WeekDatePicker value={selectedDate} onChange={handleDateChange} />
+      <DateNavigator value={selectedDate} onChange={handleDateChange} />
       <Flex justify="space-between" alignItems="center">
         <Text textStyle="2xl" fontWeight="extrabold">
           {t("pages.tasksPage.title")}

@@ -29,6 +29,7 @@ export * from "./Accordion";
 export * from "./Toast";
 export * from "./Skeleton";
 export * from "./Checkbox";
+export * from "./ButtonGroup";
 
 export * from "./icons";
 export * from "./controls";

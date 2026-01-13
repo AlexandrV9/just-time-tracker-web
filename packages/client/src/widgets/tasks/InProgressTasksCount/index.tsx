@@ -12,8 +12,7 @@ export const InProgressTasksCount = () => {
         p={2}
         w="min-content"
         flexShrink={0}
-        borderRadius="full"
-      >
+        borderRadius="full"      >
         <CircularLinesLoader
           size={24}
           radius={30}

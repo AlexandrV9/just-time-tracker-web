@@ -7,7 +7,7 @@ import type {
   GetTasksCountResponseDTO,
   GetTasksQueryDTO,
   TaskDTO,
-  TasksResponseDTO,
+  GetTasksResponseDTO,
   TimeSlotDTO,
   UpdateTaskDataDTO,
 } from "@to-do-list/shared";
@@ -141,7 +141,7 @@ const getTaskById = async (
   }
 };
 
-type GetTasksResponse = SuccessResponse<TasksResponseDTO> | ErrorResponse;
+type GetTasksResponse = SuccessResponse<GetTasksResponseDTO> | ErrorResponse;
 
 const getTasks = async (
   filters: GetTasksQueryDTO

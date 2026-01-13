@@ -23,6 +23,8 @@ export * from "./Edit";
 export * from "./Circle";
 export * from "./Calendar";
 export * from "./ShareForward";
+export * from "./HorizontalLine";
+export * from "./Calendar2";
 
 export * from "./CircularLinesLoader";
 

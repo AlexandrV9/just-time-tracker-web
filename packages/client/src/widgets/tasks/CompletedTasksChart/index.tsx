@@ -4,19 +4,50 @@ import { Chart, useChart } from "@chakra-ui/charts";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { AbsoluteCenter, ProgressCircle } from "@chakra-ui/react";
 import { useTranslation } from "~/shared/hooks";
+import { useQuery } from "@tanstack/react-query";
+import { taskApiService } from "~/shared/api/services/task";
 
 export const CompletedTasksChart = () => {
   const { t } = useTranslation();
 
-  const chart = useChart({
-    data: [
-      { allocation: 20, type: "01" },
-      { allocation: 15, type: "02" },
-      { allocation: 20, type: "03" },
-      { allocation: 30, type: "04" },
-      { allocation: 19, type: "05" },
-      { allocation: 12, type: "06" },
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const fromDate = new Date(today);
+  fromDate.setDate(today.getDate() - 6);
+
+  const toDate = new Date(today);
+  toDate.setHours(23, 59, 59, 999);
+
+  const { data } = useQuery({
+    queryKey: [
+      "completed-tasks-count",
+      fromDate.toISOString(),
+      toDate.toISOString(),
     ],
+    queryFn: () =>
+      taskApiService.getTasksCount({
+        fromDate: fromDate.toISOString(),
+        toDate: toDate.toISOString(),
+        status: "done",
+      }),
+  });
+
+  const chartData = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date(fromDate);
+    d.setDate(fromDate.getDate() + i);
+    const key = d.toISOString().slice(0, 10);
+
+    return {
+      type: key.slice(8),
+      allocation: data?.success ? data.data[key] ?? 0 : 0,
+    };
+  });
+
+  console.log("chartData", chartData);
+
+  const chart = useChart({
+    data: chartData,
     series: [{ name: "allocation", color: "teal.solid" }],
   });
 

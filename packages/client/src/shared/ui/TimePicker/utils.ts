@@ -63,3 +63,21 @@ export const applyTimeObjectToDayjsDate = (
 export const convertDayjsDateToDate = (dayjsDate: Dayjs): Date => {
   return dayjsDate.toDate();
 };
+
+export const convertSecondsToTimeObject = (totalSeconds: number): TimeObject => {
+  let current = totalSeconds;
+
+  const hours = Math.floor(current / 3600);
+  current -= hours * 3600;
+
+  const minutes = Math.floor(current / 60);
+  current -= minutes * 60;
+
+  const seconds = current;
+
+  return {
+    hours,
+    minutes,
+    seconds,
+  };
+};

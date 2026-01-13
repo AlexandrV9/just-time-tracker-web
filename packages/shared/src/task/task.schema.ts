@@ -1,7 +1,6 @@
 import z from "zod";
 import { tagSchema } from "../tag/index.js";
-
-// ********************** TaskStatusDTO ***********************
+import { baseIdSchema, paginationResponseSchema } from "../common/index.js";
 
 export const taskStatusSchema = z.enum([
   "todo",
@@ -12,23 +11,7 @@ export const taskStatusSchema = z.enum([
   "blocked",
 ]);
 
-export type TaskStatusDTO = z.infer<typeof taskStatusSchema>;
-
-//
-
-//
-
-// ********************** TaskPriorityDTO ***********************
-
 export const taskPrioritySchema = z.enum(["low", "medium", "high", "urgent"]);
-
-export type TaskPriorityDTO = z.infer<typeof taskPrioritySchema>;
-
-//
-
-//
-
-// *********************** TaskBase ***************************
 
 export const taskBaseSchema = z.object({
   title: z.string().min(1, "title is required").max(255),
@@ -43,24 +26,10 @@ export const taskBaseSchema = z.object({
   tags: z.array(tagSchema).max(10).optional(),
 });
 
-//
-
-//
-
-// *********************** CreateTaskDataDTO ***************************
-
 export const createTaskSchema = taskBaseSchema.extend({
   createdAt: z.iso.datetime().optional(),
   updatedAt: z.iso.datetime().optional().nullable(),
 });
-
-export type CreateTaskDataDTO = z.infer<typeof createTaskSchema>;
-
-//
-
-//
-
-// *********************** UpdateTaskDataDTO ***************************
 
 export const updateTaskSchema = z.object({
   id: z.string().min(1, "id is required"),
@@ -77,74 +46,13 @@ export const updateTaskSchema = z.object({
   isDeleting: z.boolean().optional(),
 });
 
-export type UpdateTaskDataDTO = z.infer<typeof updateTaskSchema>;
-
-//
-
-//
-
-// *********************** TaskIdDTO ***************************
-
-export const taskIdSchema = z.object({
-  id: z.string().min(1, "id is required"),
-});
-
-export type TaskIdDTO = z.infer<typeof taskIdSchema>;
-export type GetTaskDataDTO = TaskIdDTO;
-export type DeleteTaskDataDTO = TaskIdDTO;
-
-//
-
-//
-
-// *********************** TaskDTO ***************************
-
 export const taskSchema = z.object({
-  ...taskIdSchema.shape,
+  ...baseIdSchema.shape,
   ...taskBaseSchema.shape,
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime().nullable(),
   isDeleting: z.boolean().default(false),
 });
-
-export type TaskDTO = z.infer<typeof taskSchema>;
-
-//
-
-//
-
-// *********************** PaginationDTO ***************************
-
-export const paginationSchema = z.object({
-  page: z.number().int().positive(),
-  limit: z.number().int().positive(),
-  totalCount: z.number().int().nonnegative(),
-  totalPages: z.number().int().nonnegative(),
-  hasNext: z.boolean(),
-  hasPrev: z.boolean(),
-});
-
-export type PaginationDTO = z.infer<typeof paginationSchema>;
-
-//
-
-//
-
-// *********************** TasksResponseDTO ***************************
-
-export const tasksResponseSchema = z.object({
-  data: z.array(taskSchema),
-  pagination: paginationSchema,
-});
-
-export type TasksResponseDTO = z.infer<typeof tasksResponseSchema>;
-export type GetTasksResponseDTO = TasksResponseDTO;
-
-//
-
-//
-
-// *********************** GetTasksQueryDTO ***************************
 
 export const getTasksQuerySchema = z.object({
   status: taskStatusSchema.optional(),
@@ -171,9 +79,7 @@ export const getTasksQuerySchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).default("desc").optional(),
 });
 
-export type GetTasksQueryDTO = z.infer<typeof getTasksQuerySchema>;
-
-// *********************** GetFreeSlotsQueryDTO ***************************
+export const tasksResponseSchema = paginationResponseSchema(taskSchema);
 
 export const getFreeSlotsSchema = z.object({
   startDate: z.iso.datetime(),
@@ -181,19 +87,31 @@ export const getFreeSlotsSchema = z.object({
   excludeTaskIds: z.array(z.string()).optional(),
 });
 
-export type GetFreeSlotsQueryDTO = z.infer<typeof getFreeSlotsSchema>;
-
-export type TimeSlotDTO = {
-  startDate: string;
-  endDate: string;
-};
-
-// *********************** GetFreeSlotsQueryDTO ***************************
-
 export const getTasksCountSchema = z.object({
   fromDate: z.iso.datetime(),
   toDate: z.iso.datetime(),
+  status: taskStatusSchema.optional(),
+  priority: taskPrioritySchema.optional(),
+  createdById: z.string().optional(),
+  tags: z.array(tagSchema).optional(),
+  search: z.string().optional(),
 });
 
+export const taskIdSchema = baseIdSchema;
+
+export type TaskDTO = z.infer<typeof taskSchema>;
+export type TaskStatusDTO = z.infer<typeof taskStatusSchema>;
+export type TaskPriorityDTO = z.infer<typeof taskPrioritySchema>;
+
+export type GetTasksQueryDTO = z.infer<typeof getTasksQuerySchema>;
+export type GetTasksResponseDTO = z.infer<typeof tasksResponseSchema>;
+
+export type GetTaskDataDTO = z.infer<typeof baseIdSchema>;
+export type CreateTaskDataDTO = z.infer<typeof createTaskSchema>;
+export type UpdateTaskDataDTO = z.infer<typeof updateTaskSchema>;
+export type DeleteTaskDataDTO = z.infer<typeof baseIdSchema>;
+
 export type GetTasksCountQueryDTO = z.infer<typeof getTasksCountSchema>;
-export type GetTasksCountResponseDTO = { count: number };
+export type GetTasksCountResponseDTO = Record<string, number>;
+
+export type GetFreeSlotsQueryDTO = z.infer<typeof getFreeSlotsSchema>;

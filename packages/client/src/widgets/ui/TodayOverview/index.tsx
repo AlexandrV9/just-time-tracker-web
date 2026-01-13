@@ -21,6 +21,8 @@ export const TodayOverview = () => {
       }),
   });
 
+  console.log("data", data)
+
   return (
     <Box
       display="flex"
@@ -46,7 +48,7 @@ export const TodayOverview = () => {
         <Text textStyle="2xl" fontWeight="semibold">
           <Trans
             i18nKey="widgets.todayOverview.tasksForToday"
-            count={data?.success ? data?.data.count : 0}
+            count={0}
             components={{
               CountWrapper: <Text as="span" color="#a18ef6" />,
             }}

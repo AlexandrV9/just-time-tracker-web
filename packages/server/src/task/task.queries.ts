@@ -2,6 +2,7 @@ import type {
   CreateTaskDataDTO,
   GetFreeSlotsQueryDTO,
   GetTasksCountQueryDTO,
+  GetTasksCountResponseDTO,
   GetTasksQueryDTO,
   TaskDTO,
   TimeSlotDTO,
@@ -486,22 +487,72 @@ const getFreeSlots = async ({
 const getTasksCount = async ({
   fromDate,
   toDate,
-}: GetTasksCountQueryDTO): Promise<{ count: number }> => {
+  status,
+  priority,
+  createdById,
+  tags,
+  search,
+}: GetTasksCountQueryDTO): Promise<GetTasksCountResponseDTO> => {
   const query = `
-    SELECT 
-      COUNT(*)::int AS count
-    FROM tasks
-    WHERE 
-      is_deleting = false
-      AND start_date < $2
-      AND end_date > $1
+    WITH days AS (
+      SELECT
+        generate_series(
+          $1::date,
+          $2::date,
+          interval '1 day'
+        )::date AS day
+    ),
+    filtered_tasks AS (
+      SELECT
+        t.*
+      FROM tasks t
+      WHERE
+        t.is_deleting = false
+        AND t.start_date < ($2::date + interval '1 day')
+        AND t.end_date > $1::date
+
+        AND ($3::text IS NULL OR t.status = $3::text)
+        AND ($4::text IS NULL OR t.priority = $4::text)
+        AND ($5::text IS NULL OR t.created_by_id = $5::text)
+
+        AND (
+          $6::text[] IS NULL
+          OR EXISTS (
+            SELECT 1
+            FROM jsonb_array_elements_text(t.tags::jsonb) tag
+            WHERE tag = ANY($6::text[])
+          )
+        )
+
+        AND ($7::text IS NULL OR t.title ILIKE '%' || $7::text || '%')
+    )
+    SELECT
+      d.day::text AS date,
+      COUNT(t.id)::int AS count
+    FROM days d
+    LEFT JOIN filtered_tasks t
+      ON t.start_date < (d.day + interval '1 day')
+     AND t.end_date > d.day
+    GROUP BY d.day
+    ORDER BY d.day;
   `;
 
-  const { rows } = await pool.query(query, [fromDate, toDate]);
+  const values = [
+    fromDate, // $1
+    toDate, // $2
+    status ?? null, // $3
+    priority ?? null, // $4
+    createdById ?? null, // $5
+    tags?.length ? tags : null, // $6
+    search ?? null, // $7
+  ];
 
-  return {
-    count: rows[0]?.count ?? 0,
-  };
+  const { rows } = await pool.query(query, values);
+
+  return rows.reduce<Record<string, number>>((acc, row) => {
+    acc[row.date] = row.count;
+    return acc;
+  }, {});
 };
 
 export const taskQueries = {

@@ -5,6 +5,7 @@ import { authMiddleware, authRouter } from "./auth/index.js";
 import { tasksRouter } from "./task/index.js";
 import { config } from "./shared/index.js";
 import { healthRouter } from "./health/health.routes.js";
+import { timeEntriesRouter } from "./timeEntry/timeEntry.routes.js";
 
 const app = new Hono();
 
@@ -21,6 +22,8 @@ app.route("/health", healthRouter);
 
 app.use("/tasks/*", authMiddleware);
 app.route("/tasks", tasksRouter);
+
+app.route("/time-entries", timeEntriesRouter);
 
 serve(
   {

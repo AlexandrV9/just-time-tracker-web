@@ -1,6 +1,6 @@
 import {
   BookmarkIcon,
-  CheckCircleIcon,
+  Calendar2Icon,
   HomeIcon,
   SettingsIcon,
 } from "~/shared/ui";
@@ -17,7 +17,7 @@ export const navItems: NavItemProps[] = [
     id: "nav_item_tasks",
     title: "Tasks",
     href: "/tasks",
-    icon: CheckCircleIcon,
+    icon: Calendar2Icon,
   },
   {
     id: "nav_item_notes",
