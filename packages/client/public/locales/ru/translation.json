@@ -44,6 +44,8 @@
         "deleteConfirm": "Удалить эту активность? Это действие нельзя отменить.",
         "duplicateTitleError": "Активность с таким названием уже есть. Выберите другое имя.",
         "historyTitle": "История",
+        "createdAtLabel": "Создано",
+        "updatedAtLabel": "Обновлено",
         "sessionStart": "Начало",
         "sessionEnd": "Конец",
         "duration": "Длительность",

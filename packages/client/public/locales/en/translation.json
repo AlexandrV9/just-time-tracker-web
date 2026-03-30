@@ -44,6 +44,8 @@
         "deleteConfirm": "Delete this activity? This cannot be undone.",
         "duplicateTitleError": "An activity with this name already exists. Choose another name.",
         "historyTitle": "History",
+        "createdAtLabel": "Created",
+        "updatedAtLabel": "Last updated",
         "sessionStart": "Start",
         "sessionEnd": "End",
         "duration": "Duration",

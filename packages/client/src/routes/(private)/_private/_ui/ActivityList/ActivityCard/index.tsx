@@ -1,14 +1,8 @@
 import type { ActivityDTO } from "@to-do-list/shared";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { IconButton } from "@chakra-ui/react";
-import {
-  Card,
-  Flex,
-  PauseIcon,
-  PlayIcon,
-  Text,
-} from "~/shared/ui";
+import { Card, Flex, PauseIcon, PlayIcon, Text } from "~/shared/ui";
 import {
   convertSecondsToTimeObject,
   convertTimeObjectToTimeString,
@@ -22,14 +16,9 @@ type ActivityCardProps = {
   onPause: (activity: ActivityDTO) => void;
 };
 
-const getDurationSeconds = (
-  startDate: string,
-  endDate: string | null | undefined,
-): number => {
-  const start = new Date(startDate).getTime();
-  const end = endDate ? new Date(endDate).getTime() : Date.now();
-  return Math.max(0, Math.floor((end - start) / 1000));
-};
+/** Total wall time tracked across all sessions (active + pause intervals). */
+const getTotalTrackedSeconds = (a: ActivityDTO): number =>
+  Math.floor((a.activeDurationMs + a.pauseDurationMs) / 1000);
 
 export const ActivityCard = ({
   activity,
@@ -40,64 +29,49 @@ export const ActivityCard = ({
 }: ActivityCardProps) => {
   const navigate = useNavigate();
   const isLinkedToMain = activeSessionId === activity.id;
-  const isTrackingOnServer = !activity.endDate;
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const [liveSeconds, setLiveSeconds] = useState(() =>
-    getDurationSeconds(activity.startDate, activity.endDate),
+  const [displaySeconds, setDisplaySeconds] = useState(() =>
+    getTotalTrackedSeconds(activity),
   );
 
   useEffect(() => {
     if (isLinkedToMain) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
       return;
     }
-
-    if (isTrackingOnServer) {
-      setLiveSeconds(getDurationSeconds(activity.startDate, null));
-      intervalRef.current = setInterval(() => {
-        setLiveSeconds(getDurationSeconds(activity.startDate, null));
-      }, 1000);
-    } else {
-      setLiveSeconds(getDurationSeconds(activity.startDate, activity.endDate));
-    }
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+    setDisplaySeconds(getTotalTrackedSeconds(activity));
   }, [
     isLinkedToMain,
-    isTrackingOnServer,
-    activity.startDate,
-    activity.endDate,
+    activity.id,
+    activity.activeDurationMs,
+    activity.pauseDurationMs,
+    activity,
   ]);
 
   const displayedTime = useMemo(() => {
-    const seconds = isLinkedToMain
-      ? linkedSeconds
-      : liveSeconds;
-    return convertTimeObjectToTimeString(
-      convertSecondsToTimeObject(seconds),
-    );
-  }, [isLinkedToMain, linkedSeconds, liveSeconds]);
+    const seconds = isLinkedToMain ? linkedSeconds : displaySeconds;
+    return convertTimeObjectToTimeString(convertSecondsToTimeObject(seconds));
+  }, [isLinkedToMain, linkedSeconds, displaySeconds]);
 
   const handleCardClick = useCallback(() => {
-    navigate({ to: "/activities/$activityId", params: { activityId: activity.id } });
+    navigate({
+      to: "/activities/$activityId",
+      params: { activityId: activity.id },
+    });
   }, [navigate, activity.id]);
 
   const handleToggle = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (isLinkedToMain || isTrackingOnServer) {
+      if (isLinkedToMain) {
         onPause(activity);
       } else {
         onStart(activity);
       }
     },
-    [isLinkedToMain, isTrackingOnServer, activity, onStart, onPause],
+    [isLinkedToMain, activity, onStart, onPause],
   );
 
-  const showPause = isLinkedToMain || isTrackingOnServer;
+  const showPause = isLinkedToMain;
 
   return (
     <Card.Root
@@ -125,7 +99,12 @@ export const ActivityCard = ({
           </Text>
         </Flex>
       </Card.Body>
-      <Card.Footer p={0} justifyContent="space-between" alignItems="end" mt="auto">
+      <Card.Footer
+        p={0}
+        justifyContent="space-between"
+        alignItems="end"
+        mt="auto"
+      >
         <Text
           color="fg.muted"
           textStyle="md"

@@ -46,12 +46,9 @@ export const CreateActivityDialog = ({ dialog }: CreateActivityDialogProps) => {
   const isSubmitDisabled = title.trim().length === 0 || isPending;
 
   const handleSubmit = async () => {
-    const now = new Date().toISOString();
     const response = await createActivity({
       title: title.trim(),
       description: description.trim() || undefined,
-      startDate: now,
-      endDate: now,
       createdById: DEMO_USER_ID,
     });
 

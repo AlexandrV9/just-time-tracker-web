@@ -10,7 +10,6 @@ import {
   Flex,
   Input,
   List,
-  PauseIcon,
   Text,
   TextArea,
   TrashIcon,
@@ -23,11 +22,9 @@ import {
 import { useTranslation } from "~/shared/hooks";
 import type { ActivityDTO } from "@to-do-list/shared";
 
-const getSessionSeconds = (item: ActivityDTO): number => {
-  const start = new Date(item.startDate).getTime();
-  const end = item.endDate ? new Date(item.endDate).getTime() : Date.now();
-  return Math.max(0, Math.floor((end - start) / 1000));
-};
+/** Total wall time tracked across all sessions (active + pause intervals). */
+const getTotalTrackedSeconds = (item: ActivityDTO): number =>
+  Math.floor((item.activeDurationMs + item.pauseDurationMs) / 1000);
 
 const formatDuration = (seconds: number) =>
   convertTimeObjectToTimeString(convertSecondsToTimeObject(seconds));
@@ -75,7 +72,7 @@ export const ActivityPage = () => {
         exactTitle: activity!.title,
         limit: 100,
         page: 0,
-        sortBy: "startDate",
+        sortBy: "createdAt",
         sortOrder: "desc",
       }),
     enabled: !!activity?.createdById && !!activity?.title,
@@ -197,14 +194,11 @@ export const ActivityPage = () => {
     );
   }
 
-  const isTracking = !activity.endDate;
-  const durationSeconds = getSessionSeconds(activity);
+  const durationSeconds = getTotalTrackedSeconds(activity);
   const durationDisplay = formatDuration(durationSeconds);
 
-  const startDateDisplay = new Date(activity.startDate).toLocaleString();
-  const endDateDisplay = activity.endDate
-    ? new Date(activity.endDate).toLocaleString()
-    : "—";
+  const createdAtDisplay = new Date(activity.createdAt).toLocaleString();
+  const updatedAtDisplay = new Date(activity.updatedAt).toLocaleString();
 
   return (
     <Box
@@ -315,30 +309,23 @@ export const ActivityPage = () => {
         >
           {durationDisplay}
         </Text>
-        {isTracking && (
-          <Flex justifyContent="center">
-            <Text textStyle="sm" color="green.500" fontWeight="medium">
-              {t("pages.activities.detail.trackingBadge")}
-            </Text>
-          </Flex>
-        )}
       </Box>
 
       <Box display="flex" flexDirection="column" gap="0.5rem" px={1}>
         <Flex justifyContent="space-between" gap={4}>
           <Text textStyle="sm" color="fg.muted">
-            {t("pages.activities.detail.sessionStart")}
+            {t("pages.activities.detail.createdAtLabel")}
           </Text>
           <Text textStyle="sm" fontWeight="medium" textAlign="right">
-            {startDateDisplay}
+            {createdAtDisplay}
           </Text>
         </Flex>
         <Flex justifyContent="space-between" gap={4}>
           <Text textStyle="sm" color="fg.muted">
-            {t("pages.activities.detail.sessionEnd")}
+            {t("pages.activities.detail.updatedAtLabel")}
           </Text>
           <Text textStyle="sm" fontWeight="medium" textAlign="right">
-            {endDateDisplay}
+            {updatedAtDisplay}
           </Text>
         </Flex>
       </Box>
@@ -354,14 +341,11 @@ export const ActivityPage = () => {
           gap={3}
         >
           {historyItems.map((item) => {
-            const secs = getSessionSeconds(item);
+            const secs = getTotalTrackedSeconds(item);
             const isCurrent = item.id === activityId;
             return (
               <List.Item key={item.id}>
                 <Flex gap={2} alignItems="flex-start">
-                  <Box color="fg.muted" pt={0.5}>
-                    <PauseIcon size={18} />
-                  </Box>
                   <Box flex="1" minW={0}>
                     <Flex
                       flexWrap="wrap"
@@ -370,8 +354,8 @@ export const ActivityPage = () => {
                       justifyContent="space-between"
                     >
                       <Text textStyle="xs" color="fg.muted">
-                        {t("pages.activities.detail.sessionStart")}:{" "}
-                        {new Date(item.startDate).toLocaleString()}
+                        {t("pages.activities.detail.createdAtLabel")}:{" "}
+                        {new Date(item.createdAt).toLocaleString()}
                       </Text>
                       {isCurrent && (
                         <Text
@@ -384,10 +368,8 @@ export const ActivityPage = () => {
                       )}
                     </Flex>
                     <Text textStyle="xs" color="fg.muted" mt={1}>
-                      {t("pages.activities.detail.sessionEnd")}:{" "}
-                      {item.endDate
-                        ? new Date(item.endDate).toLocaleString()
-                        : t("pages.activities.detail.trackingBadge")}
+                      {t("pages.activities.detail.updatedAtLabel")}:{" "}
+                      {new Date(item.updatedAt).toLocaleString()}
                     </Text>
                     <Text
                       textStyle="sm"

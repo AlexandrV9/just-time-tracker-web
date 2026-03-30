@@ -17,21 +17,16 @@ type ActivityCardProps = {
   activity: ActivityDTO;
 };
 
-const getDurationSeconds = (startDate: string, endDate: string | null | undefined): number => {
-  const start = new Date(startDate).getTime();
-  const end = endDate ? new Date(endDate).getTime() : Date.now();
-  return Math.max(0, Math.floor((end - start) / 1000));
-};
+const getTotalTrackedSeconds = (a: ActivityDTO): number =>
+  Math.floor((a.activeDurationMs + a.pauseDurationMs) / 1000);
 
 export const ActivityCard = ({ activity }: ActivityCardProps) => {
   const navigate = useNavigate();
 
   const displayedTime = useMemo(() => {
-    const seconds = getDurationSeconds(activity.startDate, activity.endDate);
+    const seconds = getTotalTrackedSeconds(activity);
     return convertTimeObjectToTimeString(convertSecondsToTimeObject(seconds));
-  }, [activity.startDate, activity.endDate]);
-
-  const isTracking = !activity.endDate;
+  }, [activity.activeDurationMs, activity.pauseDurationMs]);
 
   return (
     <Card.Root
@@ -72,11 +67,6 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
             {displayedTime}
           </Text>
         </Text>
-        {isTracking && (
-          <Text textStyle="xs" color="green.500" fontWeight="medium">
-            Tracking
-          </Text>
-        )}
       </Card.Footer>
     </Card.Root>
   );

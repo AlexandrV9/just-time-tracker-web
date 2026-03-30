@@ -20,11 +20,9 @@ type DateGroup = {
   activities: ActivityDTO[];
 };
 
-const getDurationSeconds = (a: ActivityDTO): number => {
-  const start = new Date(a.startDate).getTime();
-  const end = a.endDate ? new Date(a.endDate).getTime() : Date.now();
-  return Math.max(0, Math.floor((end - start) / 1000));
-};
+/** Total wall time tracked across all sessions (active + pause intervals). */
+const getTotalTrackedSeconds = (a: ActivityDTO): number =>
+  Math.floor((a.activeDurationMs + a.pauseDurationMs) / 1000);
 
 const formatDateLabel = (dateStr: string, locale: string): string => {
   const date = new Date(dateStr + "T00:00:00");
@@ -40,7 +38,7 @@ const groupByDate = (activities: ActivityDTO[]): DateGroup[] => {
   const map = new Map<string, ActivityDTO[]>();
 
   for (const activity of activities) {
-    const dateKey = new Date(activity.startDate).toISOString().split("T")[0];
+    const dateKey = new Date(activity.createdAt).toISOString().split("T")[0];
     const group = map.get(dateKey);
     if (group) {
       group.push(activity);
@@ -52,7 +50,7 @@ const groupByDate = (activities: ActivityDTO[]): DateGroup[] => {
   return Array.from(map.entries()).map(([dateKey, items]) => ({
     dateKey,
     label: dateKey,
-    totalSeconds: items.reduce((sum, a) => sum + getDurationSeconds(a), 0),
+    totalSeconds: items.reduce((sum, a) => sum + getTotalTrackedSeconds(a), 0),
     activities: items,
   }));
 };
