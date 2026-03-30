@@ -17,21 +17,61 @@
       "goToSignInButton": "Start Using Now",
       "title": "Welcome!"
     },
-    "tasksPage": {
-      "title": "Schedule Today"
+    "home": {
+      "selectActivity": "Select activity or start timer"
+    },
+    "calendar": {
+      "title": "Calendar"
+    },
+    "activities": {
+      "title": "Activities",
+      "newActivityButton": "New activity",
+      "createDialog": {
+        "title": "New activity",
+        "nameLabel": "Name",
+        "namePlaceholder": "Activity name",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Optional description",
+        "cancelButton": "Cancel",
+        "submitButton": "Create"
+      },
+      "detail": {
+        "loading": "Loading…",
+        "notFound": "Activity not found",
+        "done": "Done",
+        "edit": "Edit",
+        "delete": "Delete activity",
+        "deleteConfirm": "Delete this activity? This cannot be undone.",
+        "duplicateTitleError": "An activity with this name already exists. Choose another name.",
+        "historyTitle": "History",
+        "sessionStart": "Start",
+        "sessionEnd": "End",
+        "duration": "Duration",
+        "currentBadge": "This session",
+        "trackingBadge": "In progress",
+        "titlePlaceholder": "Activity name",
+        "descriptionPlaceholder": "Description",
+        "saveButton": "Save",
+        "cancelEditButton": "Cancel",
+        "titleRequiredError": "Enter a name for the activity."
+      }
     }
   },
   "widgets": {
     "navbar": {
       "menuItems": {
         "Home": "Home",
-        "Tasks": "Tasks",
+        "Calendar": "Calendar",
         "Notes": "Notes",
-        "Settings": "Settings"
+        "Settings": "Settings",
+        "Activities": "Activities"
       }
     },
     "accountSettings": {
-      "title": "Account Settings"
+      "title": "Account Settings",
+      "options": {
+        "1": "Edit Profile"
+      }
     },
     "todayOverview": {
       "title": "Today`s Analysis",
@@ -50,6 +90,65 @@
     },
     "completedTasksChart": {
       "title": "Completed"
+    },
+    "timeEntryHistory": {
+      "title": "Time Entry History",
+      "updateTimeEntryDialog": {
+        "update": {
+          "title": "Update Time Entry",
+          "inputTitle": {
+            "label": "Title",
+            "placeholder": "Enter time entry title",
+            "error": {
+              "required": "Title is required",
+              "max": "The title is too long, the maximum length is {{count}} characters"
+            }
+          },
+          "inputDescription": {
+            "label": "Description",
+            "placeholder": "Enter time entry description",
+            "error": {
+              "max": "The description is too long, the maximum length is {{count}} characters"
+            }
+          },
+          "startDateInput": {
+            "label": "Start Date"
+          },
+          "endDateInput": {
+            "label": "End Date"
+          },
+          "durationInput": {
+            "label": "Duration"
+          },
+          "submitButtonText": "Update",
+          "cancelButtonText": "Cancel",
+          "successMessage": "Time entry updated successfully",
+          "errorMessage": "Failed to update time entry. Please try again."
+        }
+      },
+      "confirmDeleteTimeEntryDialog": {
+        "title": "Time Entry Deletеion",
+        "description": "Are you sure you want to delete this time entry? This action cannot be undone.",
+        "submitButtonText": "Delete",
+        "cancelButtonText": "Cancel"
+      }
+    },
+    "timeEntryTemplates": {
+      "title": "Time Entry Templates",
+      "notTemplates": "You don't have any templates yet.",
+      "noDescription": "No description",
+      "selectedTemplate": "Selected template",
+      "clearTemplate": "Clear",
+      "emptyLastEntryState": "There is no recent time entry to create a template from.",
+      "createTemplateDialog": {
+        "title": "Create template",
+        "nameLabel": "Name",
+        "namePlaceholder": "Enter template name",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Enter template description",
+        "cancelButtonText": "Cancel",
+        "submitButtonText": "Create"
+      }
     }
   },
   "features": {
@@ -161,6 +260,33 @@
         "input": {
           "placeholder": "Enter name your task"
         }
+      }
+    },
+    "timeEntries": {
+      "baseUpdateTaskDialog": {
+        "titleInput": {
+          "label": "Title",
+          "placeholder": "Enter task title",
+          "error": {
+            "required": "Title is required",
+            "max": "The title is too long, the maximum length is {{count}} characters"
+          }
+        },
+        "descriptionInput": {
+          "label": "Description",
+          "placeholder": "Enter task description",
+          "error": {
+            "max": "The description is too long, the maximum length is {{count}} characters"
+          }
+        },
+        "startDateInput": {
+          "label": "Start"
+        },
+        "endDateInput": {
+          "label": "End"
+        },
+        "submitButtonText": "Update",
+        "cancelButtonText": "Cancel"
       }
     }
   }

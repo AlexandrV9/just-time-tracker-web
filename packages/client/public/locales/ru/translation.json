@@ -17,21 +17,61 @@
       "goToSignInButton": "Начать использовать",
       "title": "Добро пожаловать!"
     },
-    "tasksPage": {
-      "title": "Очередь задач"
+    "home": {
+      "selectActivity": "Выберите активность или запустите таймер"
+    },
+    "calendar": {
+      "title": "Календарь"
+    },
+    "activities": {
+      "title": "Активности",
+      "newActivityButton": "Новая активность",
+      "createDialog": {
+        "title": "Новая активность",
+        "nameLabel": "Название",
+        "namePlaceholder": "Название активности",
+        "descriptionLabel": "Описание",
+        "descriptionPlaceholder": "Описание (необязательно)",
+        "cancelButton": "Отмена",
+        "submitButton": "Создать"
+      },
+      "detail": {
+        "loading": "Загрузка…",
+        "notFound": "Активность не найдена",
+        "done": "Готово",
+        "edit": "Редактировать",
+        "delete": "Удалить активность",
+        "deleteConfirm": "Удалить эту активность? Это действие нельзя отменить.",
+        "duplicateTitleError": "Активность с таким названием уже есть. Выберите другое имя.",
+        "historyTitle": "История",
+        "sessionStart": "Начало",
+        "sessionEnd": "Конец",
+        "duration": "Длительность",
+        "currentBadge": "Текущая сессия",
+        "trackingBadge": "Идёт учёт",
+        "titlePlaceholder": "Название активности",
+        "descriptionPlaceholder": "Описание",
+        "saveButton": "Сохранить",
+        "cancelEditButton": "Отмена",
+        "titleRequiredError": "Введите название активности."
+      }
     }
   },
   "widgets": {
     "navbar": {
       "menuItems": {
         "Home": "Главная",
-        "Tasks": "Задачи",
+        "Calendar": "Календарь",
         "Notes": "Заметки",
-        "Settings": "Настройки"
+        "Settings": "Настройки",
+        "Activities": "Активности"
       }
     },
     "accountSettings": {
-      "title": "Настройки аккаунта"
+      "title": "Настройки аккаунта",
+      "options": {
+        "1": "Редактировать профиль"
+      }
     },
     "todayOverview": {
       "title": "Дневная аналитика",
@@ -53,6 +93,67 @@
     },
     "completedTasksChart": {
       "title": "Завершено"
+    },
+    "timeEntryHistory": {
+      "title": "История трекинга",
+      "updateTimeEntryDialog": {
+        "update": {
+          "title": "Обновление записи о времени",
+          "inputTitle": {
+            "label": "Название",
+            "placeholder": "Введите название активности",
+            "error": {
+              "required": "Название обязательно",
+              "max": "Название слишком длинное, максимальная длина {{count}} символов"
+            }
+          },
+          "inputDescription": {
+            "label": "Описание",
+            "placeholder": "Введите описание активности",
+            "error": {
+              "max": "Описание слишком длинное, максимальная длина {{count}} символов"
+            }
+          },
+          "startDateInput": {
+            "label": "Дата начала"
+          },
+          "endDateInput": {
+            "label": "Дата окочания"
+          },
+          "durationInput": {
+            "label": "Длительность"
+          },
+          "submitButtonText": "Обновить",
+          "cancelButtonText": "Отмена",
+          "successMessage": "Запись о времени успешно обновлена",
+          "errorMessage": "Не удалось обновить запись о времени. Пожалуйста, попробуйте еще раз."
+        }
+      },
+      "confirmDeleteTimeEntryDialog": {
+        "title": "Удаление записи о времени",
+        "description": "Вы точно хотите удалить эту запись о времени? Это действие нельзя будет отменить.",
+        "submitButtonText": "Удалить",
+        "cancelButtonText": "Отмена"
+      }
+    },
+    "timeEntryTemplates": {
+      "title": "Шаблоны трекинга",
+      "notTemplates": "У вас нет шаблонов для трекинга.",
+      "noDescription": "Без описания",
+      "createTemplateButton": "Создать шаблон",
+      "createFromLastEntry": "Создать из последней записи",
+      "selectedTemplate": "Выбран шаблон",
+      "clearTemplate": "Сбросить",
+      "emptyLastEntryState": "Нет последних записей для создания шаблона.",
+      "createTemplateDialog": {
+        "title": "Создание шаблона",
+        "nameLabel": "Название",
+        "namePlaceholder": "Введите название шаблона",
+        "descriptionLabel": "Описание",
+        "descriptionPlaceholder": "Введите описание шаблона",
+        "cancelButtonText": "Отмена",
+        "submitButtonText": "Создать"
+      }
     }
   },
   "features": {
@@ -164,6 +265,33 @@
         "input": {
           "placeholder": "Введите название задачи"
         }
+      }
+    },
+    "timeEntries": {
+      "baseUpdateTaskDialog": {
+        "titleInput": {
+          "label": "Название",
+          "placeholder": "Введите название задачи",
+          "error": {
+            "required": "Название обязательно",
+            "max": "Название слишком длинное, максимальная длина {{count}} символов"
+          }
+        },
+        "descriptionInput": {
+          "label": "Описание",
+          "placeholder": "Введите описание задачи",
+          "error": {
+            "max": "Описание слишком длинное, максимальная длина {{count}} символов"
+          }
+        },
+        "startDateInput": {
+          "label": "Начало"
+        },
+        "endDateInput": {
+          "label": "Конец"
+        },
+        "submitButtonText": "Обновить",
+        "cancelButtonText": "Отмена"
       }
     }
   }

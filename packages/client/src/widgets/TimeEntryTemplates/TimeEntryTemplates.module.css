@@ -1,0 +1,24 @@
+.viewport {
+  overflow: hidden;
+  width: 100%;
+  /* Две карточки в ряд: 2 * slide + 1 * gap = 100% ширины viewport */
+  --template-gap: 0.7rem;
+  --slide-size: calc((100% - var(--template-gap)) / 2);
+  -webkit-overflow-scrolling: touch;
+}
+
+.container {
+  display: flex;
+  gap: var(--template-gap);
+  padding-bottom: 2px;
+}
+
+.slide {
+  flex: 0 0 var(--slide-size);
+  min-width: 0;
+}
+
+.clearSlide {
+  flex: 0 0 var(--slide-size);
+  min-width: 0;
+}

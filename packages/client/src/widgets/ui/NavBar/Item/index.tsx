@@ -29,7 +29,7 @@ export const NavBarItem = memo(
           <Button
             variant="ghost"
             height="auto"
-            padding={3}
+            padding={2}
             color={isActive ? "purple.focusRing" : "gray"}
           >
             <Link to={href}>
@@ -44,5 +44,5 @@ export const NavBarItem = memo(
         </Box>
       </List.Item>
     );
-  }
+  },
 );

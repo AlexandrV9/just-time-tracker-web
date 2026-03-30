@@ -43,7 +43,7 @@ export const Route = createFileRoute("/(private)/_private")({
       console.log("Auth check in progress...");
     }
   },
-  loader: () => <div>ddd</div>,
+  loader: () => <div>Loader...</div>,
   component: PrivateLayout,
 });
 
@@ -58,7 +58,7 @@ export function PrivateLayout() {
         <LangSwitcher />
         <ThemeSwitcher />
         <NotificationButton />
-      </Flex>
+      </Flex>,
     );
   }, [setContent]);
 

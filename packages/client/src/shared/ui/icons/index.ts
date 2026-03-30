@@ -25,6 +25,10 @@ export * from "./Calendar";
 export * from "./ShareForward";
 export * from "./HorizontalLine";
 export * from "./Calendar2";
+export * from "./Play";
+export * from "./Stop";
+export * from "./Pause";
+export * from "./Lightning";
 
 export * from "./CircularLinesLoader";
 

@@ -7,7 +7,7 @@ import type {
 import { pool } from "../shared/index.js";
 
 const createTimeEntry = async (
-  data: CreateTimeEntryDataDTO
+  data: CreateTimeEntryDataDTO,
 ): Promise<TimeEntryDTO> => {
   const {
     title,
@@ -59,7 +59,7 @@ const createTimeEntry = async (
 };
 
 const getTimeEntryById = async (
-  id: TimeEntryDTO["id"]
+  id: TimeEntryDTO["id"],
 ): Promise<TimeEntryDTO | null> => {
   const query = `
     SELECT
@@ -88,7 +88,7 @@ const getTimeEntries = async (filters: GetTimeEntriesQueryDTO) => {
     fromDate,
     toDate,
     search,
-    page = 1,
+    page = 0,
     limit = 10,
     sortBy = "startDate",
     sortOrder = "desc",
@@ -115,7 +115,7 @@ const getTimeEntries = async (filters: GetTimeEntriesQueryDTO) => {
   if (search) {
     params.push(`%${search}%`);
     conditions.push(
-      `(title ILIKE $${params.length} OR description ILIKE $${params.length})`
+      `(title ILIKE $${params.length} OR description ILIKE $${params.length})`,
     );
   }
 
@@ -155,7 +155,7 @@ const getTimeEntries = async (filters: GetTimeEntriesQueryDTO) => {
   `;
 
   const [dataResult, countResult] = await Promise.all([
-    pool.query(dataQuery, [...params, limit, (page - 1) * limit]),
+    pool.query(dataQuery, [...params, limit, page * limit]),
     pool.query(countQuery, params),
   ]);
 
@@ -169,14 +169,14 @@ const getTimeEntries = async (filters: GetTimeEntriesQueryDTO) => {
       limit,
       totalCount,
       totalPages,
-      hasNext: page < totalPages,
-      hasPrev: page > 1,
+      hasNext: page < totalPages - 1,
+      hasPrev: page > 0,
     },
   };
 };
 
 const updateTimeEntry = async (
-  data: UpdateTimeEntryDataDTO
+  data: UpdateTimeEntryDataDTO,
 ): Promise<TimeEntryDTO> => {
   const { id, title, description, startDate, endDate, tags } = data;
 
@@ -225,7 +225,7 @@ const deleteTimeEntry = async (id: TimeEntryDTO["id"]): Promise<boolean> => {
     DELETE FROM time_entries
     WHERE id = $1
     `,
-    [id]
+    [id],
   );
 
   return rowCount === 1;

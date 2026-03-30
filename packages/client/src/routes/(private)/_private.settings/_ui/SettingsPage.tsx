@@ -4,7 +4,7 @@ import { AccountSettings, AuthUserInfo } from "~/widgets";
 
 export function SettingsPage() {
   return (
-    <Stack.VStack alignItems="stretch" gap="1rem">
+    <Stack.VStack alignItems="stretch" gap="1rem" p={4}>
       <AuthUserInfo />
       <AccountSettings />
       <SignOutButton />

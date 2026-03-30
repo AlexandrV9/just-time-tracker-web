@@ -39,14 +39,14 @@ export const AccountSettings = () => {
             <Link to="/settings/profile">
               <UserCircleIcon />
               <Text textStyle="md" as="span">
-                Edit Profile
+                {t("widgets.accountSettings.options.1")}
               </Text>
               <ChevronRightIcon />
             </Link>
           </Flex>
         </List.Item>
 
-        <List.Item display="flex" alignItems="center" gap="0.5rem">
+        {/* <List.Item display="flex" alignItems="center" gap="0.5rem">
           <Flex
             asChild
             width="full"
@@ -63,7 +63,7 @@ export const AccountSettings = () => {
               <ChevronRightIcon />
             </Link>
           </Flex>
-        </List.Item>
+        </List.Item> */}
       </List.Root>
     </Box>
   );

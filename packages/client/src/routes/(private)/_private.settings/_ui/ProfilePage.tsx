@@ -8,7 +8,7 @@ export function ProfilePage() {
   const { user } = useAuthStore();
 
   return (
-    <Stack.VStack alignItems="stretch" gap="2rem">
+    <Stack.VStack alignItems="stretch" gap="2rem" p={4}>
       <AuthUserInfo />
       <Stack.VStack>
         <Box

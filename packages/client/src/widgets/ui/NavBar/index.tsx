@@ -19,7 +19,7 @@ export function NavBar({ isVertical = false, ...props }: NavBarProps) {
   const location = useLocation();
 
   return (
-    <Box as="nav" p={1} {...props}>
+    <Box as="nav" {...props}>
       <List.Root
         display="grid"
         {...(isVertical
@@ -46,7 +46,6 @@ export function NavBar({ isVertical = false, ...props }: NavBarProps) {
 }
 
 NavBar.Item = NavBarItem;
-
 
 function checkIsActive(href: string, path: string) {
   return href === "/" ? path === "/" : path.startsWith(href);
