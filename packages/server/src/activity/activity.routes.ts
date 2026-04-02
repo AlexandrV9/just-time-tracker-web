@@ -5,7 +5,9 @@ export const activitiesRouter = new Hono();
 
 activitiesRouter.get("/", activityHandlers.getActivities);
 activitiesRouter.post("/", activityHandlers.createActivity);
-activitiesRouter.patch("/", activityHandlers.updateActivity);
-
 activitiesRouter.get("/:id", activityHandlers.getActivityById);
+activitiesRouter.patch("/:id", activityHandlers.updateActivity);
 activitiesRouter.delete("/:id", activityHandlers.deleteActivity);
+
+activitiesRouter.post("/:id/play", activityHandlers.playSession);
+activitiesRouter.post("/:id/pause", activityHandlers.pauseSession);

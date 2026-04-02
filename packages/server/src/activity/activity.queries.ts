@@ -1,12 +1,12 @@
 import type {
   CreateActivityDataDTO,
-  GetActivitiesQueryDTO,
+  GetActivitiesDTO,
   ActivityDTO,
   UpdateActivityDataDTO,
 } from "@to-do-list/shared";
 import { pool } from "../shared/index.js";
 
-const RETURNING_COLUMNS = `
+export const ACTIVITY_RETURNING_COLUMNS = `
   id,
   title,
   description,
@@ -14,7 +14,16 @@ const RETURNING_COLUMNS = `
   updated_at AS "updatedAt",
   created_by_id AS "createdById",
   tags,
-  last_activity_session_id AS "lastActivitySessionId",
+  last_activity_session_id AS "currentActivitySessionId",
+  COALESCE(
+    (
+      SELECT s.status::text
+      FROM activity_sessions s
+      WHERE s.id = last_activity_session_id
+      LIMIT 1
+    ),
+    'idle'
+  ) AS status,
   active_duration_ms AS "activeDurationMs",
   pause_duration_ms AS "pauseDurationMs"
 `;
@@ -75,7 +84,7 @@ const createActivity = async (
       active_duration_ms, pause_duration_ms
     )
     VALUES ($1, $2, $3, $4::text[], NOW(), NOW(), 0, 0)
-    RETURNING ${RETURNING_COLUMNS}
+    RETURNING ${ACTIVITY_RETURNING_COLUMNS}
   `;
 
   const { rows } = await pool.query(query, [
@@ -92,7 +101,7 @@ const getActivityById = async (
   id: ActivityDTO["id"],
 ): Promise<ActivityDTO | null> => {
   const query = `
-    SELECT ${RETURNING_COLUMNS}
+    SELECT ${ACTIVITY_RETURNING_COLUMNS}
     FROM activities
     WHERE id = $1
   `;
@@ -101,7 +110,7 @@ const getActivityById = async (
   return rows[0] ?? null;
 };
 
-const getActivities = async (filters: GetActivitiesQueryDTO) => {
+const getActivities = async (filters: GetActivitiesDTO) => {
   const {
     createdById,
     tags,
@@ -151,7 +160,7 @@ const getActivities = async (filters: GetActivitiesQueryDTO) => {
   const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
   const dataQuery = `
-    SELECT ${RETURNING_COLUMNS}
+    SELECT ${ACTIVITY_RETURNING_COLUMNS}
     FROM activities
     ${where}
     ORDER BY ${sortMap[sortBy]} ${sortOrder.toUpperCase()}
@@ -214,7 +223,7 @@ const updateActivity = async (
     UPDATE activities
     SET ${updates.join(", ")}
     WHERE id = $${params.length + 1}
-    RETURNING ${RETURNING_COLUMNS}
+    RETURNING ${ACTIVITY_RETURNING_COLUMNS}
   `;
   const { rows } = await pool.query(query, [...params, id]);
   return rows[0];

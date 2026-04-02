@@ -1,0 +1,21 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { StopActivityDTO } from "@to-do-list/shared";
+import {
+  activityApiService,
+  ACTIVITYES_QUERY_KEY,
+} from "~/shared/api/services";
+
+export const useStopActivity = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: StopActivityDTO) =>
+      activityApiService.stopActivity({ activityId: data.activityId }),
+    onSuccess: (response) => {
+      console.log(response);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: [ACTIVITYES_QUERY_KEY] });
+    },
+  });
+};

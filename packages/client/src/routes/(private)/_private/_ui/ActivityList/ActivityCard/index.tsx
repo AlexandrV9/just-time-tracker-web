@@ -1,56 +1,91 @@
 import type { ActivityDTO } from "@to-do-list/shared";
+import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { IconButton } from "@chakra-ui/react";
-import { Card, Flex, PauseIcon, PlayIcon, Text } from "~/shared/ui";
+import { Card, Flex, Text } from "~/shared/ui";
 import {
   convertSecondsToTimeObject,
   convertTimeObjectToTimeString,
 } from "~/shared/libs";
+import {
+  ACTIVITY_SESSION_QUERY_KEY,
+  activityApiService,
+} from "~/shared/api/services";
+import { ActivityActionButton } from "./ActivityActionButton";
+import { computeTrackedSeconds } from "./utils";
 
-type ActivityCardProps = {
+export type ActivityCardProps = {
   activity: ActivityDTO;
-  activeSessionId: string | null;
+  linkedActivityId: string | null;
   linkedSeconds: number;
-  onStart: (activity: ActivityDTO) => void;
-  onPause: (activity: ActivityDTO) => void;
+  onStart?: () => void;
+  onPause: () => void;
+  onStop?: () => void;
 };
-
-/** Total wall time tracked across all sessions (active + pause intervals). */
-const getTotalTrackedSeconds = (a: ActivityDTO): number =>
-  Math.floor((a.activeDurationMs + a.pauseDurationMs) / 1000);
 
 export const ActivityCard = ({
   activity,
-  activeSessionId,
+  linkedActivityId,
   linkedSeconds,
   onStart,
   onPause,
+  onStop,
 }: ActivityCardProps) => {
   const navigate = useNavigate();
-  const isLinkedToMain = activeSessionId === activity.id;
+  const isLinkedToMainStopwatch = linkedActivityId === activity.id;
 
-  const [displaySeconds, setDisplaySeconds] = useState(() =>
-    getTotalTrackedSeconds(activity),
-  );
+  const { data: sessionDetail } = useQuery({
+    queryKey: [ACTIVITY_SESSION_QUERY_KEY, activity.currentActivitySessionId],
+    queryFn: () =>
+      activityApiService.getActivitySession({
+        id: activity.currentActivitySessionId!,
+      }),
+    enabled: Boolean(activity.currentActivitySessionId),
+    select: (response) => (response.success ? response.data : undefined),
+  });
+
+  const openSegment = sessionDetail?.openSegment;
+
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    if (isLinkedToMain) {
-      return;
-    }
-    setDisplaySeconds(getTotalTrackedSeconds(activity));
-  }, [
-    isLinkedToMain,
-    activity.id,
-    activity.activeDurationMs,
-    activity.pauseDurationMs,
-    activity,
-  ]);
+    const needsLiveClock =
+      !isLinkedToMainStopwatch &&
+      openSegment !== undefined &&
+      openSegment !== null &&
+      openSegment.endedAt === null;
 
-  const displayedTime = useMemo(() => {
-    const seconds = isLinkedToMain ? linkedSeconds : displaySeconds;
-    return convertTimeObjectToTimeString(convertSecondsToTimeObject(seconds));
-  }, [isLinkedToMain, linkedSeconds, displaySeconds]);
+    if (!needsLiveClock) return;
+
+    const id = window.setInterval(() => setTick((t) => t + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [isLinkedToMainStopwatch, openSegment]);
+
+  const displaySeconds = useMemo(
+    () =>
+      computeTrackedSeconds({
+        isLinkedToMainStopwatch,
+        linkedSeconds,
+        activeDurationMs: activity.activeDurationMs,
+        pauseDurationMs: activity.pauseDurationMs,
+        openSegment,
+        tick,
+      }),
+    [
+      isLinkedToMainStopwatch,
+      linkedSeconds,
+      activity.activeDurationMs,
+      activity.pauseDurationMs,
+      openSegment,
+      tick,
+    ],
+  );
+
+  const displayedTime = useMemo(
+    () =>
+      convertTimeObjectToTimeString(convertSecondsToTimeObject(displaySeconds)),
+    [displaySeconds],
+  );
 
   const handleCardClick = useCallback(() => {
     navigate({
@@ -58,20 +93,6 @@ export const ActivityCard = ({
       params: { activityId: activity.id },
     });
   }, [navigate, activity.id]);
-
-  const handleToggle = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (isLinkedToMain) {
-        onPause(activity);
-      } else {
-        onStart(activity);
-      }
-    },
-    [isLinkedToMain, activity, onStart, onPause],
-  );
-
-  const showPause = isLinkedToMain;
 
   return (
     <Card.Root
@@ -87,10 +108,6 @@ export const ActivityCard = ({
       cursor="pointer"
       onClick={handleCardClick}
       _hover={{ bg: "bg.subtle" }}
-      {...(showPause && {
-        borderColor: "border.accent",
-        borderWidth: "1px",
-      })}
     >
       <Card.Body p={0} flex="1" display="flex" flexDirection="column" minH={0}>
         <Flex flex="1" minH={0}>
@@ -113,9 +130,12 @@ export const ActivityCard = ({
         >
           {displayedTime}
         </Text>
-        <IconButton variant="ghost" size="sm" onClick={handleToggle}>
-          {showPause ? <PauseIcon size={24} /> : <PlayIcon size={24} />}
-        </IconButton>
+        <ActivityActionButton
+          status={activity.status}
+          onStart={onStart}
+          onPause={onPause}
+          onStop={onStop}
+        />
       </Card.Footer>
     </Card.Root>
   );

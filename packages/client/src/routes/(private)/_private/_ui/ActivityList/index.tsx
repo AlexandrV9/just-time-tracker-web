@@ -1,7 +1,10 @@
 import { Box, Flex, List, Text } from "~/shared/ui";
 import { ActivityCard } from "./ActivityCard";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { activityApiService } from "~/shared/api/services";
+import {
+  activityApiService,
+  ACTIVITYES_QUERY_KEY,
+} from "~/shared/api/services";
 import { useInView } from "react-intersection-observer";
 import { useEffect, useMemo } from "react";
 import type { ActivityDTO } from "@to-do-list/shared";
@@ -10,6 +13,9 @@ import {
   convertSecondsToTimeObject,
   convertTimeObjectToTimeString,
 } from "~/shared/libs";
+import { usePauseActivity } from "./usePauseActivity";
+import { useStartActivity } from "./useStartActivity";
+import { useStopActivity } from "./useStopActivity";
 
 const DEMO_USER_ID = "550e8400-e29b-41d4-a716-446655440000";
 
@@ -56,22 +62,18 @@ const groupByDate = (activities: ActivityDTO[]): DateGroup[] => {
 };
 
 type ActivityListProps = {
-  activeSessionId: string | null;
-  linkedSeconds: number;
-  onStartActivity: (activity: ActivityDTO) => void;
-  onPauseActivity: (activity: ActivityDTO) => void;
+  linkedActivityId?: string | null;
+  linkedSeconds?: number;
 };
 
 export const ActivityList = ({
-  activeSessionId,
-  linkedSeconds,
-  onStartActivity,
-  onPauseActivity,
+  linkedActivityId = null,
+  linkedSeconds = 0,
 }: ActivityListProps) => {
   const { i18n } = useTranslation();
 
   const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
-    queryKey: ["activities"],
+    queryKey: [ACTIVITYES_QUERY_KEY],
     queryFn: (ctx) =>
       activityApiService.getActivities({
         page: ctx.pageParam,
@@ -93,6 +95,10 @@ export const ActivityList = ({
   );
 
   const groups = useMemo(() => groupByDate(activities), [activities]);
+
+  const { mutateAsync: pauseActivity } = usePauseActivity();
+  const { mutateAsync: startActivity } = useStartActivity();
+  const { mutateAsync: stopActivity } = useStopActivity();
 
   useEffect(() => {
     if (isLastInView && hasNextPage) {
@@ -149,10 +155,11 @@ export const ActivityList = ({
                 >
                   <ActivityCard
                     activity={activity}
-                    activeSessionId={activeSessionId}
+                    linkedActivityId={linkedActivityId}
                     linkedSeconds={linkedSeconds}
-                    onStart={onStartActivity}
-                    onPause={onPauseActivity}
+                    onStart={() => startActivity({ activityId: activity.id })}
+                    onPause={() => pauseActivity({ activityId: activity.id })}
+                    onStop={() => stopActivity({ activityId: activity.id })}
                   />
                 </List.Item>
               ))}

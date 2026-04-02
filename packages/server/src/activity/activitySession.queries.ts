@@ -1,7 +1,7 @@
 import type { ActivitySessionDTO } from "@to-do-list/shared";
 import { pool } from "../shared/index.js";
 
-const SESSION_RETURNING = `
+export const SESSION_RETURNING = `
   id,
   created_at AS "createdAt",
   updated_at AS "updatedAt",

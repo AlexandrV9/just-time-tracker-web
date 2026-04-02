@@ -12,6 +12,8 @@ export const createActivitiesTable = async () => {
 
       tags TEXT[] NOT NULL DEFAULT '{}',
 
+      last_activity_session_id UUID,
+
       active_duration_ms BIGINT NOT NULL DEFAULT 0,
       pause_duration_ms BIGINT NOT NULL DEFAULT 0,
 
@@ -31,6 +33,9 @@ export const createActivitiesTable = async () => {
 
     CREATE INDEX IF NOT EXISTS idx_activities_tags
       ON activities USING GIN (tags);
+
+    CREATE INDEX IF NOT EXISTS idx_activities_last_activity_session_id
+      ON activities(last_activity_session_id);
   `;
 
   try {

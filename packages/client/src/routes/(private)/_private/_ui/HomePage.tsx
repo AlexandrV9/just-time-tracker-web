@@ -12,8 +12,6 @@ export function HomePage() {
     stop,
     linkedActivityId,
     selectedActivity,
-    onStartActivity,
-    onPauseActivity,
   } = useHomeStopwatchSession();
 
   return (
@@ -38,10 +36,8 @@ export function HomePage() {
         />
       </Flex>
       <ActivityList
-        activeSessionId={linkedActivityId}
+        linkedActivityId={linkedActivityId}
         linkedSeconds={seconds}
-        onStartActivity={onStartActivity}
-        onPauseActivity={onPauseActivity}
       />
     </Box>
   );

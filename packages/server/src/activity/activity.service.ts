@@ -1,15 +1,19 @@
 import type {
   CreateActivityDataDTO,
   UpdateActivityDataDTO,
-  GetActivitiesQueryDTO,
+  GetActivitiesDTO,
   ActivityDTO,
-  GetActivityDataDTO,
+  GetActivityDTO,
   GetActivitiesResponseDTO,
 } from "@to-do-list/shared";
 
 import { activityRepository } from "./activity.repository.js";
 import { activityQueries } from "./activity.queries.js";
 import { DuplicateActivityTitleError } from "./activity.errors.js";
+import {
+  pauseActivitySession,
+  playActivitySession,
+} from "./activitySession.tracking.service.js";
 import type { ErrorResponse, SuccessResponse } from "src/shared/types.js";
 
 type CreateActivityResponse = SuccessResponse<ActivityDTO> | ErrorResponse;
@@ -103,7 +107,7 @@ const deleteActivity = async (data: {
 type GetActivityByIdResponse = SuccessResponse<ActivityDTO> | ErrorResponse;
 
 const getActivityById = async (
-  data: GetActivityDataDTO,
+  data: GetActivityDTO,
 ): Promise<GetActivityByIdResponse> => {
   try {
     const entry = await activityRepository.getActivityById(data.id);
@@ -134,7 +138,7 @@ type GetActivitiesResponse =
   | ErrorResponse;
 
 const getActivities = async (
-  filters: GetActivitiesQueryDTO,
+  filters: GetActivitiesDTO,
 ): Promise<GetActivitiesResponse> => {
   try {
     const result = await activityQueries.getActivities(filters);
@@ -153,10 +157,26 @@ const getActivities = async (
   }
 };
 
+type SessionTrackingResponse = Awaited<ReturnType<typeof playActivitySession>>;
+
+const playSession = async (
+  data: GetActivityDTO,
+): Promise<SessionTrackingResponse> => {
+  return playActivitySession(data.id);
+};
+
+const pauseSession = async (
+  data: GetActivityDTO,
+): Promise<SessionTrackingResponse> => {
+  return pauseActivitySession(data.id);
+};
+
 export const activitiesService = {
   createActivity,
   updateActivity,
   deleteActivity,
   getActivityById,
   getActivities,
+  playSession,
+  pauseSession,
 };

@@ -3,14 +3,21 @@ import { baseIdSchema, paginationResponseSchema } from "../common/index.js";
 
 const tagListSchema = z.array(z.string()).max(10).optional();
 
-export const activityBaseSchema = z.object({
+export const createActivitySchema = z.object({
   title: z.string().min(1, "title is required").max(255),
   description: z.string().max(1000).optional(),
   createdById: z.string().min(1, "createdById is required"),
   tags: tagListSchema,
 });
 
-export const createActivitySchema = activityBaseSchema;
+export type CreateActivityDataDTO = z.infer<typeof createActivitySchema>;
+
+export const activityStatusSchema = z.enum([
+  "idle",
+  "active",
+  "paused",
+  "finished",
+]);
 
 export const activitySchema = z.object({
   id: z.string().min(1, "id is required"),
@@ -20,19 +27,15 @@ export const activitySchema = z.object({
   updatedAt: z.iso.datetime(),
   createdById: z.string(),
   tags: z.array(z.string()),
-  lastActivitySessionId: z.string().nullable(),
+  status: activityStatusSchema,
+  currentActivitySessionId: z.string().nullable(),
   activeDurationMs: z.number().int().nonnegative(),
   pauseDurationMs: z.number().int().nonnegative(),
 });
 
-export const updateActivitySchema = z.object({
-  id: z.string().min(1, "id is required"),
-  title: z.string().min(1).max(255).optional(),
-  description: z.string().max(1000).optional().nullable(),
-  tags: tagListSchema,
-});
+export type ActivityDTO = z.infer<typeof activitySchema>;
 
-export const getActivitiesQuerySchema = z
+export const getActivitiesSchema = z
   .object({
     createdById: z.string().optional(),
     tags: z.array(z.string()).optional(),
@@ -59,15 +62,46 @@ export const getActivitiesQuerySchema = z
     }
   });
 
-export const activityIdSchema = baseIdSchema;
+export type GetActivityDTO = z.infer<typeof baseIdSchema>;
+export type GetActivitiesDTO = z.infer<typeof getActivitiesSchema>;
+
+export const updateActivitySchema = z.object({
+  id: z.string().min(1, "id is required"),
+  title: z.string().min(1).max(255).optional(),
+  description: z.string().max(1000).optional().nullable(),
+  tags: tagListSchema,
+});
+
+export type UpdateActivityDataDTO = z.infer<typeof updateActivitySchema>;
+
+export const deleteActivitySchema = baseIdSchema;
+
+export type DeleteActivityDataDTO = z.infer<typeof deleteActivitySchema>;
+
+export const startActivity = z.object({
+  activityId: z.string().min(1, "activityId is required"),
+});
+
+export type StartActivityDTO = z.infer<typeof startActivity>;
+
+export const pauseActivity = z.object({
+  activityId: z.string().min(1, "activityId is required"),
+});
+
+export type PauseActivityDTO = z.infer<typeof pauseActivity>;
+
+export const stopActivity = z.object({
+  activityId: z.string().min(1, "activityId is required"),
+});
+
+export type StopActivityDTO = z.infer<typeof stopActivity>;
 
 export const activitiesSchema = paginationResponseSchema(activitySchema);
 
-export type ActivityDTO = z.infer<typeof activitySchema>;
-
-export type CreateActivityDataDTO = z.infer<typeof createActivitySchema>;
-export type UpdateActivityDataDTO = z.infer<typeof updateActivitySchema>;
-export type DeleteActivityDataDTO = z.infer<typeof activityIdSchema>;
-export type GetActivitiesQueryDTO = z.infer<typeof getActivitiesQuerySchema>;
-export type GetActivityDataDTO = z.infer<typeof baseIdSchema>;
 export type GetActivitiesResponseDTO = z.infer<typeof activitiesSchema>;
+
+export const getActivitySession = z.object({
+  id: z.string().min(1, "Id is required"),
+});
+
+export type GetActivitySessionDTO = z.infer<typeof getActivitySession>;

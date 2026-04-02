@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { activityApiService } from "~/shared/api/services";
-import type { ActivityDTO } from "@to-do-list/shared";
 import type { StopwatchSelectedTemplate } from "./Stopwatch";
 import { useStopwatch } from "./Stopwatch/useStopwatch";
 
@@ -53,35 +52,8 @@ export function useHomeStopwatchSession() {
     [createActivityAsync, queryClient],
   );
 
-  const { seconds, status, start, pause, stop, discard } =
+  const { seconds, status, start, pause, stop } =
     useStopwatch(handleStopTimer);
-
-  const onStartActivity = useCallback(
-    (activity: ActivityDTO) => {
-      if (linkedActivityId !== null && linkedActivityId !== activity.id) {
-        discard();
-      }
-      const template: StopwatchSelectedTemplate = {
-        title: activity.title,
-        description: activity.description,
-      };
-      setLinkedActivityId(activity.id);
-      linkedActivityIdRef.current = activity.id;
-      setSelectedActivity(template);
-      selectedActivityRef.current = template;
-      start();
-    },
-    [linkedActivityId, discard, start],
-  );
-
-  const onPauseActivity = useCallback(
-    (activity: ActivityDTO) => {
-      if (linkedActivityId === activity.id) {
-        pause();
-      }
-    },
-    [linkedActivityId, pause],
-  );
 
   return {
     seconds,
@@ -91,7 +63,5 @@ export function useHomeStopwatchSession() {
     stop,
     linkedActivityId,
     selectedActivity,
-    onStartActivity,
-    onPauseActivity,
   };
 }

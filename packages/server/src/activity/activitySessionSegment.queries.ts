@@ -1,7 +1,7 @@
 import type { ActivitySessionSegmentDTO } from "@to-do-list/shared";
 import { pool } from "../shared/index.js";
 
-const SEGMENT_RETURNING = `
+export const SEGMENT_RETURNING = `
   id,
   created_at AS "createdAt",
   updated_at AS "updatedAt",
@@ -80,6 +80,23 @@ const listActivitySessionSegmentsBySessionId = async (
   return rows.map((r) => mapRow(r));
 };
 
+const getOpenSegmentForSession = async (
+  sessionId: string,
+): Promise<ActivitySessionSegmentDTO | null> => {
+  const { rows } = await pool.query(
+    `
+    SELECT ${SEGMENT_RETURNING}
+    FROM activity_session_segments
+    WHERE session_id = $1::uuid AND ended_at IS NULL
+    ORDER BY started_at DESC
+    LIMIT 1
+    `,
+    [sessionId],
+  );
+  const row = rows[0];
+  return row ? mapRow(row) : null;
+};
+
 export type UpdateActivitySessionSegmentInput = {
   id: string;
   startedAt?: string;
@@ -125,5 +142,6 @@ export const activitySessionSegmentQueries = {
   createActivitySessionSegment,
   getActivitySessionSegmentById,
   listActivitySessionSegmentsBySessionId,
+  getOpenSegmentForSession,
   updateActivitySessionSegment,
 };

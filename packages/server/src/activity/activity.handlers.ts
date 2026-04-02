@@ -3,10 +3,10 @@ import { validationUtils } from "../shared/index.js";
 
 import { activitiesService } from "./activity.service.js";
 import {
+  baseIdSchema,
   createActivitySchema,
   updateActivitySchema,
-  getActivitiesQuerySchema,
-  activityIdSchema,
+  getActivitiesSchema,
 } from "@to-do-list/shared";
 
 type ValidatorType = "json" | "param" | "query";
@@ -51,13 +51,13 @@ const createHandler = (
 export const activityHandlers = {
   getActivityById: createHandler(
     "param",
-    activityIdSchema,
+    baseIdSchema,
     activitiesService.getActivityById,
   ),
 
   getActivities: createHandler(
     "query",
-    getActivitiesQuerySchema,
+    getActivitiesSchema,
     activitiesService.getActivities,
   ),
 
@@ -76,7 +76,19 @@ export const activityHandlers = {
 
   deleteActivity: createHandler(
     "param",
-    activityIdSchema,
+    baseIdSchema,
     activitiesService.deleteActivity,
+  ),
+
+  playSession: createHandler(
+    "param",
+    baseIdSchema,
+    activitiesService.playSession,
+  ),
+
+  pauseSession: createHandler(
+    "param",
+    baseIdSchema,
+    activitiesService.pauseSession,
   ),
 };

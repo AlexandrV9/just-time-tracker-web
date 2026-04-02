@@ -78,11 +78,12 @@ const mapDbEntryToDTO = (entry: Record<string, unknown>): ActivityDTO => {
     tags: Array.isArray(entry.tags)
       ? (entry.tags as unknown[]).map(String)
       : [],
-    lastActivitySessionId:
-      entry.lastActivitySessionId === null ||
-      entry.lastActivitySessionId === undefined
+    status: entry.status as ActivityDTO["status"],
+    currentActivitySessionId:
+      entry.currentActivitySessionId === null ||
+      entry.currentActivitySessionId === undefined
         ? null
-        : String(entry.lastActivitySessionId),
+        : String(entry.currentActivitySessionId),
     activeDurationMs: Number(entry.activeDurationMs ?? 0),
     pauseDurationMs: Number(entry.pauseDurationMs ?? 0),
   };
