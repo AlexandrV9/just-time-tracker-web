@@ -3,6 +3,7 @@ import type { StopActivityDTO } from "@to-do-list/shared";
 import {
   activityApiService,
   ACTIVITYES_QUERY_KEY,
+  ACTIVITY_SESSION_QUERY_KEY,
 } from "~/shared/api/services";
 
 export const useStopActivity = () => {
@@ -11,11 +12,11 @@ export const useStopActivity = () => {
   return useMutation({
     mutationFn: (data: StopActivityDTO) =>
       activityApiService.stopActivity({ activityId: data.activityId }),
-    onSuccess: (response) => {
-      console.log(response);
-    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: [ACTIVITYES_QUERY_KEY] });
+      queryClient.invalidateQueries({
+        queryKey: [ACTIVITY_SESSION_QUERY_KEY],
+      });
     },
   });
 };

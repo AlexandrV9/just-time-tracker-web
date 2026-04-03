@@ -91,4 +91,10 @@ export const activityHandlers = {
     baseIdSchema,
     activitiesService.pauseSession,
   ),
+
+  stopSession: createHandler(
+    "param",
+    baseIdSchema,
+    activitiesService.stopSession,
+  ),
 };

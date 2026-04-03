@@ -10,7 +10,7 @@ import { activityQueries } from "./activity.queries.js";
 const getActivityById = async (id: string): Promise<ActivityDTO | null> => {
   const entry = await activityQueries.getActivityById(id);
   if (!entry) return null;
-  return mapDbEntryToDTO(entry);
+  return mapActivityRowToDTO(entry);
 };
 
 const createActivity = async (
@@ -21,7 +21,7 @@ const createActivity = async (
     data.title,
   );
   const entry = await activityQueries.createActivity({ ...data, title });
-  return mapDbEntryToDTO(entry);
+  return mapActivityRowToDTO(entry);
 };
 
 const updateActivity = async (
@@ -51,7 +51,7 @@ const updateActivity = async (
   if (!entry) {
     return null;
   }
-  return mapDbEntryToDTO(entry);
+  return mapActivityRowToDTO(entry);
 };
 
 const deleteActivity = async (
@@ -64,7 +64,8 @@ const deleteActivity = async (
   }
 };
 
-const mapDbEntryToDTO = (entry: Record<string, unknown>): ActivityDTO => {
+/** Coerce pg row (bigint ms may arrive as string) into ActivityDTO. */
+export function mapActivityRowToDTO(entry: Record<string, unknown>): ActivityDTO {
   return {
     id: String(entry.id),
     title: String(entry.title),
@@ -87,7 +88,7 @@ const mapDbEntryToDTO = (entry: Record<string, unknown>): ActivityDTO => {
     activeDurationMs: Number(entry.activeDurationMs ?? 0),
     pauseDurationMs: Number(entry.pauseDurationMs ?? 0),
   };
-};
+}
 
 export const activityRepository = {
   getActivityById,

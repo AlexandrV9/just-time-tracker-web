@@ -15,7 +15,6 @@ import {
 } from "~/shared/libs";
 import { usePauseActivity } from "./usePauseActivity";
 import { useStartActivity } from "./useStartActivity";
-import { useStopActivity } from "./useStopActivity";
 
 const DEMO_USER_ID = "550e8400-e29b-41d4-a716-446655440000";
 
@@ -98,7 +97,6 @@ export const ActivityList = ({
 
   const { mutateAsync: pauseActivity } = usePauseActivity();
   const { mutateAsync: startActivity } = useStartActivity();
-  const { mutateAsync: stopActivity } = useStopActivity();
 
   useEffect(() => {
     if (isLastInView && hasNextPage) {
@@ -159,7 +157,6 @@ export const ActivityList = ({
                     linkedSeconds={linkedSeconds}
                     onStart={() => startActivity({ activityId: activity.id })}
                     onPause={() => pauseActivity({ activityId: activity.id })}
-                    onStop={() => stopActivity({ activityId: activity.id })}
                   />
                 </List.Item>
               ))}

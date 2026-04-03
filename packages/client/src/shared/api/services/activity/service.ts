@@ -42,15 +42,26 @@ export class ActivityService {
   }
 
   startActivity(data: StartActivityDTO) {
-    return baseApi.patch<ActivityDTO>(`/api/activities`, { data });
+    return baseApi.post<{
+      activity: ActivityDTO;
+      session: ActivitySessionDTO;
+      segment: ActivitySessionSegmentDTO;
+    }>(`/api/activities/${data.activityId}/start`);
   }
 
   pauseActivity(data: PauseActivityDTO) {
-    return baseApi.post<ActivityDTO>(`/api/activities`, { data });
+    return baseApi.post<{
+      activity: ActivityDTO;
+      session: ActivitySessionDTO;
+      segment: ActivitySessionSegmentDTO;
+    }>(`/api/activities/${data.activityId}/pause`);
   }
 
-  stopActivity(data: StopActivityDTO) {
-    return baseApi.post<ActivityDTO>(`/api/activities`, { data });
+  finishActivity(data: StopActivityDTO) {
+    return baseApi.post<{
+      activity: ActivityDTO;
+      session: ActivitySessionDTO;
+    }>(`/api/activities/${data.activityId}/finish`);
   }
 
   getActivitySession(data: GetActivitySessionDTO) {
@@ -59,6 +70,10 @@ export class ActivityService {
       openSegment: ActivitySessionSegmentDTO | null;
     }>(`/api/activity-sessions/${data.id}`);
   }
+
+  // getCurrentSession
+
+  // quickStartActivity
 }
 
 export const activityApiService = new ActivityService();

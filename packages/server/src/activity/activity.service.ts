@@ -7,10 +7,14 @@ import type {
   GetActivitiesResponseDTO,
 } from "@to-do-list/shared";
 
-import { activityRepository } from "./activity.repository.js";
+import {
+  activityRepository,
+  mapActivityRowToDTO,
+} from "./activity.repository.js";
 import { activityQueries } from "./activity.queries.js";
 import { DuplicateActivityTitleError } from "./activity.errors.js";
 import {
+  finishActivitySession,
   pauseActivitySession,
   playActivitySession,
 } from "./activitySession.tracking.service.js";
@@ -145,7 +149,12 @@ const getActivities = async (
 
     return {
       success: true,
-      data: result,
+      data: {
+        ...result,
+        data: result.data.map((row) =>
+          mapActivityRowToDTO(row as Record<string, unknown>),
+        ),
+      },
     };
   } catch (error) {
     console.error("Get activities error:", error);
@@ -171,6 +180,12 @@ const pauseSession = async (
   return pauseActivitySession(data.id);
 };
 
+const stopSession = async (
+  data: GetActivityDTO,
+): Promise<SessionTrackingResponse> => {
+  return finishActivitySession(data.id);
+};
+
 export const activitiesService = {
   createActivity,
   updateActivity,
@@ -179,4 +194,5 @@ export const activitiesService = {
   getActivities,
   playSession,
   pauseSession,
+  stopSession,
 };

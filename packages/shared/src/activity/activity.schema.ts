@@ -12,12 +12,7 @@ export const createActivitySchema = z.object({
 
 export type CreateActivityDataDTO = z.infer<typeof createActivitySchema>;
 
-export const activityStatusSchema = z.enum([
-  "idle",
-  "active",
-  "paused",
-  "finished",
-]);
+export const activityStatusSchema = z.enum(["idle", "active", "paused"]);
 
 export const activitySchema = z.object({
   id: z.string().min(1, "id is required"),
@@ -27,7 +22,7 @@ export const activitySchema = z.object({
   updatedAt: z.iso.datetime(),
   createdById: z.string(),
   tags: z.array(z.string()),
-  status: activityStatusSchema,
+  status: activityStatusSchema, // возможно убрать в будущем
   currentActivitySessionId: z.string().nullable(),
   activeDurationMs: z.number().int().nonnegative(),
   pauseDurationMs: z.number().int().nonnegative(),

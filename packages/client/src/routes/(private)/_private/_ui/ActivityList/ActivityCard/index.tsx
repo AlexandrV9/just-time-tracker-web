@@ -19,8 +19,7 @@ export type ActivityCardProps = {
   linkedActivityId: string | null;
   linkedSeconds: number;
   onStart?: () => void;
-  onPause: () => void;
-  onStop?: () => void;
+  onPause?: () => void;
 };
 
 export const ActivityCard = ({
@@ -29,7 +28,6 @@ export const ActivityCard = ({
   linkedSeconds,
   onStart,
   onPause,
-  onStop,
 }: ActivityCardProps) => {
   const navigate = useNavigate();
   const isLinkedToMainStopwatch = linkedActivityId === activity.id;
@@ -46,6 +44,10 @@ export const ActivityCard = ({
 
   const openSegment = sessionDetail?.openSegment;
 
+  /** Avoid showing pause while the list is stale: session may already have an open pause segment. */
+  const showPauseButton =
+    activity.status === "active" && openSegment?.type !== "pause";
+
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
@@ -53,7 +55,8 @@ export const ActivityCard = ({
       !isLinkedToMainStopwatch &&
       openSegment !== undefined &&
       openSegment !== null &&
-      openSegment.endedAt === null;
+      openSegment.endedAt == null &&
+      openSegment.type === "active";
 
     if (!needsLiveClock) return;
 
@@ -129,12 +132,11 @@ export const ActivityCard = ({
           fontFamily="Roboto Mono, monospace"
         >
           {displayedTime}
-        </Text>
+        </Text> 
         <ActivityActionButton
-          status={activity.status}
+          showPause={showPauseButton}
           onStart={onStart}
           onPause={onPause}
-          onStop={onStop}
         />
       </Card.Footer>
     </Card.Root>

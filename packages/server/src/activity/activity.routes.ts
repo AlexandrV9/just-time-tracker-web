@@ -11,3 +11,4 @@ activitiesRouter.delete("/:id", activityHandlers.deleteActivity);
 
 activitiesRouter.post("/:id/play", activityHandlers.playSession);
 activitiesRouter.post("/:id/pause", activityHandlers.pauseSession);
+activitiesRouter.post("/:id/stop", activityHandlers.stopSession);

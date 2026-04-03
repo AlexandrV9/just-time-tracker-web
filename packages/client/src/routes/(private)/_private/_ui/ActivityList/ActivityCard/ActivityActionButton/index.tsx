@@ -1,20 +1,18 @@
 import { IconButton } from "@chakra-ui/react";
-import type { ActivityDTO } from "@to-do-list/shared";
 import type { MouseEvent, ReactNode } from "react";
-import { PlayIcon, PauseIcon } from "~/shared/ui";
+import { Flex, PauseIcon, PlayIcon } from "~/shared/ui";
 
 export type ActivityActionButtonProps = {
-  status: ActivityDTO["status"];
+  /** True while the session has an open active segment (show pause). */
+  showPause: boolean;
   onStart?: () => void;
-  onPause: () => void;
-  onStop?: () => void;
+  onPause?: () => void;
 };
 
 export function ActivityActionButton({
-  status,
+  showPause,
   onStart,
   onPause,
-  onStop,
 }: ActivityActionButtonProps) {
   const renderIconButton = (icon: ReactNode, onClick?: () => void) => (
     <IconButton
@@ -29,15 +27,13 @@ export function ActivityActionButton({
     </IconButton>
   );
 
-  switch (status) {
-    case "idle":
-    case "finished":
-      return renderIconButton(<PlayIcon size={24} />, onStart);
-    case "active":
-      return renderIconButton(<PauseIcon size={24} />, onPause);
-    case "paused":
-      return renderIconButton(<PlayIcon size={24} />, onStop);
-    default:
-      return null;
+  if (showPause) {
+    return (
+      <Flex gap={0} alignItems="center">
+        {renderIconButton(<PauseIcon size={24} />, onPause)}
+      </Flex>
+    );
   }
+
+  return renderIconButton(<PlayIcon size={24} />, onStart);
 }
