@@ -31,7 +31,7 @@ export type InsertActivitySessionSegmentInput = {
   endedAt: string | null;
 };
 
-const createActivitySessionSegment = async (
+const createSegment = async (
   input: InsertActivitySessionSegmentInput,
 ): Promise<ActivitySessionSegmentDTO> => {
   const { sessionId, type, startedAt, endedAt } = input;
@@ -54,7 +54,7 @@ const createActivitySessionSegment = async (
   return mapRow(rows[0]);
 };
 
-const getActivitySessionSegmentById = async (
+const getSegmentById = async (
   id: string,
 ): Promise<ActivitySessionSegmentDTO | null> => {
   const { rows } = await pool.query(
@@ -65,7 +65,7 @@ const getActivitySessionSegmentById = async (
   return row ? mapRow(row) : null;
 };
 
-const listActivitySessionSegmentsBySessionId = async (
+const getSegmentsBySessionId = async (
   sessionId: string,
 ): Promise<ActivitySessionSegmentDTO[]> => {
   const { rows } = await pool.query(
@@ -80,7 +80,7 @@ const listActivitySessionSegmentsBySessionId = async (
   return rows.map((r) => mapRow(r));
 };
 
-const getOpenSegmentForSession = async (
+const getSegmentBySessionId = async (
   sessionId: string,
 ): Promise<ActivitySessionSegmentDTO | null> => {
   const { rows } = await pool.query(
@@ -120,7 +120,7 @@ const updateActivitySessionSegment = async (
   add("ended_at", rest.endedAt);
 
   if (!updates.length) {
-    return getActivitySessionSegmentById(id);
+    return getSegmentBySessionId(id);
   }
 
   params.push(new Date().toISOString());
@@ -139,9 +139,9 @@ const updateActivitySessionSegment = async (
 };
 
 export const activitySessionSegmentQueries = {
-  createActivitySessionSegment,
-  getActivitySessionSegmentById,
-  listActivitySessionSegmentsBySessionId,
-  getOpenSegmentForSession,
+  createSegment,
+  getSegmentById,
+  getSegmentBySessionId,
+  getSegmentsBySessionId,
   updateActivitySessionSegment,
 };

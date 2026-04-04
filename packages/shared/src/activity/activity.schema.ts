@@ -1,5 +1,6 @@
 import z from "zod";
 import { baseIdSchema, paginationResponseSchema } from "../common/index.js";
+import { activitySessionSchema } from "./activitySession.schema.js";
 
 const tagListSchema = z.array(z.string()).max(10).optional();
 
@@ -84,11 +85,11 @@ export const pauseActivity = z.object({
 
 export type PauseActivityDTO = z.infer<typeof pauseActivity>;
 
-export const stopActivity = z.object({
+export const finishActivity = z.object({
   activityId: z.string().min(1, "activityId is required"),
 });
 
-export type StopActivityDTO = z.infer<typeof stopActivity>;
+export type FinishActivityDTO = z.infer<typeof finishActivity>;
 
 export const activitiesSchema = paginationResponseSchema(activitySchema);
 
@@ -99,3 +100,39 @@ export const getActivitySession = z.object({
 });
 
 export type GetActivitySessionDTO = z.infer<typeof getActivitySession>;
+
+export const getActivitySessions = z.object({
+  activityId: z.string().min(1, "activityId is required"),
+  fromDate: z.iso.datetime().optional(),
+  toDate: z.iso.datetime().optional(),
+});
+
+export type GetActivitySessionsDTO = z.infer<typeof getActivitySessions>;
+
+export const getActivitySessionsSchema = z
+  .object({
+    fromDate: z.iso.datetime().optional(),
+    toDate: z.iso.datetime().optional(),
+    sortBy: z
+      .enum(["startedAt", "endedAt", "status"])
+      .default("startedAt")
+      .optional(),
+    sortOrder: z.enum(["asc", "desc"]).default("desc").optional(),
+  })
+  .superRefine(({ fromDate, toDate }, ctx) => {
+    if (fromDate && toDate && new Date(toDate) < new Date(fromDate)) {
+      ctx.addIssue({
+        path: ["toDate"],
+        message: "toDate must be after fromDate",
+        code: "custom",
+      });
+    }
+  });
+
+export const getActivitySessionsResponseSchema = z.object({
+  sessions: z.array(activitySessionSchema),
+});
+
+export type GetActivitySessionsResponseDTO = z.infer<
+  typeof getActivitySessionsResponseSchema
+>;

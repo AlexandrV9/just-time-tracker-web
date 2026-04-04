@@ -5,6 +5,9 @@ import type {
   ActivityDTO,
   GetActivityDTO,
   GetActivitiesResponseDTO,
+  GetActivitySessionsDTO,
+  GetActivitySessionsResponseDTO,
+  ActivitySessionDTO,
 } from "@to-do-list/shared";
 
 import {
@@ -12,12 +15,12 @@ import {
   mapActivityRowToDTO,
 } from "./activity.repository.js";
 import { activityQueries } from "./activity.queries.js";
-import { DuplicateActivityTitleError } from "./activity.errors.js";
 import {
   finishActivitySession,
   pauseActivitySession,
   playActivitySession,
 } from "./activitySession.tracking.service.js";
+import { activitySessionQueries } from "./activitySession.queries.js";
 import type { ErrorResponse, SuccessResponse } from "src/shared/types.js";
 
 type CreateActivityResponse = SuccessResponse<ActivityDTO> | ErrorResponse;
@@ -62,12 +65,6 @@ const updateActivity = async (
       data: entry,
     };
   } catch (error) {
-    if (error instanceof DuplicateActivityTitleError) {
-      return {
-        success: false,
-        message: "An activity with this name already exists",
-      };
-    }
     console.error("Update activity error:", error);
 
     return {
@@ -180,10 +177,48 @@ const pauseSession = async (
   return pauseActivitySession(data.id);
 };
 
-const stopSession = async (
+const finishActivity = async (
   data: GetActivityDTO,
 ): Promise<SessionTrackingResponse> => {
   return finishActivitySession(data.id);
+};
+
+type GetActivitySessionsByActivityIdResponse =
+  | SuccessResponse<GetActivitySessionsResponseDTO>
+  | ErrorResponse;
+
+const getActivitySessionsByActivityId = async (
+  data: GetActivitySessionsDTO,
+): Promise<GetActivitySessionsByActivityIdResponse> => {
+  try {
+    const activity = await activityRepository.getActivityById(data.activityId);
+
+    if (!activity) {
+      return {
+        success: false,
+        message: "Activity not found",
+      };
+    }
+
+    const sessions: ActivitySessionDTO[] =
+      await activitySessionQueries.getActivitySessionsByActivityId(
+        data.activityId,
+        data.fromDate ?? null,
+        data.toDate ?? null,
+      );
+
+    return {
+      success: true,
+      data: { sessions },
+    };
+  } catch (error) {
+    console.error("List activity sessions error:", error);
+
+    return {
+      success: false,
+      message: "Failed to fetch activity sessions",
+    };
+  }
 };
 
 export const activitiesService = {
@@ -194,5 +229,6 @@ export const activitiesService = {
   getActivities,
   playSession,
   pauseSession,
-  stopSession,
+  finishActivity,
+  getActivitySessionsByActivityId,
 };

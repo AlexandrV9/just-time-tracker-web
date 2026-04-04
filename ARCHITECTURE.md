@@ -397,7 +397,7 @@ POST /activities/:id/finish
 {
   activity: ActivityDTO;
   session: ActivitySessionDTO;
-  openSegment: ActivitySessionSegmentDTO | null;
+  segment: ActivitySessionSegmentDTO | null;
 }
 ```
 

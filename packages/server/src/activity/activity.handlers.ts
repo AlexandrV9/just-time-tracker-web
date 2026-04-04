@@ -1,3 +1,4 @@
+import type { Context } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { validationUtils } from "../shared/index.js";
 
@@ -7,6 +8,7 @@ import {
   createActivitySchema,
   updateActivitySchema,
   getActivitiesSchema,
+  getActivitySessionsSchema,
 } from "@to-do-list/shared";
 
 type ValidatorType = "json" | "param" | "query";
@@ -92,9 +94,53 @@ export const activityHandlers = {
     activitiesService.pauseSession,
   ),
 
-  stopSession: createHandler(
+  finishSession: createHandler(
     "param",
     baseIdSchema,
-    activitiesService.stopSession,
+    activitiesService.finishActivity,
   ),
+
+  getActivitySessionsByActivityId: async (c: Context) => {
+    const activityId = c.req.param("id");
+
+    if (!activityId) {
+      return c.json({ success: false, message: "Missing activity id" }, 400);
+    }
+
+    const parsed = getActivitySessionsSchema.safeParse({
+      fromDate: c.req.query("fromDate") ?? undefined,
+      toDate: c.req.query("toDate") ?? undefined,
+    });
+
+    if (!parsed.success) {
+      return c.json(
+        {
+          success: false,
+          message: "Validation failed",
+          data: validationUtils.formatZodErrors(parsed.error.message),
+        },
+        400,
+      );
+    }
+
+    try {
+      const responseData =
+        await activitiesService.getActivitySessionsByActivityId({
+          activityId,
+          ...parsed.data,
+        });
+
+      return c.json(responseData);
+    } catch (error) {
+      console.error("Handler error:", error);
+
+      return c.json(
+        {
+          success: false,
+          message: "Internal server error",
+        },
+        500,
+      );
+    }
+  },
 };

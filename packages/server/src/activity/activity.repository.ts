@@ -4,7 +4,6 @@ import type {
   UpdateActivityDataDTO,
   DeleteActivityDataDTO,
 } from "@to-do-list/shared";
-import { DuplicateActivityTitleError } from "./activity.errors.js";
 import { activityQueries } from "./activity.queries.js";
 
 const getActivityById = async (id: string): Promise<ActivityDTO | null> => {
@@ -36,14 +35,7 @@ const updateActivity = async (
 
   if (data.title !== undefined) {
     const trimmed = data.title.trim();
-    const taken = await activityQueries.titleExistsForUser(
-      String(existing.createdById),
-      trimmed,
-      data.id,
-    );
-    if (taken) {
-      throw new DuplicateActivityTitleError();
-    }
+
     payload = { ...payload, title: trimmed };
   }
 
@@ -65,7 +57,9 @@ const deleteActivity = async (
 };
 
 /** Coerce pg row (bigint ms may arrive as string) into ActivityDTO. */
-export function mapActivityRowToDTO(entry: Record<string, unknown>): ActivityDTO {
+export function mapActivityRowToDTO(
+  entry: Record<string, unknown>,
+): ActivityDTO {
   return {
     id: String(entry.id),
     title: String(entry.title),

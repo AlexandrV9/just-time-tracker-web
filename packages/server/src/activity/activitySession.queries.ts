@@ -1,4 +1,8 @@
-import type { ActivitySessionDTO } from "@to-do-list/shared";
+import type {
+  ActivitySessionDTO,
+  CreateActivitySessionDataDTO,
+  UpdateActivitySessionDataDTO,
+} from "@to-do-list/shared";
 import { pool } from "../shared/index.js";
 
 export const SESSION_RETURNING = `
@@ -28,17 +32,8 @@ const mapRow = (row: Record<string, unknown>): ActivitySessionDTO => ({
   pauseDurationMs: Number(row.pauseDurationMs ?? 0),
 });
 
-export type InsertActivitySessionInput = {
-  activityId: string;
-  startedAt: string;
-  endedAt: string | null;
-  status: ActivitySessionDTO["status"];
-  activeDurationMs?: number;
-  pauseDurationMs?: number;
-};
-
 const createActivitySession = async (
-  input: InsertActivitySessionInput,
+  data: CreateActivitySessionDataDTO,
 ): Promise<ActivitySessionDTO> => {
   const {
     activityId,
@@ -47,7 +42,7 @@ const createActivitySession = async (
     status,
     activeDurationMs = 0,
     pauseDurationMs = 0,
-  } = input;
+  } = data;
 
   const query = `
     INSERT INTO activity_sessions (
@@ -81,17 +76,21 @@ const getActivitySessionById = async (
   return row ? mapRow(row) : null;
 };
 
-const listActivitySessionsByActivityId = async (
+const getActivitySessionsByActivityId = async (
   activityId: string,
+  fromDate: string | null,
+  toDate: string | null,
 ): Promise<ActivitySessionDTO[]> => {
   const { rows } = await pool.query(
     `
     SELECT ${SESSION_RETURNING}
     FROM activity_sessions
     WHERE activity_id = $1
+      AND started_at < COALESCE($2::timestamptz, 'infinity'::timestamptz)
+      AND COALESCE(ended_at, NOW()) > COALESCE($3::timestamptz, '-infinity'::timestamptz)
     ORDER BY started_at DESC
     `,
-    [activityId],
+    [activityId, toDate, fromDate],
   );
   return rows.map((r) => mapRow(r));
 };
@@ -106,9 +105,9 @@ export type UpdateActivitySessionInput = {
 };
 
 const updateActivitySession = async (
-  input: UpdateActivitySessionInput,
+  data: UpdateActivitySessionDataDTO,
 ): Promise<ActivitySessionDTO | null> => {
-  const { id, ...rest } = input;
+  const { id, ...rest } = data;
   const updates: string[] = [];
   const params: unknown[] = [];
 
@@ -146,6 +145,6 @@ const updateActivitySession = async (
 export const activitySessionQueries = {
   createActivitySession,
   getActivitySessionById,
-  listActivitySessionsByActivityId,
+  getActivitySessionsByActivityId,
   updateActivitySession,
 };

@@ -7,7 +7,7 @@ import {
 } from "~/shared/api/services";
 import { useInView } from "react-intersection-observer";
 import { useEffect, useMemo } from "react";
-import type { ActivityDTO } from "@to-do-list/shared";
+import { type ActivityDTO } from "@to-do-list/shared";
 import { useTranslation } from "~/shared/hooks";
 import {
   convertSecondsToTimeObject,
@@ -15,6 +15,7 @@ import {
 } from "~/shared/libs";
 import { usePauseActivity } from "./usePauseActivity";
 import { useStartActivity } from "./useStartActivity";
+import { useFinishActivity } from "./useFinishActivity";
 
 const DEMO_USER_ID = "550e8400-e29b-41d4-a716-446655440000";
 
@@ -95,8 +96,9 @@ export const ActivityList = ({
 
   const groups = useMemo(() => groupByDate(activities), [activities]);
 
-  const { mutateAsync: pauseActivity } = usePauseActivity();
   const { mutateAsync: startActivity } = useStartActivity();
+  const { mutateAsync: pauseActivity } = usePauseActivity();
+  const { mutateAsync: finishActivity } = useFinishActivity();
 
   useEffect(() => {
     if (isLastInView && hasNextPage) {
@@ -153,10 +155,12 @@ export const ActivityList = ({
                 >
                   <ActivityCard
                     activity={activity}
+                    dayKey={group.dateKey}
                     linkedActivityId={linkedActivityId}
                     linkedSeconds={linkedSeconds}
-                    onStart={() => startActivity({ activityId: activity.id })}
-                    onPause={() => pauseActivity({ activityId: activity.id })}
+                    onStart={startActivity}
+                    onPause={pauseActivity}
+                    onFinish={finishActivity}
                   />
                 </List.Item>
               ))}

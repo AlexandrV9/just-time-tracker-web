@@ -11,7 +11,9 @@ import type {
   GetActivitiesDTO,
   GetActivitiesResponseDTO,
   PauseActivityDTO,
-  StopActivityDTO,
+  FinishActivityDTO,
+  GetActivitySessionsDTO,
+  GetActivitySessionsResponseDTO,
 } from "@to-do-list/shared";
 import { baseApi } from "../base";
 import type { RequestResponse } from "../types";
@@ -57,7 +59,7 @@ export class ActivityService {
     }>(`/api/activities/${data.activityId}/pause`);
   }
 
-  finishActivity(data: StopActivityDTO) {
+  finishActivity(data: FinishActivityDTO) {
     return baseApi.post<{
       activity: ActivityDTO;
       session: ActivitySessionDTO;
@@ -67,13 +69,21 @@ export class ActivityService {
   getActivitySession(data: GetActivitySessionDTO) {
     return baseApi.get<{
       session: ActivitySessionDTO;
-      openSegment: ActivitySessionSegmentDTO | null;
+      segment: ActivitySessionSegmentDTO | null;
     }>(`/api/activity-sessions/${data.id}`);
   }
 
-  // getCurrentSession
-
-  // quickStartActivity
+  getActivitySessions(
+    data: GetActivitySessionsDTO,
+  ): Promise<RequestResponse<GetActivitySessionsResponseDTO, unknown>> {
+    const { activityId, fromDate, toDate } = data;
+    return baseApi.get<GetActivitySessionsResponseDTO>(
+      `/api/activities/${activityId}/sessions`,
+      {
+        params: { fromDate, toDate },
+      },
+    );
+  }
 }
 
 export const activityApiService = new ActivityService();

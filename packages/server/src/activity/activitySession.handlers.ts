@@ -14,12 +14,12 @@ export const activitySessionHandlers = {
       return c.json({ success: false, message: "Session not found" }, 404);
     }
 
-    const openSegment =
-      await activitySessionSegmentQueries.getOpenSegmentForSession(id);
+    const segment =
+      await activitySessionSegmentQueries.getSegmentBySessionId(id);
 
     return c.json({
       success: true,
-      data: { session, openSegment },
+      data: { session, segment },
     });
   },
 };
