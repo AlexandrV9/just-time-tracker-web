@@ -16,6 +16,7 @@ export const activitySessionSchema = z.object({
   status: activitySessionStatusSchema,
   activeDurationMs: z.number().int().nonnegative(),
   pauseDurationMs: z.number().int().nonnegative(),
+  lastHeartbeatAt: z.iso.datetime().optional(), // последний момент, когда мы уверены, что пользователь работал в рамках ЭТОЙ конкретной сессии
 });
 
 export type ActivitySessionDTO = z.infer<typeof activitySessionSchema>;

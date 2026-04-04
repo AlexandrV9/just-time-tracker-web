@@ -35,7 +35,6 @@ export const getActivitiesSchema = z
     createdById: z.string().optional(),
     tags: z.array(z.string()).optional(),
     search: z.string().optional(),
-    /** Exact match on title (e.g. history for one activity name) */
     exactTitle: z.string().min(1).max(255).optional(),
     page: z.coerce.number().int().min(0).default(0),
     limit: z.coerce.number().int().min(1).max(100).default(10),
