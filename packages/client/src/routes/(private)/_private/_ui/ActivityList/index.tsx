@@ -19,6 +19,14 @@ import { useFinishActivity } from "./useFinishActivity";
 
 const DEMO_USER_ID = "550e8400-e29b-41d4-a716-446655440000";
 
+/** YYYY-MM-DD in the user's local timezone (aligned with date headers and session ranges). */
+const getLocalCalendarDayKey = (d: Date): string => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
 type DateGroup = {
   dateKey: string;
   label: string;
@@ -44,7 +52,7 @@ const groupByDate = (activities: ActivityDTO[]): DateGroup[] => {
   const map = new Map<string, ActivityDTO[]>();
 
   for (const activity of activities) {
-    const dateKey = new Date(activity.createdAt).toISOString().split("T")[0];
+    const dateKey = getLocalCalendarDayKey(new Date(activity.createdAt));
     const group = map.get(dateKey);
     if (group) {
       group.push(activity);
@@ -95,6 +103,7 @@ export const ActivityList = ({
   );
 
   const groups = useMemo(() => groupByDate(activities), [activities]);
+  const todayKey = getLocalCalendarDayKey(new Date());
 
   const { mutateAsync: startActivity } = useStartActivity();
   const { mutateAsync: pauseActivity } = usePauseActivity();
@@ -146,24 +155,27 @@ export const ActivityList = ({
               gridTemplateColumns="repeat(2, minmax(0, 1fr))"
               alignItems="stretch"
             >
-              {group.activities.map((activity) => (
-                <List.Item
-                  key={activity.id}
-                  display="flex"
-                  minH="0"
-                  alignSelf="stretch"
-                >
-                  <ActivityCard
-                    activity={activity}
-                    dayKey={group.dateKey}
-                    linkedActivityId={linkedActivityId}
-                    linkedSeconds={linkedSeconds}
-                    onStart={startActivity}
-                    onPause={pauseActivity}
-                    onFinish={finishActivity}
-                  />
-                </List.Item>
-              ))}
+              {group.activities.map((activity) => {
+                return (
+                  <List.Item
+                    key={activity.id}
+                    display="flex"
+                    minH="0"
+                    alignSelf="stretch"
+                  >
+                    <ActivityCard
+                      activity={activity}
+                      dayKey={group.dateKey}
+                      showControlButtons={group.dateKey === todayKey}
+                      linkedActivityId={linkedActivityId}
+                      linkedSeconds={linkedSeconds}
+                      onStart={startActivity}
+                      onPause={pauseActivity}
+                      onFinish={finishActivity}
+                    />
+                  </List.Item>
+                );
+              })}
             </List.Root>
           </Box>
         );

@@ -33,6 +33,7 @@ export const computeTrackedSeconds = (
 export type ActivityCardProps = {
   activity: ActivityDTO;
   dayKey: string;
+  showControlButtons: boolean;
   linkedActivityId: string | null;
   linkedSeconds: number;
   onStart?: (activityId: ActivityDTO["id"]) => void;
@@ -43,6 +44,7 @@ export type ActivityCardProps = {
 export const ActivityCard = ({
   activity,
   dayKey,
+  showControlButtons,
   onStart,
   onPause,
   onFinish,
@@ -60,25 +62,19 @@ export const ActivityCard = ({
       activityApiService.getActivitySession({
         id: activity.currentActivitySessionId!,
       }),
-    enabled: Boolean(activity.currentActivitySessionId),
+    enabled: showControlButtons && Boolean(activity.currentActivitySessionId),
     select: (response) => (response.success ? response.data : undefined),
   });
 
   const { data: sessions = [] } = useQuery({
-    queryKey: [
-      ACTIVITY_SESSIONS_QUERY_KEY,
-      activity.id,
-      fromDate,
-      toDate,
-    ],
+    queryKey: [ACTIVITY_SESSIONS_QUERY_KEY, activity.id, fromDate, toDate],
     queryFn: () =>
       activityApiService.getActivitySessions({
         activityId: activity.id,
         fromDate,
         toDate,
       }),
-    select: (response) =>
-      response.success ? response.data.sessions : [],
+    select: (response) => (response.success ? response.data.sessions : []),
   });
 
   const { session } = data ?? {};
@@ -97,6 +93,76 @@ export const ActivityCard = ({
       params: { activityId: activity.id },
     });
   }, [navigate, activity.id]);
+
+  const renderConrolButtons = () => {
+    if (!showControlButtons) {
+      return null;
+    }
+
+    if (session?.status === "active") {
+      return (
+        <Flex justify="right" alignItems="center" gap="1rem">
+          <IconButton
+            variant="ghost"
+            size="2xs"
+            onClick={(event: MouseEvent<HTMLButtonElement>) => {
+              event.stopPropagation();
+              onPause?.(activity.id);
+            }}
+          >
+            <PauseIcon />
+          </IconButton>
+        </Flex>
+      );
+    }
+
+    if (session?.status === "paused") {
+      return (
+        <Flex justify="right" alignItems="center" gap="0.5rem">
+          <IconButton
+            variant="ghost"
+            size="2xs"
+            onClick={(event: MouseEvent<HTMLButtonElement>) => {
+              event.stopPropagation();
+              onFinish?.(activity.id);
+            }}
+          >
+            <StopIcon />
+          </IconButton>
+          <IconButton
+            variant="ghost"
+            size="2xs"
+            onClick={(event: MouseEvent<HTMLButtonElement>) => {
+              event.stopPropagation();
+              onStart?.(activity.id);
+            }}
+          >
+            <PlayIcon />
+          </IconButton>
+        </Flex>
+      );
+    }
+
+    if (
+      session?.status === "finished" ||
+      activity.currentActivitySessionId === null
+    ) {
+      return (
+        <IconButton
+          variant="ghost"
+          size="2xs"
+          onClick={(event: MouseEvent<HTMLButtonElement>) => {
+            event.stopPropagation();
+            onStart?.(activity.id);
+          }}
+        >
+          <PlayIcon />
+        </IconButton>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <Card.Root
@@ -135,54 +201,7 @@ export const ActivityCard = ({
         >
           {displayedTime}
         </Text>
-        {session?.status === "active" ? (
-          <Flex justify="right" alignItems="center" gap="1rem">
-            <IconButton
-              variant="ghost"
-              size="2xs"
-              onClick={(event: MouseEvent<HTMLButtonElement>) => {
-                event.stopPropagation();
-                onPause?.(activity.id);
-              }}
-            >
-              <PauseIcon />
-            </IconButton>
-          </Flex>
-        ) : session?.status === "paused" ? (
-          <Flex justify="right" alignItems="center" gap="0.5rem">
-            <IconButton
-              variant="ghost"
-              size="2xs"
-              onClick={(event: MouseEvent<HTMLButtonElement>) => {
-                event.stopPropagation();
-                onFinish?.(activity.id);
-              }}
-            >
-              <StopIcon />
-            </IconButton>
-            <IconButton
-              variant="ghost"
-              size="2xs"
-              onClick={(event: MouseEvent<HTMLButtonElement>) => {
-                event.stopPropagation();
-                onStart?.(activity.id);
-              }}
-            >
-              <PlayIcon />
-            </IconButton>
-          </Flex>
-        ) : session?.status === "finished" ? (
-          <IconButton
-            variant="ghost"
-            size="2xs"
-            onClick={(event: MouseEvent<HTMLButtonElement>) => {
-              event.stopPropagation();
-              onStart?.(activity.id);
-            }}
-          >
-            <PlayIcon />
-          </IconButton>
-        ) : null}
+        {renderConrolButtons()}
       </Card.Footer>
     </Card.Root>
   );
