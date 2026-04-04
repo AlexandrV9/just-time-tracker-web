@@ -17,7 +17,9 @@ export const createActivitySessionsTable = async () => {
         CHECK (status IN ('active', 'paused', 'finished')),
 
       active_duration_ms BIGINT NOT NULL DEFAULT 0,
-      pause_duration_ms BIGINT NOT NULL DEFAULT 0
+      pause_duration_ms BIGINT NOT NULL DEFAULT 0,
+
+      last_heartbeat_at TIMESTAMPTZ
     );
   `;
 
@@ -53,7 +55,9 @@ export const createActivitySessionsTable = async () => {
     await pool.query(indexes);
     await pool.query(addFk);
 
-    console.log("✅ Таблица 'activity_sessions' готова (FK на activities.last_activity_session_id)");
+    console.log(
+      "✅ Таблица 'activity_sessions' готова (FK на activities.last_activity_session_id)",
+    );
   } catch (error) {
     console.error("❌ Ошибка создания activity_sessions:", error);
     throw error;

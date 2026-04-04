@@ -6,7 +6,7 @@ export const createActivitiesTable = async () => {
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
       title VARCHAR(255) NOT NULL,
-      description TEXT,
+      description VARCHAR(1000),
 
       created_by_id TEXT NOT NULL,
 
@@ -20,7 +20,8 @@ export const createActivitiesTable = async () => {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-      CONSTRAINT activities_user_title_unique UNIQUE (created_by_id, title)
+      CONSTRAINT activities_user_title_unique UNIQUE (created_by_id, title),
+      CONSTRAINT activities_tags_max_10 CHECK (cardinality(tags) <= 10)
     );
   `;
 
