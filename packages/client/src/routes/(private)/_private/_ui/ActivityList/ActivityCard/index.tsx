@@ -1,6 +1,12 @@
 import type { ActivityDTO, ActivitySessionDTO } from "@to-do-list/shared";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo, type MouseEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type MouseEvent,
+} from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Card, Flex, PauseIcon, PlayIcon, StopIcon, Text } from "~/shared/ui";
 
@@ -14,28 +20,16 @@ import {
   convertSecondsToTimeObject,
   convertTimeObjectToTimeString,
 } from "~/shared/libs";
-
-/** Local calendar day as half-open [from, to) in ISO UTC, aligned with list date headers. */
-const getLocalDayBoundsIso = (dayKey: string) => {
-  const dayStart = new Date(`${dayKey}T00:00:00`);
-  const dayEnd = new Date(dayStart);
-  dayEnd.setDate(dayEnd.getDate() + 1);
-  return { fromDate: dayStart.toISOString(), toDate: dayEnd.toISOString() };
-};
-
-export const computeTrackedSeconds = (
-  sessions: ActivitySessionDTO[],
-): number => {
-  const ms = sessions.reduce((sum, s) => sum + s.activeDurationMs, 0);
-  return Math.floor(ms / 1000);
-};
+import {
+  computeLiveActiveSeconds,
+  computeTrackedSeconds,
+  getLocalDayBoundsIso,
+} from "./utils";
 
 export type ActivityCardProps = {
   activity: ActivityDTO;
   dayKey: string;
   showControlButtons: boolean;
-  linkedActivityId: string | null;
-  linkedSeconds: number;
   onStart?: (activityId: ActivityDTO["id"]) => void;
   onPause?: (activityId: ActivityDTO["id"]) => void;
   onFinish?: (activityId: ActivityDTO["id"]) => void;
@@ -77,15 +71,83 @@ export const ActivityCard = ({
     select: (response) => (response.success ? response.data.sessions : []),
   });
 
-  const { session } = data ?? {};
+  const { session: sessionRaw, segment: segmentRaw } = data ?? {};
 
-  const displayedTime = useMemo(
-    () =>
-      convertTimeObjectToTimeString(
-        convertSecondsToTimeObject(computeTrackedSeconds(sessions)),
-      ),
-    [sessions],
-  );
+  const sessionMatches =
+    sessionRaw != null &&
+    activity.currentActivitySessionId != null &&
+    sessionRaw.id === activity.currentActivitySessionId;
+
+  const session = sessionMatches ? sessionRaw : undefined;
+  const segment = sessionMatches ? segmentRaw : undefined;
+
+  /** Active ms today on other sessions (exclude current so we don’t double-count with detail + live segment). */
+  const otherSessionsActiveMsToday = useMemo(() => {
+    const currentId = activity.currentActivitySessionId;
+    if (currentId == null) return 0;
+    return sessions
+      .filter((s) => s.id !== currentId)
+      .reduce((sum, s) => sum + s.activeDurationMs, 0);
+  }, [sessions, activity.currentActivitySessionId]);
+
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const isLiveActive =
+      showControlButtons &&
+      session?.status === "active" &&
+      segment?.type === "active";
+
+    if (!isLiveActive) {
+      setTick(0);
+      return;
+    }
+
+    const id = window.setInterval(() => {
+      setTick((n) => n + 1);
+    }, 1000);
+
+    return () => window.clearInterval(id);
+  }, [
+    showControlButtons,
+    session?.status,
+    session?.id,
+    segment?.type,
+    segment?.startedAt,
+  ]);
+
+  const displayedTime = useMemo(() => {
+    let seconds: number;
+
+    if (showControlButtons && session?.status === "active") {
+      if (segment?.type === "active") {
+        seconds = computeLiveActiveSeconds(
+          session,
+          segment.startedAt,
+          otherSessionsActiveMsToday,
+        );
+      } else {
+        seconds = Math.floor(
+          (otherSessionsActiveMsToday + session.activeDurationMs) / 1000,
+        );
+      }
+    } else if (showControlButtons && session?.status === "paused") {
+      seconds = Math.floor(
+        (otherSessionsActiveMsToday + session.activeDurationMs) / 1000,
+      );
+    } else {
+      seconds = computeTrackedSeconds(sessions);
+    }
+
+    return convertTimeObjectToTimeString(convertSecondsToTimeObject(seconds));
+  }, [
+    showControlButtons,
+    session,
+    segment?.type,
+    segment?.startedAt,
+    otherSessionsActiveMsToday,
+    sessions,
+    tick,
+  ]);
 
   const handleCardClick = useCallback(() => {
     navigate({

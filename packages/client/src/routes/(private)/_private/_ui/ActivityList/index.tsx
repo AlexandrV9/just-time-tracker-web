@@ -7,11 +7,13 @@ import {
 } from "~/shared/api/services";
 import { useInView } from "react-intersection-observer";
 import { useEffect, useMemo } from "react";
-import { type ActivityDTO } from "@to-do-list/shared";
 import { useTranslation } from "~/shared/hooks";
 import {
   convertSecondsToTimeObject,
   convertTimeObjectToTimeString,
+  formatGroupLabel,
+  getLocalCalendarDayKey,
+  groupByDate,
 } from "~/shared/libs";
 import { usePauseActivity } from "./usePauseActivity";
 import { useStartActivity } from "./useStartActivity";
@@ -19,65 +21,7 @@ import { useFinishActivity } from "./useFinishActivity";
 
 const DEMO_USER_ID = "550e8400-e29b-41d4-a716-446655440000";
 
-/** YYYY-MM-DD in the user's local timezone (aligned with date headers and session ranges). */
-const getLocalCalendarDayKey = (d: Date): string => {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-};
-
-type DateGroup = {
-  dateKey: string;
-  label: string;
-  totalSeconds: number;
-  activities: ActivityDTO[];
-};
-
-/** Total wall time tracked across all sessions (active + pause intervals). */
-const getTotalTrackedSeconds = (a: ActivityDTO): number =>
-  Math.floor((a.activeDurationMs + a.pauseDurationMs) / 1000);
-
-const formatDateLabel = (dateStr: string, locale: string): string => {
-  const date = new Date(dateStr + "T00:00:00");
-  const intlLocale = locale === "ru" ? "ru-RU" : "en-US";
-  return date.toLocaleDateString(intlLocale, {
-    weekday: "short",
-    month: "long",
-    day: "numeric",
-  });
-};
-
-const groupByDate = (activities: ActivityDTO[]): DateGroup[] => {
-  const map = new Map<string, ActivityDTO[]>();
-
-  for (const activity of activities) {
-    const dateKey = getLocalCalendarDayKey(new Date(activity.createdAt));
-    const group = map.get(dateKey);
-    if (group) {
-      group.push(activity);
-    } else {
-      map.set(dateKey, [activity]);
-    }
-  }
-
-  return Array.from(map.entries()).map(([dateKey, items]) => ({
-    dateKey,
-    label: dateKey,
-    totalSeconds: items.reduce((sum, a) => sum + getTotalTrackedSeconds(a), 0),
-    activities: items,
-  }));
-};
-
-type ActivityListProps = {
-  linkedActivityId?: string | null;
-  linkedSeconds?: number;
-};
-
-export const ActivityList = ({
-  linkedActivityId = null,
-  linkedSeconds = 0,
-}: ActivityListProps) => {
+export const ActivityList = () => {
   const { i18n } = useTranslation();
 
   const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
@@ -97,12 +41,25 @@ export const ActivityList = ({
   });
 
   const { ref: fetchRef, inView: isLastInView } = useInView();
+
   const activities = useMemo(
     () => data?.pages.flatMap((d) => (d.success ? d.data.data : [])) ?? [],
     [data],
   );
 
-  const groups = useMemo(() => groupByDate(activities), [activities]);
+  const groups = useMemo(() => {
+    return Object.entries(groupByDate(activities, "day")).map(
+      ([dateKey, activities]) => ({
+        dateKey,
+        label: dateKey,
+        totalSeconds: activities.reduce(
+          (sum, item) => sum + Math.floor(item.activeDurationMs / 1000),
+          0,
+        ),
+        activities,
+      }),
+    );
+  }, [activities]);
   const todayKey = getLocalCalendarDayKey(new Date());
 
   const { mutateAsync: startActivity } = useStartActivity();
@@ -131,7 +88,11 @@ export const ActivityList = ({
           >
             <Flex justifyContent="space-between" alignItems="center" px={1}>
               <Text textStyle="sm" fontWeight="bold" color="fg.muted">
-                {formatDateLabel(group.dateKey, i18n.language)}
+                {formatGroupLabel({
+                  key: group.dateKey,
+                  groupBy: "day",
+                  locale: i18n.language,
+                })}
               </Text>
               <Flex gap="0.25rem" alignItems="center">
                 <Text textStyle="sm" color="fg.muted">
@@ -167,8 +128,6 @@ export const ActivityList = ({
                       activity={activity}
                       dayKey={group.dateKey}
                       showControlButtons={group.dateKey === todayKey}
-                      linkedActivityId={linkedActivityId}
-                      linkedSeconds={linkedSeconds}
                       onStart={startActivity}
                       onPause={pauseActivity}
                       onFinish={finishActivity}

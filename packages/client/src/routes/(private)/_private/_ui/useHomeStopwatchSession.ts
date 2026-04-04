@@ -1,6 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { activityApiService } from "~/shared/api/services";
+import {
+  activityApiService,
+  ACTIVITYES_QUERY_KEY,
+} from "~/shared/api/services";
 import type { StopwatchSelectedTemplate } from "./Stopwatch";
 import { useStopwatch } from "./Stopwatch/useStopwatch";
 
@@ -35,7 +38,7 @@ export function useHomeStopwatchSession() {
         linkedActivityIdRef.current = null;
         setSelectedActivity(null);
         selectedActivityRef.current = null;
-        queryClient.invalidateQueries({ queryKey: ["activities"] });
+        queryClient.invalidateQueries({ queryKey: [ACTIVITYES_QUERY_KEY] });
         return;
       }
 
@@ -46,7 +49,7 @@ export function useHomeStopwatchSession() {
         description: selectedActivityRef.current?.description ?? undefined,
         createdById: DEMO_USER_ID,
       }).then(() => {
-        queryClient.invalidateQueries({ queryKey: ["activities"] });
+        queryClient.invalidateQueries({ queryKey: [ACTIVITYES_QUERY_KEY] });
       });
     },
     [createActivityAsync, queryClient],

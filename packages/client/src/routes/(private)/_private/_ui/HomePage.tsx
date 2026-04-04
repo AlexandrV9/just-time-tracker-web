@@ -4,15 +4,8 @@ import { ActivityList } from "./ActivityList";
 import { useHomeStopwatchSession } from "./useHomeStopwatchSession";
 
 export function HomePage() {
-  const {
-    seconds,
-    status,
-    start,
-    pause,
-    stop,
-    linkedActivityId,
-    selectedActivity,
-  } = useHomeStopwatchSession();
+  const { seconds, status, start, pause, stop, selectedActivity } =
+    useHomeStopwatchSession();
 
   return (
     <Box
@@ -35,10 +28,7 @@ export function HomePage() {
           selectedActivity={selectedActivity}
         />
       </Flex>
-      <ActivityList
-        linkedActivityId={linkedActivityId}
-        linkedSeconds={seconds}
-      />
+      <ActivityList />
     </Box>
   );
 }
