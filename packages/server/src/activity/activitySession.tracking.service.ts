@@ -73,7 +73,7 @@ async function loadActivityRowForUpdate(
   return rows[0] ?? null;
 }
 
-export async function playActivitySession(
+export async function startActivitySession(
   activityId: string,
 ): Promise<TrackingOk | TrackingErr> {
   const client = await pool.connect();

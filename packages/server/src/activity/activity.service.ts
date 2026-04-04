@@ -18,7 +18,7 @@ import { activityQueries } from "./activity.queries.js";
 import {
   finishActivitySession,
   pauseActivitySession,
-  playActivitySession,
+  startActivitySession,
 } from "./activitySession.tracking.service.js";
 import { activitySessionQueries } from "./activitySession.queries.js";
 import type { ErrorResponse, SuccessResponse } from "src/shared/types.js";
@@ -163,15 +163,15 @@ const getActivities = async (
   }
 };
 
-type SessionTrackingResponse = Awaited<ReturnType<typeof playActivitySession>>;
+type SessionTrackingResponse = Awaited<ReturnType<typeof startActivitySession>>;
 
-const playSession = async (
+const startActivity = async (
   data: GetActivityDTO,
 ): Promise<SessionTrackingResponse> => {
-  return playActivitySession(data.id);
+  return startActivitySession(data.id);
 };
 
-const pauseSession = async (
+const pauseActivity = async (
   data: GetActivityDTO,
 ): Promise<SessionTrackingResponse> => {
   return pauseActivitySession(data.id);
@@ -227,8 +227,8 @@ export const activitiesService = {
   deleteActivity,
   getActivityById,
   getActivities,
-  playSession,
-  pauseSession,
+  startActivity,
+  pauseActivity,
   finishActivity,
   getActivitySessionsByActivityId,
 };

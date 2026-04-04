@@ -82,19 +82,19 @@ export const activityHandlers = {
     activitiesService.deleteActivity,
   ),
 
-  playSession: createHandler(
+  startActivity: createHandler(
     "param",
     baseIdSchema,
-    activitiesService.playSession,
+    activitiesService.startActivity,
   ),
 
-  pauseSession: createHandler(
+  pauseActivity: createHandler(
     "param",
     baseIdSchema,
-    activitiesService.pauseSession,
+    activitiesService.pauseActivity,
   ),
 
-  finishSession: createHandler(
+  finishActivity: createHandler(
     "param",
     baseIdSchema,
     activitiesService.finishActivity,

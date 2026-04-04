@@ -13,6 +13,6 @@ activitiesRouter.get("/:id", activityHandlers.getActivityById);
 activitiesRouter.patch("/:id", activityHandlers.updateActivity);
 activitiesRouter.delete("/:id", activityHandlers.deleteActivity);
 
-activitiesRouter.post("/:id/play", activityHandlers.playSession);
-activitiesRouter.post("/:id/pause", activityHandlers.pauseSession);
-activitiesRouter.post("/:id/finish", activityHandlers.finishSession);
+activitiesRouter.post("/:id/start", activityHandlers.startActivity);
+activitiesRouter.post("/:id/pause", activityHandlers.pauseActivity);
+activitiesRouter.post("/:id/finish", activityHandlers.finishActivity);
