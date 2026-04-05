@@ -13,6 +13,7 @@ export function useTickingNow(enabled: boolean): number {
     }
 
     setNowMs(Date.now());
+
     const id = window.setInterval(() => {
       setNowMs(Date.now());
     }, 1000);

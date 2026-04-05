@@ -75,7 +75,6 @@ export const ActivityList = () => {
           onFinish={finishActivity}
         />
       ))}
-
       <div ref={fetchRef} style={{ height: 1, width: "100%" }} />
     </Box>
   );

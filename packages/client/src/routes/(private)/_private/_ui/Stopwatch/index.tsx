@@ -62,6 +62,7 @@ export function Stopwatch({
       borderRadius="2xl"
       p="1rem"
       gap="0.8rem"
+      overflow="hidden"
     >
       {selectedActivity ? (
         <Badge variant="outline" size="lg" rounded="full" borderStyle="dotted">

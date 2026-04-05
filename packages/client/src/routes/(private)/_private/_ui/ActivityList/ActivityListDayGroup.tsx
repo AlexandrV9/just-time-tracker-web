@@ -28,16 +28,13 @@ export function ActivityListDayGroup({
   onFinish,
 }: ActivityListDayGroupProps) {
   const totalSeconds = useGroupDayActiveTotalSeconds(dateKey, activities);
+
   const totalTime = convertTimeObjectToTimeString(
     convertSecondsToTimeObject(totalSeconds),
   );
 
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      gap="0.75rem"
-    >
+    <Box display="flex" flexDirection="column" gap="0.75rem">
       <Flex justifyContent="space-between" alignItems="center" px={1}>
         <Text textStyle="sm" fontWeight="bold" color="fg.muted">
           {formatGroupLabel({

@@ -4,18 +4,14 @@ import type { ActivityDTO } from "@to-do-list/shared";
 
 import {
   ACTIVITY_ANALYTICS_QUERY_KEY,
-  ACTIVITY_SESSIONS_QUERY_KEY,
   activityApiService,
 } from "~/shared/api/services";
 
-import {
-  getLocalDayBoundsIso,
-  resolveDisplayedSeconds,
-} from "./ActivityCard/utils";
-import { useTickingNow } from "./ActivityCard/useTickingNow";
+import { getLocalDayBoundsIso } from "./ActivityCard/utils";
 
 /**
- * Same basis as {@link useActivityCardData}: per-day analytics + live drift for active sessions.
+ * Per-day totals from analytics only (no live drift). Updates when queries refetch
+ * after pause/finish/start mutations invalidate analytics.
  */
 export function useGroupDayActiveTotalSeconds(
   dayKey: string,
@@ -35,41 +31,18 @@ export function useGroupDayActiveTotalSeconds(
           fromDate,
           toDate,
         }),
-      select: (response: Awaited<
-        ReturnType<typeof activityApiService.getActivityAnalytics>
-      >) => (response.success ? response.data : undefined),
+      select: (
+        response: Awaited<
+          ReturnType<typeof activityApiService.getActivityAnalytics>
+        >,
+      ) => (response.success ? response.data : undefined),
     })),
   });
-
-  const sessionResults = useQueries({
-    queries: activities.map((activity) => ({
-      queryKey: [ACTIVITY_SESSIONS_QUERY_KEY, activity.currentSessionId],
-      queryFn: () =>
-        activityApiService.getActivitySession({
-          id: activity.currentSessionId!,
-        }),
-      enabled: Boolean(activity.currentSessionId),
-      select: (response: Awaited<
-        ReturnType<typeof activityApiService.getActivitySession>
-      >) => (response.success ? response.data : undefined),
-    })),
-  });
-
-  const anyLiveActive = sessionResults.some((r) => r.data?.status === "active");
-  const nowMs = useTickingNow(anyLiveActive);
 
   let totalSeconds = 0;
   for (let i = 0; i < activities.length; i++) {
     const dayActiveMs = analyticsResults[i]?.data?.totals.activeDurationMs ?? 0;
-    const dataUpdatedAt = analyticsResults[i]?.dataUpdatedAt ?? 0;
-    const session = sessionResults[i]?.data;
-    const isLiveActiveTicking = session?.status === "active";
-    totalSeconds += resolveDisplayedSeconds({
-      dayActiveMs,
-      analyticsFetchedAtMs: dataUpdatedAt,
-      isLiveActiveTicking,
-      nowMs,
-    });
+    totalSeconds += Math.max(0, Math.floor(dayActiveMs / 1000));
   }
 
   return totalSeconds;
