@@ -7,6 +7,7 @@ import {
   ACTIVITY_SESSIONS_QUERY_KEY,
   activityApiService,
 } from "~/shared/api/services";
+import { getLocalCalendarDayKey } from "~/shared/libs";
 
 import {
   formatDurationLabel,
@@ -18,17 +19,31 @@ import { useTickingNow } from "./useTickingNow";
 type UseActivityCardDataArgs = {
   activityId?: ActivityDTO["id"];
   currentSessionId?: ActivityDTO["currentSessionId"];
+  /** Calendar key of the list group (from activity `createdAt`). */
   dayKey: string;
+  /** Row status from the activities list; used until the session request resolves. */
+  activityStatus: ActivityDTO["status"];
 };
 
 export function useActivityCardData({
   activityId,
   currentSessionId,
   dayKey,
+  activityStatus,
 }: UseActivityCardDataArgs) {
+  /**
+   * Open active segments end at "now" on the server. If the card sits under an older
+   * `dayKey` (grouped by createdAt), that day's window excludes today's segment → 0 ms
+   * and the UI only shows drift since page load. While running, ask analytics for today.
+   */
+  const analyticsDayKey =
+    activityStatus === "active"
+      ? getLocalCalendarDayKey(new Date())
+      : dayKey;
+
   const { fromDate, toDate } = useMemo(
-    () => getLocalDayBoundsIso(dayKey),
-    [dayKey],
+    () => getLocalDayBoundsIso(analyticsDayKey),
+    [analyticsDayKey],
   );
 
   const { data: currentSession, isLoading: isLoadingCurrentSession } = useQuery(
@@ -46,7 +61,10 @@ export function useActivityCardData({
       },
     },
   );
-  const currentSessionStatus = currentSession?.status;
+  const hasActiveSession =
+    currentSession !== undefined
+      ? currentSession.status === "active"
+      : activityStatus === "active" && Boolean(currentSessionId);
 
   const {
     data: analytics,
@@ -70,7 +88,6 @@ export function useActivityCardData({
   });
 
   const currentActiveMs = analytics?.totals?.activeDurationMs ?? 0;
-  const hasActiveSession = currentSessionStatus === "active";
 
   const nowMs = useTickingNow(hasActiveSession);
 
@@ -113,9 +130,16 @@ export function useActivityCardData({
     [displayedSeconds],
   );
 
+  const sessionStatusForControls =
+    currentSession !== undefined
+      ? currentSession.status
+      : activityStatus === "active" || activityStatus === "paused"
+        ? activityStatus
+        : undefined;
+
   return {
     displayedTime,
-    sessionStatus: currentSessionStatus,
+    sessionStatus: sessionStatusForControls,
     hasActiveSession,
     isLoading: isLoadingAnalytics || isLoadingCurrentSession,
   };

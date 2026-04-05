@@ -29,6 +29,7 @@ export const ActivityCard = ({
     useActivityCardData({
       activityId: activity.id,
       currentSessionId: activity.currentSessionId,
+      activityStatus: activity.status,
       dayKey,
     });
 
