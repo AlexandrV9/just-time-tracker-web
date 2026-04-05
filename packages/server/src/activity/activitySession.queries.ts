@@ -30,6 +30,10 @@ const mapRow = (row: Record<string, unknown>): ActivitySessionDTO => ({
   status: row.status as ActivitySessionDTO["status"],
   activeDurationMs: Number(row.activeDurationMs ?? 0),
   pauseDurationMs: Number(row.pauseDurationMs ?? 0),
+  currentSegmentId:
+    row.currentSegmentId === null || row.currentSegmentId === undefined
+      ? null
+      : String(row.currentSegmentId),
 });
 
 const createActivitySession = async (

@@ -28,50 +28,6 @@ export const ACTIVITY_RETURNING_COLUMNS = `
   pause_duration_ms AS "pauseDurationMs"
 `;
 
-const titleExistsForUser = async (
-  createdById: string,
-  title: string,
-  excludeId?: string | null,
-): Promise<boolean> => {
-  const query = excludeId
-    ? `
-      SELECT 1 FROM activities
-      WHERE created_by_id = $1 AND title = $2 AND id <> $3::uuid
-      LIMIT 1
-    `
-    : `
-      SELECT 1 FROM activities
-      WHERE created_by_id = $1 AND title = $2
-      LIMIT 1
-    `;
-
-  const params = excludeId
-    ? [createdById, title, excludeId]
-    : [createdById, title];
-
-  const { rows } = await pool.query(query, params);
-  return rows.length > 0;
-};
-
-const resolveUniqueTitleForUser = async (
-  createdById: string,
-  desiredTitle: string,
-  excludeId?: string | null,
-): Promise<string> => {
-  const base =
-    desiredTitle.trim().length > 0 ? desiredTitle.trim() : "Unnamed Activity";
-
-  let candidate = base;
-  let n = 2;
-
-  while (await titleExistsForUser(createdById, candidate, excludeId)) {
-    candidate = `${base} (${n})`;
-    n += 1;
-  }
-
-  return candidate;
-};
-
 const createActivity = async (
   data: CreateActivityDataDTO,
 ): Promise<ActivityDTO> => {
@@ -244,6 +200,4 @@ export const activityQueries = {
   getActivities,
   updateActivity,
   deleteActivity,
-  titleExistsForUser,
-  resolveUniqueTitleForUser,
 };

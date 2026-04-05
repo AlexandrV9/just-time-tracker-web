@@ -24,7 +24,7 @@ export const activitySchema = z.object({
   createdById: z.string(),
   tags: z.array(z.string()),
   status: activityStatusSchema, // возможно убрать в будущем
-  currentActivitySessionId: z.string().nullable(),
+  currentSessionId: z.string().nullable(),
   activeDurationMs: z.number().int().nonnegative(),
   pauseDurationMs: z.number().int().nonnegative(),
 });
@@ -135,4 +135,59 @@ export const getActivitySessionsResponseSchema = z.object({
 
 export type GetActivitySessionsResponseDTO = z.infer<
   typeof getActivitySessionsResponseSchema
+>;
+
+export const getActivityAnalyticsSchema = z.object({
+  activityId: z.string().min(1, "activityId is required"),
+  fromDate: z.iso.datetime().optional(),
+  toDate: z.iso.datetime().optional(),
+});
+
+export type GetActivityAnalyticsDTO = z.infer<
+  typeof getActivityAnalyticsSchema
+>;
+
+/** Query string for `GET /activities/:id/analytics`. */
+export const getActivityAnalyticsQuerySchema = z
+  .object({
+    fromDate: z.iso.datetime().optional(),
+    toDate: z.iso.datetime().optional(),
+  })
+  .superRefine(({ fromDate, toDate }, ctx) => {
+    if (fromDate && toDate && new Date(toDate) < new Date(fromDate)) {
+      ctx.addIssue({
+        path: ["toDate"],
+        message: "toDate must be after fromDate",
+        code: "custom",
+      });
+    }
+  });
+
+export type GetActivityAnalyticsQueryDTO = z.infer<
+  typeof getActivityAnalyticsQuerySchema
+>;
+
+export const getActivityAnalyticsResponseSchema = z.object({
+  activityId: z.string().min(1, "activityId is required"),
+  fromDate: z.iso.datetime(),
+  toDate: z.iso.datetime(),
+  totals: z.object({
+    activeDurationMs: z.number().int().nonnegative(),
+    pauseDurationMs: z.number().int().nonnegative(),
+    totalDurationMs: z.number().int().nonnegative(),
+  }),
+  days: z.array(
+    z.object({
+      day: z.iso.datetime(),
+      totals: z.object({
+        activeDurationMs: z.number().int().nonnegative(),
+        pauseDurationMs: z.number().int().nonnegative(),
+        totalDurationMs: z.number().int().nonnegative(),
+      }),
+    }),
+  ),
+});
+
+export type GetActivityAnalyticsResponseDTO = z.infer<
+  typeof getActivityAnalyticsResponseSchema
 >;

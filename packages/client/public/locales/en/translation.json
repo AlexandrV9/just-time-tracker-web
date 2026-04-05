@@ -42,7 +42,7 @@
         "edit": "Edit",
         "delete": "Delete activity",
         "deleteConfirm": "Delete this activity? This cannot be undone.",
-        "duplicateTitleError": "An activity with this name already exists. Choose another name.",
+        "saveError": "Could not save changes. Try again.",
         "historyTitle": "History",
         "createdAtLabel": "Created",
         "updatedAtLabel": "Last updated",

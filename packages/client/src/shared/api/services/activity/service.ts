@@ -14,6 +14,9 @@ import type {
   FinishActivityDTO,
   GetActivitySessionsDTO,
   GetActivitySessionsResponseDTO,
+  GetActivitySessionSegmentDTO,
+  GetActivityAnalyticsDTO,
+  GetActivityAnalyticsResponseDTO,
 } from "@to-do-list/shared";
 import { baseApi } from "../base";
 import type { RequestResponse } from "../types";
@@ -67,10 +70,7 @@ export class ActivityService {
   }
 
   getActivitySession(data: GetActivitySessionDTO) {
-    return baseApi.get<{
-      session: ActivitySessionDTO;
-      segment: ActivitySessionSegmentDTO | null;
-    }>(`/api/activity-sessions/${data.id}`);
+    return baseApi.get<ActivitySessionDTO>(`/api/activity-sessions/${data.id}`);
   }
 
   getActivitySessions(
@@ -82,6 +82,24 @@ export class ActivityService {
       {
         params: { fromDate, toDate },
       },
+    );
+  }
+
+  getActivityAnalytics(
+    data: GetActivityAnalyticsDTO,
+  ): Promise<RequestResponse<GetActivityAnalyticsResponseDTO, unknown>> {
+    const { activityId, fromDate, toDate } = data;
+    return baseApi.get<GetActivityAnalyticsResponseDTO>(
+      `/api/activities/${activityId}/analytics`,
+      {
+        params: { fromDate, toDate },
+      },
+    );
+  }
+
+  getSessionSegment(data: GetActivitySessionSegmentDTO) {
+    return baseApi.get<ActivitySessionSegmentDTO>(
+      `/api/session-segments/${data.segmentId}`,
     );
   }
 }

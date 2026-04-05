@@ -4,8 +4,11 @@ import { Hono } from "hono";
 import { authMiddleware, authRouter } from "./auth/index.js";
 import { config } from "./shared/index.js";
 import { healthRouter } from "./health/health.routes.js";
-import { activitiesRouter } from "./activity/activity.routes.js";
-import { activitySessionsRouter } from "./activity/activitySession.routes.js";
+import {
+  activitiesRouter,
+  activitySessionSegmentsRouter,
+  activitySessionsRouter,
+} from "./activity/index.js";
 
 const app = new Hono();
 
@@ -24,6 +27,7 @@ app.route("/health", healthRouter);
 
 app.route("/activities", activitiesRouter);
 app.route("/activity-sessions", activitySessionsRouter);
+app.route("/activity-session-segments", activitySessionSegmentsRouter);
 
 serve(
   {

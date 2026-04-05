@@ -15,3 +15,11 @@ export const activitySessionSegmentSchema = z.object({
 export type ActivitySessionSegmentDTO = z.infer<
   typeof activitySessionSegmentSchema
 >;
+
+export const getActivitySessionSegmentSchema = z.object({
+  segmentId: z.string().min(1, "segmentId is required"),
+});
+
+export type GetActivitySessionSegmentDTO = z.infer<
+  typeof getActivitySessionSegmentSchema
+>;

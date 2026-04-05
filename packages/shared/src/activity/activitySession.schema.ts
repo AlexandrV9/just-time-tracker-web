@@ -6,6 +6,10 @@ export const activitySessionStatusSchema = z.enum([
   "finished",
 ]);
 
+export type ActivitySessionStatusDTO = z.infer<
+  typeof activitySessionStatusSchema
+>;
+
 export const activitySessionSchema = z.object({
   id: z.string().min(1),
   createdAt: z.iso.datetime(),
@@ -17,6 +21,7 @@ export const activitySessionSchema = z.object({
   activeDurationMs: z.number().int().nonnegative(),
   pauseDurationMs: z.number().int().nonnegative(),
   lastHeartbeatAt: z.iso.datetime().optional(), // последний момент, когда мы уверены, что пользователь работал в рамках ЭТОЙ конкретной сессии
+  currentSegmentId: z.string().nullable(),
 });
 
 export type ActivitySessionDTO = z.infer<typeof activitySessionSchema>;

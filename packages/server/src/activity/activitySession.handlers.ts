@@ -1,6 +1,5 @@
 import type { Context } from "hono";
 import { activitySessionQueries } from "./activitySession.queries.js";
-import { activitySessionSegmentQueries } from "./activitySessionSegment.queries.js";
 
 export const activitySessionHandlers = {
   getById: async (c: Context) => {
@@ -14,12 +13,9 @@ export const activitySessionHandlers = {
       return c.json({ success: false, message: "Session not found" }, 404);
     }
 
-    const segment =
-      await activitySessionSegmentQueries.getSegmentBySessionId(id);
-
     return c.json({
       success: true,
-      data: { session, segment },
+      data: session,
     });
   },
 };

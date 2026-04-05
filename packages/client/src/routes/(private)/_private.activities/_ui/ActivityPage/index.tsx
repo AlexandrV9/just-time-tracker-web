@@ -40,7 +40,7 @@ export const ActivityPage = () => {
 
   const { data, isPending } = useQuery({
     queryKey: ["activities", activityId],
-    queryFn: () => activityApiService.getActivityById({ id: activityId }),
+    queryFn: () => activityApiService.getActivity({ id: activityId }),
   });
 
   const activity = data?.success ? data.data : null;
@@ -135,7 +135,7 @@ export const ActivityPage = () => {
     });
 
     if (!res.success) {
-      setTitleError(t("pages.activities.detail.duplicateTitleError"));
+      setTitleError(res.message || t("pages.activities.detail.saveError"));
       return;
     }
 

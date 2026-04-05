@@ -20,7 +20,6 @@ export const createActivitiesTable = async () => {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-      CONSTRAINT activities_user_title_unique UNIQUE (created_by_id, title),
       CONSTRAINT activities_tags_max_10 CHECK (cardinality(tags) <= 10)
     );
   `;

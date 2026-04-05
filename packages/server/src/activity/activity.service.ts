@@ -8,6 +8,8 @@ import type {
   GetActivitySessionsDTO,
   GetActivitySessionsResponseDTO,
   ActivitySessionDTO,
+  GetActivityAnalyticsDTO,
+  GetActivityAnalyticsResponseDTO,
 } from "@to-do-list/shared";
 
 import {
@@ -21,7 +23,65 @@ import {
   startActivitySession,
 } from "./activitySession.tracking.service.js";
 import { activitySessionQueries } from "./activitySession.queries.js";
+import { activitySessionSegmentQueries } from "./activitySessionSegment.queries.js";
 import type { ErrorResponse, SuccessResponse } from "src/shared/types.js";
+
+type DayTotalsAgg = {
+  activeDurationMs: number;
+  pauseDurationMs: number;
+};
+
+function clipSegmentToWindow(
+  startedAtIso: string,
+  endedAtIso: string | null,
+  windowFromMs: number,
+  windowToMs: number,
+): { start: number; end: number } | null {
+  const startMs = Date.parse(startedAtIso);
+  const naturalEndMs = endedAtIso ? Date.parse(endedAtIso) : Date.now();
+  if (!Number.isFinite(startMs) || !Number.isFinite(naturalEndMs)) {
+    return null;
+  }
+
+  const clipStart = Math.max(startMs, windowFromMs);
+  const clipEnd = Math.min(naturalEndMs, windowToMs);
+  if (clipEnd <= clipStart) {
+    return null;
+  }
+  return { start: clipStart, end: clipEnd };
+}
+
+function utcDayStartMs(ms: number): number {
+  const d = new Date(ms);
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+}
+
+function addMsToUtcDayBuckets(
+  startMs: number,
+  endMs: number,
+  kind: "active" | "pause",
+  buckets: Map<number, DayTotalsAgg>,
+): void {
+  let t = startMs;
+  while (t < endMs) {
+    const dayStart = utcDayStartMs(t);
+    const dayEnd = dayStart + 86400000;
+    const sliceEnd = Math.min(endMs, dayEnd);
+    const dur = sliceEnd - t;
+
+    let row = buckets.get(dayStart);
+    if (!row) {
+      row = { activeDurationMs: 0, pauseDurationMs: 0 };
+      buckets.set(dayStart, row);
+    }
+    if (kind === "active") {
+      row.activeDurationMs += dur;
+    } else {
+      row.pauseDurationMs += dur;
+    }
+    t = sliceEnd;
+  }
+}
 
 type CreateActivityResponse = SuccessResponse<ActivityDTO> | ErrorResponse;
 
@@ -187,7 +247,7 @@ type GetActivitySessionsByActivityIdResponse =
   | SuccessResponse<GetActivitySessionsResponseDTO>
   | ErrorResponse;
 
-const getActivitySessionsByActivityId = async (
+const getSessionsByActivityId = async (
   data: GetActivitySessionsDTO,
 ): Promise<GetActivitySessionsByActivityIdResponse> => {
   try {
@@ -221,6 +281,106 @@ const getActivitySessionsByActivityId = async (
   }
 };
 
+type GetActivityAnalyticsResult =
+  | SuccessResponse<GetActivityAnalyticsResponseDTO>
+  | ErrorResponse;
+
+const getActivityAnalytics = async (
+  data: GetActivityAnalyticsDTO,
+): Promise<GetActivityAnalyticsResult> => {
+  try {
+    const entry = await activityRepository.getActivityById(data.activityId);
+
+    if (!entry) {
+      return {
+        success: false,
+        message: "Activity not found",
+      };
+    }
+
+    const nowIso = new Date().toISOString();
+    const fromIso = data.fromDate ?? "1970-01-01T00:00:00.000Z";
+    const toIso = data.toDate ?? nowIso;
+
+    const fromMs = Date.parse(fromIso);
+    const toMs = Date.parse(toIso);
+    if (!Number.isFinite(fromMs) || !Number.isFinite(toMs) || toMs <= fromMs) {
+      return {
+        success: false,
+        message: "Invalid date range (toDate must be after fromDate)",
+      };
+    }
+
+    const segments =
+      await activitySessionSegmentQueries.listSegmentIntervalsForActivityInRange(
+        data.activityId,
+        fromIso,
+        toIso,
+      );
+
+    let activeDurationMs = 0;
+    let pauseDurationMs = 0;
+    const dayBuckets = new Map<number, DayTotalsAgg>();
+
+    for (const seg of segments) {
+      const clip = clipSegmentToWindow(
+        seg.startedAt,
+        seg.endedAt,
+        fromMs,
+        toMs,
+      );
+      if (!clip) {
+        continue;
+      }
+
+      const ms = clip.end - clip.start;
+      if (seg.type === "active") {
+        activeDurationMs += ms;
+      } else {
+        pauseDurationMs += ms;
+      }
+      addMsToUtcDayBuckets(clip.start, clip.end, seg.type, dayBuckets);
+    }
+
+    const floorMs = (n: number) => Math.floor(Math.max(0, n));
+
+    const days = Array.from(dayBuckets.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([utcDayStart, totals]) => ({
+        day: new Date(utcDayStart).toISOString(),
+        totals: {
+          activeDurationMs: floorMs(totals.activeDurationMs),
+          pauseDurationMs: floorMs(totals.pauseDurationMs),
+          totalDurationMs: floorMs(
+            totals.activeDurationMs + totals.pauseDurationMs,
+          ),
+        },
+      }));
+
+    return {
+      success: true,
+      data: {
+        activityId: data.activityId,
+        fromDate: fromIso,
+        toDate: toIso,
+        totals: {
+          activeDurationMs: floorMs(activeDurationMs),
+          pauseDurationMs: floorMs(pauseDurationMs),
+          totalDurationMs: floorMs(activeDurationMs + pauseDurationMs),
+        },
+        days,
+      },
+    };
+  } catch (error) {
+    console.error("Get activity analytics error:", error);
+
+    return {
+      success: false,
+      message: "Failed to load activity analytics",
+    };
+  }
+};
+
 export const activitiesService = {
   createActivity,
   updateActivity,
@@ -230,5 +390,6 @@ export const activitiesService = {
   startActivity,
   pauseActivity,
   finishActivity,
-  getActivitySessionsByActivityId,
+  getSessionsByActivityId,
+  getActivityAnalytics,
 };

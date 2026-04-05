@@ -1,4 +1,7 @@
-import type { ActivitySessionDTO } from "@to-do-list/shared";
+import {
+  convertSecondsToTimeObject,
+  convertTimeObjectToTimeString,
+} from "~/shared/libs";
 
 export const getLocalDayBoundsIso = (dayKey: string) => {
   const dayStart = new Date(`${dayKey}T00:00:00`);
@@ -7,25 +10,35 @@ export const getLocalDayBoundsIso = (dayKey: string) => {
   return { fromDate: dayStart.toISOString(), toDate: dayEnd.toISOString() };
 };
 
-export const computeTrackedSeconds = (
-  sessions: ActivitySessionDTO[],
-): number => {
-  const ms = sessions.reduce((sum, s) => sum + s.activeDurationMs, 0);
-  return Math.floor(ms / 1000);
+export type DisplayedSecondsInput = {
+  /** Segment-based active ms for the card’s day window (from getActivityAnalytics). */
+  dayActiveMs: number;
+  /** `useQuery`’s `dataUpdatedAt` when analytics succeeded; 0 = unknown, no drift. */
+  analyticsFetchedAtMs: number;
+  isLiveActiveTicking: boolean;
+  nowMs: number;
 };
 
 /**
- * Active time for today while the current session is running:
- * other sessions’ active ms for the day + this session’s denormalized ms + open active segment.
+ * Server baseline already includes open active segment up to fetch time.
+ * While ticking, add wall-clock drift since that fetch.
  */
-export const computeLiveActiveSeconds = (
-  session: ActivitySessionDTO,
-  openSegmentStartedAtIso: string,
-  otherSessionsActiveMsToday: number,
-  nowMs: number = Date.now(),
-): number => {
-  const openStart = new Date(openSegmentStartedAtIso).getTime();
-  const liveMs =
-    otherSessionsActiveMsToday + session.activeDurationMs + (nowMs - openStart);
-  return Math.max(0, Math.floor(liveMs / 1000));
-};
+export function resolveDisplayedSeconds({
+  dayActiveMs,
+  analyticsFetchedAtMs,
+  isLiveActiveTicking,
+  nowMs,
+}: DisplayedSecondsInput): number {
+  const driftMs =
+    isLiveActiveTicking && analyticsFetchedAtMs > 0
+      ? Math.max(0, nowMs - analyticsFetchedAtMs)
+      : 0;
+  const totalMs = dayActiveMs + driftMs;
+  return Math.max(0, Math.floor(totalMs / 1000));
+}
+
+export function formatDurationLabel(totalSeconds: number): string {
+  return convertTimeObjectToTimeString(
+    convertSecondsToTimeObject(totalSeconds),
+  );
+}

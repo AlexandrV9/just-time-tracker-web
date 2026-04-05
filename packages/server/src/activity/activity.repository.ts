@@ -15,11 +15,7 @@ const getActivityById = async (id: string): Promise<ActivityDTO | null> => {
 const createActivity = async (
   data: CreateActivityDataDTO,
 ): Promise<ActivityDTO> => {
-  const title = await activityQueries.resolveUniqueTitleForUser(
-    data.createdById,
-    data.title,
-  );
-  const entry = await activityQueries.createActivity({ ...data, title });
+  const entry = await activityQueries.createActivity(data);
   return mapActivityRowToDTO(entry);
 };
 
@@ -74,7 +70,7 @@ export function mapActivityRowToDTO(
       ? (entry.tags as unknown[]).map(String)
       : [],
     status: entry.status as ActivityDTO["status"],
-    currentActivitySessionId:
+    currentSessionId:
       entry.currentActivitySessionId === null ||
       entry.currentActivitySessionId === undefined
         ? null

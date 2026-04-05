@@ -3,12 +3,10 @@ import { activityHandlers } from "./activity.handlers.js";
 
 export const activitiesRouter = new Hono();
 
-activitiesRouter.get("/", activityHandlers.getActivities);
 activitiesRouter.post("/", activityHandlers.createActivity);
-activitiesRouter.get(
-  "/:id/sessions",
-  activityHandlers.getActivitySessionsByActivityId,
-);
+activitiesRouter.get("/", activityHandlers.getActivities);
+activitiesRouter.get("/:id/analytics", activityHandlers.getActivityAnalytics);
+activitiesRouter.get("/:id/sessions", activityHandlers.getSessionsByActivityId);
 activitiesRouter.get("/:id", activityHandlers.getActivityById);
 activitiesRouter.patch("/:id", activityHandlers.updateActivity);
 activitiesRouter.delete("/:id", activityHandlers.deleteActivity);
