@@ -5,11 +5,6 @@ import { Card, Flex, Text } from "~/shared/ui";
 
 import { ActivityCardControls } from "./ActivityCardControls";
 import { useActivityCardData } from "./useActivityCardData";
-import { useQuery } from "@tanstack/react-query";
-import {
-  ACTIVITY_SESSIONS_QUERY_KEY,
-  activityApiService,
-} from "~/shared/api/services";
 
 export type ActivityCardProps = {
   activity: ActivityDTO;
@@ -30,21 +25,12 @@ export const ActivityCard = ({
 }: ActivityCardProps) => {
   const navigate = useNavigate();
 
-  const { data: session } = useQuery({
-    queryKey: [ACTIVITY_SESSIONS_QUERY_KEY, activity.currentSessionId],
-    queryFn: () =>
-      activityApiService.getActivitySession({
-        id: activity.currentSessionId!,
-      }),
-    enabled: Boolean(activity.currentSessionId),
-    select: (response) => (response.success ? response.data : undefined),
-  });
-
-  const { displayedTime } = useActivityCardData({
-    activityId: activity.id,
-    activityCurrentSessionId: activity.currentSessionId,
-    dayKey,
-  });
+  const { displayedTime, sessionStatus, hasActiveSession } =
+    useActivityCardData({
+      activityId: activity.id,
+      currentSessionId: activity.currentSessionId,
+      dayKey,
+    });
 
   const handleCardClick = useCallback(() => {
     navigate({
@@ -92,8 +78,9 @@ export const ActivityCard = ({
         </Text>
         {showControlButtons && (
           <ActivityCardControls
-            activity={activity}
-            sessionStatus={session?.status}
+            activityId={activity.id}
+            hasActiveSession={hasActiveSession}
+            sessionStatus={sessionStatus}
             onStart={onStart}
             onPause={onPause}
             onFinish={onFinish}

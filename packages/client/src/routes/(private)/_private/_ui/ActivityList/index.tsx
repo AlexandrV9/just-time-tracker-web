@@ -8,24 +8,26 @@ import { useInView } from "react-intersection-observer";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "~/shared/hooks";
 import { getLocalCalendarDayKey, groupByDate } from "~/shared/libs";
+import { useAuthStore } from "~/features/auth";
 import { ActivityListDayGroup } from "./ActivityListDayGroup";
 import { usePauseActivity } from "./usePauseActivity";
 import { useStartActivity } from "./useStartActivity";
 import { useFinishActivity } from "./useFinishActivity";
 
-const DEMO_USER_ID = "550e8400-e29b-41d4-a716-446655440000";
-
 export const ActivityList = () => {
   const { i18n } = useTranslation();
+  const { user } = useAuthStore();
+  const userId = user?.id;
 
   const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
-    queryKey: [ACTIVITIES_QUERY_KEY],
+    queryKey: [ACTIVITIES_QUERY_KEY, userId],
     queryFn: (ctx) =>
       activityApiService.getActivities({
         page: ctx.pageParam,
         limit: 20,
-        createdById: DEMO_USER_ID,
+        createdById: userId!,
       }),
+    enabled: !!userId,
     initialPageParam: 0,
     getNextPageParam: (lastGroup) => {
       if (lastGroup?.success && lastGroup.data.pagination.hasNext) {

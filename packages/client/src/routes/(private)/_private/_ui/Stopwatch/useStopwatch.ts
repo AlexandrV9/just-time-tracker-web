@@ -10,7 +10,9 @@ type PersistedState = {
 
 const STORAGE_KEY = "pwa-stopwatch";
 
-export function useStopwatch(onStop?: (seconds: number) => void) {
+export function useStopwatch(
+  onStop?: (seconds: number, totalElapsedMs: number) => void,
+) {
   const [seconds, setSeconds] = useState(0);
   const [status, setStatus] = useState<StopwatchStatus>("idle");
 
@@ -80,7 +82,7 @@ export function useStopwatch(onStop?: (seconds: number) => void) {
 
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
-    onStop?.(finalSeconds);
+    onStop?.(finalSeconds, finalMs);
 
     accumulatedMsRef.current = 0;
     startedAtRef.current = null;

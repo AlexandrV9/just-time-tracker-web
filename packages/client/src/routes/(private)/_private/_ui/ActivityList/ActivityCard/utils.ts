@@ -12,10 +12,10 @@ export const getLocalDayBoundsIso = (dayKey: string) => {
 
 export type DisplayedSecondsInput = {
   /** Segment-based active ms for the card’s day window (from getActivityAnalytics). */
-  dayActiveMs: number;
+  currentActiveMs: number;
   /** `useQuery`’s `dataUpdatedAt` when analytics succeeded; 0 = unknown, no drift. */
   analyticsFetchedAtMs: number;
-  isLiveActiveTicking: boolean;
+  hasActiveSession: boolean;
   nowMs: number;
 };
 
@@ -24,16 +24,18 @@ export type DisplayedSecondsInput = {
  * While ticking, add wall-clock drift since that fetch.
  */
 export function resolveDisplayedSeconds({
-  dayActiveMs,
+  currentActiveMs,
   analyticsFetchedAtMs,
-  isLiveActiveTicking,
+  hasActiveSession,
   nowMs,
 }: DisplayedSecondsInput): number {
   const driftMs =
-    isLiveActiveTicking && analyticsFetchedAtMs > 0
+    hasActiveSession && analyticsFetchedAtMs > 0
       ? Math.max(0, nowMs - analyticsFetchedAtMs)
       : 0;
-  const totalMs = dayActiveMs + driftMs;
+
+  const totalMs = currentActiveMs + driftMs;
+
   return Math.max(0, Math.floor(totalMs / 1000));
 }
 

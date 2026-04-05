@@ -1,4 +1,4 @@
-import { useQueries } from "@tanstack/react-query";
+import { keepPreviousData, useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 import type { ActivityDTO } from "@to-do-list/shared";
 
@@ -25,23 +25,23 @@ export function useGroupDayActiveTotalSeconds(
   const analyticsResults = useQueries({
     queries: activities.map((activity) => ({
       queryKey: [ACTIVITY_ANALYTICS_QUERY_KEY, activity.id, fromDate, toDate],
-      queryFn: () =>
-        activityApiService.getActivityAnalytics({
+      queryFn: async () => {
+        const response = await activityApiService.getActivityAnalytics({
           activityId: activity.id,
           fromDate,
           toDate,
-        }),
-      select: (
-        response: Awaited<
-          ReturnType<typeof activityApiService.getActivityAnalytics>
-        >,
-      ) => (response.success ? response.data : undefined),
+        });
+        return response.success ? response.data : undefined;
+      },
+      placeholderData: keepPreviousData,
     })),
   });
 
   let totalSeconds = 0;
+
   for (let i = 0; i < activities.length; i++) {
-    const dayActiveMs = analyticsResults[i]?.data?.totals.activeDurationMs ?? 0;
+    const dayActiveMs =
+      analyticsResults[i]?.data?.totals?.activeDurationMs ?? 0;
     totalSeconds += Math.max(0, Math.floor(dayActiveMs / 1000));
   }
 

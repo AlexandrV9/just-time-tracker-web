@@ -17,6 +17,7 @@ import type {
   GetActivitySessionSegmentDTO,
   GetActivityAnalyticsDTO,
   GetActivityAnalyticsResponseDTO,
+  CreateActivityFromQuickTimerDataDTO,
 } from "@to-do-list/shared";
 import { baseApi } from "../base";
 import type { RequestResponse } from "../types";
@@ -24,6 +25,10 @@ import type { RequestResponse } from "../types";
 export class ActivityService {
   createActivity(data: CreateActivityDataDTO) {
     return baseApi.post<ActivityDTO>(`/api/activities`, { data });
+  }
+
+  createActivityFromQuickTimer(data: CreateActivityFromQuickTimerDataDTO) {
+    return baseApi.post<ActivityDTO>(`/api/activities/quick-timer`, { data });
   }
 
   getActivity({

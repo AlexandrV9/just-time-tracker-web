@@ -4,15 +4,17 @@ import { Flex, PauseIcon, PlayIcon, StopIcon } from "~/shared/ui";
 import { IconButton } from "@chakra-ui/react";
 
 type ActivityCardControlsProps = {
-  activity: ActivityDTO;
+  hasActiveSession?: boolean;
   sessionStatus?: ActivitySessionStatusDTO;
+  activityId: ActivityDTO["id"];
   onStart?: (activityId: ActivityDTO["id"]) => void;
   onPause?: (activityId: ActivityDTO["id"]) => void;
   onFinish?: (activityId: ActivityDTO["id"]) => void;
 };
 
 export function ActivityCardControls({
-  activity,
+  activityId,
+  hasActiveSession,
   sessionStatus,
   onStart,
   onPause,
@@ -26,7 +28,7 @@ export function ActivityCardControls({
           size="2xs"
           onClick={(event: MouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
-            onPause?.(activity.id);
+            onPause?.(activityId);
           }}
         >
           <PauseIcon />
@@ -43,7 +45,7 @@ export function ActivityCardControls({
           size="2xs"
           onClick={(event: MouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
-            onFinish?.(activity.id);
+            onFinish?.(activityId);
           }}
         >
           <StopIcon />
@@ -53,7 +55,7 @@ export function ActivityCardControls({
           size="2xs"
           onClick={(event: MouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
-            onStart?.(activity.id);
+            onStart?.(activityId);
           }}
         >
           <PlayIcon />
@@ -62,17 +64,14 @@ export function ActivityCardControls({
     );
   }
 
-  if (
-    sessionStatus === "finished" ||
-    activity.currentSessionId === null
-  ) {
+  if (sessionStatus === "finished" || !hasActiveSession) {
     return (
       <IconButton
         variant="ghost"
         size="2xs"
         onClick={(event: MouseEvent<HTMLButtonElement>) => {
           event.stopPropagation();
-          onStart?.(activity.id);
+          onStart?.(activityId);
         }}
       >
         <PlayIcon />

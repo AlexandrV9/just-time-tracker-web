@@ -10,6 +10,7 @@ import {
   getActivitiesSchema,
   getActivitySessionsSchema,
   getActivityAnalyticsQuerySchema,
+  createActivityFromQuickTimerSchema,
 } from "@to-do-list/shared";
 
 type ValidatorType = "json" | "param" | "query";
@@ -68,6 +69,13 @@ export const activityHandlers = {
     "json",
     createActivitySchema,
     activitiesService.createActivity,
+    201,
+  ),
+
+  createActivityFromQuickTimer: createHandler(
+    "json",
+    createActivityFromQuickTimerSchema,
+    activitiesService.createActivityFromQuickTimer,
     201,
   ),
 

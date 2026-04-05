@@ -10,6 +10,7 @@ import type {
   ActivitySessionDTO,
   GetActivityAnalyticsDTO,
   GetActivityAnalyticsResponseDTO,
+  CreateActivityFromQuickTimerDataDTO,
 } from "@to-do-list/shared";
 
 import {
@@ -101,6 +102,26 @@ const createActivity = async (
     return {
       success: false,
       message: "Failed to create activity",
+    };
+  }
+};
+
+const createActivityFromQuickTimer = async (
+  data: CreateActivityFromQuickTimerDataDTO,
+): Promise<CreateActivityResponse> => {
+  try {
+    const entry = await activityRepository.createActivityFromQuickTimer(data);
+
+    return {
+      success: true,
+      data: entry,
+    };
+  } catch (error) {
+    console.error("Create activity from quick timer error:", error);
+
+    return {
+      success: false,
+      message: "Failed to create activity from quick timer",
     };
   }
 };
@@ -383,6 +404,7 @@ const getActivityAnalytics = async (
 
 export const activitiesService = {
   createActivity,
+  createActivityFromQuickTimer,
   updateActivity,
   deleteActivity,
   getActivityById,

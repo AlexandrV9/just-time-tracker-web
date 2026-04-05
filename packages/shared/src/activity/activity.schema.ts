@@ -13,6 +13,16 @@ export const createActivitySchema = z.object({
 
 export type CreateActivityDataDTO = z.infer<typeof createActivitySchema>;
 
+export const createActivityFromQuickTimerSchema = z.object({
+  createdById: z.string().min(1, "createdById is required"),
+  startedAt: z.iso.datetime(),
+  endedAt: z.iso.datetime(),
+});
+
+export type CreateActivityFromQuickTimerDataDTO = z.infer<
+  typeof createActivityFromQuickTimerSchema
+>;
+
 export const activityStatusSchema = z.enum(["idle", "active", "paused"]);
 
 export const activitySchema = z.object({
