@@ -4,8 +4,7 @@ import { ActivityList } from "./ActivityList";
 import { useHomeStopwatchSession } from "./useHomeStopwatchSession";
 
 export function HomePage() {
-  const { seconds, status, start, pause, stop, selectedActivity } =
-    useHomeStopwatchSession();
+  const { seconds, status, start, pause, stop } = useHomeStopwatchSession();
 
   return (
     <Box
@@ -25,7 +24,6 @@ export function HomePage() {
           onStart={start}
           onPause={pause}
           onFinish={stop}
-          selectedActivity={selectedActivity}
         />
       </Flex>
       <ActivityList />

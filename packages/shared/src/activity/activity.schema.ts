@@ -14,6 +14,7 @@ export const createActivitySchema = z.object({
 export type CreateActivityDataDTO = z.infer<typeof createActivitySchema>;
 
 export const createActivityFromQuickTimerSchema = z.object({
+  title: z.string().max(255).optional(),
   createdById: z.string().min(1, "createdById is required"),
   startedAt: z.iso.datetime(),
   endedAt: z.iso.datetime(),

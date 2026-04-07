@@ -25,7 +25,7 @@ import {
 } from "./activitySession.tracking.service.js";
 import { activitySessionQueries } from "./activitySession.queries.js";
 import { activitySessionSegmentQueries } from "./activitySessionSegment.queries.js";
-import type { ErrorResponse, SuccessResponse } from "src/shared/types.js";
+import type { ErrorResponse, SuccessResponse } from "../shared/types.js";
 
 type DayTotalsAgg = {
   activeDurationMs: number;

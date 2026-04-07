@@ -56,12 +56,17 @@ const createActivity = async (
   return rows[0];
 };
 
-const QUICK_TIMER_DEFAULT_TITLE = "Quick timer";
+const DEFAULT_ACTIVITY_TITLE = "Quick timer";
 
 const createActivityFromQuickTimer = async (
   data: CreateActivityFromQuickTimerDataDTO,
 ): Promise<ActivityDTO> => {
-  const { createdById, startedAt: startedAtRaw, endedAt: endedAtRaw } = data;
+  const {
+    createdById,
+    startedAt: startedAtRaw,
+    endedAt: endedAtRaw,
+    title = DEFAULT_ACTIVITY_TITLE,
+  } = data;
   const tagList: string[] = [];
 
   const parsedStart = Date.parse(startedAtRaw);
@@ -96,7 +101,7 @@ const createActivityFromQuickTimer = async (
       VALUES ($1, $2, $3, $4::text[], NOW(), NOW(), 0, 0)
       RETURNING ${ACTIVITY_RETURNING_COLUMNS}
       `,
-      [QUICK_TIMER_DEFAULT_TITLE, null, createdById, tagList],
+      [title, null, createdById, tagList],
     );
     return rows[0];
   }
@@ -114,7 +119,7 @@ const createActivityFromQuickTimer = async (
       VALUES ($1, $2, $3, $4::text[], NOW(), NOW(), 0, 0)
       RETURNING id
       `,
-      [QUICK_TIMER_DEFAULT_TITLE, null, createdById, tagList],
+      [title, null, createdById, tagList],
     );
     const activityId = String(actRows[0].id);
 

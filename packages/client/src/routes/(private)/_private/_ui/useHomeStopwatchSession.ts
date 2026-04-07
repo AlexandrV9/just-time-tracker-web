@@ -28,6 +28,7 @@ export function useHomeStopwatchSession() {
       const startedAt = endedAt - Math.floor(totalElapsedMs);
 
       createActivityFromQuickTimer({
+        title: "Unnamed activity",
         createdById: userId,
         startedAt: new Date(startedAt).toISOString(),
         endedAt: new Date(endedAt).toISOString(),

@@ -5,13 +5,10 @@ import { IconButton } from "@chakra-ui/react";
 import {
   ArrowLeftIcon,
   Box,
-  Button,
   EditIcon,
   Flex,
-  Input,
   List,
   Text,
-  TextArea,
   TrashIcon,
 } from "~/shared/ui";
 import { activityApiService } from "~/shared/api/services";
@@ -211,105 +208,35 @@ export const ActivityPage = () => {
       maxWidth="100vw"
     >
       <Flex justifyContent="space-between" alignItems="center" minH="40px">
-        <IconButton variant="outline" onClick={handleBack}>
-          <ArrowLeftIcon />
+        <IconButton variant="outline" onClick={handleBack} size="xs">
+          <ArrowLeftIcon size={20} />
         </IconButton>
         <Flex alignItems="center" gap="0.5rem">
           <IconButton
+            size="xs"
             variant="outline"
             onClick={handleToggleEdit}
             disabled={isDeleting || isUpdating}
             aria-label={t("pages.activities.detail.edit")}
           >
-            <EditIcon />
+            <EditIcon size={20} />
           </IconButton>
           <IconButton
+            size="xs"
             variant="outline"
             onClick={handleDelete}
             disabled={isDeleting || isUpdating}
             aria-label={t("pages.activities.detail.delete")}
           >
-            <TrashIcon />
+            <TrashIcon size={20} />
           </IconButton>
         </Flex>
       </Flex>
 
       <Flex alignItems="flex-start" gap="2" justifyContent="space-between">
-        <Flex
-          direction="column"
-          as="form"
-          gap="1rem"
-          w="full"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (isEditing) void handleSave();
-          }}
-        >
-          <Input
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              setTitleError(null);
-            }}
-            variant="outline"
-            readOnly={!isEditing}
-            placeholder={t("pages.activities.detail.titlePlaceholder")}
-          />
-          {titleError && (
-            <Text textStyle="sm" color="red.500" mt={1}>
-              {titleError}
-            </Text>
-          )}
-          <TextArea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            readOnly={!isEditing}
-            placeholder={t("pages.activities.detail.descriptionPlaceholder")}
-            variant="outline"
-            rows={2}
-          />
-          {isEditing && (
-            <Flex gap={2} flexWrap="wrap">
-              <Button
-                type="submit"
-                colorPalette="purple"
-                loading={isUpdating}
-                disabled={isDeleting}
-              >
-                {t("pages.activities.detail.saveButton")}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleToggleEdit}
-                disabled={isUpdating || isDeleting}
-              >
-                {t("pages.activities.detail.cancelEditButton")}
-              </Button>
-            </Flex>
-          )}
-        </Flex>
+        <Text textStyle="lg">{title}</Text>
+        {description && <Text>{description}</Text>}
       </Flex>
-
-      <Box
-        display="flex"
-        flexDirection="column"
-        gap="0.75rem"
-        px={1}
-        py={3}
-        borderRadius="xl"
-        border="1px solid"
-        borderColor="border"
-      >
-        <Text
-          textStyle="3xl"
-          fontWeight="bold"
-          fontFamily="Roboto Mono, monospace"
-          textAlign="center"
-        >
-          {durationDisplay}
-        </Text>
-      </Box>
 
       <Box display="flex" flexDirection="column" gap="0.5rem" px={1}>
         <Flex justifyContent="space-between" gap={4}>

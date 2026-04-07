@@ -55,7 +55,6 @@ export function Stopwatch({
     <Stack.VStack
       position="relative"
       w="full"
-      boxShadow="0 4px 24px rgba(0, 0, 0, 0.35)"
       backdropFilter="blur(10px)"
       border="1px solid"
       borderColor="border"
@@ -63,6 +62,7 @@ export function Stopwatch({
       p="1rem"
       gap="0.8rem"
       overflow="hidden"
+      maxWidth="500px"
     >
       {selectedActivity ? (
         <Badge variant="outline" size="lg" rounded="full" borderStyle="dotted">
