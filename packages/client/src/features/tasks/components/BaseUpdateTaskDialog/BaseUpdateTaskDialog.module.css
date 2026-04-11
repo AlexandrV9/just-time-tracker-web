@@ -1,5 +1,0 @@
-.closeButton {
-  position: absolute;
-  top: calc(var(--safe-area-inset-top) + 5px);
-  right: var(--safe-area-inset-right + 10px);
-}

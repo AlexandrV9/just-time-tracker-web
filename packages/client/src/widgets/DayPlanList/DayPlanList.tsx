@@ -10,11 +10,13 @@ import {
   DAY_PLANS_QUERY_KEY,
   dayPlanApiService,
 } from "~/shared/api/services";
-import { getLocalCalendarDayKey } from "~/shared/libs";
 import { useAuthStore } from "~/features/auth";
-import { Button, Card, EmptyBox, Flex, Stack, Text, toast } from "~/shared/ui";
+import { Button, EmptyBox, Flex, Stack, Text, toast } from "~/shared/ui";
 
 import { SelectDayActivitiesDialog } from "./SelectDayActivitiesDialog";
+import { getLocalCalendarDay } from "~/shared/libs";
+import { ActivityCard } from "~/features";
+import { ActivityListView } from "~/entities/Activity";
 
 export const DayPlanList = () => {
   const { t } = useTranslation();
@@ -24,7 +26,7 @@ export const DayPlanList = () => {
   const { user } = useAuthStore();
 
   const userId = user?.id;
-  const todayKey = useMemo(() => getLocalCalendarDayKey(new Date()), []);
+  const todayKey = useMemo(() => getLocalCalendarDay(new Date()), []);
 
   const dialog = useDialog();
 
@@ -204,25 +206,23 @@ export const DayPlanList = () => {
   }
 
   return (
-    <Stack.VStack gap={4} align="stretch" w="full">
-      <Stack.VStack gap={2} align="stretch">
-        {items.map((item) => {
-          const activity = activityById.get(item.activityId);
-          return (
-            <Card.Root
-              key={item.id}
-              size="sm"
-              borderRadius="xl"
-              variant="subtle"
-            >
-              <Card.Body py={3} px={4}>
-                <Text fontWeight="medium">
-                  {activity?.title ?? item.activityId}
-                </Text>
-              </Card.Body>
-            </Card.Root>
-          );
-        })}
+    <>
+      <Stack.VStack gap={4} align="stretch" w="full">
+        <ActivityListView>
+          {items.map((item) => {
+            const activity = activityById.get(item.activityId);
+
+            if (!activity) {
+              return null;
+            }
+
+            return (
+              <ActivityListView.Item key={activity.id}>
+                <ActivityCard activity={activity} />;
+              </ActivityListView.Item>
+            );
+          })}
+        </ActivityListView>
         <Button
           alignSelf="center"
           size="sm"
@@ -241,6 +241,6 @@ export const DayPlanList = () => {
         onSave={handleSave}
         isSaving={saveMutation.isPending}
       />
-    </Stack.VStack>
+    </>
   );
 };

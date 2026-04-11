@@ -6,7 +6,7 @@ import {
   startOfDay,
   startOfWeek,
 } from "date-fns";
-import type { GroupByDate } from "./types";
+import type { CalendarDay, GroupByDate } from "./types";
 
 type WithCreatedAt = {
   createdAt: string;
@@ -15,7 +15,7 @@ type WithCreatedAt = {
 export function groupByDate<T extends WithCreatedAt>(
   items: T[],
   groupBy: GroupByDate,
-): Record<string, T[]> {
+): Record<CalendarDay, T[]> {
   const map = new Map<string, { date: Date; items: T[] }>();
 
   for (const item of items) {

@@ -1,5 +1,5 @@
 export * from "./DayPlanList";
-export * from "./ActivityList";
+export * from "./ActivityGroupList";
 export * from "./AccountSettings";
 export * from "./AuthUserInfo";
 export * from "./DayPlanList";

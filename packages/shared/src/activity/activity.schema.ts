@@ -26,6 +26,8 @@ export type CreateActivityFromQuickTimerDataDTO = z.infer<
 
 export const activityStatusSchema = z.enum(["idle", "active", "paused"]);
 
+export type ActivityStatusDTO = z.infer<typeof activityStatusSchema>;
+
 export const activitySchema = z.object({
   id: z.string().min(1, "id is required"),
   title: z.string(),

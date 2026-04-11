@@ -3,9 +3,9 @@ import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { Box, Flex, Tabs } from "~/shared/ui";
 import { useTranslation } from "~/shared/hooks";
 import { Stopwatch } from "./Stopwatch";
-import { ActivityList } from "../../../../widgets/ActivityList";
 import { useHomeStopwatchSession } from "./useHomeStopwatchSession";
-import { DayPlanList } from "./DayPlanList";
+import { ActivityGroupList } from "~/widgets/ActivityGroupList/ActivityGroupList";
+import { DayPlanList } from "~/widgets";
 
 const homeRouteApi = getRouteApi("/(private)/_private/");
 
@@ -96,7 +96,7 @@ export function HomePage() {
           <DayPlanList />
         </Tabs.Content>
         <Tabs.Content value="history" pt={3}>
-          <ActivityList />
+          <ActivityGroupList />
         </Tabs.Content>
       </Tabs.Root>
     </Box>
