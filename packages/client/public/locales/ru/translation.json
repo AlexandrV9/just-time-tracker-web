@@ -18,7 +18,19 @@
       "title": "Добро пожаловать!"
     },
     "home": {
-      "selectActivity": "Выберите активность или запустите таймер"
+      "selectActivity": "Выберите активность или запустите таймер",
+      "tabToday": "Сегодня",
+      "tabHistory": "История",
+      "historyPlaceholder": "История появится здесь",
+      "dayPlanChooseActivities": "Выбрать активности",
+      "dayPlanDialogTitle": "Активности на сегодня",
+      "dayPlanDialogCancel": "Отмена",
+      "dayPlanDialogAdd": "Добавить",
+      "dayPlanLoadingActivities": "Загрузка активностей…",
+      "dayPlanNoActivities": "Нет доступных активностей. Создайте их в разделе «Активности».",
+      "dayPlanSaveSuccess": "План дня обновлён",
+      "dayPlanSaveError": "Не удалось сохранить план дня",
+      "dayPlanEditSelection": "Изменить выбор"
     },
     "calendar": {
       "title": "Календарь"

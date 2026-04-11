@@ -18,7 +18,19 @@
       "title": "Welcome!"
     },
     "home": {
-      "selectActivity": "Select activity or start timer"
+      "selectActivity": "Select activity or start timer",
+      "tabToday": "Today",
+      "tabHistory": "History",
+      "historyPlaceholder": "History will appear here",
+      "dayPlanChooseActivities": "Choose activities",
+      "dayPlanDialogTitle": "Activities for today",
+      "dayPlanDialogCancel": "Cancel",
+      "dayPlanDialogAdd": "Add",
+      "dayPlanLoadingActivities": "Loading activities…",
+      "dayPlanNoActivities": "No activities yet. Create some under Activities.",
+      "dayPlanSaveSuccess": "Day plan updated",
+      "dayPlanSaveError": "Could not save day plan",
+      "dayPlanEditSelection": "Edit selection"
     },
     "calendar": {
       "title": "Calendar"
