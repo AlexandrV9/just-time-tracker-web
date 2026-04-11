@@ -1,4 +1,4 @@
-import { Box, Flex } from "~/shared/ui";
+import { Box, Flex, Tabs } from "~/shared/ui";
 import { Stopwatch } from "./Stopwatch";
 import { ActivityList } from "./ActivityList";
 import { useHomeStopwatchSession } from "./useHomeStopwatchSession";
@@ -13,8 +13,7 @@ export function HomePage() {
       justifyContent="stretch"
       flexGrow={1}
       gap="1rem"
-      px={2}
-      py={5}
+      p={2}
       maxWidth="100vw"
     >
       <Flex justifyContent="center">

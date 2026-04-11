@@ -30,6 +30,7 @@ export * from "./Toast";
 export * from "./Skeleton";
 export * from "./Checkbox";
 export * from "./ButtonGroup";
+export * from "./Tabs";
 
 export * from "./icons";
 export * from "./controls";

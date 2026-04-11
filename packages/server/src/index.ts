@@ -9,6 +9,7 @@ import {
   activitySessionSegmentsRouter,
   activitySessionsRouter,
 } from "./activity/index.js";
+import { dayPlanItemsRouter, dayPlansRouter } from "./dayPlan/index.js";
 
 const app = new Hono();
 
@@ -28,6 +29,8 @@ app.route("/health", healthRouter);
 app.route("/activities", activitiesRouter);
 app.route("/activity-sessions", activitySessionsRouter);
 app.route("/activity-session-segments", activitySessionSegmentsRouter);
+app.route("/day-plans", dayPlansRouter);
+app.route("/day-plan-items", dayPlanItemsRouter);
 
 serve(
   {

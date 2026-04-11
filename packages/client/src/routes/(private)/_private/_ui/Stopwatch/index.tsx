@@ -53,9 +53,8 @@ export function Stopwatch({
 
   return (
     <Stack.VStack
-      position="relative"
       w="full"
-      backdropFilter="blur(10px)"
+      backdropFilter="blur(20px)"
       border="1px solid"
       borderColor="border"
       borderRadius="2xl"
