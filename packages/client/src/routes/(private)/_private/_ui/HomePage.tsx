@@ -3,7 +3,7 @@ import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { Box, Flex, Tabs } from "~/shared/ui";
 import { useTranslation } from "~/shared/hooks";
 import { Stopwatch } from "./Stopwatch";
-import { ActivityList } from "./ActivityList";
+import { ActivityList } from "../../../../widgets/ActivityList";
 import { useHomeStopwatchSession } from "./useHomeStopwatchSession";
 import { DayPlanList } from "./DayPlanList";
 

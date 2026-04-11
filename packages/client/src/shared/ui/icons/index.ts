@@ -29,7 +29,7 @@ export * from "./Play";
 export * from "./Stop";
 export * from "./Pause";
 export * from "./Lightning";
-
+export * from "./EmptyBox";
 export * from "./CircularLinesLoader";
 
 export * from "./withIconProps";

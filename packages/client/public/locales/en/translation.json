@@ -22,6 +22,8 @@
       "tabToday": "Today",
       "tabHistory": "History",
       "historyPlaceholder": "History will appear here",
+      "dayPlanEmptyTitle": "No activities planned for today",
+      "dayPlanEmptyHint": "Choose from your list to plan the day",
       "dayPlanChooseActivities": "Choose activities",
       "dayPlanDialogTitle": "Activities for today",
       "dayPlanDialogCancel": "Cancel",

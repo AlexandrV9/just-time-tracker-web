@@ -22,6 +22,8 @@
       "tabToday": "Сегодня",
       "tabHistory": "История",
       "historyPlaceholder": "История появится здесь",
+      "dayPlanEmptyTitle": "На сегодня пока нет активностей",
+      "dayPlanEmptyHint": "Нажмите, чтобы выбрать из списка",
       "dayPlanChooseActivities": "Выбрать активности",
       "dayPlanDialogTitle": "Активности на сегодня",
       "dayPlanDialogCancel": "Отмена",

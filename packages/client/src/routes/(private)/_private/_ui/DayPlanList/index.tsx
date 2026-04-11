@@ -12,7 +12,7 @@ import {
 } from "~/shared/api/services";
 import { getLocalCalendarDayKey } from "~/shared/libs";
 import { useAuthStore } from "~/features/auth";
-import { Button, Card, Flex, Stack, Text, toast } from "~/shared/ui";
+import { Button, Card, EmptyBox, Flex, Stack, Text, toast } from "~/shared/ui";
 
 import { SelectDayActivitiesDialog } from "./SelectDayActivitiesDialog";
 
@@ -170,48 +170,65 @@ export const DayPlanList = () => {
     return null;
   }
 
-  return (
-    <Stack.VStack gap={4} align="stretch" w="full">
-      {isEmpty ? (
-        <Flex justifyContent="center" py={6}>
-          <Button
-            size="lg"
-            variant="outline"
-            borderRadius="2xl"
-            onClick={() => dialog.setOpen(true)}
-          >
-            {t("pages.home.dayPlanChooseActivities")}
-          </Button>
-        </Flex>
-      ) : (
-        <Stack.VStack gap={2} align="stretch">
-          {items.map((item) => {
-            const activity = activityById.get(item.activityId);
-            return (
-              <Card.Root
-                key={item.id}
-                size="sm"
-                borderRadius="xl"
-                variant="subtle"
-              >
-                <Card.Body py={3} px={4}>
-                  <Text fontWeight="medium">
-                    {activity?.title ?? item.activityId}
-                  </Text>
-                </Card.Body>
-              </Card.Root>
-            );
-          })}
-          <Button
-            alignSelf="center"
-            size="sm"
-            variant="ghost"
-            onClick={() => dialog.setOpen(true)}
-          >
-            {t("pages.home.dayPlanEditSelection")}
+  if (isEmpty) {
+    return (
+      <Flex
+        direction="column"
+        align="center"
+        justify="center"
+        gap={3}
+        textAlign="center"
+        w="full"
+        py={12}
+        px={4}
+        borderWidth="1px"
+        borderStyle="dashed"
+        borderColor="border.emphasized"
+        borderRadius="xl"
+        h="auto"
+      >
+        <Stack.VStack gap="0.8rem">
+          <EmptyBox size={60} />
+          <Text fontSize="md" fontWeight="medium" color="fg">
+            {t("pages.home.dayPlanEmptyTitle")}
+          </Text>
+          <Button variant="outline" onClick={() => dialog.setOpen(true)}>
+            Добавить
           </Button>
         </Stack.VStack>
-      )}
+      </Flex>
+    );
+  }
+
+  return (
+    <Stack.VStack gap={4} align="stretch" w="full">
+      <Stack.VStack gap={2} align="stretch">
+        {items.map((item) => {
+          const activity = activityById.get(item.activityId);
+          return (
+            <Card.Root
+              key={item.id}
+              size="sm"
+              borderRadius="xl"
+              variant="subtle"
+            >
+              <Card.Body py={3} px={4}>
+                <Text fontWeight="medium">
+                  {activity?.title ?? item.activityId}
+                </Text>
+              </Card.Body>
+            </Card.Root>
+          );
+        })}
+        <Button
+          alignSelf="center"
+          size="sm"
+          variant="ghost"
+          onClick={() => dialog.setOpen(true)}
+        >
+          {t("pages.home.dayPlanEditSelection")}
+        </Button>
+      </Stack.VStack>
 
       <SelectDayActivitiesDialog
         dialog={dialog}

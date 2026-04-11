@@ -64,22 +64,32 @@ export function SelectDayActivitiesDialog({
     isSaving || isActivitiesLoading || activities.length === 0;
 
   return (
-    <Dialog.RootProvider size="full" lazyMount value={dialog}>
+    <Dialog.RootProvider size="md" placement="center" lazyMount value={dialog}>
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner zIndex={3}>
-          <Dialog.SafeContent
-            overflow="hidden"
+          <Dialog.Content
+            maxW="md"
+            w="full"
+            mx={4}
+            borderRadius="xl"
             display="flex"
             flexDirection="column"
-            maxH="85dvh"
+            maxH="min(85dvh, 560px)"
+            overflow="hidden"
           >
             <Dialog.Header>
               <Dialog.Title fontSize="xl">
                 {t("pages.home.dayPlanDialogTitle")}
               </Dialog.Title>
             </Dialog.Header>
-            <Dialog.Body flex="1" minH={0} display="flex" flexDirection="column">
+            <Dialog.Body
+              flex="1"
+              minH={0}
+              display="flex"
+              flexDirection="column"
+              overflow="hidden"
+            >
               {isActivitiesLoading ? (
                 <Text color="fg.muted">{t("pages.home.dayPlanLoadingActivities")}</Text>
               ) : activities.length === 0 ? (
@@ -112,6 +122,9 @@ export function SelectDayActivitiesDialog({
               borderTop="1px solid"
               borderColor="border.emphasized"
               p="1rem"
+              display="flex"
+              gap={3}
+              justifyContent="flex-end"
             >
               <Button variant="outline" onClick={closeDialog} disabled={isSaving}>
                 {t("pages.home.dayPlanDialogCancel")}
@@ -127,7 +140,7 @@ export function SelectDayActivitiesDialog({
             <Dialog.CloseTrigger asChild>
               <CloseButton size="2xl" />
             </Dialog.CloseTrigger>
-          </Dialog.SafeContent>
+          </Dialog.Content>
         </Dialog.Positioner>
       </Portal>
     </Dialog.RootProvider>
