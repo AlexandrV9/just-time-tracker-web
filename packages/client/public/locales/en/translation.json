@@ -53,6 +53,9 @@
         "done": "Done",
         "edit": "Edit",
         "delete": "Delete activity",
+        "deleteDialogTitle": "Delete activity",
+        "deleteDialogCancel": "Cancel",
+        "deleteDialogConfirm": "Delete",
         "deleteConfirm": "Delete this activity? This cannot be undone.",
         "saveError": "Could not save changes. Try again.",
         "historyTitle": "History",
@@ -67,7 +70,8 @@
         "descriptionPlaceholder": "Description",
         "saveButton": "Save",
         "cancelEditButton": "Cancel",
-        "titleRequiredError": "Enter a name for the activity."
+        "titleRequiredError": "Enter a name for the activity.",
+        "editDialogTitle": "Edit activity"
       }
     }
   },

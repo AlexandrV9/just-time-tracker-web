@@ -1,6 +1,7 @@
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useDialog } from "@ark-ui/react";
+import { useNavigate, useParams, useRouter } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { IconButton } from "@chakra-ui/react";
 import {
   ArrowLeftIcon,
@@ -19,6 +20,9 @@ import {
 import { useTranslation } from "~/shared/hooks";
 import type { ActivityDTO } from "@to-do-list/shared";
 
+import { DeleteActivityDialog } from "./DeleteActivityDialog";
+import { EditActivityDialog } from "./EditActivityDialog";
+
 /** Total wall time tracked across all sessions (active + pause intervals). */
 const getTotalTrackedSeconds = (item: ActivityDTO): number =>
   Math.floor((item.activeDurationMs + item.pauseDurationMs) / 1000);
@@ -33,7 +37,13 @@ export const ActivityPage = () => {
   });
 
   const navigate = useNavigate();
+
+  const router = useRouter();
+
   const queryClient = useQueryClient();
+
+  const editDialog = useDialog();
+  const deleteDialog = useDialog();
 
   const { data, isPending } = useQuery({
     queryKey: ["activities", activityId],
@@ -41,19 +51,6 @@ export const ActivityPage = () => {
   });
 
   const activity = data?.success ? data.data : null;
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [titleError, setTitleError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (activity) {
-      setTitle(activity.title);
-      setDescription(activity.description ?? "");
-      setTitleError(null);
-    }
-  }, [activity]);
 
   const { data: historyResponse } = useQuery({
     queryKey: [
@@ -93,75 +90,43 @@ export const ActivityPage = () => {
     },
   });
 
-  const hasChanges = useMemo(() => {
-    if (!activity) return false;
-    return (
-      title.trim() !== activity.title ||
-      (description.trim() || null) !== (activity.description?.trim() || null)
-    );
-  }, [activity, title, description]);
-
-  const handleToggleEdit = useCallback(() => {
-    if (isEditing) {
-      if (activity) {
-        setTitle(activity.title);
-        setDescription(activity.description ?? "");
+  const handleEditSave = useCallback(
+    async (data: { title: string; description: string | null }) => {
+      if (!activity) {
+        return { success: false as const, message: undefined };
       }
-      setTitleError(null);
-    }
-    setIsEditing((v) => !v);
-  }, [isEditing, activity]);
 
-  const handleSave = useCallback(async () => {
+      const res = await updateActivityAsync({
+        id: activity.id,
+        title: data.title,
+        description: data.description,
+      });
+
+      if (!res.success) {
+        return {
+          success: false as const,
+          message: res.message ?? t("pages.activities.detail.saveError"),
+        };
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["activities"] });
+      queryClient.invalidateQueries({ queryKey: ["activities", activityId] });
+      queryClient.invalidateQueries({ queryKey: ["activities", "history"] });
+
+      editDialog.setOpen(false);
+      return { success: true as const };
+    },
+    [activity, updateActivityAsync, queryClient, activityId, t, editDialog],
+  );
+
+  const handleConfirmDelete = useCallback(() => {
     if (!activity) return;
-    const trimmed = title.trim();
-    if (trimmed.length === 0) {
-      setTitleError(t("pages.activities.detail.titleRequiredError"));
-      return;
-    }
-
-    if (!hasChanges) {
-      setIsEditing(false);
-      return;
-    }
-
-    const res = await updateActivityAsync({
-      id: activity.id,
-      title: trimmed,
-      description: description.trim() || null,
-    });
-
-    if (!res.success) {
-      setTitleError(res.message || t("pages.activities.detail.saveError"));
-      return;
-    }
-
-    queryClient.invalidateQueries({ queryKey: ["activities"] });
-    queryClient.invalidateQueries({ queryKey: ["activities", activityId] });
-    queryClient.invalidateQueries({ queryKey: ["activities", "history"] });
-
-    setTitleError(null);
-    setIsEditing(false);
-  }, [
-    activity,
-    title,
-    description,
-    hasChanges,
-    updateActivityAsync,
-    queryClient,
-    activityId,
-    t,
-  ]);
-
-  const handleDelete = useCallback(() => {
-    if (!activity) return;
-    if (!window.confirm(t("pages.activities.detail.deleteConfirm"))) return;
     deleteActivity({ id: activity.id });
-  }, [activity, deleteActivity, t]);
+  }, [activity, deleteActivity]);
 
   const handleBack = useCallback(() => {
-    navigate({ to: "/" });
-  }, [navigate]);
+    router.history.back();
+  }, [router.history]);
 
   if (isPending) {
     return (
@@ -191,9 +156,6 @@ export const ActivityPage = () => {
     );
   }
 
-  const durationSeconds = getTotalTrackedSeconds(activity);
-  const durationDisplay = formatDuration(durationSeconds);
-
   const createdAtDisplay = new Date(activity.createdAt).toLocaleString();
   const updatedAtDisplay = new Date(activity.updatedAt).toLocaleString();
 
@@ -215,7 +177,7 @@ export const ActivityPage = () => {
           <IconButton
             size="xs"
             variant="outline"
-            onClick={handleToggleEdit}
+            onClick={() => editDialog.setOpen(true)}
             disabled={isDeleting || isUpdating}
             aria-label={t("pages.activities.detail.edit")}
           >
@@ -224,7 +186,7 @@ export const ActivityPage = () => {
           <IconButton
             size="xs"
             variant="outline"
-            onClick={handleDelete}
+            onClick={() => deleteDialog.setOpen(true)}
             disabled={isDeleting || isUpdating}
             aria-label={t("pages.activities.detail.delete")}
           >
@@ -234,8 +196,8 @@ export const ActivityPage = () => {
       </Flex>
 
       <Flex alignItems="flex-start" gap="2" justifyContent="space-between">
-        <Text textStyle="lg">{title}</Text>
-        {description && <Text>{description}</Text>}
+        <Text textStyle="lg">{activity.title}</Text>
+        {activity.description ? <Text>{activity.description}</Text> : null}
       </Flex>
 
       <Box display="flex" flexDirection="column" gap="0.5rem" px={1}>
@@ -314,6 +276,18 @@ export const ActivityPage = () => {
           })}
         </List.Root>
       </Box>
+      <EditActivityDialog
+        dialog={editDialog}
+        activity={activity}
+        isSaving={isUpdating}
+        onSave={handleEditSave}
+      />
+      <DeleteActivityDialog
+        dialog={deleteDialog}
+        activityTitle={activity.title}
+        isDeleting={isDeleting}
+        onConfirm={handleConfirmDelete}
+      />
     </Box>
   );
 };

@@ -53,6 +53,9 @@
         "done": "Готово",
         "edit": "Редактировать",
         "delete": "Удалить активность",
+        "deleteDialogTitle": "Удаление активности",
+        "deleteDialogCancel": "Отмена",
+        "deleteDialogConfirm": "Удалить",
         "deleteConfirm": "Удалить эту активность? Это действие нельзя отменить.",
         "saveError": "Не удалось сохранить изменения. Попробуйте ещё раз.",
         "historyTitle": "История",
@@ -67,7 +70,8 @@
         "descriptionPlaceholder": "Описание",
         "saveButton": "Сохранить",
         "cancelEditButton": "Отмена",
-        "titleRequiredError": "Введите название активности."
+        "titleRequiredError": "Введите название активности.",
+        "editDialogTitle": "Редактировать активность"
       }
     }
   },
