@@ -10,6 +10,8 @@ import type {
   ActivitySessionDTO,
   GetActivityAnalyticsDTO,
   GetActivityAnalyticsResponseDTO,
+  GetBatchActivityAnalyticsDTO,
+  GetBatchActivityAnalyticsResponseDTO,
   CreateActivityFromQuickTimerDataDTO,
 } from "@to-do-list/shared";
 
@@ -402,6 +404,101 @@ const getActivityAnalytics = async (
   }
 };
 
+type GetBatchActivityAnalyticsResult =
+  | SuccessResponse<GetBatchActivityAnalyticsResponseDTO>
+  | ErrorResponse;
+
+const getBatchActivityAnalytics = async (
+  data: GetBatchActivityAnalyticsDTO,
+): Promise<GetBatchActivityAnalyticsResult> => {
+  try {
+    const { activityIds, fromDate, toDate } = data;
+
+    if (activityIds.length === 0) {
+      return { success: true, data: { items: {} } };
+    }
+
+    const nowIso = new Date().toISOString();
+    const fromIso = fromDate ?? "1970-01-01T00:00:00.000Z";
+    const toIso = toDate ?? nowIso;
+
+    const fromMs = Date.parse(fromIso);
+    const toMs = Date.parse(toIso);
+    if (!Number.isFinite(fromMs) || !Number.isFinite(toMs) || toMs <= fromMs) {
+      return {
+        success: false,
+        message: "Invalid date range (toDate must be after fromDate)",
+      };
+    }
+
+    const segments =
+      await activitySessionSegmentQueries.listSegmentIntervalsForMultipleActivitiesInRange(
+        activityIds,
+        fromIso,
+        toIso,
+      );
+
+    const floorMs = (n: number) => Math.floor(Math.max(0, n));
+
+    const perActivity = new Map<
+      string,
+      { activeDurationMs: number; pauseDurationMs: number; dayBuckets: Map<number, DayTotalsAgg> }
+    >();
+
+    for (const id of activityIds) {
+      perActivity.set(id, { activeDurationMs: 0, pauseDurationMs: 0, dayBuckets: new Map() });
+    }
+
+    for (const seg of segments) {
+      const agg = perActivity.get(seg.activityId);
+      if (!agg) continue;
+
+      const clip = clipSegmentToWindow(seg.startedAt, seg.endedAt, fromMs, toMs);
+      if (!clip) continue;
+
+      const ms = clip.end - clip.start;
+      if (seg.type === "active") {
+        agg.activeDurationMs += ms;
+      } else {
+        agg.pauseDurationMs += ms;
+      }
+      addMsToUtcDayBuckets(clip.start, clip.end, seg.type, agg.dayBuckets);
+    }
+
+    const items: GetBatchActivityAnalyticsResponseDTO["items"] = {};
+
+    for (const [activityId, agg] of perActivity) {
+      const days = Array.from(agg.dayBuckets.entries())
+        .sort((a, b) => a[0] - b[0])
+        .map(([utcDayStart, totals]) => ({
+          day: new Date(utcDayStart).toISOString(),
+          totals: {
+            activeDurationMs: floorMs(totals.activeDurationMs),
+            pauseDurationMs: floorMs(totals.pauseDurationMs),
+            totalDurationMs: floorMs(totals.activeDurationMs + totals.pauseDurationMs),
+          },
+        }));
+
+      items[activityId] = {
+        activityId,
+        fromDate: fromIso,
+        toDate: toIso,
+        totals: {
+          activeDurationMs: floorMs(agg.activeDurationMs),
+          pauseDurationMs: floorMs(agg.pauseDurationMs),
+          totalDurationMs: floorMs(agg.activeDurationMs + agg.pauseDurationMs),
+        },
+        days,
+      };
+    }
+
+    return { success: true, data: { items } };
+  } catch (error) {
+    console.error("Get batch activity analytics error:", error);
+    return { success: false, message: "Failed to load batch activity analytics" };
+  }
+};
+
 export const activitiesService = {
   createActivity,
   createActivityFromQuickTimer,
@@ -414,4 +511,5 @@ export const activitiesService = {
   finishActivity,
   getSessionsByActivityId,
   getActivityAnalytics,
+  getBatchActivityAnalytics,
 };

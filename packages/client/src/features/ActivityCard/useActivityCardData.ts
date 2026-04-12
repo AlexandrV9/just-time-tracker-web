@@ -19,12 +19,14 @@ import {
   type CalendarDay,
 } from "~/shared/libs";
 import { useDisplayedSeconds } from "./useDisplayedSeconds";
+import type { PreloadedAnalytics } from "./index";
 
 type UseActivityCardDataProps = {
   activityId: ActivityDTO["id"];
   currentSessionId?: ActivitySessionDTO["id"] | null;
   calendarDay?: CalendarDay;
   activityStatus: ActivityStatusDTO;
+  preloadedAnalytics?: PreloadedAnalytics;
 };
 
 export function useActivityCardData({
@@ -32,11 +34,14 @@ export function useActivityCardData({
   currentSessionId,
   calendarDay,
   activityStatus,
+  preloadedAnalytics,
 }: UseActivityCardDataProps) {
   const { data: currentSession, isLoading: isLoadingCurrentSession } = useQuery(
     {
       queryKey: [ACTIVITY_SESSIONS_QUERY_KEY, currentSessionId],
-      enabled: Boolean(currentSessionId),
+      // Only fetch the session when the activity is currently active.
+      // For paused/finished activities, activityStatus is a reliable fallback.
+      enabled: Boolean(currentSessionId) && activityStatus === "active",
       queryFn: async () => {
         if (!currentSessionId) return undefined;
 
@@ -62,10 +67,7 @@ export function useActivityCardData({
   const {
     data: analytics,
     isLoading: isLoadingAnalytics,
-    /**
-     * Это время, когда данные стали актуальны в кэше React Query
-     */
-    dataUpdatedAt: analyticsFetchedAtMs,
+    dataUpdatedAt: analyticsDataUpdatedAt,
   } = useQuery({
     queryKey: [ACTIVITY_ANALYTICS_QUERY_KEY, activityId, fromDate, toDate],
     queryFn: async () => {
@@ -77,11 +79,18 @@ export function useActivityCardData({
 
       return response.success ? response.data : undefined;
     },
-    enabled: !!activityId,
+    // Skip when analytics were pre-loaded by the parent (batch fetch).
+    enabled: !!activityId && !preloadedAnalytics,
     placeholderData: keepPreviousData,
   });
 
-  const currentActiveMs = analytics?.totals?.activeDurationMs ?? 0;
+  const currentActiveMs =
+    preloadedAnalytics?.currentActiveMs ??
+    analytics?.totals?.activeDurationMs ??
+    0;
+
+  const analyticsFetchedAtMs =
+    preloadedAnalytics?.fetchedAtMs ?? analyticsDataUpdatedAt;
 
   const displayedSeconds = useDisplayedSeconds({
     currentActiveMs,

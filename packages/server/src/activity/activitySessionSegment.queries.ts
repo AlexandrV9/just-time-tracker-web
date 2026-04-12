@@ -117,6 +117,41 @@ const listSegmentIntervalsForActivityInRange = async (
   }));
 };
 
+const listSegmentIntervalsForMultipleActivitiesInRange = async (
+  activityIds: string[],
+  fromDate: string | null,
+  toDate: string | null,
+): Promise<Array<SegmentIntervalRow & { activityId: string }>> => {
+  if (activityIds.length === 0) return [];
+
+  const { rows } = await pool.query(
+    `
+    SELECT
+      s.activity_id AS "activityId",
+      seg.segment_type AS "type",
+      seg.started_at AS "startedAt",
+      seg.ended_at AS "endedAt"
+    FROM activity_session_segments seg
+    INNER JOIN activity_sessions s ON s.id = seg.session_id
+    WHERE s.activity_id = ANY($1::uuid[])
+      AND seg.started_at < COALESCE($2::timestamptz, 'infinity'::timestamptz)
+      AND COALESCE(seg.ended_at, NOW()) > COALESCE($3::timestamptz, '-infinity'::timestamptz)
+    ORDER BY seg.started_at ASC
+    `,
+    [activityIds, toDate, fromDate],
+  );
+
+  return rows.map((r) => ({
+    activityId: String(r.activityId),
+    type: r.type as ActivitySessionSegmentDTO["type"],
+    startedAt: String(r.startedAt),
+    endedAt:
+      r.endedAt === null || r.endedAt === undefined
+        ? null
+        : String(r.endedAt),
+  }));
+};
+
 const getSegmentBySessionId = async (
   sessionId: string,
 ): Promise<ActivitySessionSegmentDTO | null> => {
@@ -181,5 +216,6 @@ export const activitySessionSegmentQueries = {
   getSegmentBySessionId,
   getSegmentsBySessionId,
   listSegmentIntervalsForActivityInRange,
+  listSegmentIntervalsForMultipleActivitiesInRange,
   updateActivitySessionSegment,
 };

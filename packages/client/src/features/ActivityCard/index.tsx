@@ -8,6 +8,11 @@ import { useActivityCardData } from "./useActivityCardData";
 import { ActivityCardView } from "~/entities/Activity";
 import type { CalendarDay } from "~/shared/libs";
 
+export type PreloadedAnalytics = {
+  currentActiveMs: number;
+  fetchedAtMs: number;
+};
+
 export type ActivityCardProps = {
   activity: ActivityDTO;
   /**
@@ -17,6 +22,11 @@ export type ActivityCardProps = {
    */
   calendarDay?: CalendarDay;
   withControlButtons?: boolean;
+  /**
+   * Аналитика, предварительно загруженная родительским компонентом (например, батчевым запросом).
+   * Если передана, индивидуальный запрос аналитики для карточки не выполняется.
+   */
+  preloadedAnalytics?: PreloadedAnalytics;
   onStart?: () => void;
   onPause?: () => void;
   onFinish?: () => void;
@@ -26,6 +36,7 @@ export const ActivityCard = ({
   activity,
   calendarDay,
   withControlButtons = true,
+  preloadedAnalytics,
   onStart,
   onPause,
   onFinish,
@@ -38,6 +49,7 @@ export const ActivityCard = ({
       currentSessionId: activity.currentSessionId,
       activityStatus: activity.status,
       calendarDay,
+      preloadedAnalytics,
     });
 
   const handleCardClick = useCallback(() => {

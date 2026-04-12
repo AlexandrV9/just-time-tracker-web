@@ -6,7 +6,7 @@ import {
   formatGroupLabel,
   type CalendarDay,
 } from "~/shared/libs";
-import { useGroupDayActiveTotalSeconds } from "./useGroupDayActiveTotalSeconds";
+import { useGroupAnalytics } from "./useGroupAnalytics";
 import { ActivityListView } from "~/entities/Activity";
 import { ActivityCard } from "~/features";
 
@@ -28,7 +28,7 @@ export function ActivityGroupListItem({
   onPause,
   onFinish,
 }: ActivityGroupListItemProps) {
-  const totalSeconds = useGroupDayActiveTotalSeconds(calendarDay, activities);
+  const { totalSeconds, analyticsMap } = useGroupAnalytics(calendarDay, activities);
 
   const totalTime = convertTimeObjectToTimeString(
     convertSecondsToTimeObject(totalSeconds),
@@ -64,6 +64,7 @@ export function ActivityGroupListItem({
               activity={activity}
               calendarDay={calendarDay}
               withControlButtons={false}
+              preloadedAnalytics={analyticsMap[activity.id]}
               onStart={() => onStart(activity.id)}
               onPause={() => onPause(activity.id)}
               onFinish={() => onFinish(activity.id)}

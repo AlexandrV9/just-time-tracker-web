@@ -17,6 +17,8 @@ import type {
   GetActivitySessionSegmentDTO,
   GetActivityAnalyticsDTO,
   GetActivityAnalyticsResponseDTO,
+  GetBatchActivityAnalyticsDTO,
+  GetBatchActivityAnalyticsResponseDTO,
   CreateActivityFromQuickTimerDataDTO,
 } from "@to-do-list/shared";
 import { baseApi } from "../base";
@@ -98,6 +100,21 @@ export class ActivityService {
       `/api/activities/${activityId}/analytics`,
       {
         params: { fromDate, toDate },
+      },
+    );
+  }
+
+  getBatchActivityAnalytics(
+    data: GetBatchActivityAnalyticsDTO,
+  ): Promise<RequestResponse<GetBatchActivityAnalyticsResponseDTO, unknown>> {
+    return baseApi.get<GetBatchActivityAnalyticsResponseDTO>(
+      `/api/activities/analytics`,
+      {
+        params: {
+          activityIds: data.activityIds,
+          fromDate: data.fromDate,
+          toDate: data.toDate,
+        },
       },
     );
   }

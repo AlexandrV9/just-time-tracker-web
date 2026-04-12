@@ -6,6 +6,7 @@ export const activitiesRouter = new Hono();
 activitiesRouter.post("/", activityHandlers.createActivity);
 activitiesRouter.post("/quick-timer", activityHandlers.createActivityFromQuickTimer);
 activitiesRouter.get("/", activityHandlers.getActivities);
+activitiesRouter.get("/analytics", activityHandlers.getBatchActivityAnalytics);
 activitiesRouter.get("/:id/analytics", activityHandlers.getActivityAnalytics);
 activitiesRouter.get("/:id/sessions", activityHandlers.getSessionsByActivityId);
 activitiesRouter.get("/:id", activityHandlers.getActivityById);

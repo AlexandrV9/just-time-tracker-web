@@ -204,3 +204,34 @@ export const getActivityAnalyticsResponseSchema = z.object({
 export type GetActivityAnalyticsResponseDTO = z.infer<
   typeof getActivityAnalyticsResponseSchema
 >;
+
+/** Query string for `GET /activities/analytics` (batch). */
+export const getBatchActivityAnalyticsQuerySchema = z
+  .object({
+    activityIds: z
+      .union([z.string(), z.array(z.string())])
+      .transform((v) => (Array.isArray(v) ? v : [v])),
+    fromDate: z.iso.datetime().optional(),
+    toDate: z.iso.datetime().optional(),
+  })
+  .superRefine(({ fromDate, toDate }, ctx) => {
+    if (fromDate && toDate && new Date(toDate) < new Date(fromDate)) {
+      ctx.addIssue({
+        path: ["toDate"],
+        message: "toDate must be after fromDate",
+        code: "custom",
+      });
+    }
+  });
+
+export type GetBatchActivityAnalyticsDTO = z.infer<
+  typeof getBatchActivityAnalyticsQuerySchema
+>;
+
+export const getBatchActivityAnalyticsResponseSchema = z.object({
+  items: z.record(z.string(), getActivityAnalyticsResponseSchema),
+});
+
+export type GetBatchActivityAnalyticsResponseDTO = z.infer<
+  typeof getBatchActivityAnalyticsResponseSchema
+>;

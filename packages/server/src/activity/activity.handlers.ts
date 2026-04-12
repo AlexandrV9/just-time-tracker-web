@@ -10,6 +10,7 @@ import {
   getActivitiesSchema,
   getActivitySessionsSchema,
   getActivityAnalyticsQuerySchema,
+  getBatchActivityAnalyticsQuerySchema,
   createActivityFromQuickTimerSchema,
 } from "@to-do-list/shared";
 
@@ -149,6 +150,39 @@ export const activityHandlers = {
         },
         500,
       );
+    }
+  },
+
+  getBatchActivityAnalytics: async (c: Context) => {
+    const rawIds = c.req.queries("activityIds") ?? [];
+    const fromDate = c.req.query("fromDate") ?? undefined;
+    const toDate = c.req.query("toDate") ?? undefined;
+
+    const parsed = getBatchActivityAnalyticsQuerySchema.safeParse({
+      activityIds: rawIds,
+      fromDate,
+      toDate,
+    });
+
+    if (!parsed.success) {
+      return c.json(
+        {
+          success: false,
+          message: "Validation failed",
+          data: validationUtils.formatZodErrors(parsed.error.message),
+        },
+        400,
+      );
+    }
+
+    try {
+      const responseData = await activitiesService.getBatchActivityAnalytics(
+        parsed.data,
+      );
+      return c.json(responseData);
+    } catch (error) {
+      console.error("Handler error:", error);
+      return c.json({ success: false, message: "Internal server error" }, 500);
     }
   },
 
