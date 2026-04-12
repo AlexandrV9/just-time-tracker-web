@@ -82,6 +82,12 @@ type CalculateDisplayedSecondsProps = {
    * Момент локального "resume" в рамках текущего mount.
    */
   resumedAtWallClockMs: number | null;
+  /**
+   * true только в первый рендер после перехода inactive → active.
+   * В этот момент nowMs ещё stale (useLiveTimestamp effect не отработал),
+   * поэтому нельзя сохранять его как resumedAtWallClockMs.
+   */
+  isJustActivated: boolean;
 };
 
 export function calculateDisplayedSeconds({
@@ -91,6 +97,7 @@ export function calculateDisplayedSeconds({
   nowMs,
   lastStableSeconds,
   resumedAtWallClockMs,
+  isJustActivated,
 }: CalculateDisplayedSecondsProps) {
   /**
    * Базовое значение от сервера:
@@ -111,16 +118,33 @@ export function calculateDisplayedSeconds({
   /**
    * 🔴 Состояние: НЕ активна
    *
-   * - сбрасываем локальный resume
-   * - сохраняем текущее значение как стабильное
+   * Чтобы избежать скачка назад в момент паузы/завершения
+   * (до рефетча analytics), используем локально вычисленное значение
+   * как нижнюю границу.
    *
-   * Это значение потом будет использовано как база,
-   * если пользователь снова нажмёт Start.
+   * - Первый рендер после паузы: resumedAtWallClockMs ещё установлен,
+   *   вычисляем живое значение через lastStableSeconds + delta.
+   * - Последующие рендеры: resumedAtWallClockMs уже сброшен,
+   *   используем lastStableSeconds как сохранённую нижнюю границу.
+   * - После рефетча analytics: serverDrivenSeconds обновляется до верного
+   *   значения, max(...) отдаёт его.
    */
   if (!hasActiveSession) {
+    let displayedSeconds = serverDrivenSeconds;
+
+    if (lastStableSeconds !== null && resumedAtWallClockMs !== null) {
+      const localDelta = Math.floor((nowMs - resumedAtWallClockMs) / 1000);
+      displayedSeconds = Math.max(
+        serverDrivenSeconds,
+        lastStableSeconds + localDelta,
+      );
+    } else if (lastStableSeconds !== null) {
+      displayedSeconds = Math.max(serverDrivenSeconds, lastStableSeconds);
+    }
+
     return {
-      displayedSeconds: serverDrivenSeconds,
-      nextLastStableSeconds: serverDrivenSeconds,
+      displayedSeconds,
+      nextLastStableSeconds: displayedSeconds,
       nextResumedAtWallClockMs: null,
     };
   }
@@ -129,7 +153,7 @@ export function calculateDisplayedSeconds({
    * 🟡 Состояние: активна, но у нас нет "снапшота"
    *
    * Это означает:
-   * - либо мы только что смонтировались
+   * - либо мы только что смонтировались (активность уже была запущена)
    * - либо ещё не было состояния pause/stop
    *
    * В этом случае можно доверять чисто серверному значению.
@@ -145,24 +169,28 @@ export function calculateDisplayedSeconds({
   /**
    * 🟢 Состояние: активна и есть стабильная база
    *
-   * Если мы только что перешли в active:
-   * - фиксируем момент времени (resumedAtWallClockMs)
+   * Если это первый рендер после перехода inactive → active (isJustActivated),
+   * nowMs ещё stale: useLiveTimestamp инициализируется при монтировании
+   * и обновляется только через useEffect. Откладываем захват
+   * resumedAtWallClockMs до следующего рендера, когда nowMs станет свежим.
    *
-   * И дальше считаем:
-   * base (последнее стабильное значение) +
-   * сколько прошло с момента resume
+   * На следующем рендере (triggered useEffect → setTimestamp):
+   * resumedAtWallClockMs всё ещё null → захватываем свежий nowMs → delta = 0.
    */
+  if (isJustActivated) {
+    return {
+      displayedSeconds: lastStableSeconds,
+      nextLastStableSeconds: lastStableSeconds,
+      nextResumedAtWallClockMs: null,
+    };
+  }
+
   const effectiveResumedAtWallClockMs = resumedAtWallClockMs ?? nowMs;
 
   const localLiveDeltaSeconds = Math.floor(
     (nowMs - effectiveResumedAtWallClockMs) / 1000,
   );
 
-  /**
-   * Возвращаем:
-   * - новое отображаемое значение
-   * - те же refs (они остаются стабильными)
-   */
   return {
     displayedSeconds: lastStableSeconds + localLiveDeltaSeconds,
     nextLastStableSeconds: lastStableSeconds,

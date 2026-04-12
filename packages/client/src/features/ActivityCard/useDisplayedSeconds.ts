@@ -14,34 +14,22 @@ export function useDisplayedSeconds({
   hasActiveSession,
   nowMs,
 }: UseDisplayedSecondsProps) {
-  /**
-   * Последнее "зафиксированное" значение таймера.
-   *
-   * Когда активность НЕ активна:
-   * - мы сохраняем сюда серверное значение
-   *
-   * Когда пользователь снова нажимает Start:
-   * - мы продолжаем считать время ОТ ЭТОГО значения
-   *
-   * Это защищает от скачков:
-   * paused → start → refetch → значение не откатывается назад
-   */
   const lastStableSecondsRef = useRef<number | null>(null);
-
-  /**
-   * Момент (в миллисекундах), когда мы локально зафиксировали
-   * переход в активное состояние.
-   *
-   * Используется как точка отсчёта для "живого" таймера:
-   * nowMs - resumedAtWallClockMs = сколько прошло после resume
-   */
   const resumedAtWallClockMsRef = useRef<number | null>(null);
 
+  /**
+   * Отслеживаем предыдущее значение hasActiveSession, чтобы определить
+   * момент перехода из неактивного в активное состояние (isJustActivated).
+   * В этот первый рендер nowMs ещё stale (useLiveTimestamp effect не успел
+   * отработать), поэтому нельзя использовать nowMs как resumedAtWallClockMs.
+   */
+  const prevHasActiveSessionRef = useRef<boolean>(hasActiveSession);
+
   return useMemo(() => {
-    /**
-     * Вычисляем новое значение таймера + новые значения для refs
-     * (они возвращаются как nextLastStableSeconds и nextResumedAtWallClockMs)
-     */
+    const isJustActivated =
+      hasActiveSession && !prevHasActiveSessionRef.current;
+    prevHasActiveSessionRef.current = hasActiveSession;
+
     const result = calculateDisplayedSeconds({
       currentActiveMs,
       analyticsFetchedAtMs,
@@ -49,14 +37,9 @@ export function useDisplayedSeconds({
       nowMs,
       lastStableSeconds: lastStableSecondsRef.current,
       resumedAtWallClockMs: resumedAtWallClockMsRef.current,
+      isJustActivated,
     });
 
-    /**
-     * Сохраняем новое "состояние" между рендерами.
-     * Это позволяет нам помнить:
-     * - от какого значения продолжать таймер
-     * - когда начался текущий активный интервал
-     */
     lastStableSecondsRef.current = result.nextLastStableSeconds;
     resumedAtWallClockMsRef.current = result.nextResumedAtWallClockMs;
 
