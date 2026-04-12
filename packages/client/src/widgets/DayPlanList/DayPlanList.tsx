@@ -217,26 +217,36 @@ export const DayPlanList = () => {
             </Stack.VStack>
           </Flex>
         ) : (
-          <ActivityListView>
-            {items.map((item) => {
-              const activity = activityById.get(item.activityId);
+          <>
+            <ActivityListView>
+              {items.map((item) => {
+                const activity = activityById.get(item.activityId);
 
-              if (!activity) {
-                return null;
-              }
+                if (!activity) {
+                  return null;
+                }
 
-              return (
-                <ActivityListView.Item key={activity.id}>
-                  <ActivityCard
-                    activity={activity}
-                    onStart={() => startActivity(activity.id)}
-                    onPause={() => pauseActivity(activity.id)}
-                    onFinish={() => finishActivity(activity.id)}
-                  />
-                </ActivityListView.Item>
-              );
-            })}
-          </ActivityListView>
+                return (
+                  <ActivityListView.Item key={activity.id}>
+                    <ActivityCard
+                      activity={activity}
+                      onStart={() => startActivity(activity.id)}
+                      onPause={() => pauseActivity(activity.id)}
+                      onFinish={() => finishActivity(activity.id)}
+                    />
+                  </ActivityListView.Item>
+                );
+              })}
+            </ActivityListView>
+            <Button
+              variant="outline"
+              size="sm"
+              alignSelf="center"
+              onClick={() => addActivityDialog.setOpen(true)}
+            >
+              Добавить
+            </Button>
+          </>
         )}
       </Stack.VStack>
 

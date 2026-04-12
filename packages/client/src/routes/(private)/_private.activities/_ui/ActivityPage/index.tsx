@@ -53,22 +53,19 @@ export const ActivityPage = () => {
   const activity = data?.success ? data.data : null;
 
   const { data: historyResponse } = useQuery({
-    queryKey: [
-      "activities",
-      "history",
-      activityId,
-      activity?.title,
-      activity?.createdById,
-    ],
-    queryFn: () =>
-      activityApiService.getActivities({
+    // Title is intentionally excluded from the key: renaming the activity
+    // must not cause the history to re-fetch under the new name.
+    queryKey: ["activities", "history", activityId, activity?.createdById],
+    queryFn: () => {
+      return activityApiService.getActivities({
         createdById: activity!.createdById,
         exactTitle: activity!.title,
         limit: 100,
         page: 0,
         sortBy: "createdAt",
         sortOrder: "desc",
-      }),
+      });
+    },
     enabled: !!activity?.createdById && !!activity?.title,
   });
 
@@ -111,7 +108,8 @@ export const ActivityPage = () => {
 
       queryClient.invalidateQueries({ queryKey: ["activities"] });
       queryClient.invalidateQueries({ queryKey: ["activities", activityId] });
-      queryClient.invalidateQueries({ queryKey: ["activities", "history"] });
+      // History is intentionally NOT invalidated on rename — the list must stay
+      // stable and continue showing activities under the original title.
 
       editDialog.setOpen(false);
       return { success: true as const };

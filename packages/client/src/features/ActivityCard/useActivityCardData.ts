@@ -54,6 +54,15 @@ export function useActivityCardData({
     },
   );
 
+  // When the session query is disabled, `currentSession` holds stale cache data.
+  // Derive the authoritative session status from `activityStatus` instead.
+  const sessionQueryEnabled = Boolean(currentSessionId) && activityStatus === "active";
+  const effectiveSessionStatus = sessionQueryEnabled
+    ? currentSession?.status
+    : activityStatus === "paused"
+      ? "paused"
+      : undefined;
+
   const hasActiveSession = resolveHasActiveSession({
     activityStatus,
     currentSessionStatus: currentSession?.status,
@@ -105,7 +114,7 @@ export function useActivityCardData({
 
   return {
     displayedTime,
-    sessionStatus: currentSession?.status,
+    sessionStatus: effectiveSessionStatus,
     hasActiveSession,
     isLoading: isLoadingAnalytics || isLoadingCurrentSession,
   };

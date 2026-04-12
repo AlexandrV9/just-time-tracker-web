@@ -154,7 +154,12 @@ export const activityHandlers = {
   },
 
   getBatchActivityAnalytics: async (c: Context) => {
-    const rawIds = c.req.queries("activityIds") ?? [];
+    // Axios serializes arrays as `activityIds[]=id1&activityIds[]=id2` (bracket format).
+    // Hono's c.req.queries() looks for the exact key, so we try both forms.
+    const rawIds = [
+      ...(c.req.queries("activityIds") ?? []),
+      ...(c.req.queries("activityIds[]") ?? []),
+    ];
     const fromDate = c.req.query("fromDate") ?? undefined;
     const toDate = c.req.query("toDate") ?? undefined;
 

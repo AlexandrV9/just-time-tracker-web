@@ -15,11 +15,13 @@ type WithCreatedAt = {
 export function groupByDate<T extends WithCreatedAt>(
   items: T[],
   groupBy: GroupByDate,
+  dateExtractor?: (item: T) => string,
 ): Record<CalendarDay, T[]> {
   const map = new Map<string, { date: Date; items: T[] }>();
 
   for (const item of items) {
-    const date = dateFromCreatedAt(item.createdAt);
+    const raw = dateExtractor ? dateExtractor(item) : item.createdAt;
+    const date = dateFromCreatedAt(raw);
     if (!date) {
       continue;
     }

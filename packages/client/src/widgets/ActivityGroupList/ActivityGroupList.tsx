@@ -31,6 +31,8 @@ export const ActivityGroupList = () => {
         page: ctx.pageParam,
         limit: 20,
         createdById: userId!,
+        sortBy: "updatedAt",
+        sortOrder: "desc",
       }),
     enabled: !!userId,
     initialPageParam: 0,
@@ -49,7 +51,7 @@ export const ActivityGroupList = () => {
   );
 
   const groups = useMemo(() => {
-    return Object.entries(groupByDate(activities, "day")).map(
+    return Object.entries(groupByDate(activities, "day", (a) => a.updatedAt)).map(
       ([calendarDay, dayActivities]) => ({
         calendarDay: calendarDay as CalendarDay,
         activities: dayActivities,

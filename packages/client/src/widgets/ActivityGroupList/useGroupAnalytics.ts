@@ -19,6 +19,7 @@ export function useGroupAnalytics(
 ): {
   totalSeconds: number;
   analyticsMap: Record<string, ActivityAnalyticsEntry>;
+  isFetched: boolean;
 } {
   const { fromDate, toDate } = useMemo(
     () => getDateIntervalByCalendarDay(calendarDay),
@@ -30,7 +31,7 @@ export function useGroupAnalytics(
     [activities],
   );
 
-  const { data, dataUpdatedAt } = useQuery({
+  const { data, dataUpdatedAt, isFetched } = useQuery({
     queryKey: [ACTIVITY_BATCH_ANALYTICS_QUERY_KEY, activityIds, fromDate, toDate],
     queryFn: async () => {
       const response = await activityApiService.getBatchActivityAnalytics({
@@ -58,6 +59,6 @@ export function useGroupAnalytics(
       analyticsMap[activity.id] = { currentActiveMs, fetchedAtMs: dataUpdatedAt };
     }
 
-    return { totalSeconds, analyticsMap };
-  }, [data, dataUpdatedAt, activities]);
+    return { totalSeconds, analyticsMap, isFetched };
+  }, [data, dataUpdatedAt, activities, isFetched]);
 }

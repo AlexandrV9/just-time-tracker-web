@@ -28,7 +28,15 @@ export function ActivityGroupListItem({
   onPause,
   onFinish,
 }: ActivityGroupListItemProps) {
-  const { totalSeconds, analyticsMap } = useGroupAnalytics(calendarDay, activities);
+  const { totalSeconds, analyticsMap, isFetched } = useGroupAnalytics(calendarDay, activities);
+
+  const visibleActivities = isFetched
+    ? activities.filter((a) => (analyticsMap[a.id]?.currentActiveMs ?? 0) > 0)
+    : activities;
+
+  if (isFetched && visibleActivities.length === 0) {
+    return null;
+  }
 
   const totalTime = convertTimeObjectToTimeString(
     convertSecondsToTimeObject(totalSeconds),
@@ -58,7 +66,7 @@ export function ActivityGroupListItem({
         </Flex>
       </Flex>
       <ActivityListView>
-        {activities.map((activity) => (
+        {visibleActivities.map((activity) => (
           <ActivityListView.Item key={activity.id}>
             <ActivityCard
               activity={activity}
