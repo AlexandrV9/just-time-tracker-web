@@ -4,17 +4,19 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { activityApiService } from "~/shared/api/services";
 import { useInView } from "react-intersection-observer";
 import { useEffect, useMemo } from "react";
-
-const DEMO_USER_ID = "550e8400-e29b-41d4-a716-446655440000";
+import { useAuthStore } from "~/features/auth";
 
 export const ActivityList = () => {
+  const { user } = useAuthStore();
+  const userId = user?.id;
+
   const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
     queryKey: ["activities"],
     queryFn: (ctx) =>
       activityApiService.getActivities({
         page: ctx.pageParam,
         limit: 20,
-        createdById: DEMO_USER_ID,
+        createdById: userId!,
       }),
     initialPageParam: 0,
     getNextPageParam: (lastGroup) => {

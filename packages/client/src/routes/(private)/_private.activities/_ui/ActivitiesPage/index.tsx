@@ -6,6 +6,7 @@ import { useTranslation } from "~/shared/hooks";
 
 export const ActivitiesPage = () => {
   const { t } = useTranslation();
+
   const createActivityDialog = useDialog();
 
   return (

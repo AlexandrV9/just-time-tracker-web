@@ -91,7 +91,9 @@ export function SelectDayActivitiesDialog({
               overflow="hidden"
             >
               {isActivitiesLoading ? (
-                <Text color="fg.muted">{t("pages.home.dayPlanLoadingActivities")}</Text>
+                <Text color="fg.muted">
+                  {t("pages.home.dayPlanLoadingActivities")}
+                </Text>
               ) : activities.length === 0 ? (
                 <Text color="fg.muted" textAlign="center">
                   {t("pages.home.dayPlanNoActivities")}
@@ -126,7 +128,11 @@ export function SelectDayActivitiesDialog({
               gap={3}
               justifyContent="flex-end"
             >
-              <Button variant="outline" onClick={closeDialog} disabled={isSaving}>
+              <Button
+                variant="outline"
+                onClick={closeDialog}
+                disabled={isSaving}
+              >
                 {t("pages.home.dayPlanDialogCancel")}
               </Button>
               <Button

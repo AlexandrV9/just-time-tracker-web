@@ -13,8 +13,7 @@ import {
   Stack,
   TextArea,
 } from "~/shared/ui";
-
-const DEMO_USER_ID = "550e8400-e29b-41d4-a716-446655440000";
+import { useAuthStore } from "~/features/auth";
 
 type CreateActivityDialogProps = {
   dialog: ReturnType<typeof useDialog>;
@@ -22,8 +21,14 @@ type CreateActivityDialogProps = {
 
 export const CreateActivityDialog = ({ dialog }: CreateActivityDialogProps) => {
   const { t } = useTranslation();
+
   const queryClient = useQueryClient();
+
+  const { user } = useAuthStore();
+  const userId = user?.id;
+
   const [title, setTitle] = useState("");
+
   const [description, setDescription] = useState("");
 
   const resetForm = useCallback(() => {
@@ -49,7 +54,7 @@ export const CreateActivityDialog = ({ dialog }: CreateActivityDialogProps) => {
     const response = await createActivity({
       title: title.trim(),
       description: description.trim() || undefined,
-      createdById: DEMO_USER_ID,
+      createdById: userId!,
     });
 
     if (!response.success) return;

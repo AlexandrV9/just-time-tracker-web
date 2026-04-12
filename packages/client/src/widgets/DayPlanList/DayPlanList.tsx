@@ -17,6 +17,11 @@ import { SelectDayActivitiesDialog } from "./SelectDayActivitiesDialog";
 import { getLocalCalendarDay } from "~/shared/libs";
 import { ActivityCard } from "~/features";
 import { ActivityListView } from "~/entities/Activity";
+import {
+  useFinishActivity,
+  usePauseActivity,
+  useStartActivity,
+} from "./mutations";
 
 export const DayPlanList = () => {
   const { t } = useTranslation();
@@ -24,11 +29,11 @@ export const DayPlanList = () => {
   const queryClient = useQueryClient();
 
   const { user } = useAuthStore();
-
   const userId = user?.id;
+
   const todayKey = useMemo(() => getLocalCalendarDay(new Date()), []);
 
-  const dialog = useDialog();
+  const addActivityDialog = useDialog();
 
   const dayPlanQuery = useQuery({
     queryKey: [DAY_PLANS_QUERY_KEY, userId, todayKey],
@@ -152,7 +157,7 @@ export const DayPlanList = () => {
     },
     onSuccess: () => {
       invalidateDayPlan();
-      dialog.setOpen(false);
+      addActivityDialog.setOpen(false);
       toast.success(t("pages.home.dayPlanSaveSuccess"), {
         toastId: "day_plan_saved",
       });
@@ -163,6 +168,10 @@ export const DayPlanList = () => {
       });
     },
   });
+
+  const { mutateAsync: startActivity } = useStartActivity();
+  const { mutateAsync: pauseActivity } = usePauseActivity();
+  const { mutateAsync: finishActivity } = useFinishActivity();
 
   const handleSave = useCallback(
     async (ids: string[]) => {
@@ -175,66 +184,64 @@ export const DayPlanList = () => {
     return null;
   }
 
-  if (isEmpty) {
-    return (
-      <Flex
-        direction="column"
-        align="center"
-        justify="center"
-        gap={3}
-        textAlign="center"
-        w="full"
-        py={12}
-        px={4}
-        borderWidth="1px"
-        borderStyle="dashed"
-        borderColor="border.emphasized"
-        borderRadius="xl"
-        h="auto"
-      >
-        <Stack.VStack gap="0.8rem">
-          <EmptyBox size={60} />
-          <Text fontSize="md" fontWeight="medium" color="fg">
-            {t("pages.home.dayPlanEmptyTitle")}
-          </Text>
-          <Button variant="outline" onClick={() => dialog.setOpen(true)}>
-            Добавить
-          </Button>
-        </Stack.VStack>
-      </Flex>
-    );
-  }
-
   return (
     <>
       <Stack.VStack gap={4} align="stretch" w="full">
-        <ActivityListView>
-          {items.map((item) => {
-            const activity = activityById.get(item.activityId);
+        {isEmpty ? (
+          <Flex
+            direction="column"
+            align="center"
+            justify="center"
+            gap={3}
+            textAlign="center"
+            w="full"
+            py={12}
+            px={4}
+            borderWidth="1px"
+            borderStyle="dashed"
+            borderColor="border.emphasized"
+            borderRadius="xl"
+            h="auto"
+          >
+            <Stack.VStack gap="0.8rem">
+              <EmptyBox size={60} />
+              <Text fontSize="md" fontWeight="medium" color="fg">
+                {t("pages.home.dayPlanEmptyTitle")}
+              </Text>
+              <Button
+                variant="outline"
+                onClick={() => addActivityDialog.setOpen(true)}
+              >
+                Добавить
+              </Button>
+            </Stack.VStack>
+          </Flex>
+        ) : (
+          <ActivityListView>
+            {items.map((item) => {
+              const activity = activityById.get(item.activityId);
 
-            if (!activity) {
-              return null;
-            }
+              if (!activity) {
+                return null;
+              }
 
-            return (
-              <ActivityListView.Item key={activity.id}>
-                <ActivityCard activity={activity} />;
-              </ActivityListView.Item>
-            );
-          })}
-        </ActivityListView>
-        <Button
-          alignSelf="center"
-          size="sm"
-          variant="ghost"
-          onClick={() => dialog.setOpen(true)}
-        >
-          {t("pages.home.dayPlanEditSelection")}
-        </Button>
+              return (
+                <ActivityListView.Item key={activity.id}>
+                  <ActivityCard
+                    activity={activity}
+                    onStart={() => startActivity(activity.id)}
+                    onPause={() => pauseActivity(activity.id)}
+                    onFinish={() => finishActivity(activity.id)}
+                  />
+                </ActivityListView.Item>
+              );
+            })}
+          </ActivityListView>
+        )}
       </Stack.VStack>
 
       <SelectDayActivitiesDialog
-        dialog={dialog}
+        dialog={addActivityDialog}
         activities={activities}
         isActivitiesLoading={activitiesQuery.isLoading}
         initialActivityIds={initialActivityIds}
