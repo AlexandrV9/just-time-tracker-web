@@ -13,7 +13,6 @@ import {
 } from "~/shared/api/services";
 
 import { formatDurationLabel, resolveHasActiveSession } from "./utils";
-import { useLiveTimestamp } from "./useLiveTimestamp";
 import {
   getDateIntervalByCalendarDay,
   getLocalCalendarDay,
@@ -82,17 +81,12 @@ export function useActivityCardData({
     placeholderData: keepPreviousData,
   });
 
-  // Суммарное время активности за промежуток от fromDate до toDate
   const currentActiveMs = analytics?.totals?.activeDurationMs ?? 0;
-
-  // Количество миллисекунд с учётом текущей активности
-  const nowMs = useLiveTimestamp(hasActiveSession);
 
   const displayedSeconds = useDisplayedSeconds({
     currentActiveMs,
     analyticsFetchedAtMs,
     hasActiveSession,
-    nowMs,
   });
 
   const displayedTime = useMemo(

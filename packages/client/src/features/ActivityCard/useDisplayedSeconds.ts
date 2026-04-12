@@ -1,48 +1,43 @@
 import { useMemo, useRef } from "react";
-import { calculateDisplayedSeconds } from "./utils";
+import { useLiveTimestamp } from "./useLiveTimestamp";
 
 type UseDisplayedSecondsProps = {
   currentActiveMs: number;
   analyticsFetchedAtMs: number;
   hasActiveSession: boolean;
-  nowMs: number;
 };
 
 export function useDisplayedSeconds({
   currentActiveMs,
   analyticsFetchedAtMs,
   hasActiveSession,
-  nowMs,
 }: UseDisplayedSecondsProps) {
-  const lastStableSecondsRef = useRef<number | null>(null);
-  const resumedAtWallClockMsRef = useRef<number | null>(null);
+  const nowMs = useLiveTimestamp(hasActiveSession);
 
   /**
-   * Отслеживаем предыдущее значение hasActiveSession, чтобы определить
-   * момент перехода из неактивного в активное состояние (isJustActivated).
-   * В этот первый рендер nowMs ещё stale (useLiveTimestamp effect не успел
-   * отработать), поэтому нельзя использовать nowMs как resumedAtWallClockMs.
+   * Последнее отображённое значение во время активной фазы.
+   * Используется как нижняя граница при паузе, пока analytics не рефетчнулись,
+   * и как fallback в первый тик после старта (nowMs ещё null).
    */
-  const prevHasActiveSessionRef = useRef<boolean>(hasActiveSession);
+  const lastActiveSecondsRef = useRef(0);
 
   return useMemo(() => {
-    const isJustActivated =
-      hasActiveSession && !prevHasActiveSessionRef.current;
-    prevHasActiveSessionRef.current = hasActiveSession;
+    if (!hasActiveSession) {
+      const serverSeconds = Math.floor(currentActiveMs / 1000);
+      return Math.max(serverSeconds, lastActiveSecondsRef.current);
+    }
 
-    const result = calculateDisplayedSeconds({
-      currentActiveMs,
-      analyticsFetchedAtMs,
-      hasActiveSession,
-      nowMs,
-      lastStableSeconds: lastStableSecondsRef.current,
-      resumedAtWallClockMs: resumedAtWallClockMsRef.current,
-      isJustActivated,
-    });
+    if (nowMs === null) {
+      return lastActiveSecondsRef.current;
+    }
 
-    lastStableSecondsRef.current = result.nextLastStableSeconds;
-    resumedAtWallClockMsRef.current = result.nextResumedAtWallClockMs;
+    const driftMs =
+      analyticsFetchedAtMs > 0 ? Math.max(0, nowMs - analyticsFetchedAtMs) : 0;
 
-    return result.displayedSeconds;
+    const seconds = Math.max(0, Math.floor((currentActiveMs + driftMs) / 1000));
+
+    lastActiveSecondsRef.current = seconds;
+
+    return seconds;
   }, [currentActiveMs, analyticsFetchedAtMs, hasActiveSession, nowMs]);
 }

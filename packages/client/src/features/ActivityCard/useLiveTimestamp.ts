@@ -1,19 +1,22 @@
 import { useEffect, useState } from "react";
 
-export function useLiveTimestamp(enabled: boolean): number {
-  const [timestamp, setTimestamp] = useState(() => Date.now());
+export function useLiveTimestamp(enabled: boolean): number | null {
+  const [timestamp, setTimestamp] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      setTimestamp(null);
+      return;
+    }
 
     setTimestamp(Date.now());
 
-    const intervalId = setInterval(() => {
-      setTimestamp(Date.now());
-    }, 1000);
+    const id = setInterval(() => setTimestamp(Date.now()), 1000);
 
-    return () => clearInterval(intervalId);
+    return () => clearInterval(id);
   }, [enabled]);
 
-  return timestamp;
+  // Synchronously return null when disabled — even before the effect fires —
+  // so stale state from a previous active phase is never exposed.
+  return enabled ? timestamp : null;
 }
