@@ -5,13 +5,14 @@ import {
   dayPlanApiService,
 } from "~/shared/api/services";
 import { getCalendarDay } from "~/shared/libs";
+import { toast } from "~/shared/ui";
 
 export type UseAddTodayActivitiesProps = {
-  todayPlanId?: string;
+  planId?: string;
 };
 
 export const useAddTodayActivities = ({
-  todayPlanId,
+  planId,
 }: UseAddTodayActivitiesProps) => {
   const queryClient = useQueryClient();
 
@@ -22,9 +23,7 @@ export const useAddTodayActivities = ({
 
   return useMutation({
     mutationFn: async (activityIds: string[]) => {
-      let currentPlanId = todayPlanId;
-
-      console.log("currentPlanId", currentPlanId);
+      let currentPlanId = planId;
 
       if (!currentPlanId) {
         const todayPlan = await dayPlanApiService.createDayPlan({
@@ -39,15 +38,19 @@ export const useAddTodayActivities = ({
         currentPlanId = todayPlan.data.id;
       }
 
-      console.log("addDayPlanItems", currentPlanId, activityIds);
       return dayPlanApiService.addDayPlanItems({
         dayPlanId: currentPlanId!,
         activityIds,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [DAY_PLAN_ITEMS_QUERY_KEY] });
+      toast.success("Активность добавлена");
+      queryClient.invalidateQueries({
+        queryKey: [DAY_PLAN_ITEMS_QUERY_KEY, planId],
+      });
     },
-    onError: () => {},
+    onError: () => {
+      toast.success("Не удалось добавить активность");
+    },
   });
 };

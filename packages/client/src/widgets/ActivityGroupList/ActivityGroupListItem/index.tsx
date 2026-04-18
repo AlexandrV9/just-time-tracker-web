@@ -3,17 +3,19 @@ import { Box, Flex, Text } from "~/shared/ui";
 import {
   convertSecondsToTimeObject,
   convertTimeObjectToTimeString,
-  formatGroupLabel,
-  type CalendarDay,
 } from "~/shared/libs";
-import { useGroupAnalytics } from "./useGroupAnalytics";
 import { ActivityListView } from "~/entities/Activity";
 import { ActivityCard } from "~/features";
-import { useTranslation } from "~/shared/hooks";
+import { Skeleton } from "./Skeleton";
+
+export type ActivityGroupDTO = {
+  label: string;
+  totalActiveTime: number;
+  activities: ActivityDTO[];
+};
 
 type ActivityGroupListItemProps = {
-  calendarDay: CalendarDay;
-  activities: ActivityDTO[];
+  data: ActivityGroupDTO;
   withControlButtons?: boolean;
   onStart: (activityId: ActivityDTO["id"]) => void;
   onPause: (activityId: ActivityDTO["id"]) => void;
@@ -21,43 +23,21 @@ type ActivityGroupListItemProps = {
 };
 
 export function ActivityGroupListItem({
-  calendarDay,
-  activities,
+  data,
   onStart,
   onPause,
   onFinish,
   withControlButtons = false,
 }: ActivityGroupListItemProps) {
-  const { i18n } = useTranslation();
-
-  const { totalSeconds, analyticsMap, isFetched } = useGroupAnalytics(
-    calendarDay,
-    activities,
-  );
-
-  const visibleActivities = isFetched
-    ? activities.filter((a) => (analyticsMap[a.id]?.currentActiveMs ?? 0) > 0)
-    : activities;
-
-  console.log("visibleActivities", visibleActivities);
-
-  if (isFetched && visibleActivities.length === 0) {
-    return null;
-  }
-
-  const totalTime = convertTimeObjectToTimeString(
-    convertSecondsToTimeObject(totalSeconds),
+  const displayedActiveTotalTime = convertTimeObjectToTimeString(
+    convertSecondsToTimeObject(data.totalActiveTime),
   );
 
   return (
     <Box display="flex" flexDirection="column" gap="0.75rem">
       <Flex justifyContent="space-between" alignItems="center" px={1}>
         <Text textStyle="sm" fontWeight="bold" color="fg.muted">
-          {formatGroupLabel({
-            key: calendarDay,
-            groupBy: "day",
-            locale: i18n.language,
-          })}
+          {data.label}
         </Text>
         <Flex gap="0.25rem" alignItems="center">
           <Text textStyle="sm" color="fg.muted">
@@ -68,18 +48,17 @@ export function ActivityGroupListItem({
             fontWeight="bold"
             fontFamily="Roboto Mono, monospace"
           >
-            {totalTime}
+            {displayedActiveTotalTime}
           </Text>
         </Flex>
       </Flex>
       <ActivityListView>
-        {visibleActivities.map((activity) => (
+        {data.activities.map((activity) => (
           <ActivityListView.Item key={activity.id}>
             <ActivityCard
               activity={activity}
-              calendarDay={calendarDay}
+              // calendarDay={calendarDay}
               withControlButtons={withControlButtons}
-              preloadedAnalytics={analyticsMap[activity.id]}
               onStart={() => onStart(activity.id)}
               onPause={() => onPause(activity.id)}
               onFinish={() => onFinish(activity.id)}
@@ -90,3 +69,5 @@ export function ActivityGroupListItem({
     </Box>
   );
 }
+
+ActivityGroupListItem.Skeleton = Skeleton;

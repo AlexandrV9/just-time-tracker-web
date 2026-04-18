@@ -85,6 +85,7 @@ export function AddTodayActivitiesDialog({
     setIsPending(true);
     onSubmit?.(Array.from(selectedActivityIds)).finally(() => {
       setIsPending(false);
+      dialog.setOpen(false);
     });
   };
 

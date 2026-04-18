@@ -81,10 +81,9 @@
     "navbar": {
       "menuItems": {
         "Home": "Home",
-        "Calendar": "Calendar",
-        "Notes": "Notes",
         "Settings": "Settings",
-        "Activities": "Activities"
+        "Activities": "Activities",
+        "History": "History"
       }
     },
     "accountSettings": {

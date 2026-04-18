@@ -81,10 +81,9 @@
     "navbar": {
       "menuItems": {
         "Home": "Главная",
-        "Calendar": "Календарь",
-        "Notes": "Заметки",
         "Settings": "Настройки",
-        "Activities": "Активности"
+        "Activities": "Активности",
+        "History": "История"
       }
     },
     "accountSettings": {

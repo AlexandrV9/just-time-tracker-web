@@ -18,6 +18,7 @@ import { Route as privatePrivateIndexRouteImport } from './routes/(private)/_pri
 import { Route as publicPublicWelcomeIndexRouteImport } from './routes/(public)/_public.welcome/index'
 import { Route as privatePrivateSettingsIndexRouteImport } from './routes/(private)/_private.settings/index'
 import { Route as privatePrivateMoreIndexRouteImport } from './routes/(private)/_private.more/index'
+import { Route as privatePrivateHistoryIndexRouteImport } from './routes/(private)/_private.history/index'
 import { Route as privatePrivateCalendarIndexRouteImport } from './routes/(private)/_private.calendar/index'
 import { Route as privatePrivateActivitiesIndexRouteImport } from './routes/(private)/_private.activities/index'
 import { Route as authAuthSignupIndexRouteImport } from './routes/(auth)/_auth.signup/index'
@@ -76,6 +77,12 @@ const privatePrivateMoreIndexRoute = privatePrivateMoreIndexRouteImport.update({
   path: '/more/',
   getParentRoute: () => privatePrivateRoute,
 } as any)
+const privatePrivateHistoryIndexRoute =
+  privatePrivateHistoryIndexRouteImport.update({
+    id: '/history/',
+    path: '/history/',
+    getParentRoute: () => privatePrivateRoute,
+  } as any)
 const privatePrivateCalendarIndexRoute =
   privatePrivateCalendarIndexRouteImport.update({
     id: '/calendar/',
@@ -126,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof authAuthSignupIndexRoute
   '/activities': typeof privatePrivateActivitiesIndexRoute
   '/calendar': typeof privatePrivateCalendarIndexRoute
+  '/history': typeof privatePrivateHistoryIndexRoute
   '/more': typeof privatePrivateMoreIndexRoute
   '/settings': typeof privatePrivateSettingsIndexRoute
   '/welcome': typeof publicPublicWelcomeIndexRoute
@@ -139,6 +147,7 @@ export interface FileRoutesByTo {
   '/signup': typeof authAuthSignupIndexRoute
   '/activities': typeof privatePrivateActivitiesIndexRoute
   '/calendar': typeof privatePrivateCalendarIndexRoute
+  '/history': typeof privatePrivateHistoryIndexRoute
   '/more': typeof privatePrivateMoreIndexRoute
   '/settings': typeof privatePrivateSettingsIndexRoute
   '/welcome': typeof publicPublicWelcomeIndexRoute
@@ -159,6 +168,7 @@ export interface FileRoutesById {
   '/(auth)/_auth/signup/': typeof authAuthSignupIndexRoute
   '/(private)/_private/activities/': typeof privatePrivateActivitiesIndexRoute
   '/(private)/_private/calendar/': typeof privatePrivateCalendarIndexRoute
+  '/(private)/_private/history/': typeof privatePrivateHistoryIndexRoute
   '/(private)/_private/more/': typeof privatePrivateMoreIndexRoute
   '/(private)/_private/settings/': typeof privatePrivateSettingsIndexRoute
   '/(public)/_public/welcome/': typeof publicPublicWelcomeIndexRoute
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/activities'
     | '/calendar'
+    | '/history'
     | '/more'
     | '/settings'
     | '/welcome'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/activities'
     | '/calendar'
+    | '/history'
     | '/more'
     | '/settings'
     | '/welcome'
@@ -206,6 +218,7 @@ export interface FileRouteTypes {
     | '/(auth)/_auth/signup/'
     | '/(private)/_private/activities/'
     | '/(private)/_private/calendar/'
+    | '/(private)/_private/history/'
     | '/(private)/_private/more/'
     | '/(private)/_private/settings/'
     | '/(public)/_public/welcome/'
@@ -287,6 +300,13 @@ declare module '@tanstack/react-router' {
       path: '/more'
       fullPath: '/more'
       preLoaderRoute: typeof privatePrivateMoreIndexRouteImport
+      parentRoute: typeof privatePrivateRoute
+    }
+    '/(private)/_private/history/': {
+      id: '/(private)/_private/history/'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof privatePrivateHistoryIndexRouteImport
       parentRoute: typeof privatePrivateRoute
     }
     '/(private)/_private/calendar/': {
@@ -372,6 +392,7 @@ interface privatePrivateRouteChildren {
   privatePrivateSettingsProfileRoute: typeof privatePrivateSettingsProfileRoute
   privatePrivateActivitiesIndexRoute: typeof privatePrivateActivitiesIndexRoute
   privatePrivateCalendarIndexRoute: typeof privatePrivateCalendarIndexRoute
+  privatePrivateHistoryIndexRoute: typeof privatePrivateHistoryIndexRoute
   privatePrivateMoreIndexRoute: typeof privatePrivateMoreIndexRoute
   privatePrivateSettingsIndexRoute: typeof privatePrivateSettingsIndexRoute
 }
@@ -384,6 +405,7 @@ const privatePrivateRouteChildren: privatePrivateRouteChildren = {
   privatePrivateSettingsProfileRoute: privatePrivateSettingsProfileRoute,
   privatePrivateActivitiesIndexRoute: privatePrivateActivitiesIndexRoute,
   privatePrivateCalendarIndexRoute: privatePrivateCalendarIndexRoute,
+  privatePrivateHistoryIndexRoute: privatePrivateHistoryIndexRoute,
   privatePrivateMoreIndexRoute: privatePrivateMoreIndexRoute,
   privatePrivateSettingsIndexRoute: privatePrivateSettingsIndexRoute,
 }

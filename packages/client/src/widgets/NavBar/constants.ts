@@ -1,4 +1,4 @@
-import { HomeIcon, LightningIcon, SettingsIcon } from "~/shared/ui";
+import { BookIcon, HomeIcon, LightningIcon, SettingsIcon } from "~/shared/ui";
 import type { NavItemProps } from "./types";
 
 export const navItems: NavItemProps[] = [
@@ -9,10 +9,16 @@ export const navItems: NavItemProps[] = [
     icon: HomeIcon,
   },
   {
-    id: "nav_item_calendar",
+    id: "nav_item_activities",
     title: "Activities",
     href: "/activities",
     icon: LightningIcon,
+  },
+  {
+    id: "nav_item_history",
+    title: "History",
+    href: "/history",
+    icon: BookIcon,
   },
   {
     id: "nav_item_settings",

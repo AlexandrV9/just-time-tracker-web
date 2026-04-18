@@ -7,6 +7,7 @@ import { ActivityCardControls } from "./ActivityCardControls";
 import { useActivityCardData } from "./useActivityCardData";
 import { ActivityCardView } from "~/entities/Activity";
 import type { CalendarDay } from "~/shared/libs";
+import { Skeleton } from "./Skeleton";
 
 export type PreloadedAnalytics = {
   currentActiveMs: number;
@@ -91,3 +92,5 @@ export const ActivityCard = ({
     </ActivityCardView>
   );
 };
+
+ActivityCard.Skeleton = Skeleton;

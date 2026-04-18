@@ -1,19 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
 import { ActivityGroupListItem } from "../ActivityGroupList/ActivityGroupListItem";
-import {
-  ACTIVITIES_QUERY_KEY,
-  activityApiService,
-  DAY_PLAN_ITEMS_QUERY_KEY,
-  DAY_PLANS_QUERY_KEY,
-  dayPlanApiService,
-} from "~/shared/api/services";
-import { useAuthStore } from "~/features/auth";
 import {
   useFinishActivity,
   usePauseActivity,
   useStartActivity,
 } from "../DayPlanList/mutations";
-import { getCalendarDay, getDateIntervalByCalendarDay } from "~/shared/libs";
 import { useDialog } from "@ark-ui/react";
 import {
   Box,
@@ -26,64 +16,46 @@ import {
 import { AddTodayActivitiesDialog } from "./AddTodayActivityDialog";
 import { VStack } from "@chakra-ui/react";
 import { useAddTodayActivities } from "./useAddTodayActivities";
+import { useTodayActivities } from "./useTodayActivities";
 
 export const TodayActivities = () => {
-  const { user } = useAuthStore();
-  const userId = user?.id;
-
   const addTodayActivityDialog = useDialog();
 
-  const todayCalendarDay = getCalendarDay();
-
-  const { fromDate, toDate } = getDateIntervalByCalendarDay(todayCalendarDay);
-
-  const { data: todayPlanActivitiesResponse } = useQuery({
-    queryKey: [DAY_PLANS_QUERY_KEY, userId, todayCalendarDay],
-    queryFn: () =>
-      dayPlanApiService.getDayPlans({
-        createdById: userId!,
-        date: todayCalendarDay,
-        page: 0,
-        limit: 1,
-      }),
-    enabled: !!userId,
-    select: (response) => (response.success ? response.data : undefined),
-  });
-  const todayPlan = todayPlanActivitiesResponse?.data?.[0];
-  const todayPlanId = todayPlan?.id;
-
-  const { data: todayPlanItemsResponse } = useQuery({
-    queryKey: [DAY_PLAN_ITEMS_QUERY_KEY, todayPlanId],
-    queryFn: () =>
-      dayPlanApiService.getDayPlanItems({
-        dayPlanId: todayPlanId!,
-        page: 0,
-        limit: 100,
-      }),
-    enabled: !!todayPlanId,
-    select: (response) => (response.success ? response.data : undefined),
-  });
-  const todayPlanItems = todayPlanItemsResponse?.data;
-  const todayActivityIds =
-    todayPlanItems?.map((planItem) => planItem.activityId) ?? [];
-
-  const { data: activities = [] } = useQuery({
-    queryKey: [ACTIVITIES_QUERY_KEY, userId, fromDate, toDate],
-    queryFn: () =>
-      activityApiService.getActivitiesByIds({ activityIds: todayActivityIds }),
-    enabled: todayActivityIds?.length !== 0,
-    select: (response) => (response.success ? response.data : []),
-  });
+  const { planId, activityGroup, isLoading, isError } = useTodayActivities();
 
   const { mutateAsync: startActivity } = useStartActivity();
   const { mutateAsync: pauseActivity } = usePauseActivity();
   const { mutateAsync: finishActivity } = useFinishActivity();
   const { mutateAsync: addTodayActivities } = useAddTodayActivities({
-    todayPlanId,
+    planId,
   });
 
   const renderContent = () => {
-    if (activities.length === 0) {
+    if (isLoading) {
+      return <ActivityGroupListItem.Skeleton />;
+    }
+
+    if (isError) {
+      return (
+        <EmptyState.Root>
+          <EmptyState.Content>
+            <EmptyState.Indicator>
+              <VersionIcon size={60} />
+            </EmptyState.Indicator>
+            <VStack textAlign="center">
+              <EmptyState.Title>
+                Не удалось загрузить активности
+              </EmptyState.Title>
+              <EmptyState.Description>
+                Попробуйте перезагрузить страницу
+              </EmptyState.Description>
+            </VStack>
+          </EmptyState.Content>
+        </EmptyState.Root>
+      );
+    }
+
+    if (!activityGroup || activityGroup.activities.length === 0) {
       return (
         <EmptyState.Root>
           <EmptyState.Content>
@@ -98,13 +70,10 @@ export const TodayActivities = () => {
       );
     }
 
-    console.log("activities", activities);
-
     return (
       <ActivityGroupListItem
         withControlButtons
-        calendarDay={todayCalendarDay}
-        activities={activities}
+        data={activityGroup}
         onStart={startActivity}
         onPause={pauseActivity}
         onFinish={finishActivity}
@@ -136,7 +105,7 @@ export const TodayActivities = () => {
       </Box>
       <AddTodayActivitiesDialog
         dialog={addTodayActivityDialog}
-        selectedActivityIds={todayActivityIds}
+        selectedActivityIds={activityGroup.activities.map((item) => item.id)}
         onSubmit={addTodayActivities}
       />
     </>
