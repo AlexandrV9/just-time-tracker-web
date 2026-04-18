@@ -45,6 +45,8 @@ export function useGroupAnalytics(
     placeholderData: keepPreviousData,
   });
 
+  console.log("data --->", data)
+
   return useMemo(() => {
     const items = data?.items ?? {};
 

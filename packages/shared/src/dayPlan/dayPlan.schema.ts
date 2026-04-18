@@ -41,10 +41,9 @@ export const getDayPlansSchema = z.object({
 export type GetDayPlansDTO = z.infer<typeof getDayPlansSchema>;
 
 export const deleteDayPlanSchema = baseIdSchema;
-
 export type DeleteDayPlanDataDTO = z.infer<typeof deleteDayPlanSchema>;
 
 export type GetDayPlanDTO = z.infer<typeof baseIdSchema>;
-
-export const getDayPlansResponseSchema = paginationResponseSchema(dayPlanSchema);
+export const getDayPlansResponseSchema =
+  paginationResponseSchema(dayPlanSchema);
 export type GetDayPlansResponseDTO = z.infer<typeof getDayPlansResponseSchema>;

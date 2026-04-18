@@ -7,6 +7,7 @@ import type {
   GetDayPlansDTO,
   GetDayPlanItemsResponseDTO,
   GetDayPlansResponseDTO,
+  AddDayPlanItemsDataDTO,
 } from "@to-do-list/shared";
 
 import { baseApi } from "../base";
@@ -35,6 +36,12 @@ export class DayPlanService {
 
   deleteDayPlanItem(id: string): Promise<RequestResponse<boolean>> {
     return baseApi.delete<boolean>(`/api/day-plan-items/${id}`);
+  }
+
+  addDayPlanItems(
+    data: AddDayPlanItemsDataDTO,
+  ): Promise<RequestResponse<DayPlanItemDTO[]>> {
+    return baseApi.post<DayPlanItemDTO[]>(`/api/day-plan-items/batch`, { data });
   }
 }
 

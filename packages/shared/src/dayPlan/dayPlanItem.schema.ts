@@ -47,3 +47,10 @@ export const getDayPlanItemsResponseSchema =
 export type GetDayPlanItemsResponseDTO = z.infer<
   typeof getDayPlanItemsResponseSchema
 >;
+
+export const addDayPlanItemsSchema = z.object({
+  dayPlanId: z.string().min(1, "dayPlanId is required"),
+  activityIds: z.array(z.string().min(1, "activityId is required")),
+});
+
+export type AddDayPlanItemsDataDTO = z.infer<typeof addDayPlanItemsSchema>;

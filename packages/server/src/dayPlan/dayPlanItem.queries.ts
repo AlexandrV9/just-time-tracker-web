@@ -1,4 +1,5 @@
 import type {
+  AddDayPlanItemsDataDTO,
   CreateDayPlanItemDataDTO,
   DayPlanItemDTO,
   GetDayPlanItemsDTO,
@@ -27,6 +28,34 @@ const createDayPlanItem = async (
 
   const { rows } = await pool.query(query, [data.dayPlanId, data.activityId]);
   return rows[0];
+};
+
+const addDayPlanItems = async (
+  data: AddDayPlanItemsDataDTO,
+): Promise<DayPlanItemDTO[]> => {
+  const uniqueActivityIds = [...new Set(data.activityIds)];
+  if (uniqueActivityIds.length === 0) {
+    return [];
+  }
+
+  const valueRows = uniqueActivityIds
+    .map((_, i) => `($1::uuid, $${i + 2}::uuid, NOW(), NOW())`)
+    .join(", ");
+
+  const query = `
+    INSERT INTO day_plan_items (
+      day_plan_id, activity_id, created_at, updated_at
+    )
+    VALUES ${valueRows}
+    ON CONFLICT (day_plan_id, activity_id) DO NOTHING
+    RETURNING ${DAY_PLAN_ITEM_RETURNING_COLUMNS}
+  `;
+
+  const { rows } = await pool.query(query, [
+    data.dayPlanId,
+    ...uniqueActivityIds,
+  ]);
+  return rows as DayPlanItemDTO[];
 };
 
 const getDayPlanItemById = async (
@@ -144,6 +173,7 @@ const deleteDayPlanItem = async (id: string): Promise<boolean> => {
 
 export const dayPlanItemQueries = {
   createDayPlanItem,
+  addDayPlanItems,
   getDayPlanItemById,
   getDayPlanItems,
   updateDayPlanItem,

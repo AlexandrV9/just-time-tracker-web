@@ -4,6 +4,7 @@ import type {
   ActivityDTO,
   UpdateActivityDataDTO,
   CreateActivityFromQuickTimerDataDTO,
+  GetActivitiesByIdsDTO,
 } from "@to-do-list/shared";
 import { pool } from "../shared/index.js";
 
@@ -186,6 +187,25 @@ const getActivityById = async (
   return rows[0] ?? null;
 };
 
+const getActivitiesByIds = async (
+  data: GetActivitiesByIdsDTO,
+): Promise<ActivityDTO[]> => {
+  const ids = [...new Set(data.activityIds)];
+  if (ids.length === 0) {
+    return [];
+  }
+
+  const query = `
+    SELECT ${ACTIVITY_RETURNING_COLUMNS}
+    FROM activities
+    WHERE id = ANY($1::uuid[])
+    ORDER BY array_position($1::uuid[], id)
+  `;
+
+  const { rows } = await pool.query(query, [ids]);
+  return rows as ActivityDTO[];
+};
+
 const getActivities = async (filters: GetActivitiesDTO) => {
   const {
     createdById,
@@ -318,6 +338,7 @@ export const activityQueries = {
   createActivity,
   createActivityFromQuickTimer,
   getActivityById,
+  getActivitiesByIds,
   getActivities,
   updateActivity,
   deleteActivity,

@@ -11,10 +11,18 @@ import {
   dayPlanApiService,
 } from "~/shared/api/services";
 import { useAuthStore } from "~/features/auth";
-import { Button, EmptyBox, Flex, Stack, Text, toast } from "~/shared/ui";
+import {
+  Button,
+  EmptyBox,
+  Flex,
+  PlusIcon,
+  Stack,
+  Text,
+  toast,
+} from "~/shared/ui";
 
 import { SelectDayActivitiesDialog } from "./SelectDayActivitiesDialog";
-import { getLocalCalendarDay } from "~/shared/libs";
+import { getCalendarDay } from "~/shared/libs";
 import { ActivityCard } from "~/features";
 import { ActivityListView } from "~/entities/Activity";
 import {
@@ -31,7 +39,7 @@ export const DayPlanList = () => {
   const { user } = useAuthStore();
   const userId = user?.id;
 
-  const todayKey = useMemo(() => getLocalCalendarDay(new Date()), []);
+  const todayKey = useMemo(() => getCalendarDay(new Date()), []);
 
   const addActivityDialog = useDialog();
 
@@ -237,15 +245,29 @@ export const DayPlanList = () => {
                   </ActivityListView.Item>
                 );
               })}
+              <ActivityListView.Item
+                flex="1"
+                minH="clamp(7.5rem, 28vw, 10rem)"
+                display="flex"
+                flexDirection="column"
+                p="0.8rem"
+                borderRadius="2xl"
+                gap={1}
+                border="1px dashed"
+                borderColor="bg.emphasized"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Button
+                  size="md"
+                  variant="ghost"
+                  onClick={() => addActivityDialog.setOpen(true)}
+                >
+                  Добавить
+                  <PlusIcon size={20} />
+                </Button>
+              </ActivityListView.Item>
             </ActivityListView>
-            <Button
-              variant="outline"
-              size="sm"
-              alignSelf="center"
-              onClick={() => addActivityDialog.setOpen(true)}
-            >
-              Добавить
-            </Button>
           </>
         )}
       </Stack.VStack>
@@ -261,3 +283,7 @@ export const DayPlanList = () => {
     </>
   );
 };
+
+// Баги
+// 1) После закрытия крышки ноутбука приложение не продлжает считать
+// 2) Если наступает новый день и у нас были запущенные активности, то они должны продолжить считаться

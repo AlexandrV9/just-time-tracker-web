@@ -9,12 +9,12 @@ import {
 import { useGroupAnalytics } from "./useGroupAnalytics";
 import { ActivityListView } from "~/entities/Activity";
 import { ActivityCard } from "~/features";
+import { useTranslation } from "~/shared/hooks";
 
 type ActivityGroupListItemProps = {
   calendarDay: CalendarDay;
   activities: ActivityDTO[];
-  todayKey: string;
-  locale: string;
+  withControlButtons?: boolean;
   onStart: (activityId: ActivityDTO["id"]) => void;
   onPause: (activityId: ActivityDTO["id"]) => void;
   onFinish: (activityId: ActivityDTO["id"]) => void;
@@ -23,16 +23,23 @@ type ActivityGroupListItemProps = {
 export function ActivityGroupListItem({
   calendarDay,
   activities,
-  locale,
   onStart,
   onPause,
   onFinish,
+  withControlButtons = false,
 }: ActivityGroupListItemProps) {
-  const { totalSeconds, analyticsMap, isFetched } = useGroupAnalytics(calendarDay, activities);
+  const { i18n } = useTranslation();
+
+  const { totalSeconds, analyticsMap, isFetched } = useGroupAnalytics(
+    calendarDay,
+    activities,
+  );
 
   const visibleActivities = isFetched
     ? activities.filter((a) => (analyticsMap[a.id]?.currentActiveMs ?? 0) > 0)
     : activities;
+
+  console.log("visibleActivities", visibleActivities);
 
   if (isFetched && visibleActivities.length === 0) {
     return null;
@@ -49,7 +56,7 @@ export function ActivityGroupListItem({
           {formatGroupLabel({
             key: calendarDay,
             groupBy: "day",
-            locale,
+            locale: i18n.language,
           })}
         </Text>
         <Flex gap="0.25rem" alignItems="center">
@@ -71,7 +78,7 @@ export function ActivityGroupListItem({
             <ActivityCard
               activity={activity}
               calendarDay={calendarDay}
-              withControlButtons={false}
+              withControlButtons={withControlButtons}
               preloadedAnalytics={analyticsMap[activity.id]}
               onStart={() => onStart(activity.id)}
               onPause={() => onPause(activity.id)}

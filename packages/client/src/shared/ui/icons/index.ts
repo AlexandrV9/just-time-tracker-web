@@ -31,5 +31,6 @@ export * from "./Pause";
 export * from "./Lightning";
 export * from "./EmptyBox";
 export * from "./CircularLinesLoader";
+export * from "./Version";
 
 export * from "./withIconProps";

@@ -15,7 +15,7 @@ import {
 import { formatDurationLabel, resolveHasActiveSession } from "./utils";
 import {
   getDateIntervalByCalendarDay,
-  getLocalCalendarDay,
+  getCalendarDay,
   type CalendarDay,
 } from "~/shared/libs";
 import { useDisplayedSeconds } from "./useDisplayedSeconds";
@@ -69,7 +69,7 @@ export function useActivityCardData({
   });
 
   const { fromDate, toDate } = useMemo(
-    () => getDateIntervalByCalendarDay(calendarDay ?? getLocalCalendarDay()),
+    () => getDateIntervalByCalendarDay(calendarDay ?? getCalendarDay()),
     [calendarDay],
   );
 

@@ -6,12 +6,7 @@ import {
 } from "~/shared/api/services";
 import { useInView } from "react-intersection-observer";
 import { useEffect, useMemo } from "react";
-import { useTranslation } from "~/shared/hooks";
-import {
-  getLocalCalendarDay,
-  groupByDate,
-  type CalendarDay,
-} from "~/shared/libs";
+import { groupByDate, type CalendarDay } from "~/shared/libs";
 import { useAuthStore } from "~/features/auth";
 import { ActivityGroupListItem } from "./ActivityGroupListItem";
 import { usePauseActivity } from "./mutations/usePauseActivity";
@@ -19,7 +14,6 @@ import { useStartActivity } from "./mutations/useStartActivity";
 import { useFinishActivity } from "./mutations/useFinishActivity";
 
 export const ActivityGroupList = () => {
-  const { i18n } = useTranslation();
   const { user } = useAuthStore();
 
   const userId = user?.id;
@@ -51,14 +45,13 @@ export const ActivityGroupList = () => {
   );
 
   const groups = useMemo(() => {
-    return Object.entries(groupByDate(activities, "day", (a) => a.updatedAt)).map(
-      ([calendarDay, dayActivities]) => ({
-        calendarDay: calendarDay as CalendarDay,
-        activities: dayActivities,
-      }),
-    );
+    return Object.entries(
+      groupByDate(activities, "day", (a) => a.updatedAt),
+    ).map(([calendarDay, dayActivities]) => ({
+      calendarDay: calendarDay as CalendarDay,
+      activities: dayActivities,
+    }));
   }, [activities]);
-  const todayKey = getLocalCalendarDay(new Date());
 
   const { mutateAsync: startActivity } = useStartActivity();
   const { mutateAsync: pauseActivity } = usePauseActivity();
@@ -77,8 +70,6 @@ export const ActivityGroupList = () => {
           key={group.calendarDay}
           calendarDay={group.calendarDay}
           activities={group.activities}
-          todayKey={todayKey}
-          locale={i18n.language}
           onStart={startActivity}
           onPause={pauseActivity}
           onFinish={finishActivity}

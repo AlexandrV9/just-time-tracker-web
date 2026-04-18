@@ -9,6 +9,7 @@ import type {
   StartActivityDTO,
   GetActivityDTO,
   GetActivitiesDTO,
+  GetActivitiesByIdsDTO,
   GetActivitiesResponseDTO,
   PauseActivityDTO,
   FinishActivityDTO,
@@ -43,6 +44,12 @@ export class ActivityService {
     return baseApi.get<GetActivitiesResponseDTO>(`/api/activities`, {
       params: data,
     });
+  }
+
+  getActivitiesByIds(
+    data: GetActivitiesByIdsDTO,
+  ): Promise<RequestResponse<ActivityDTO[], unknown>> {
+    return baseApi.post<ActivityDTO[]>(`/api/activities/by-ids`, { data });
   }
 
   updateActivity(data: UpdateActivityDataDTO) {

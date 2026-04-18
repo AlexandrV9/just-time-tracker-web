@@ -1,4 +1,5 @@
 import type {
+  AddDayPlanItemsDataDTO,
   CreateDayPlanItemDataDTO,
   DayPlanItemDTO,
   DeleteDayPlanItemDataDTO,
@@ -41,6 +42,28 @@ const createDayPlanItem = async (
     }
     console.error("Create day plan item error:", error);
     return { success: false, message: "Failed to create day plan item" };
+  }
+};
+
+type AddDayPlanItemsResponse =
+  | SuccessResponse<DayPlanItemDTO[]>
+  | ErrorResponse;
+
+const addDayPlanItems = async (
+  data: AddDayPlanItemsDataDTO,
+): Promise<AddDayPlanItemsResponse> => {
+  try {
+    const entries = await dayPlanItemQueries.addDayPlanItems(data);
+    return { success: true, data: entries };
+  } catch (error) {
+    if (isPgError(error) && error.code === PG_FK) {
+      return {
+        success: false,
+        message: "Invalid day plan or activity",
+      };
+    }
+    console.error("Add day plan items error:", error);
+    return { success: false, message: "Failed to add day plan items" };
   }
 };
 
@@ -128,6 +151,7 @@ const deleteDayPlanItem = async (
 
 export const dayPlanItemsService = {
   createDayPlanItem,
+  addDayPlanItems,
   getDayPlanItemById,
   getDayPlanItems,
   updateDayPlanItem,

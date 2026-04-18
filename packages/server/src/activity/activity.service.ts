@@ -2,6 +2,7 @@ import type {
   CreateActivityDataDTO,
   UpdateActivityDataDTO,
   GetActivitiesDTO,
+  GetActivitiesByIdsDTO,
   ActivityDTO,
   GetActivityDTO,
   GetActivitiesResponseDTO,
@@ -213,6 +214,32 @@ const getActivityById = async (
     return {
       success: false,
       message: "Failed to get activity",
+    };
+  }
+};
+
+type GetActivitiesByIdsResponse =
+  | SuccessResponse<ActivityDTO[]>
+  | ErrorResponse;
+
+const getActivitiesByIds = async (
+  data: GetActivitiesByIdsDTO,
+): Promise<GetActivitiesByIdsResponse> => {
+  try {
+    const rows = await activityQueries.getActivitiesByIds(data);
+
+    return {
+      success: true,
+      data: rows.map((row) =>
+        mapActivityRowToDTO(row as Record<string, unknown>),
+      ),
+    };
+  } catch (error) {
+    console.error("Get activities by ids error:", error);
+
+    return {
+      success: false,
+      message: "Failed to fetch activities",
     };
   }
 };
@@ -505,6 +532,7 @@ export const activitiesService = {
   updateActivity,
   deleteActivity,
   getActivityById,
+  getActivitiesByIds,
   getActivities,
   startActivity,
   pauseActivity,

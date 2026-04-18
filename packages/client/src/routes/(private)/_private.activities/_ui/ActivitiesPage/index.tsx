@@ -1,5 +1,5 @@
 import { useDialog } from "@ark-ui/react";
-import { Box, Button, Flex, Text } from "~/shared/ui";
+import { Box, Flex, IconButton, PlusIcon, Text } from "~/shared/ui";
 import { ActivityList } from "./ActivityList";
 import { CreateActivityDialog } from "./CreateActivityDialog";
 import { useTranslation } from "~/shared/hooks";
@@ -20,17 +20,18 @@ export const ActivitiesPage = () => {
       py={5}
       maxWidth="100vw"
     >
-      <Flex justifyContent="space-between" alignItems="center" gap="1rem">
+      <Flex alignItems="center" gap="1rem">
         <Text textStyle="2xl" fontWeight="bolder">
           {t("pages.activities.title")}
         </Text>
-        <Button
+        <IconButton
           variant="outline"
+          size="sm"
           borderRadius="xl"
           onClick={() => createActivityDialog.setOpen(true)}
         >
-          {t("pages.activities.newActivityButton")}
-        </Button>
+          <PlusIcon />
+        </IconButton>
       </Flex>
       <ActivityList />
       <CreateActivityDialog dialog={createActivityDialog} />

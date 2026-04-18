@@ -55,24 +55,11 @@ export function Stopwatch({
     <Stack.VStack
       w="full"
       backdropFilter="blur(20px)"
-      border="1px solid"
-      borderColor="border"
-      borderRadius="2xl"
       p="1rem"
       gap="0.8rem"
       overflow="hidden"
       maxWidth="500px"
     >
-      {selectedActivity ? (
-        <Badge variant="outline" size="lg" rounded="full" borderStyle="dotted">
-          <Box w="8px" h="8px" bgColor="green.focusRing" rounded="full" />
-          {selectedActivity.title}
-        </Badge>
-      ) : (
-        <Badge variant="outline" size="lg" rounded="full" borderStyle="dotted">
-          {t("pages.home.selectActivity")}
-        </Badge>
-      )}
       <Box
         display="flex"
         flexDirection="column"
@@ -91,49 +78,6 @@ export function Stopwatch({
           {displayedTime}
         </Text>
       </Box>
-      <ButtonGroup
-        justifyContent="center"
-        display="grid"
-        alignItems="center"
-        gridTemplateColumns="repeat(2, 1fr)"
-        gap={4}
-        w="full"
-      >
-        <Button
-          onClick={onFinish}
-          variant="outline"
-          size="lg"
-          disabled={seconds === 0}
-          borderRadius="2xl"
-          gap="0.4rem"
-        >
-          <StopIcon />
-          Finish
-        </Button>
-        {status !== "running" ? (
-          <Button
-            onClick={onStart}
-            size="lg"
-            variant="outline"
-            borderRadius="2xl"
-            gap="0.4rem"
-          >
-            <PlayIcon />
-            Start
-          </Button>
-        ) : (
-          <Button
-            onClick={onPause}
-            size="lg"
-            variant="outline"
-            borderRadius="2xl"
-            gap="0.4rem"
-          >
-            <PauseIcon />
-            Pause
-          </Button>
-        )}
-      </ButtonGroup>
     </Stack.VStack>
   );
 }

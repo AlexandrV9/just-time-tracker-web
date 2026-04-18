@@ -1,5 +1,6 @@
 import { zValidator } from "@hono/zod-validator";
 import {
+  addDayPlanItemsSchema,
   baseIdSchema,
   createDayPlanItemSchema,
   createDayPlanSchema,
@@ -84,6 +85,12 @@ export const dayPlanItemHandlers = {
     "json",
     createDayPlanItemSchema,
     dayPlanItemsService.createDayPlanItem,
+    201,
+  ),
+  addDayPlanItems: createHandler(
+    "json",
+    addDayPlanItemsSchema,
+    dayPlanItemsService.addDayPlanItems,
     201,
   ),
   getDayPlanItems: createHandler(

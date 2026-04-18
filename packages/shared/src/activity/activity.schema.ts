@@ -73,6 +73,12 @@ export const getActivitiesSchema = z
 export type GetActivityDTO = z.infer<typeof baseIdSchema>;
 export type GetActivitiesDTO = z.infer<typeof getActivitiesSchema>;
 
+export const getActivitiesByIdsSchema = z.object({
+  activityIds: z.array(z.string().min(1, "activityId is required")),
+});
+
+export type GetActivitiesByIdsDTO = z.infer<typeof getActivitiesByIdsSchema>;
+
 export const updateActivitySchema = z.object({
   id: z.string().min(1, "id is required"),
   title: z.string().min(1).max(255).optional(),
