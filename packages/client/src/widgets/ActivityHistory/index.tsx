@@ -8,7 +8,7 @@ import {
   activityApiService,
 } from "~/shared/api/services";
 import { useTranslation } from "~/shared/hooks";
-import { formatGroupLabel } from "~/shared/libs";
+import { formatGroupLabel, type CalendarDay } from "~/shared/libs";
 import { Box, EmptyState, VersionIcon } from "~/shared/ui";
 import { VStack } from "@chakra-ui/react";
 import { ActivityGroupListItem } from "../ActivityGroupList/ActivityGroupListItem";
@@ -123,7 +123,11 @@ export const ActivityHistory = () => {
   return (
     <Box display="flex" flexDirection="column" gap="1.5rem">
       {groups.map((group) => (
-        <ActivityGroupListItem key={group.calendarDay} data={group.data} />
+        <ActivityGroupListItem
+          key={group.calendarDay}
+          data={group.data}
+          calendarDay={group.calendarDay as CalendarDay}
+        />
       ))}
       <div ref={fetchRef} style={{ height: 1, width: "100%" }} />
     </Box>

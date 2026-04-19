@@ -3,6 +3,7 @@ import { Box, Flex, Text } from "~/shared/ui";
 import {
   convertSecondsToTimeObject,
   convertTimeObjectToTimeString,
+  type CalendarDay,
 } from "~/shared/libs";
 import { ActivityListView } from "~/entities/Activity";
 import { ActivityCard } from "~/features";
@@ -16,6 +17,7 @@ export type ActivityGroupDTO = {
 
 type ActivityGroupListItemProps = {
   data: ActivityGroupDTO;
+  calendarDay?: CalendarDay;
   withControlButtons?: boolean;
   onStart?: (activityId: ActivityDTO["id"]) => void;
   onPause?: (activityId: ActivityDTO["id"]) => void;
@@ -24,6 +26,7 @@ type ActivityGroupListItemProps = {
 
 export function ActivityGroupListItem({
   data,
+  calendarDay,
   onStart,
   onPause,
   onFinish,
@@ -57,6 +60,7 @@ export function ActivityGroupListItem({
           <ActivityListView.Item key={activity.id}>
             <ActivityCard
               activity={activity}
+              calendarDay={calendarDay}
               withControlButtons={withControlButtons}
               onStart={() => onStart?.(activity.id)}
               onPause={() => onPause?.(activity.id)}

@@ -1,7 +1,7 @@
 import { Box, Flex } from "~/shared/ui";
 import { Stopwatch } from "./Stopwatch";
 import { useHomeStopwatchSession } from "./useHomeStopwatchSession";
-import { TodayActivities } from "~/widgets";
+import { ActivityTodayList } from "~/widgets";
 
 export function HomePage() {
   const { seconds, status, start, pause, stop } = useHomeStopwatchSession();
@@ -24,7 +24,7 @@ export function HomePage() {
           onFinish={stop}
         />
       </Flex>
-      <TodayActivities />
+      <ActivityTodayList />
     </Box>
   );
 }

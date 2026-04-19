@@ -24,7 +24,6 @@ import { Route as privatePrivateActivitiesIndexRouteImport } from './routes/(pri
 import { Route as authAuthSignupIndexRouteImport } from './routes/(auth)/_auth.signup/index'
 import { Route as authAuthSigninIndexRouteImport } from './routes/(auth)/_auth.signin/index'
 import { Route as privatePrivateSettingsProfileRouteImport } from './routes/(private)/_private.settings/profile'
-import { Route as privatePrivateCalendarTaskIdRouteImport } from './routes/(private)/_private.calendar/$taskId'
 import { Route as privatePrivateActivitiesActivityIdRouteImport } from './routes/(private)/_private.activities/$activityId'
 
 const publicRouteImport = createFileRoute('/(public)')()
@@ -111,12 +110,6 @@ const privatePrivateSettingsProfileRoute =
     path: '/settings/profile',
     getParentRoute: () => privatePrivateRoute,
   } as any)
-const privatePrivateCalendarTaskIdRoute =
-  privatePrivateCalendarTaskIdRouteImport.update({
-    id: '/calendar/$taskId',
-    path: '/calendar/$taskId',
-    getParentRoute: () => privatePrivateRoute,
-  } as any)
 const privatePrivateActivitiesActivityIdRoute =
   privatePrivateActivitiesActivityIdRouteImport.update({
     id: '/activities/$activityId',
@@ -127,7 +120,6 @@ const privatePrivateActivitiesActivityIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof privatePrivateIndexRoute
   '/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
-  '/calendar/$taskId': typeof privatePrivateCalendarTaskIdRoute
   '/settings/profile': typeof privatePrivateSettingsProfileRoute
   '/signin': typeof authAuthSigninIndexRoute
   '/signup': typeof authAuthSignupIndexRoute
@@ -141,7 +133,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof privatePrivateIndexRoute
   '/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
-  '/calendar/$taskId': typeof privatePrivateCalendarTaskIdRoute
   '/settings/profile': typeof privatePrivateSettingsProfileRoute
   '/signin': typeof authAuthSigninIndexRoute
   '/signup': typeof authAuthSignupIndexRoute
@@ -162,7 +153,6 @@ export interface FileRoutesById {
   '/(public)/_public': typeof publicPublicRouteWithChildren
   '/(private)/_private/': typeof privatePrivateIndexRoute
   '/(private)/_private/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
-  '/(private)/_private/calendar/$taskId': typeof privatePrivateCalendarTaskIdRoute
   '/(private)/_private/settings/profile': typeof privatePrivateSettingsProfileRoute
   '/(auth)/_auth/signin/': typeof authAuthSigninIndexRoute
   '/(auth)/_auth/signup/': typeof authAuthSignupIndexRoute
@@ -178,7 +168,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/activities/$activityId'
-    | '/calendar/$taskId'
     | '/settings/profile'
     | '/signin'
     | '/signup'
@@ -192,7 +181,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/activities/$activityId'
-    | '/calendar/$taskId'
     | '/settings/profile'
     | '/signin'
     | '/signup'
@@ -212,7 +200,6 @@ export interface FileRouteTypes {
     | '/(public)/_public'
     | '/(private)/_private/'
     | '/(private)/_private/activities/$activityId'
-    | '/(private)/_private/calendar/$taskId'
     | '/(private)/_private/settings/profile'
     | '/(auth)/_auth/signin/'
     | '/(auth)/_auth/signup/'
@@ -344,13 +331,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof privatePrivateSettingsProfileRouteImport
       parentRoute: typeof privatePrivateRoute
     }
-    '/(private)/_private/calendar/$taskId': {
-      id: '/(private)/_private/calendar/$taskId'
-      path: '/calendar/$taskId'
-      fullPath: '/calendar/$taskId'
-      preLoaderRoute: typeof privatePrivateCalendarTaskIdRouteImport
-      parentRoute: typeof privatePrivateRoute
-    }
     '/(private)/_private/activities/$activityId': {
       id: '/(private)/_private/activities/$activityId'
       path: '/activities/$activityId'
@@ -388,7 +368,6 @@ const authRouteWithChildren = authRoute._addFileChildren(authRouteChildren)
 interface privatePrivateRouteChildren {
   privatePrivateIndexRoute: typeof privatePrivateIndexRoute
   privatePrivateActivitiesActivityIdRoute: typeof privatePrivateActivitiesActivityIdRoute
-  privatePrivateCalendarTaskIdRoute: typeof privatePrivateCalendarTaskIdRoute
   privatePrivateSettingsProfileRoute: typeof privatePrivateSettingsProfileRoute
   privatePrivateActivitiesIndexRoute: typeof privatePrivateActivitiesIndexRoute
   privatePrivateCalendarIndexRoute: typeof privatePrivateCalendarIndexRoute
@@ -401,7 +380,6 @@ const privatePrivateRouteChildren: privatePrivateRouteChildren = {
   privatePrivateIndexRoute: privatePrivateIndexRoute,
   privatePrivateActivitiesActivityIdRoute:
     privatePrivateActivitiesActivityIdRoute,
-  privatePrivateCalendarTaskIdRoute: privatePrivateCalendarTaskIdRoute,
   privatePrivateSettingsProfileRoute: privatePrivateSettingsProfileRoute,
   privatePrivateActivitiesIndexRoute: privatePrivateActivitiesIndexRoute,
   privatePrivateCalendarIndexRoute: privatePrivateCalendarIndexRoute,

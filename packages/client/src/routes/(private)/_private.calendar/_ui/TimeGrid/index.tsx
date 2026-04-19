@@ -1,8 +1,8 @@
-import { Box, Flex, Text, useMainContainer } from "~/shared/ui";
+import { Box, Flex, Text } from "~/shared/ui";
 import styles from "./TimeGrid.module.css";
 import { CurrentTimePointer } from "./TimePointer";
 import { useRef } from "react";
-import { useScrollToAnchor } from "./useScrollToAnchor";
+// import { useScrollToAnchor } from "./useScrollToAnchor";
 
 type TimeGridProps = {
   startHour?: number;
@@ -13,16 +13,14 @@ type TimeGridProps = {
 const hours = Array.from({ length: 25 }, (_, index) => index);
 
 export const TimeGrid = ({ hourHeight = 60 }: TimeGridProps) => {
-  const { mainContainerRef } = useMainContainer();
-
   const currentTimePointerRef = useRef<HTMLDivElement>(null);
 
-  useScrollToAnchor({
-    containerRef: mainContainerRef,
-    targetRef: currentTimePointerRef,
-    anchor: 0.4,
-    deps: [hourHeight],
-  });
+  // useScrollToAnchor({
+  //   containerRef: mainContainerRef,
+  //   targetRef: currentTimePointerRef,
+  //   anchor: 0.4,
+  //   deps: [hourHeight],
+  // });
 
   return (
     <Box position="relative">

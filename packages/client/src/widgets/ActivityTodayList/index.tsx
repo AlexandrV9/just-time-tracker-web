@@ -1,9 +1,5 @@
 import { ActivityGroupListItem } from "../ActivityGroupList/ActivityGroupListItem";
-import {
-  useFinishActivity,
-  usePauseActivity,
-  useStartActivity,
-} from "../DayPlanList/mutations";
+
 import { useDialog } from "@ark-ui/react";
 import {
   Box,
@@ -17,8 +13,13 @@ import { AddTodayActivitiesDialog } from "./AddTodayActivityDialog";
 import { VStack } from "@chakra-ui/react";
 import { useAddTodayActivities } from "./useAddTodayActivities";
 import { useTodayActivities } from "./useTodayActivities";
+import {
+  useFinishActivity,
+  usePauseActivity,
+  useStartActivity,
+} from "./mutations";
 
-export const TodayActivities = () => {
+export const ActivityTodayList = () => {
   const addTodayActivityDialog = useDialog();
 
   const { planId, activityGroup, isLoading, isError } = useTodayActivities();
