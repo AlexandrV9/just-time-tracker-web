@@ -10,6 +10,8 @@ import type {
   GetActivityDTO,
   GetActivitiesDTO,
   GetActivitiesByIdsDTO,
+  GetActivitiesGroupedByDayDTO,
+  GetActivitiesGroupedByDayResponseDTO,
   GetActivitiesResponseDTO,
   PauseActivityDTO,
   FinishActivityDTO,
@@ -50,6 +52,15 @@ export class ActivityService {
     data: GetActivitiesByIdsDTO,
   ): Promise<RequestResponse<ActivityDTO[], unknown>> {
     return baseApi.post<ActivityDTO[]>(`/api/activities/by-ids`, { data });
+  }
+
+  getActivitiesGroupedByDay(
+    params: GetActivitiesGroupedByDayDTO,
+  ): Promise<RequestResponse<GetActivitiesGroupedByDayResponseDTO, unknown>> {
+    return baseApi.get<GetActivitiesGroupedByDayResponseDTO>(
+      `/api/activities/grouped-by-day`,
+      { params },
+    );
   }
 
   updateActivity(data: UpdateActivityDataDTO) {

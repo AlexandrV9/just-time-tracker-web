@@ -8,6 +8,7 @@ import {
   createActivitySchema,
   updateActivitySchema,
   getActivitiesSchema,
+  getActivitiesGroupedByDayQuerySchema,
   getActivitiesByIdsSchema,
   getActivitySessionsSchema,
   getActivityAnalyticsQuerySchema,
@@ -71,6 +72,12 @@ export const activityHandlers = {
     "json",
     getActivitiesByIdsSchema,
     activitiesService.getActivitiesByIds,
+  ),
+
+  getActivitiesGroupedByDay: createHandler(
+    "query",
+    getActivitiesGroupedByDayQuerySchema,
+    activitiesService.getActivitiesGroupedByDay,
   ),
 
   createActivity: createHandler(

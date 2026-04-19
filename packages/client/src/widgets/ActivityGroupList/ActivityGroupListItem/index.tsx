@@ -17,9 +17,9 @@ export type ActivityGroupDTO = {
 type ActivityGroupListItemProps = {
   data: ActivityGroupDTO;
   withControlButtons?: boolean;
-  onStart: (activityId: ActivityDTO["id"]) => void;
-  onPause: (activityId: ActivityDTO["id"]) => void;
-  onFinish: (activityId: ActivityDTO["id"]) => void;
+  onStart?: (activityId: ActivityDTO["id"]) => void;
+  onPause?: (activityId: ActivityDTO["id"]) => void;
+  onFinish?: (activityId: ActivityDTO["id"]) => void;
 };
 
 export function ActivityGroupListItem({
@@ -57,11 +57,10 @@ export function ActivityGroupListItem({
           <ActivityListView.Item key={activity.id}>
             <ActivityCard
               activity={activity}
-              // calendarDay={calendarDay}
               withControlButtons={withControlButtons}
-              onStart={() => onStart(activity.id)}
-              onPause={() => onPause(activity.id)}
-              onFinish={() => onFinish(activity.id)}
+              onStart={() => onStart?.(activity.id)}
+              onPause={() => onPause?.(activity.id)}
+              onFinish={() => onFinish?.(activity.id)}
             />
           </ActivityListView.Item>
         ))}

@@ -1,6 +1,6 @@
 import { ActivityListView } from "~/entities/Activity";
 import { ActivityCard } from "~/features";
-import { Box, Flex, Text } from "~/shared/ui";
+import { Box, Flex } from "~/shared/ui";
 
 import { Skeleton as BaseSkeleton } from "~/shared/ui";
 

@@ -7,6 +7,7 @@ activitiesRouter.post("/", activityHandlers.createActivity);
 activitiesRouter.post("/quick-timer", activityHandlers.createActivityFromQuickTimer);
 activitiesRouter.post("/by-ids", activityHandlers.getActivitiesByIds);
 activitiesRouter.get("/", activityHandlers.getActivities);
+activitiesRouter.get("/grouped-by-day", activityHandlers.getActivitiesGroupedByDay);
 activitiesRouter.get("/analytics", activityHandlers.getBatchActivityAnalytics);
 activitiesRouter.get("/:id/analytics", activityHandlers.getActivityAnalytics);
 activitiesRouter.get("/:id/sessions", activityHandlers.getSessionsByActivityId);

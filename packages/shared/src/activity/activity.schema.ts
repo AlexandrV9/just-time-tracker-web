@@ -1,5 +1,9 @@
 import z from "zod";
-import { baseIdSchema, paginationResponseSchema } from "../common/index.js";
+import {
+  baseIdSchema,
+  paginationResponseSchema,
+  paginationSchema,
+} from "../common/index.js";
 import { activitySessionSchema } from "./activitySession.schema.js";
 
 const tagListSchema = z.array(z.string()).max(10).optional();
@@ -78,6 +82,42 @@ export const getActivitiesByIdsSchema = z.object({
 });
 
 export type GetActivitiesByIdsDTO = z.infer<typeof getActivitiesByIdsSchema>;
+
+const calendarDayKeySchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "key must be YYYY-MM-DD");
+
+export const getActivitiesGroupedByDayQuerySchema = z
+  .object({
+    createdById: z.string().min(1, "createdById is required"),
+    startDate: z.iso.datetime().optional(),
+    toDate: z.iso.datetime().optional(),
+    page: z.coerce.number().int().min(0).default(0),
+    limit: z.coerce.number().int().min(1).max(100).default(7),
+  })
+  .superRefine(({ startDate, toDate }, ctx) => {
+    if (startDate && toDate && new Date(toDate) < new Date(startDate)) {
+      ctx.addIssue({
+        path: ["toDate"],
+        message: "toDate must be on or after startDate",
+        code: "custom",
+      });
+    }
+  });
+
+export type GetActivitiesGroupedByDayDTO = z.infer<
+  typeof getActivitiesGroupedByDayQuerySchema
+>;
+
+/** Body of `success.data` for grouped-by-day list (plus standard success wrapper from API). */
+export const getActivitiesGroupedByDayResponseSchema = z.object({
+  data: z.record(calendarDayKeySchema, z.array(activitySchema)),
+  pagination: paginationSchema,
+});
+
+export type GetActivitiesGroupedByDayResponseDTO = z.infer<
+  typeof getActivitiesGroupedByDayResponseSchema
+>;
 
 export const updateActivitySchema = z.object({
   id: z.string().min(1, "id is required"),

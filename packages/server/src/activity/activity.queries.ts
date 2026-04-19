@@ -206,6 +206,30 @@ const getActivitiesByIds = async (
   return rows as ActivityDTO[];
 };
 
+const listActivitiesInUtcCalendarDayRange = async (params: {
+  createdById: string;
+  fromDay: string;
+  toDay: string;
+}): Promise<Array<Record<string, unknown>>> => {
+  const query = `
+    SELECT
+      ${ACTIVITY_RETURNING_COLUMNS},
+      to_char((updated_at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD') AS "calendarDay"
+    FROM activities
+    WHERE created_by_id = $1
+    AND (updated_at AT TIME ZONE 'UTC')::date >= $2::date
+    AND (updated_at AT TIME ZONE 'UTC')::date <= $3::date
+    ORDER BY updated_at DESC
+  `;
+
+  const { rows } = await pool.query(query, [
+    params.createdById,
+    params.fromDay,
+    params.toDay,
+  ]);
+  return rows as Array<Record<string, unknown>>;
+};
+
 const getActivities = async (filters: GetActivitiesDTO) => {
   const {
     createdById,
@@ -334,11 +358,97 @@ const deleteActivity = async (id: ActivityDTO["id"]): Promise<boolean> => {
   return rowCount === 1;
 };
 
+const listActivitiesGroupedByDay = async (params: {
+  createdById: string;
+  fromDay?: string;
+  toDay?: string;
+  page: number;
+  limit: number;
+}): Promise<{
+  days: string[];
+  activities: Array<Record<string, unknown>>;
+  totalDayCount: number;
+}> => {
+  const { createdById, fromDay, toDay, page, limit } = params;
+
+  const conditions: string[] = ["created_by_id = $1"];
+  const baseParams: unknown[] = [createdById];
+
+  if (fromDay) {
+    baseParams.push(fromDay);
+    conditions.push(
+      `(updated_at AT TIME ZONE 'UTC')::date >= $${baseParams.length}::date`,
+    );
+  }
+  if (toDay) {
+    baseParams.push(toDay);
+    conditions.push(
+      `(updated_at AT TIME ZONE 'UTC')::date <= $${baseParams.length}::date`,
+    );
+  }
+
+  const where = `WHERE ${conditions.join(" AND ")}`;
+  const offset = page * limit;
+
+  const daysParams = [...baseParams, limit, offset];
+  const daysQuery = `
+    SELECT DISTINCT
+      to_char((updated_at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD') AS calendar_day
+    FROM activities
+    ${where}
+    ORDER BY calendar_day DESC
+    LIMIT $${daysParams.length - 1} OFFSET $${daysParams.length}
+  `;
+
+  const countQuery = `
+    SELECT COUNT(DISTINCT to_char((updated_at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD'))::int AS count
+    FROM activities
+    ${where}
+  `;
+
+  const [daysResult, countResult] = await Promise.all([
+    pool.query(daysQuery, daysParams),
+    pool.query(countQuery, baseParams),
+  ]);
+
+  const days: string[] = daysResult.rows.map((r: Record<string, unknown>) =>
+    String(r["calendar_day"]),
+  );
+  const totalDayCount = Number(countResult.rows[0]?.["count"] ?? 0);
+
+  if (days.length === 0) {
+    return { days, activities: [], totalDayCount };
+  }
+
+  const activitiesQuery = `
+    SELECT
+      ${ACTIVITY_RETURNING_COLUMNS},
+      to_char((updated_at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD') AS "calendarDay"
+    FROM activities
+    WHERE created_by_id = $1
+      AND to_char((updated_at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD') = ANY($2::text[])
+    ORDER BY updated_at DESC
+  `;
+
+  const activitiesResult = await pool.query(activitiesQuery, [
+    createdById,
+    days,
+  ]);
+
+  return {
+    days,
+    activities: activitiesResult.rows as Array<Record<string, unknown>>,
+    totalDayCount,
+  };
+};
+
 export const activityQueries = {
   createActivity,
   createActivityFromQuickTimer,
   getActivityById,
   getActivitiesByIds,
+  listActivitiesInUtcCalendarDayRange,
+  listActivitiesGroupedByDay,
   getActivities,
   updateActivity,
   deleteActivity,

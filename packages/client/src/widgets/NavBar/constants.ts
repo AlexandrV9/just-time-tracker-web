@@ -9,16 +9,16 @@ export const navItems: NavItemProps[] = [
     icon: HomeIcon,
   },
   {
-    id: "nav_item_activities",
-    title: "Activities",
-    href: "/activities",
-    icon: LightningIcon,
-  },
-  {
     id: "nav_item_history",
     title: "History",
     href: "/history",
     icon: BookIcon,
+  },
+  {
+    id: "nav_item_activities",
+    title: "Activities",
+    href: "/activities",
+    icon: LightningIcon,
   },
   {
     id: "nav_item_settings",

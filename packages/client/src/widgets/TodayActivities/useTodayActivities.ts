@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import type { ActivityDTO } from "@to-do-list/shared";
 import { useAuthStore } from "~/features/auth";
 import {
   ACTIVITIES_QUERY_KEY,
@@ -8,6 +7,7 @@ import {
   DAY_PLAN_ITEMS_QUERY_KEY,
   DAY_PLANS_QUERY_KEY,
   dayPlanApiService,
+  type ActivityGroup,
 } from "~/shared/api/services";
 import { useTranslation } from "~/shared/hooks";
 import {
@@ -16,15 +16,9 @@ import {
   getDateIntervalByCalendarDay,
 } from "~/shared/libs";
 
-type ActivityGroupDTO = {
-  label: string;
-  totalActiveTime: number;
-  activities: ActivityDTO[];
-};
-
 export const useTodayActivities = (): {
   planId?: string;
-  activityGroup: ActivityGroupDTO;
+  activityGroup: ActivityGroup;
   isLoading: boolean;
   isError: boolean;
 } => {
@@ -115,7 +109,7 @@ export const useTodayActivities = (): {
       }),
       totalActiveTime: todayAnalyticsQuery.data ?? 0,
       activities: todayActivities,
-    } satisfies ActivityGroupDTO,
+    } satisfies ActivityGroup,
     isLoading:
       todayPlanActivitiesQuery.isLoading ||
       todayPlanItemsQuery.isLoading ||

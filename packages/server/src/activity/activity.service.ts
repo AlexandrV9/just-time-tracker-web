@@ -3,6 +3,8 @@ import type {
   UpdateActivityDataDTO,
   GetActivitiesDTO,
   GetActivitiesByIdsDTO,
+  GetActivitiesGroupedByDayDTO,
+  GetActivitiesGroupedByDayResponseDTO,
   ActivityDTO,
   GetActivityDTO,
   GetActivitiesResponseDTO,
@@ -29,6 +31,7 @@ import {
 import { activitySessionQueries } from "./activitySession.queries.js";
 import { activitySessionSegmentQueries } from "./activitySessionSegment.queries.js";
 import type { ErrorResponse, SuccessResponse } from "../shared/types.js";
+
 
 type DayTotalsAgg = {
   activeDurationMs: number;
@@ -236,6 +239,73 @@ const getActivitiesByIds = async (
     };
   } catch (error) {
     console.error("Get activities by ids error:", error);
+
+    return {
+      success: false,
+      message: "Failed to fetch activities",
+    };
+  }
+};
+
+type GetActivitiesGroupedByDayResult =
+  | SuccessResponse<GetActivitiesGroupedByDayResponseDTO>
+  | ErrorResponse;
+
+const getActivitiesGroupedByDay = async (
+  filters: GetActivitiesGroupedByDayDTO,
+): Promise<GetActivitiesGroupedByDayResult> => {
+  try {
+    const { createdById, startDate, toDate, page = 0, limit = 7 } = filters;
+
+    const fromDay = startDate
+      ? new Date(startDate).toISOString().slice(0, 10)
+      : undefined;
+    const toDay = toDate
+      ? new Date(toDate).toISOString().slice(0, 10)
+      : undefined;
+
+    const { days, activities, totalDayCount } =
+      await activityQueries.listActivitiesGroupedByDay({
+        createdById,
+        fromDay,
+        toDay,
+        page,
+        limit,
+      });
+
+    const totalPages =
+      totalDayCount === 0 ? 0 : Math.ceil(totalDayCount / limit);
+
+    const data: Record<string, ActivityDTO[]> = {};
+    for (const day of days) {
+      data[day] = [];
+    }
+
+    for (const row of activities) {
+      const { calendarDay, ...rest } = row as Record<string, unknown> & {
+        calendarDay: string;
+      };
+      if (data[calendarDay] !== undefined) {
+        data[calendarDay].push(mapActivityRowToDTO(rest));
+      }
+    }
+
+    return {
+      success: true,
+      data: {
+        data,
+        pagination: {
+          page,
+          limit,
+          totalCount: totalDayCount,
+          totalPages,
+          hasNext: totalPages > 0 && page < totalPages - 1,
+          hasPrev: page > 0,
+        },
+      },
+    };
+  } catch (error) {
+    console.error("Get activities grouped by day error:", error);
 
     return {
       success: false,
@@ -533,6 +603,7 @@ export const activitiesService = {
   deleteActivity,
   getActivityById,
   getActivitiesByIds,
+  getActivitiesGroupedByDay,
   getActivities,
   startActivity,
   pauseActivity,

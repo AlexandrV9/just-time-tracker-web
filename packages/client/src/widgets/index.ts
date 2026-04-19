@@ -7,3 +7,4 @@ export * from "./NavBar";
 export * from "./SideBar";
 export * from "./TodayActivities";
 export * from "./TodayOverview";
+export * from "./ActivityHistory";

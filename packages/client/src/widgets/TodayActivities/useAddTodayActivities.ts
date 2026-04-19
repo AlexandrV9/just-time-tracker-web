@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "~/features/auth";
 import {
   DAY_PLAN_ITEMS_QUERY_KEY,
+  DAY_PLANS_QUERY_KEY,
   dayPlanApiService,
 } from "~/shared/api/services";
 import { getCalendarDay } from "~/shared/libs";
@@ -28,7 +29,7 @@ export const useAddTodayActivities = ({
       if (!currentPlanId) {
         const todayPlan = await dayPlanApiService.createDayPlan({
           createdById: userId!,
-          date: todayCalendarDay,
+           date: todayCalendarDay,
         });
 
         if (!todayPlan.success) {
@@ -45,6 +46,9 @@ export const useAddTodayActivities = ({
     },
     onSuccess: () => {
       toast.success("Активность добавлена");
+      queryClient.invalidateQueries({
+        queryKey: [DAY_PLANS_QUERY_KEY, userId, todayCalendarDay],
+      });
       queryClient.invalidateQueries({
         queryKey: [DAY_PLAN_ITEMS_QUERY_KEY, planId],
       });
