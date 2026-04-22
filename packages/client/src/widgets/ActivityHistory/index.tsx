@@ -8,10 +8,10 @@ import {
   activityApiService,
 } from "~/shared/api/services";
 import { useTranslation } from "~/shared/hooks";
-import { formatGroupLabel, type CalendarDay } from "~/shared/libs";
+import { formatGroupLabel } from "~/shared/libs";
 import { Box, EmptyState, VersionIcon } from "~/shared/ui";
 import { VStack } from "@chakra-ui/react";
-import { ActivityGroupListItem } from "../ActivityGroupList/ActivityGroupListItem";
+import { ActivityGroup } from "../ActivityGroup";
 
 export const ActivityHistory = () => {
   const { user } = useAuthStore();
@@ -22,54 +22,69 @@ export const ActivityHistory = () => {
 
   const { data, fetchNextPage, hasNextPage, isLoading, isError } =
     useInfiniteQuery({
-      queryKey: [ACTIVITIES_QUERY_KEY, userId, "history"],
+      queryKey: [ACTIVITIES_QUERY_KEY, userId, "history", "day"],
       queryFn: ({ pageParam }) =>
-        activityApiService.getActivitiesGroupedByDay({
-          page: pageParam,
-          limit: 7,
+        activityApiService.getGroupedActivities({
+          groupBy: "day",
+          limit: 8,
+          cursor: pageParam ?? undefined,
           createdById: userId!,
         }),
-      enabled: !!userId,
-      initialPageParam: 0,
-      getNextPageParam: (lastGroup) => {
-        if (lastGroup?.success && lastGroup.data.pagination.hasNext) {
-          return lastGroup.data.pagination.page + 1;
-        }
-        return undefined;
+      initialPageParam: null as string | null,
+      getNextPageParam: (lastPage) => {
+        if (!lastPage?.success) return undefined;
+        return lastPage.data.pagination.nextCursor ?? undefined;
       },
     });
 
   const groups = useMemo(() => {
-    const allEntries =
-      data?.pages.flatMap((page) =>
-        page.success ? Object.entries(page.data.data) : [],
-      ) ?? [];
+    const groupList =
+      data?.pages.flatMap((page) => (page.success ? page.data.groups : [])) ??
+      [];
 
-    const merged = new Map<string, ActivityDTO[]>();
-
-    for (const [day, activities] of allEntries) {
-      if (!merged.has(day)) {
-        merged.set(day, []);
+    const merged = new Map<
+      string,
+      {
+        groupDateStart: string;
+        groupDateEnd: string;
+        totalActiveDurationMs: number;
+        totalPauseDurationMs: number;
+        items: ActivityDTO[];
       }
-      merged.get(day)!.push(...activities);
+    >();
+
+    for (const group of groupList) {
+      const key = group.groupDateStart;
+
+      if (!merged.has(key)) {
+        merged.set(key, {
+          groupDateStart: group.groupDateStart,
+          groupDateEnd: group.groupDateEnd,
+          totalActiveDurationMs: group.totalActiveDurationMs,
+          totalPauseDurationMs: group.totalPauseDurationMs,
+          items: [...group.items],
+        });
+      } else {
+        merged.get(key)?.items.push(...group.items);
+      }
     }
 
-    return Array.from(merged.entries())
-      .sort(([a], [b]) => b.localeCompare(a))
-      .map(([calendarDay, activities]) => ({
-        data: {
-          label: formatGroupLabel({
-            key: calendarDay,
-            groupBy: "day",
-            locale: i18n.language,
-          }),
-          totalActiveTime: activities.reduce(
-            (sum, a) => sum + Math.floor(a.activeDurationMs / 1000),
-            0,
-          ),
-          activities,
-        },
-        calendarDay,
+    return Array.from(merged.values())
+      .sort(
+        (a, b) =>
+          new Date(b.groupDateStart).getTime() -
+          new Date(a.groupDateStart).getTime(),
+      )
+      .map((group) => ({
+        key: group.groupDateStart,
+        label: formatGroupLabel({
+          key: group.groupDateStart,
+          groupBy: "day",
+          locale: i18n.language,
+        }),
+        totalActiveTime: Math.floor(group.totalActiveDurationMs / 1000),
+        activities: group.items,
+        groupDateStart: group.groupDateStart,
       }));
   }, [data, i18n.language]);
 
@@ -84,7 +99,7 @@ export const ActivityHistory = () => {
   }
 
   if (isLoading) {
-    return <ActivityGroupListItem.Skeleton />;
+    return <ActivityGroup.Skeleton />;
   }
 
   if (isError) {
@@ -123,11 +138,7 @@ export const ActivityHistory = () => {
   return (
     <Box display="flex" flexDirection="column" gap="1.5rem">
       {groups.map((group) => (
-        <ActivityGroupListItem
-          key={group.calendarDay}
-          data={group.data}
-          calendarDay={group.calendarDay as CalendarDay}
-        />
+        <ActivityGroup key={group.key} data={group} />
       ))}
       <div ref={fetchRef} style={{ height: 1, width: "100%" }} />
     </Box>

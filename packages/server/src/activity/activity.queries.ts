@@ -206,30 +206,6 @@ const getActivitiesByIds = async (
   return rows as ActivityDTO[];
 };
 
-const listActivitiesInUtcCalendarDayRange = async (params: {
-  createdById: string;
-  fromDay: string;
-  toDay: string;
-}): Promise<Array<Record<string, unknown>>> => {
-  const query = `
-    SELECT
-      ${ACTIVITY_RETURNING_COLUMNS},
-      to_char((updated_at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD') AS "calendarDay"
-    FROM activities
-    WHERE created_by_id = $1
-    AND (updated_at AT TIME ZONE 'UTC')::date >= $2::date
-    AND (updated_at AT TIME ZONE 'UTC')::date <= $3::date
-    ORDER BY updated_at DESC
-  `;
-
-  const { rows } = await pool.query(query, [
-    params.createdById,
-    params.fromDay,
-    params.toDay,
-  ]);
-  return rows as Array<Record<string, unknown>>;
-};
-
 const getActivities = async (filters: GetActivitiesDTO) => {
   const {
     createdById,
@@ -358,22 +334,30 @@ const deleteActivity = async (id: ActivityDTO["id"]): Promise<boolean> => {
   return rowCount === 1;
 };
 
-const listActivitiesGroupedByDay = async (params: {
+/**
+ * Fetches (limit + 1) distinct UTC calendar days and all activities belonging to them.
+ * Ordered newest-first so the caller can detect hasNext by checking if limit+1 days came back.
+ *
+ * `beforeDay` is exclusive (YYYY-MM-DD) — used to continue from a cursor.
+ */
+const listActivitiesGroupedCursor = async (params: {
   createdById: string;
+  beforeDay?: string;
   fromDay?: string;
   toDay?: string;
-  page: number;
   limit: number;
-}): Promise<{
-  days: string[];
-  activities: Array<Record<string, unknown>>;
-  totalDayCount: number;
-}> => {
-  const { createdById, fromDay, toDay, page, limit } = params;
+}): Promise<{ days: string[]; activities: Array<Record<string, unknown>> }> => {
+  const { createdById, beforeDay, fromDay, toDay, limit } = params;
 
   const conditions: string[] = ["created_by_id = $1"];
   const baseParams: unknown[] = [createdById];
 
+  if (beforeDay) {
+    baseParams.push(beforeDay);
+    conditions.push(
+      `(updated_at AT TIME ZONE 'UTC')::date < $${baseParams.length}::date`,
+    );
+  }
   if (fromDay) {
     baseParams.push(fromDay);
     conditions.push(
@@ -388,36 +372,23 @@ const listActivitiesGroupedByDay = async (params: {
   }
 
   const where = `WHERE ${conditions.join(" AND ")}`;
-  const offset = page * limit;
 
-  const daysParams = [...baseParams, limit, offset];
   const daysQuery = `
     SELECT DISTINCT
       to_char((updated_at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD') AS calendar_day
     FROM activities
     ${where}
     ORDER BY calendar_day DESC
-    LIMIT $${daysParams.length - 1} OFFSET $${daysParams.length}
+    LIMIT $${baseParams.length + 1}
   `;
 
-  const countQuery = `
-    SELECT COUNT(DISTINCT to_char((updated_at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD'))::int AS count
-    FROM activities
-    ${where}
-  `;
-
-  const [daysResult, countResult] = await Promise.all([
-    pool.query(daysQuery, daysParams),
-    pool.query(countQuery, baseParams),
-  ]);
-
+  const daysResult = await pool.query(daysQuery, [...baseParams, limit]);
   const days: string[] = daysResult.rows.map((r: Record<string, unknown>) =>
     String(r["calendar_day"]),
   );
-  const totalDayCount = Number(countResult.rows[0]?.["count"] ?? 0);
 
   if (days.length === 0) {
-    return { days, activities: [], totalDayCount };
+    return { days, activities: [] };
   }
 
   const activitiesQuery = `
@@ -438,7 +409,6 @@ const listActivitiesGroupedByDay = async (params: {
   return {
     days,
     activities: activitiesResult.rows as Array<Record<string, unknown>>,
-    totalDayCount,
   };
 };
 
@@ -447,8 +417,7 @@ export const activityQueries = {
   createActivityFromQuickTimer,
   getActivityById,
   getActivitiesByIds,
-  listActivitiesInUtcCalendarDayRange,
-  listActivitiesGroupedByDay,
+  listActivitiesGroupedCursor,
   getActivities,
   updateActivity,
   deleteActivity,

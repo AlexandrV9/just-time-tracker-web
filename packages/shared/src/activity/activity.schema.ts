@@ -1,9 +1,5 @@
 import z from "zod";
-import {
-  baseIdSchema,
-  paginationResponseSchema,
-  paginationSchema,
-} from "../common/index.js";
+import { baseIdSchema, paginationResponseSchema } from "../common/index.js";
 import { activitySessionSchema } from "./activitySession.schema.js";
 
 const tagListSchema = z.array(z.string()).max(10).optional();
@@ -82,42 +78,6 @@ export const getActivitiesByIdsSchema = z.object({
 });
 
 export type GetActivitiesByIdsDTO = z.infer<typeof getActivitiesByIdsSchema>;
-
-const calendarDayKeySchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "key must be YYYY-MM-DD");
-
-export const getActivitiesGroupedByDayQuerySchema = z
-  .object({
-    createdById: z.string().min(1, "createdById is required"),
-    startDate: z.iso.datetime().optional(),
-    toDate: z.iso.datetime().optional(),
-    page: z.coerce.number().int().min(0).default(0),
-    limit: z.coerce.number().int().min(1).max(100).default(7),
-  })
-  .superRefine(({ startDate, toDate }, ctx) => {
-    if (startDate && toDate && new Date(toDate) < new Date(startDate)) {
-      ctx.addIssue({
-        path: ["toDate"],
-        message: "toDate must be on or after startDate",
-        code: "custom",
-      });
-    }
-  });
-
-export type GetActivitiesGroupedByDayDTO = z.infer<
-  typeof getActivitiesGroupedByDayQuerySchema
->;
-
-/** Body of `success.data` for grouped-by-day list (plus standard success wrapper from API). */
-export const getActivitiesGroupedByDayResponseSchema = z.object({
-  data: z.record(calendarDayKeySchema, z.array(activitySchema)),
-  pagination: paginationSchema,
-});
-
-export type GetActivitiesGroupedByDayResponseDTO = z.infer<
-  typeof getActivitiesGroupedByDayResponseSchema
->;
 
 export const updateActivitySchema = z.object({
   id: z.string().min(1, "id is required"),
@@ -228,21 +188,13 @@ export type GetActivityAnalyticsQueryDTO = z.infer<
 
 export const getActivityAnalyticsResponseSchema = z.object({
   activityId: z.string().min(1, "activityId is required"),
-  fromDate: z.iso.datetime(),
-  toDate: z.iso.datetime(),
-  totals: z.object({
-    activeDurationMs: z.number().int().nonnegative(),
-    pauseDurationMs: z.number().int().nonnegative(),
-    totalDurationMs: z.number().int().nonnegative(),
-  }),
+  activeDurationMs: z.number().int().nonnegative(),
+  pauseDurationMs: z.number().int().nonnegative(),
   days: z.array(
     z.object({
       day: z.iso.datetime(),
-      totals: z.object({
-        activeDurationMs: z.number().int().nonnegative(),
-        pauseDurationMs: z.number().int().nonnegative(),
-        totalDurationMs: z.number().int().nonnegative(),
-      }),
+      activeDurationMs: z.number().int().nonnegative(),
+      pauseDurationMs: z.number().int().nonnegative(),
     }),
   ),
 });
@@ -251,8 +203,7 @@ export type GetActivityAnalyticsResponseDTO = z.infer<
   typeof getActivityAnalyticsResponseSchema
 >;
 
-/** Query string for `GET /activities/analytics` (batch). */
-export const getBatchActivityAnalyticsQuerySchema = z
+export const getActivitiesAnalyticsQuerySchema = z
   .object({
     activityIds: z
       .union([z.string(), z.array(z.string())])
@@ -270,14 +221,48 @@ export const getBatchActivityAnalyticsQuerySchema = z
     }
   });
 
-export type GetBatchActivityAnalyticsDTO = z.infer<
-  typeof getBatchActivityAnalyticsQuerySchema
+export type GetActivitiesAnalyticsQueryDTO = z.infer<
+  typeof getActivitiesAnalyticsQuerySchema
 >;
 
-export const getBatchActivityAnalyticsResponseSchema = z.object({
+export const getActivitiesAnalyticsResponseSchema = z.object({
   items: z.record(z.string(), getActivityAnalyticsResponseSchema),
 });
 
-export type GetBatchActivityAnalyticsResponseDTO = z.infer<
-  typeof getBatchActivityAnalyticsResponseSchema
+export type GetActivitiesAnalyticsResponseDTO = z.infer<
+  typeof getActivitiesAnalyticsResponseSchema
+>;
+
+export const getGroupedActivitiesResponseSchema = z.object({
+  groups: z.array(
+    z.object({
+      groupDateStart: z.iso.datetime(), // inclusive
+      groupDateEnd: z.iso.datetime(), // exclusive
+      items: z.array(activitySchema),
+      hasMoreItems: z.boolean(),
+      totalActiveDurationMs: z.number().int().nonnegative(),
+      totalPauseDurationMs: z.number().int().nonnegative(),
+    }),
+  ),
+  pagination: z.object({
+    nextCursor: z.string().nullable(),
+    hasNext: z.boolean(),
+  }),
+});
+
+export type GetGroupedActivitiesResponseDTO = z.infer<
+  typeof getGroupedActivitiesResponseSchema
+>;
+
+export const getGroupedActivitiesQuerySchema = z.object({
+  createdById: z.string().min(1, "createdById is required"),
+  groupBy: z.enum(["day"]).optional().default("day"),
+  cursor: z.string().min(1).optional(),
+  limit: z.coerce.number().int().positive(),
+  fromDate: z.iso.datetime().optional(),
+  toDate: z.iso.datetime().optional(),
+});
+
+export type GetGroupedActivitiesQueryDTO = z.infer<
+  typeof getGroupedActivitiesQuerySchema
 >;

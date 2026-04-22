@@ -6,7 +6,6 @@ import { Flex, Text } from "~/shared/ui";
 import { ActivityCardControls } from "./ActivityCardControls";
 import { useActivityCardData } from "./useActivityCardData";
 import { ActivityCardView } from "~/entities/Activity";
-import type { CalendarDay } from "~/shared/libs";
 import { Skeleton } from "./Skeleton";
 
 export type PreloadedAnalytics = {
@@ -16,18 +15,7 @@ export type PreloadedAnalytics = {
 
 export type ActivityCardProps = {
   activity: ActivityDTO;
-  /**
-   * Это день в формате YYYY-MM-DD, для которого отображается карточка активности
-   * Нужен для корректного отображения времени активности, т.к. время отображаемое на карточке - это время активности в рамках дня,
-   * а не общее время активности
-   */
-  calendarDay?: CalendarDay;
   withControlButtons?: boolean;
-  /**
-   * Аналитика, предварительно загруженная родительским компонентом (например, батчевым запросом).
-   * Если передана, индивидуальный запрос аналитики для карточки не выполняется.
-   */
-  preloadedAnalytics?: PreloadedAnalytics;
   onStart?: () => void;
   onPause?: () => void;
   onFinish?: () => void;
@@ -35,9 +23,7 @@ export type ActivityCardProps = {
 
 export const ActivityCard = ({
   activity,
-  calendarDay,
   withControlButtons = true,
-  preloadedAnalytics,
   onStart,
   onPause,
   onFinish,
@@ -49,8 +35,10 @@ export const ActivityCard = ({
       activityId: activity.id,
       currentSessionId: activity.currentSessionId,
       activityStatus: activity.status,
-      calendarDay,
-      preloadedAnalytics,
+      preloadedAnalytics: {
+        currentActiveMs: activity.activeDurationMs,
+        fetchedAtMs: 0,
+      },
     });
 
   const handleCardClick = useCallback(() => {

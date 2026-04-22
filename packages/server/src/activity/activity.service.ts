@@ -3,8 +3,6 @@ import type {
   UpdateActivityDataDTO,
   GetActivitiesDTO,
   GetActivitiesByIdsDTO,
-  GetActivitiesGroupedByDayDTO,
-  GetActivitiesGroupedByDayResponseDTO,
   ActivityDTO,
   GetActivityDTO,
   GetActivitiesResponseDTO,
@@ -13,9 +11,11 @@ import type {
   ActivitySessionDTO,
   GetActivityAnalyticsDTO,
   GetActivityAnalyticsResponseDTO,
-  GetBatchActivityAnalyticsDTO,
-  GetBatchActivityAnalyticsResponseDTO,
   CreateActivityFromQuickTimerDataDTO,
+  GetGroupedActivitiesQueryDTO,
+  GetGroupedActivitiesResponseDTO,
+  GetActivitiesAnalyticsResponseDTO,
+  GetActivitiesAnalyticsQueryDTO,
 } from "@to-do-list/shared";
 
 import {
@@ -31,7 +31,6 @@ import {
 import { activitySessionQueries } from "./activitySession.queries.js";
 import { activitySessionSegmentQueries } from "./activitySessionSegment.queries.js";
 import type { ErrorResponse, SuccessResponse } from "../shared/types.js";
-
 
 type DayTotalsAgg = {
   activeDurationMs: number;
@@ -247,73 +246,6 @@ const getActivitiesByIds = async (
   }
 };
 
-type GetActivitiesGroupedByDayResult =
-  | SuccessResponse<GetActivitiesGroupedByDayResponseDTO>
-  | ErrorResponse;
-
-const getActivitiesGroupedByDay = async (
-  filters: GetActivitiesGroupedByDayDTO,
-): Promise<GetActivitiesGroupedByDayResult> => {
-  try {
-    const { createdById, startDate, toDate, page = 0, limit = 7 } = filters;
-
-    const fromDay = startDate
-      ? new Date(startDate).toISOString().slice(0, 10)
-      : undefined;
-    const toDay = toDate
-      ? new Date(toDate).toISOString().slice(0, 10)
-      : undefined;
-
-    const { days, activities, totalDayCount } =
-      await activityQueries.listActivitiesGroupedByDay({
-        createdById,
-        fromDay,
-        toDay,
-        page,
-        limit,
-      });
-
-    const totalPages =
-      totalDayCount === 0 ? 0 : Math.ceil(totalDayCount / limit);
-
-    const data: Record<string, ActivityDTO[]> = {};
-    for (const day of days) {
-      data[day] = [];
-    }
-
-    for (const row of activities) {
-      const { calendarDay, ...rest } = row as Record<string, unknown> & {
-        calendarDay: string;
-      };
-      if (data[calendarDay] !== undefined) {
-        data[calendarDay].push(mapActivityRowToDTO(rest));
-      }
-    }
-
-    return {
-      success: true,
-      data: {
-        data,
-        pagination: {
-          page,
-          limit,
-          totalCount: totalDayCount,
-          totalPages,
-          hasNext: totalPages > 0 && page < totalPages - 1,
-          hasPrev: page > 0,
-        },
-      },
-    };
-  } catch (error) {
-    console.error("Get activities grouped by day error:", error);
-
-    return {
-      success: false,
-      message: "Failed to fetch activities",
-    };
-  }
-};
-
 type GetActivitiesResponse =
   | SuccessResponse<GetActivitiesResponseDTO>
   | ErrorResponse;
@@ -468,26 +400,16 @@ const getActivityAnalytics = async (
       .sort((a, b) => a[0] - b[0])
       .map(([utcDayStart, totals]) => ({
         day: new Date(utcDayStart).toISOString(),
-        totals: {
-          activeDurationMs: floorMs(totals.activeDurationMs),
-          pauseDurationMs: floorMs(totals.pauseDurationMs),
-          totalDurationMs: floorMs(
-            totals.activeDurationMs + totals.pauseDurationMs,
-          ),
-        },
+        activeDurationMs: floorMs(totals.activeDurationMs),
+        pauseDurationMs: floorMs(totals.pauseDurationMs),
       }));
 
     return {
       success: true,
       data: {
         activityId: data.activityId,
-        fromDate: fromIso,
-        toDate: toIso,
-        totals: {
-          activeDurationMs: floorMs(activeDurationMs),
-          pauseDurationMs: floorMs(pauseDurationMs),
-          totalDurationMs: floorMs(activeDurationMs + pauseDurationMs),
-        },
+        activeDurationMs: floorMs(activeDurationMs),
+        pauseDurationMs: floorMs(pauseDurationMs),
         days,
       },
     };
@@ -501,13 +423,13 @@ const getActivityAnalytics = async (
   }
 };
 
-type GetBatchActivityAnalyticsResult =
-  | SuccessResponse<GetBatchActivityAnalyticsResponseDTO>
+type GetActivitiesAnalyticsResult =
+  | SuccessResponse<GetActivitiesAnalyticsResponseDTO>
   | ErrorResponse;
 
-const getBatchActivityAnalytics = async (
-  data: GetBatchActivityAnalyticsDTO,
-): Promise<GetBatchActivityAnalyticsResult> => {
+const getActivitiesAnalytics = async (
+  data: GetActivitiesAnalyticsQueryDTO,
+): Promise<GetActivitiesAnalyticsResult> => {
   try {
     const { activityIds, fromDate, toDate } = data;
 
@@ -539,18 +461,31 @@ const getBatchActivityAnalytics = async (
 
     const perActivity = new Map<
       string,
-      { activeDurationMs: number; pauseDurationMs: number; dayBuckets: Map<number, DayTotalsAgg> }
+      {
+        activeDurationMs: number;
+        pauseDurationMs: number;
+        dayBuckets: Map<number, DayTotalsAgg>;
+      }
     >();
 
     for (const id of activityIds) {
-      perActivity.set(id, { activeDurationMs: 0, pauseDurationMs: 0, dayBuckets: new Map() });
+      perActivity.set(id, {
+        activeDurationMs: 0,
+        pauseDurationMs: 0,
+        dayBuckets: new Map(),
+      });
     }
 
     for (const seg of segments) {
       const agg = perActivity.get(seg.activityId);
       if (!agg) continue;
 
-      const clip = clipSegmentToWindow(seg.startedAt, seg.endedAt, fromMs, toMs);
+      const clip = clipSegmentToWindow(
+        seg.startedAt,
+        seg.endedAt,
+        fromMs,
+        toMs,
+      );
       if (!clip) continue;
 
       const ms = clip.end - clip.start;
@@ -562,29 +497,21 @@ const getBatchActivityAnalytics = async (
       addMsToUtcDayBuckets(clip.start, clip.end, seg.type, agg.dayBuckets);
     }
 
-    const items: GetBatchActivityAnalyticsResponseDTO["items"] = {};
+    const items: GetActivitiesAnalyticsResponseDTO["items"] = {};
 
     for (const [activityId, agg] of perActivity) {
       const days = Array.from(agg.dayBuckets.entries())
         .sort((a, b) => a[0] - b[0])
         .map(([utcDayStart, totals]) => ({
           day: new Date(utcDayStart).toISOString(),
-          totals: {
-            activeDurationMs: floorMs(totals.activeDurationMs),
-            pauseDurationMs: floorMs(totals.pauseDurationMs),
-            totalDurationMs: floorMs(totals.activeDurationMs + totals.pauseDurationMs),
-          },
+          activeDurationMs: floorMs(totals.activeDurationMs),
+          pauseDurationMs: floorMs(totals.pauseDurationMs),
         }));
 
       items[activityId] = {
         activityId,
-        fromDate: fromIso,
-        toDate: toIso,
-        totals: {
-          activeDurationMs: floorMs(agg.activeDurationMs),
-          pauseDurationMs: floorMs(agg.pauseDurationMs),
-          totalDurationMs: floorMs(agg.activeDurationMs + agg.pauseDurationMs),
-        },
+        activeDurationMs: floorMs(agg.activeDurationMs),
+        pauseDurationMs: floorMs(agg.pauseDurationMs),
         days,
       };
     }
@@ -592,7 +519,237 @@ const getBatchActivityAnalytics = async (
     return { success: true, data: { items } };
   } catch (error) {
     console.error("Get batch activity analytics error:", error);
-    return { success: false, message: "Failed to load batch activity analytics" };
+    return {
+      success: false,
+      message: "Failed to load batch activity analytics",
+    };
+  }
+};
+
+type CursorPayload = {
+  groupBy: "day";
+  groupStart: string;
+  groupEnd: string;
+  offsetInGroup: number;
+  [key: string]: unknown;
+};
+
+function encodeCursor(payload: CursorPayload): string {
+  return Buffer.from(JSON.stringify(payload)).toString("base64");
+}
+
+function decodeCursor(cursor: string): CursorPayload | null {
+  try {
+    return JSON.parse(
+      Buffer.from(cursor, "base64").toString("utf8"),
+    ) as CursorPayload;
+  } catch {
+    return null;
+  }
+}
+
+type GetGroupedActivitiesResult =
+  | SuccessResponse<GetGroupedActivitiesResponseDTO>
+  | ErrorResponse;
+
+const getGroupedActivities = async (
+  params: GetGroupedActivitiesQueryDTO,
+): Promise<GetGroupedActivitiesResult> => {
+  try {
+    const { createdById, cursor, limit, fromDate, toDate } = params;
+
+    const fromDay = fromDate
+      ? new Date(fromDate).toISOString().slice(0, 10)
+      : undefined;
+
+    const toDay = toDate
+      ? new Date(toDate).toISOString().slice(0, 10)
+      : undefined;
+
+    let beforeDay: string | undefined;
+
+    if (cursor) {
+      const payload = decodeCursor(cursor);
+
+      if (payload?.groupStart) {
+        beforeDay = new Date(payload.groupStart).toISOString().slice(0, 10);
+      }
+    }
+
+    // Fetch limit + 1 days to detect whether a next page exists.
+    const { days: rawDays, activities: rawActivities } =
+      await activityQueries.listActivitiesGroupedCursor({
+        createdById,
+        beforeDay,
+        fromDay,
+        toDay,
+        limit: limit + 1,
+      });
+
+    const hasNext = rawDays.length > limit;
+    const days = hasNext ? rawDays.slice(0, limit) : rawDays;
+
+    if (days.length === 0) {
+      return {
+        success: true,
+        data: {
+          groups: [],
+          pagination: { nextCursor: null, hasNext: false },
+        },
+      };
+    }
+
+    // Filter activities to only those belonging to the returned days.
+    const daySet = new Set(days);
+    const activities = rawActivities.filter((r) =>
+      daySet.has(String(r["calendarDay"])),
+    );
+
+    // Group activities by day.
+    const activityMap = new Map<string, ActivityDTO[]>();
+    for (const day of days) {
+      activityMap.set(day, []);
+    }
+    for (const row of activities) {
+      const day = String(row["calendarDay"]);
+      const { calendarDay: _cd, ...rest } = row as Record<string, unknown> & {
+        calendarDay: string;
+      };
+      activityMap.get(day)?.push(mapActivityRowToDTO(rest));
+    }
+
+    // Compute segment durations for each day window.
+    const allActivityIds = activities.map((r) => String(r["id"]));
+
+    const oldestDay = days[days.length - 1]!;
+    const newestDay = days[0]!;
+    const rangeFrom = `${oldestDay}T00:00:00.000Z`;
+    const rangeTo = `${newestDay}T23:59:59.999Z`;
+
+    const segments =
+      allActivityIds.length > 0
+        ? await activitySessionSegmentQueries.listSegmentIntervalsForMultipleActivitiesInRange(
+            allActivityIds,
+            rangeFrom,
+            rangeTo,
+          )
+        : [];
+
+    // Map each segment's activityId to its calendarDay so we can bucket durations.
+    const activityDayMap = new Map<string, string>();
+    for (const row of activities) {
+      activityDayMap.set(String(row["id"]), String(row["calendarDay"]));
+    }
+
+    const floorMs = (n: number) => Math.floor(Math.max(0, n));
+
+    type DurAgg = { activeDurationMs: number; pauseDurationMs: number };
+
+    // Per-day group totals.
+    const dayDurations = new Map<string, DurAgg>();
+    for (const day of days) {
+      dayDurations.set(day, { activeDurationMs: 0, pauseDurationMs: 0 });
+    }
+
+    // Per-activity durations clipped to the day they belong to.
+    const activityDayDurations = new Map<string, DurAgg>();
+    for (const row of activities) {
+      activityDayDurations.set(String(row["id"]), {
+        activeDurationMs: 0,
+        pauseDurationMs: 0,
+      });
+    }
+
+    for (const seg of segments) {
+      const day = activityDayMap.get(seg.activityId);
+      if (!day) continue;
+
+      const dayAgg = dayDurations.get(day);
+      if (!dayAgg) continue;
+
+      const windowFromMs = Date.parse(`${day}T00:00:00.000Z`);
+      const windowToMs = windowFromMs + 86400000;
+
+      const clip = clipSegmentToWindow(
+        seg.startedAt,
+        seg.endedAt,
+        windowFromMs,
+        windowToMs,
+      );
+      if (!clip) continue;
+
+      const ms = clip.end - clip.start;
+
+      if (seg.type === "active") {
+        dayAgg.activeDurationMs += ms;
+      } else {
+        dayAgg.pauseDurationMs += ms;
+      }
+
+      const actAgg = activityDayDurations.get(seg.activityId);
+      if (actAgg) {
+        if (seg.type === "active") {
+          actAgg.activeDurationMs += ms;
+        } else {
+          actAgg.pauseDurationMs += ms;
+        }
+      }
+    }
+
+    const groups: GetGroupedActivitiesResponseDTO["groups"] = days.map(
+      (day) => {
+        const dayFromMs = Date.parse(`${day}T00:00:00.000Z`);
+        const dayToMs = dayFromMs + 86400000;
+        const durations = dayDurations.get(day) ?? {
+          activeDurationMs: 0,
+          pauseDurationMs: 0,
+        };
+
+        const items = (activityMap.get(day) ?? []).map((activity) => {
+          const dur = activityDayDurations.get(activity.id);
+          if (!dur) return activity;
+          return {
+            ...activity,
+            activeDurationMs: floorMs(dur.activeDurationMs),
+            pauseDurationMs: floorMs(dur.pauseDurationMs),
+          };
+        });
+
+        return {
+          groupDateStart: new Date(dayFromMs).toISOString(),
+          groupDateEnd: new Date(dayToMs).toISOString(),
+          items,
+          hasMoreItems: false,
+          totalActiveDurationMs: floorMs(durations.activeDurationMs),
+          totalPauseDurationMs: floorMs(durations.pauseDurationMs),
+        };
+      },
+    );
+
+    let nextCursor: string | null = null;
+    if (hasNext) {
+      const oldestReturnedDay = days[days.length - 1]!;
+      nextCursor = encodeCursor({
+        groupBy: "day",
+        groupStart: `${oldestReturnedDay}T00:00:00.000Z`,
+        groupEnd: `${oldestReturnedDay}T00:00:00.000Z`,
+        offsetInGroup: 0,
+      });
+    }
+
+    return {
+      success: true,
+      data: {
+        groups,
+        pagination: { nextCursor, hasNext },
+      },
+    };
+  } catch (error) {
+    console.error("Get grouped activities error:", error);
+    return {
+      success: false,
+      message: "Failed to fetch grouped activities",
+    };
   }
 };
 
@@ -603,12 +760,12 @@ export const activitiesService = {
   deleteActivity,
   getActivityById,
   getActivitiesByIds,
-  getActivitiesGroupedByDay,
   getActivities,
   startActivity,
   pauseActivity,
   finishActivity,
   getSessionsByActivityId,
   getActivityAnalytics,
-  getBatchActivityAnalytics,
+  getActivitiesAnalytics,
+  getGroupedActivities,
 };

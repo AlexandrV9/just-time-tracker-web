@@ -3,7 +3,6 @@ import { Box, Flex, Text } from "~/shared/ui";
 import {
   convertSecondsToTimeObject,
   convertTimeObjectToTimeString,
-  type CalendarDay,
 } from "~/shared/libs";
 import { ActivityListView } from "~/entities/Activity";
 import { ActivityCard } from "~/features";
@@ -15,23 +14,21 @@ export type ActivityGroupDTO = {
   activities: ActivityDTO[];
 };
 
-type ActivityGroupListItemProps = {
+type ActivityGroupProps = {
   data: ActivityGroupDTO;
-  calendarDay?: CalendarDay;
   withControlButtons?: boolean;
   onStart?: (activityId: ActivityDTO["id"]) => void;
   onPause?: (activityId: ActivityDTO["id"]) => void;
   onFinish?: (activityId: ActivityDTO["id"]) => void;
 };
 
-export function ActivityGroupListItem({
+export function ActivityGroup({
   data,
-  calendarDay,
   onStart,
   onPause,
   onFinish,
   withControlButtons = false,
-}: ActivityGroupListItemProps) {
+}: ActivityGroupProps) {
   const displayedActiveTotalTime = convertTimeObjectToTimeString(
     convertSecondsToTimeObject(data.totalActiveTime),
   );
@@ -56,21 +53,22 @@ export function ActivityGroupListItem({
         </Flex>
       </Flex>
       <ActivityListView>
-        {data.activities.map((activity) => (
-          <ActivityListView.Item key={activity.id}>
-            <ActivityCard
-              activity={activity}
-              calendarDay={calendarDay}
-              withControlButtons={withControlButtons}
-              onStart={() => onStart?.(activity.id)}
-              onPause={() => onPause?.(activity.id)}
-              onFinish={() => onFinish?.(activity.id)}
-            />
-          </ActivityListView.Item>
-        ))}
+        {data.activities.map((activity) => {
+          return (
+            <ActivityListView.Item key={activity.id}>
+              <ActivityCard
+                activity={activity}
+                withControlButtons={withControlButtons}
+                onStart={() => onStart?.(activity.id)}
+                onPause={() => onPause?.(activity.id)}
+                onFinish={() => onFinish?.(activity.id)}
+              />
+            </ActivityListView.Item>
+          );
+        })}
       </ActivityListView>
     </Box>
   );
 }
 
-ActivityGroupListItem.Skeleton = Skeleton;
+ActivityGroup.Skeleton = Skeleton;

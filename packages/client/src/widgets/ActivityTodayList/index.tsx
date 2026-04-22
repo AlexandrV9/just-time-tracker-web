@@ -1,4 +1,4 @@
-import { ActivityGroupListItem } from "../ActivityGroupList/ActivityGroupListItem";
+import { ActivityGroup } from "../ActivityGroup";
 
 import { useDialog } from "@ark-ui/react";
 import {
@@ -33,7 +33,7 @@ export const ActivityTodayList = () => {
 
   const renderContent = () => {
     if (isLoading) {
-      return <ActivityGroupListItem.Skeleton />;
+      return <ActivityGroup.Skeleton />;
     }
 
     if (isError) {
@@ -72,7 +72,7 @@ export const ActivityTodayList = () => {
     }
 
     return (
-      <ActivityGroupListItem
+      <ActivityGroup
         withControlButtons
         data={activityGroup}
         onStart={startActivity}

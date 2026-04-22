@@ -8,12 +8,12 @@ import {
   createActivitySchema,
   updateActivitySchema,
   getActivitiesSchema,
-  getActivitiesGroupedByDayQuerySchema,
   getActivitiesByIdsSchema,
   getActivitySessionsSchema,
   getActivityAnalyticsQuerySchema,
-  getBatchActivityAnalyticsQuerySchema,
+  getActivitiesAnalyticsQuerySchema,
   createActivityFromQuickTimerSchema,
+  getGroupedActivitiesQuerySchema,
 } from "@to-do-list/shared";
 
 type ValidatorType = "json" | "param" | "query";
@@ -74,12 +74,6 @@ export const activityHandlers = {
     activitiesService.getActivitiesByIds,
   ),
 
-  getActivitiesGroupedByDay: createHandler(
-    "query",
-    getActivitiesGroupedByDayQuerySchema,
-    activitiesService.getActivitiesGroupedByDay,
-  ),
-
   createActivity: createHandler(
     "json",
     createActivitySchema,
@@ -122,6 +116,12 @@ export const activityHandlers = {
     "param",
     baseIdSchema,
     activitiesService.finishActivity,
+  ),
+
+  getGroupedActivities: createHandler(
+    "query",
+    getGroupedActivitiesQuerySchema,
+    activitiesService.getGroupedActivities,
   ),
 
   getSessionsByActivityId: async (c: Context) => {
@@ -167,7 +167,7 @@ export const activityHandlers = {
     }
   },
 
-  getBatchActivityAnalytics: async (c: Context) => {
+  getActivitiesAnalytics: async (c: Context) => {
     // Axios serializes arrays as `activityIds[]=id1&activityIds[]=id2` (bracket format).
     // Hono's c.req.queries() looks for the exact key, so we try both forms.
     const rawIds = [
@@ -177,7 +177,7 @@ export const activityHandlers = {
     const fromDate = c.req.query("fromDate") ?? undefined;
     const toDate = c.req.query("toDate") ?? undefined;
 
-    const parsed = getBatchActivityAnalyticsQuerySchema.safeParse({
+    const parsed = getActivitiesAnalyticsQuerySchema.safeParse({
       activityIds: rawIds,
       fromDate,
       toDate,
@@ -195,7 +195,7 @@ export const activityHandlers = {
     }
 
     try {
-      const responseData = await activitiesService.getBatchActivityAnalytics(
+      const responseData = await activitiesService.getActivitiesAnalytics(
         parsed.data,
       );
       return c.json(responseData);

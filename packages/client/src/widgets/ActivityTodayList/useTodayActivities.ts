@@ -79,7 +79,7 @@ export const useTodayActivities = (): {
       todayActivityIds,
     ],
     queryFn: async () => {
-      const response = await activityApiService.getBatchActivityAnalytics({
+      const response = await activityApiService.getActivitiesAnalytics({
         activityIds: todayActivityIds,
         fromDate,
         toDate,
@@ -89,10 +89,8 @@ export const useTodayActivities = (): {
         return undefined;
       }
 
-      console.log("response.data.items", response.data.items);
-
       return Object.values(response.data.items).reduce((acc, item) => {
-        acc += Math.floor(item.totals.activeDurationMs / 1000);
+        acc += Math.floor(item.activeDurationMs / 1000);
         return acc;
       }, 0);
     },

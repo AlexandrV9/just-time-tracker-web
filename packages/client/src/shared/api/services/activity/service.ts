@@ -10,8 +10,6 @@ import type {
   GetActivityDTO,
   GetActivitiesDTO,
   GetActivitiesByIdsDTO,
-  GetActivitiesGroupedByDayDTO,
-  GetActivitiesGroupedByDayResponseDTO,
   GetActivitiesResponseDTO,
   PauseActivityDTO,
   FinishActivityDTO,
@@ -20,9 +18,11 @@ import type {
   GetActivitySessionSegmentDTO,
   GetActivityAnalyticsDTO,
   GetActivityAnalyticsResponseDTO,
-  GetBatchActivityAnalyticsDTO,
-  GetBatchActivityAnalyticsResponseDTO,
   CreateActivityFromQuickTimerDataDTO,
+  GetGroupedActivitiesQueryDTO,
+  GetGroupedActivitiesResponseDTO,
+  GetActivitiesAnalyticsResponseDTO,
+  GetActivitiesAnalyticsQueryDTO,
 } from "@to-do-list/shared";
 import { baseApi } from "../base";
 import type { RequestResponse } from "../types";
@@ -52,15 +52,6 @@ export class ActivityService {
     data: GetActivitiesByIdsDTO,
   ): Promise<RequestResponse<ActivityDTO[], unknown>> {
     return baseApi.post<ActivityDTO[]>(`/api/activities/by-ids`, { data });
-  }
-
-  getActivitiesGroupedByDay(
-    params: GetActivitiesGroupedByDayDTO,
-  ): Promise<RequestResponse<GetActivitiesGroupedByDayResponseDTO, unknown>> {
-    return baseApi.get<GetActivitiesGroupedByDayResponseDTO>(
-      `/api/activities/grouped-by-day`,
-      { params },
-    );
   }
 
   updateActivity(data: UpdateActivityDataDTO) {
@@ -122,10 +113,10 @@ export class ActivityService {
     );
   }
 
-  getBatchActivityAnalytics(
-    data: GetBatchActivityAnalyticsDTO,
-  ): Promise<RequestResponse<GetBatchActivityAnalyticsResponseDTO, unknown>> {
-    return baseApi.get<GetBatchActivityAnalyticsResponseDTO>(
+  getActivitiesAnalytics(
+    data: GetActivitiesAnalyticsQueryDTO,
+  ): Promise<RequestResponse<GetActivitiesAnalyticsResponseDTO, unknown>> {
+    return baseApi.get<GetActivitiesAnalyticsResponseDTO>(
       `/api/activities/analytics`,
       {
         params: {
@@ -140,6 +131,13 @@ export class ActivityService {
   getSessionSegment(data: GetActivitySessionSegmentDTO) {
     return baseApi.get<ActivitySessionSegmentDTO>(
       `/api/session-segments/${data.segmentId}`,
+    );
+  }
+
+  getGroupedActivities(data?: GetGroupedActivitiesQueryDTO) {
+    return baseApi.get<GetGroupedActivitiesResponseDTO>(
+      `/api/activities/grouped`,
+      { params: data },
     );
   }
 }
