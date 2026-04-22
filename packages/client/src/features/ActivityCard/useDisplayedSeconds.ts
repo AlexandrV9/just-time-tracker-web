@@ -2,28 +2,33 @@ import { useMemo, useRef } from "react";
 import { useLiveTimestamp } from "./useLiveTimestamp";
 
 type UseDisplayedSecondsProps = {
-  currentActiveMs: number;
-  analyticsFetchedAtMs: number;
+  activeDurationMs: number;
   hasActiveSession: boolean;
 };
 
 export function useDisplayedSeconds({
-  currentActiveMs,
-  analyticsFetchedAtMs,
+  activeDurationMs,
   hasActiveSession,
 }: UseDisplayedSecondsProps) {
   const nowMs = useLiveTimestamp(hasActiveSession);
 
+  const fetchedAtRef = useRef(Date.now());
+  const prevMsRef = useRef(activeDurationMs);
+  if (prevMsRef.current !== activeDurationMs) {
+    prevMsRef.current = activeDurationMs;
+    fetchedAtRef.current = Date.now();
+  }
+
   /**
    * Последнее отображённое значение во время активной фазы.
-   * Используется как нижняя граница при паузе, пока analytics не рефетчнулись,
+   * Используется как нижняя граница при паузе, пока данные не обновились,
    * и как fallback в первый тик после старта (nowMs ещё null).
    */
   const lastActiveSecondsRef = useRef(0);
 
   return useMemo(() => {
     if (!hasActiveSession) {
-      const serverSeconds = Math.floor(currentActiveMs / 1000);
+      const serverSeconds = Math.floor(activeDurationMs / 1000);
       return Math.max(serverSeconds, lastActiveSecondsRef.current);
     }
 
@@ -31,13 +36,11 @@ export function useDisplayedSeconds({
       return lastActiveSecondsRef.current;
     }
 
-    const driftMs =
-      analyticsFetchedAtMs > 0 ? Math.max(0, nowMs - analyticsFetchedAtMs) : 0;
-
-    const seconds = Math.max(0, Math.floor((currentActiveMs + driftMs) / 1000));
+    const driftMs = Math.max(0, nowMs - fetchedAtRef.current);
+    const seconds = Math.max(0, Math.floor((activeDurationMs + driftMs) / 1000));
 
     lastActiveSecondsRef.current = seconds;
 
     return seconds;
-  }, [currentActiveMs, analyticsFetchedAtMs, hasActiveSession, nowMs]);
+  }, [activeDurationMs, hasActiveSession, nowMs]);
 }

@@ -58,6 +58,7 @@ export function ActivityGroup({
             <ActivityListView.Item key={activity.id}>
               <ActivityCard
                 activity={activity}
+                activeDurationMs={activity.activeDurationMs}
                 withControlButtons={withControlButtons}
                 onStart={() => onStart?.(activity.id)}
                 onPause={() => onPause?.(activity.id)}

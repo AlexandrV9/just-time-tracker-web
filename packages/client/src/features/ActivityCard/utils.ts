@@ -7,41 +7,6 @@ import {
   convertTimeObjectToTimeString,
 } from "~/shared/libs";
 
-export type ResolveDisplayedSecondsProps = {
-  /**
-   * Суммарное активное время активности за день в ms
-   */
-  currentActiveMs: number;
-  /**
-   * Когда эти данные были получены
-   */
-  analyticsFetchedAtMs: number;
-  /**
-   * Есть ли сейчас активная сессия.
-   */
-  hasActiveSession: boolean;
-  /**
-   * Текущее время
-   */
-  nowMs: number;
-};
-
-export function resolveDisplayedSeconds({
-  currentActiveMs,
-  analyticsFetchedAtMs,
-  hasActiveSession,
-  nowMs,
-}: ResolveDisplayedSecondsProps) {
-  const driftMs =
-    hasActiveSession && analyticsFetchedAtMs > 0
-      ? Math.max(0, nowMs - analyticsFetchedAtMs)
-      : 0;
-
-  const totalMs = currentActiveMs + driftMs;
-
-  return Math.max(0, Math.floor(totalMs / 1000));
-}
-
 export function formatDurationLabel(totalSeconds: number): string {
   return convertTimeObjectToTimeString(
     convertSecondsToTimeObject(totalSeconds),

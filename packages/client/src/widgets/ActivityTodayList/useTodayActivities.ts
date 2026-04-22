@@ -89,12 +89,23 @@ export const useTodayActivities = (): {
         return undefined;
       }
 
-      return Object.values(response.data.items).reduce((acc, item) => {
-        acc += Math.floor(item.activeDurationMs / 1000);
-        return acc;
-      }, 0);
+      const itemsMap: Record<string, number> = {};
+      let totalSeconds = 0;
+      for (const [id, item] of Object.entries(response.data.items)) {
+        itemsMap[id] = item.activeDurationMs;
+        totalSeconds += Math.floor(item.activeDurationMs / 1000);
+      }
+
+      return { totalSeconds, itemsMap };
     },
     enabled: todayActivityIds.length > 0,
+  });
+
+  const analyticsItemsMap = todayAnalyticsQuery.data?.itemsMap ?? {};
+  const activitiesToday = todayActivities.map((activity) => {
+    const todayMs = analyticsItemsMap[activity.id];
+    if (todayMs === undefined) return activity;
+    return { ...activity, activeDurationMs: todayMs };
   });
 
   return {
@@ -105,8 +116,8 @@ export const useTodayActivities = (): {
         groupBy: "day",
         locale: i18n.language,
       }),
-      totalActiveTime: todayAnalyticsQuery.data ?? 0,
-      activities: todayActivities,
+      totalActiveTime: todayAnalyticsQuery.data?.totalSeconds ?? 0,
+      activities: activitiesToday,
     } satisfies ActivityGroup,
     isLoading:
       todayPlanActivitiesQuery.isLoading ||

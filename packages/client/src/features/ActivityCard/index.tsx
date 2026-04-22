@@ -1,20 +1,17 @@
 import type { ActivityDTO } from "@to-do-list/shared";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Flex, Text } from "~/shared/ui";
 
 import { ActivityCardControls } from "./ActivityCardControls";
-import { useActivityCardData } from "./useActivityCardData";
+import { useDisplayedSeconds } from "./useDisplayedSeconds";
+import { formatDurationLabel, resolveHasActiveSession } from "./utils";
 import { ActivityCardView } from "~/entities/Activity";
 import { Skeleton } from "./Skeleton";
 
-export type PreloadedAnalytics = {
-  currentActiveMs: number;
-  fetchedAtMs: number;
-};
-
 export type ActivityCardProps = {
   activity: ActivityDTO;
+  activeDurationMs: number;
   withControlButtons?: boolean;
   onStart?: () => void;
   onPause?: () => void;
@@ -23,6 +20,7 @@ export type ActivityCardProps = {
 
 export const ActivityCard = ({
   activity,
+  activeDurationMs,
   withControlButtons = true,
   onStart,
   onPause,
@@ -30,16 +28,23 @@ export const ActivityCard = ({
 }: ActivityCardProps) => {
   const navigate = useNavigate();
 
-  const { displayedTime, sessionStatus, hasActiveSession } =
-    useActivityCardData({
-      activityId: activity.id,
-      currentSessionId: activity.currentSessionId,
-      activityStatus: activity.status,
-      preloadedAnalytics: {
-        currentActiveMs: activity.activeDurationMs,
-        fetchedAtMs: 0,
-      },
-    });
+  const hasActiveSession = resolveHasActiveSession({
+    activityStatus: activity.status,
+  });
+
+  const sessionStatus =
+    activity.status === "active"
+      ? "active"
+      : activity.status === "paused"
+        ? "paused"
+        : undefined;
+
+  const displayedSeconds = useDisplayedSeconds({ activeDurationMs, hasActiveSession });
+
+  const displayedTime = useMemo(
+    () => formatDurationLabel(displayedSeconds),
+    [displayedSeconds],
+  );
 
   const handleCardClick = useCallback(() => {
     navigate({
