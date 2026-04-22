@@ -261,6 +261,8 @@ export const getGroupedActivitiesQuerySchema = z.object({
   limit: z.coerce.number().int().positive(),
   fromDate: z.iso.datetime().optional(),
   toDate: z.iso.datetime().optional(),
+  /** UTC offset in minutes (e.g. 180 for UTC+3). Used to group activities by local calendar day. */
+  utcOffsetMinutes: z.coerce.number().int().min(-840).max(840).default(0),
 });
 
 export type GetGroupedActivitiesQueryDTO = z.infer<

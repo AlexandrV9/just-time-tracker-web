@@ -556,7 +556,8 @@ const getGroupedActivities = async (
   params: GetGroupedActivitiesQueryDTO,
 ): Promise<GetGroupedActivitiesResult> => {
   try {
-    const { createdById, cursor, limit, fromDate, toDate } = params;
+    const { createdById, cursor, limit, fromDate, toDate, utcOffsetMinutes } =
+      params;
 
     const fromDay = fromDate
       ? new Date(fromDate).toISOString().slice(0, 10)
@@ -584,6 +585,7 @@ const getGroupedActivities = async (
         fromDay,
         toDay,
         limit: limit + 1,
+        utcOffsetMinutes,
       });
 
     const hasNext = rawDays.length > limit;
@@ -623,8 +625,14 @@ const getGroupedActivities = async (
 
     const oldestDay = days[days.length - 1]!;
     const newestDay = days[0]!;
-    const rangeFrom = `${oldestDay}T00:00:00.000Z`;
-    const rangeTo = `${newestDay}T23:59:59.999Z`;
+    // Shift day boundaries to UTC using the user's offset.
+    const offsetMs = utcOffsetMinutes * 60000;
+    const rangeFrom = new Date(
+      Date.parse(`${oldestDay}T00:00:00.000Z`) - offsetMs,
+    ).toISOString();
+    const rangeTo = new Date(
+      Date.parse(`${newestDay}T00:00:00.000Z`) - offsetMs + 86400000 - 1,
+    ).toISOString();
 
     const segments =
       allActivityIds.length > 0
@@ -667,7 +675,9 @@ const getGroupedActivities = async (
       const dayAgg = dayDurations.get(day);
       if (!dayAgg) continue;
 
-      const windowFromMs = Date.parse(`${day}T00:00:00.000Z`);
+      // day is a local calendar date; shift to UTC to get the actual window.
+      const windowFromMs =
+        Date.parse(`${day}T00:00:00.000Z`) - utcOffsetMinutes * 60000;
       const windowToMs = windowFromMs + 86400000;
 
       const clip = clipSegmentToWindow(
@@ -715,9 +725,12 @@ const getGroupedActivities = async (
           };
         });
 
+        // groupDateStart/End represent the local day boundaries in UTC.
+        const localMidnightUtcMs = dayFromMs - utcOffsetMinutes * 60000;
+
         return {
-          groupDateStart: new Date(dayFromMs).toISOString(),
-          groupDateEnd: new Date(dayToMs).toISOString(),
+          groupDateStart: new Date(localMidnightUtcMs).toISOString(),
+          groupDateEnd: new Date(localMidnightUtcMs + 86400000).toISOString(),
           items,
           hasMoreItems: false,
           totalActiveDurationMs: floorMs(durations.activeDurationMs),

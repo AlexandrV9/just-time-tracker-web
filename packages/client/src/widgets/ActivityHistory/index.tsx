@@ -29,6 +29,7 @@ export const ActivityHistory = () => {
           limit: 8,
           cursor: pageParam ?? undefined,
           createdById: userId!,
+          utcOffsetMinutes: -new Date().getTimezoneOffset(),
         }),
       initialPageParam: null as string | null,
       getNextPageParam: (lastPage) => {
@@ -41,6 +42,7 @@ export const ActivityHistory = () => {
     const groupList =
       data?.pages.flatMap((page) => (page.success ? page.data.groups : [])) ??
       [];
+
 
     const merged = new Map<
       string,

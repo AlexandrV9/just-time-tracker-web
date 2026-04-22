@@ -335,10 +335,11 @@ const deleteActivity = async (id: ActivityDTO["id"]): Promise<boolean> => {
 };
 
 /**
- * Fetches (limit + 1) distinct UTC calendar days and all activities belonging to them.
+ * Fetches (limit + 1) distinct local calendar days and all activities belonging to them.
  * Ordered newest-first so the caller can detect hasNext by checking if limit+1 days came back.
  *
  * `beforeDay` is exclusive (YYYY-MM-DD) — used to continue from a cursor.
+ * `utcOffsetMinutes` shifts UTC timestamps to the user's local timezone before extracting the date.
  */
 const listActivitiesGroupedCursor = async (params: {
   createdById: string;
@@ -346,36 +347,35 @@ const listActivitiesGroupedCursor = async (params: {
   fromDay?: string;
   toDay?: string;
   limit: number;
+  utcOffsetMinutes: number;
 }): Promise<{ days: string[]; activities: Array<Record<string, unknown>> }> => {
-  const { createdById, beforeDay, fromDay, toDay, limit } = params;
+  const { createdById, beforeDay, fromDay, toDay, limit, utcOffsetMinutes } =
+    params;
+
+  // Shift updated_at to local time before extracting the calendar date.
+  const localDate = `(updated_at + ($2::int * INTERVAL '1 minute'))::date`;
 
   const conditions: string[] = ["created_by_id = $1"];
-  const baseParams: unknown[] = [createdById];
+  const baseParams: unknown[] = [createdById, utcOffsetMinutes];
 
   if (beforeDay) {
     baseParams.push(beforeDay);
-    conditions.push(
-      `(updated_at AT TIME ZONE 'UTC')::date < $${baseParams.length}::date`,
-    );
+    conditions.push(`${localDate} < $${baseParams.length}::date`);
   }
   if (fromDay) {
     baseParams.push(fromDay);
-    conditions.push(
-      `(updated_at AT TIME ZONE 'UTC')::date >= $${baseParams.length}::date`,
-    );
+    conditions.push(`${localDate} >= $${baseParams.length}::date`);
   }
   if (toDay) {
     baseParams.push(toDay);
-    conditions.push(
-      `(updated_at AT TIME ZONE 'UTC')::date <= $${baseParams.length}::date`,
-    );
+    conditions.push(`${localDate} <= $${baseParams.length}::date`);
   }
 
   const where = `WHERE ${conditions.join(" AND ")}`;
 
   const daysQuery = `
     SELECT DISTINCT
-      to_char((updated_at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD') AS calendar_day
+      to_char(${localDate}, 'YYYY-MM-DD') AS calendar_day
     FROM activities
     ${where}
     ORDER BY calendar_day DESC
@@ -394,15 +394,16 @@ const listActivitiesGroupedCursor = async (params: {
   const activitiesQuery = `
     SELECT
       ${ACTIVITY_RETURNING_COLUMNS},
-      to_char((updated_at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD') AS "calendarDay"
+      to_char(${localDate}, 'YYYY-MM-DD') AS "calendarDay"
     FROM activities
     WHERE created_by_id = $1
-      AND to_char((updated_at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD') = ANY($2::text[])
+      AND to_char(${localDate}, 'YYYY-MM-DD') = ANY($3::text[])
     ORDER BY updated_at DESC
   `;
 
   const activitiesResult = await pool.query(activitiesQuery, [
     createdById,
+    utcOffsetMinutes,
     days,
   ]);
 
