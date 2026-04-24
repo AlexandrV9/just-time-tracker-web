@@ -233,17 +233,19 @@ export type GetActivitiesAnalyticsResponseDTO = z.infer<
   typeof getActivitiesAnalyticsResponseSchema
 >;
 
+export const activityGroupSchema = z.object({
+  groupDateStart: z.iso.datetime(), // inclusive
+  groupDateEnd: z.iso.datetime(), // exclusive
+  items: z.array(activitySchema),
+  hasMoreItems: z.boolean(),
+  totalActiveDurationMs: z.number().int().nonnegative(),
+  totalPauseDurationMs: z.number().int().nonnegative(),
+});
+
+export type ActivityGroupDTO = z.infer<typeof activityGroupSchema>;
+
 export const getGroupedActivitiesResponseSchema = z.object({
-  groups: z.array(
-    z.object({
-      groupDateStart: z.iso.datetime(), // inclusive
-      groupDateEnd: z.iso.datetime(), // exclusive
-      items: z.array(activitySchema),
-      hasMoreItems: z.boolean(),
-      totalActiveDurationMs: z.number().int().nonnegative(),
-      totalPauseDurationMs: z.number().int().nonnegative(),
-    }),
-  ),
+  groups: z.array(activityGroupSchema),
   pagination: z.object({
     nextCursor: z.string().nullable(),
     hasNext: z.boolean(),

@@ -37,7 +37,10 @@ export function useDisplayedSeconds({
     }
 
     const driftMs = Math.max(0, nowMs - fetchedAtRef.current);
-    const seconds = Math.max(0, Math.floor((activeDurationMs + driftMs) / 1000));
+    const seconds = Math.max(
+      0,
+      Math.floor((activeDurationMs + driftMs) / 1000),
+    );
 
     lastActiveSecondsRef.current = seconds;
 

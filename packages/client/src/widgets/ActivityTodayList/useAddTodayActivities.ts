@@ -29,7 +29,7 @@ export const useAddTodayActivities = ({
       if (!currentPlanId) {
         const todayPlan = await dayPlanApiService.createDayPlan({
           createdById: userId!,
-           date: todayCalendarDay,
+          date: todayCalendarDay,
         });
 
         if (!todayPlan.success) {
@@ -45,7 +45,8 @@ export const useAddTodayActivities = ({
       });
     },
     onSuccess: () => {
-      toast.success("Активность добавлена");
+      toast.success("Активности добавлены");
+
       queryClient.invalidateQueries({
         queryKey: [DAY_PLANS_QUERY_KEY, userId, todayCalendarDay],
       });
@@ -54,7 +55,7 @@ export const useAddTodayActivities = ({
       });
     },
     onError: () => {
-      toast.success("Не удалось добавить активность");
+      toast.error("Не удалось добавить активности");
     },
   });
 };

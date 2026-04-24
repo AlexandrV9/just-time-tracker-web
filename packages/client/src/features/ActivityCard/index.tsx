@@ -1,6 +1,5 @@
 import type { ActivityDTO } from "@to-do-list/shared";
-import { useCallback, useMemo } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { Flex, Text } from "~/shared/ui";
 
 import { ActivityCardControls } from "./ActivityCardControls";
@@ -13,6 +12,7 @@ export type ActivityCardProps = {
   activity: ActivityDTO;
   activeDurationMs: number;
   withControlButtons?: boolean;
+  onClick?: () => void;
   onStart?: () => void;
   onPause?: () => void;
   onFinish?: () => void;
@@ -25,38 +25,26 @@ export const ActivityCard = ({
   onStart,
   onPause,
   onFinish,
+  onClick,
 }: ActivityCardProps) => {
-  const navigate = useNavigate();
-
   const hasActiveSession = resolveHasActiveSession({
     activityStatus: activity.status,
   });
 
-  const sessionStatus =
-    activity.status === "active"
-      ? "active"
-      : activity.status === "paused"
-        ? "paused"
-        : undefined;
-
-  const displayedSeconds = useDisplayedSeconds({ activeDurationMs, hasActiveSession });
+  const displayedSeconds = useDisplayedSeconds({
+    activeDurationMs,
+    hasActiveSession,
+  });
 
   const displayedTime = useMemo(
     () => formatDurationLabel(displayedSeconds),
     [displayedSeconds],
   );
 
-  const handleCardClick = useCallback(() => {
-    navigate({
-      to: "/activities/$activityId",
-      params: { activityId: activity.id },
-    });
-  }, [navigate, activity.id]);
-
   return (
-    <ActivityCardView onClick={handleCardClick}>
+    <ActivityCardView onClick={onClick}>
       <ActivityCardView.Body>
-        <Flex flex="1" minH={0}>
+        <Flex flex="1" minH={0} justifyContent="space-between">
           <Text textStyle="md" fontWeight="bold" lineClamp={2}>
             {activity.title}
           </Text>
@@ -75,7 +63,7 @@ export const ActivityCard = ({
           <ActivityCardControls
             activityId={activity.id}
             hasActiveSession={hasActiveSession}
-            sessionStatus={sessionStatus}
+            sessionStatus={activity.status}
             onStart={onStart}
             onPause={onPause}
             onFinish={onFinish}

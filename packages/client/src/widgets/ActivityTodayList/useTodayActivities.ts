@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "~/features/auth";
 import {
+  ACTIVITIES_ANALYTICS_QUERY_KEY,
   ACTIVITIES_QUERY_KEY,
-  ACTIVITY_BATCH_ANALYTICS_QUERY_KEY,
   activityApiService,
   DAY_PLAN_ITEMS_QUERY_KEY,
   DAY_PLANS_QUERY_KEY,
@@ -73,7 +73,7 @@ export const useTodayActivities = (): {
 
   const todayAnalyticsQuery = useQuery({
     queryKey: [
-      ACTIVITY_BATCH_ANALYTICS_QUERY_KEY,
+      ACTIVITIES_ANALYTICS_QUERY_KEY,
       fromDate,
       toDate,
       todayActivityIds,

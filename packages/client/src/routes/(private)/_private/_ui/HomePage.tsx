@@ -1,11 +1,8 @@
 import { Box, Flex } from "~/shared/ui";
 import { Stopwatch } from "./Stopwatch";
-import { useHomeStopwatchSession } from "./useHomeStopwatchSession";
 import { ActivityTodayList } from "~/widgets";
 
 export function HomePage() {
-  const { seconds, status, start, pause, stop } = useHomeStopwatchSession();
-
   return (
     <Box
       display="flex"
@@ -16,13 +13,7 @@ export function HomePage() {
       maxWidth="100vw"
     >
       <Flex justifyContent="center">
-        <Stopwatch
-          seconds={seconds}
-          status={status}
-          onStart={start}
-          onPause={pause}
-          onFinish={stop}
-        />
+        <Stopwatch />
       </Flex>
       <ActivityTodayList />
     </Box>

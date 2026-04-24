@@ -1,11 +1,11 @@
-import type { ActivityDTO, ActivitySessionStatusDTO } from "@to-do-list/shared";
+import type { ActivityDTO, ActivityStatusDTO } from "@to-do-list/shared";
 import type { MouseEvent } from "react";
 import { Flex, PauseIcon, PlayIcon, StopIcon } from "~/shared/ui";
 import { IconButton } from "@chakra-ui/react";
 
 type ActivityCardControlsProps = {
   hasActiveSession?: boolean;
-  sessionStatus?: ActivitySessionStatusDTO;
+  sessionStatus?: ActivityStatusDTO;
   activityId: ActivityDTO["id"];
   onStart?: (activityId: ActivityDTO["id"]) => void;
   onPause?: (activityId: ActivityDTO["id"]) => void;
@@ -64,7 +64,7 @@ export function ActivityCardControls({
     );
   }
 
-  if (sessionStatus === "finished" || !hasActiveSession) {
+  if (sessionStatus === "idle" || !hasActiveSession) {
     return (
       <IconButton
         variant="ghost"

@@ -1,4 +1,3 @@
-import type { ActivityDTO } from "@to-do-list/shared";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
@@ -8,10 +7,10 @@ import {
   activityApiService,
 } from "~/shared/api/services";
 import { useTranslation } from "~/shared/hooks";
-import { formatGroupLabel } from "~/shared/libs";
 import { Box, EmptyState, VersionIcon } from "~/shared/ui";
 import { VStack } from "@chakra-ui/react";
 import { ActivityGroup } from "../ActivityGroup";
+import { formatActivityGroups } from "./utils";
 
 export const ActivityHistory = () => {
   const { user } = useAuthStore();
@@ -39,56 +38,12 @@ export const ActivityHistory = () => {
     });
 
   const groups = useMemo(() => {
-    const groupList =
+    return formatActivityGroups(
       data?.pages.flatMap((page) => (page.success ? page.data.groups : [])) ??
-      [];
-
-
-    const merged = new Map<
-      string,
-      {
-        groupDateStart: string;
-        groupDateEnd: string;
-        totalActiveDurationMs: number;
-        totalPauseDurationMs: number;
-        items: ActivityDTO[];
-      }
-    >();
-
-    for (const group of groupList) {
-      const key = group.groupDateStart;
-
-      if (!merged.has(key)) {
-        merged.set(key, {
-          groupDateStart: group.groupDateStart,
-          groupDateEnd: group.groupDateEnd,
-          totalActiveDurationMs: group.totalActiveDurationMs,
-          totalPauseDurationMs: group.totalPauseDurationMs,
-          items: [...group.items],
-        });
-      } else {
-        merged.get(key)?.items.push(...group.items);
-      }
-    }
-
-    return Array.from(merged.values())
-      .sort(
-        (a, b) =>
-          new Date(b.groupDateStart).getTime() -
-          new Date(a.groupDateStart).getTime(),
-      )
-      .map((group) => ({
-        key: group.groupDateStart,
-        label: formatGroupLabel({
-          key: group.groupDateStart,
-          groupBy: "day",
-          locale: i18n.language,
-        }),
-        totalActiveTime: Math.floor(group.totalActiveDurationMs / 1000),
-        activities: group.items,
-        groupDateStart: group.groupDateStart,
-      }));
-  }, [data, i18n.language]);
+        [],
+      i18n.language,
+    );
+  }, [data?.pages, i18n.language]);
 
   useEffect(() => {
     if (isLastInView && hasNextPage) {
@@ -136,6 +91,13 @@ export const ActivityHistory = () => {
       </EmptyState.Root>
     );
   }
+
+  // const handleCardClick = useCallback(() => {
+  //   navigate({
+  //     to: "/activities/$activityId",
+  //     params: { activityId: activity.id },
+  //   });
+  // }, [navigate, activity.id]);
 
   return (
     <Box display="flex" flexDirection="column" gap="1.5rem">

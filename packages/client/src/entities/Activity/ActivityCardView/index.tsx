@@ -3,13 +3,13 @@ import { Card } from "~/shared/ui";
 
 import { ActivityCardViewFooter } from "./ActivityCardViewFooter";
 import { ActivityCardViewBody } from "./ActivityCardViewBody";
+import type { CardRootProps } from "@chakra-ui/react";
 
-export type ActivityCardProps = {
+export interface ActivityCardProps extends CardRootProps {
   children: ReactNode;
-  onClick?: () => void;
-};
+}
 
-export const ActivityCardView = ({ children, onClick }: ActivityCardProps) => {
+export const ActivityCardView = (props: ActivityCardProps) => {
   return (
     <Card.Root
       flex="1"
@@ -22,12 +22,10 @@ export const ActivityCardView = ({ children, onClick }: ActivityCardProps) => {
       borderRadius="2xl"
       gap={1}
       cursor="pointer"
-      onClick={onClick}
       overflow="hidden"
       _hover={{ bg: "bg.subtle" }}
-    >
-      {children}
-    </Card.Root>
+      {...props}
+    />
   );
 };
 

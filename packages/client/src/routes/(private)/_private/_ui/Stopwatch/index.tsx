@@ -1,45 +1,22 @@
-import { ButtonGroup } from "@chakra-ui/react";
 import { useMemo } from "react";
 import {
-  Badge,
   Box,
-  Button,
   convertSecondsToTimeObject,
   convertTimeObjectToTimeString,
-  PauseIcon,
-  PlayIcon,
   Stack,
-  StopIcon,
   Text,
   type TimeObject,
 } from "~/shared/ui";
-import { useTranslation } from "~/shared/hooks";
+import { useDisplayedSeconds } from "~/features/ActivityCard/useDisplayedSeconds";
+import { useRunningActivity } from "./useRunningActivity";
 
-import type { StopwatchStatus } from "./useStopwatch";
+export function Stopwatch() {
+  const { runningActivity } = useRunningActivity();
 
-export type StopwatchSelectedTemplate = {
-  title: string;
-  description?: string | null;
-} | null;
+  const hasActiveSession = runningActivity?.status === "active";
+  const activeDurationMs = runningActivity?.activeDurationMs ?? 0;
 
-type StopwatchProps = {
-  seconds: number;
-  status: StopwatchStatus;
-  onStart: () => void;
-  onPause: () => void;
-  onFinish: () => void;
-  selectedActivity?: StopwatchSelectedTemplate;
-};
-
-export function Stopwatch({
-  seconds,
-  status,
-  onStart,
-  onPause,
-  onFinish,
-  selectedActivity,
-}: StopwatchProps) {
-  const { t } = useTranslation();
+  const seconds = useDisplayedSeconds({ activeDurationMs, hasActiveSession });
 
   const timeObject = useMemo(
     (): TimeObject => convertSecondsToTimeObject(seconds),
@@ -69,6 +46,11 @@ export function Stopwatch({
         justifyContent="center"
         position="relative"
       >
+        {runningActivity && (
+          <Text textStyle="sm" color="fg.muted" lineClamp={1}>
+            {runningActivity.title}
+          </Text>
+        )}
         <Text
           style={{
             fontSize: 40,
