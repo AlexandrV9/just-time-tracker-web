@@ -146,9 +146,18 @@ const updateActivitySession = async (
   return row ? mapRow(row) : null;
 };
 
+const deleteActivitySessionById = async (id: string): Promise<boolean> => {
+  const { rowCount } = await pool.query(
+    `DELETE FROM activity_sessions WHERE id = $1`,
+    [id],
+  );
+  return rowCount ? rowCount > 0 : false;
+};
+
 export const activitySessionQueries = {
   createActivitySession,
   getActivitySessionById,
   getActivitySessionsByActivityId,
   updateActivitySession,
+  deleteActivitySessionById,
 };

@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useCallback, useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
 import { useAuthStore } from "~/features/auth";
 import {
@@ -16,6 +17,17 @@ export const ActivityHistory = () => {
   const { user } = useAuthStore();
   const userId = user?.id;
   const { i18n } = useTranslation();
+  const navigate = useNavigate();
+
+  const handleSelectActivity = useCallback(
+    (activityId: string) => {
+      navigate({
+        to: "/activities/$activityId",
+        params: { activityId },
+      });
+    },
+    [navigate],
+  );
 
   const { ref: fetchRef, inView: isLastInView } = useInView();
 
@@ -92,17 +104,14 @@ export const ActivityHistory = () => {
     );
   }
 
-  // const handleCardClick = useCallback(() => {
-  //   navigate({
-  //     to: "/activities/$activityId",
-  //     params: { activityId: activity.id },
-  //   });
-  // }, [navigate, activity.id]);
-
   return (
     <Box display="flex" flexDirection="column" gap="1.5rem">
       {groups.map((group) => (
-        <ActivityGroup key={group.key} data={group} />
+        <ActivityGroup
+          key={group.key}
+          data={group}
+          onSelect={(id) => handleSelectActivity(id)}
+        />
       ))}
       <div ref={fetchRef} style={{ height: 1, width: "100%" }} />
     </Box>

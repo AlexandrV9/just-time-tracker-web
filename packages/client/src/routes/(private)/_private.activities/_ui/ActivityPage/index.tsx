@@ -13,7 +13,7 @@ import {
 } from "~/shared/ui";
 import { activityApiService } from "~/shared/api/services";
 import { useTranslation } from "~/shared/hooks";
-import { ActivityDayAnalytics } from "~/widgets";
+import { ActivityAnalytics } from "~/widgets";
 
 import { DeleteActivityDialog } from "./DeleteActivityDialog";
 import { EditActivityDialog } from "./EditActivityDialog";
@@ -182,8 +182,7 @@ export const ActivityPage = () => {
           </Text>
         </Flex>
       </Box>
-
-      <ActivityDayAnalytics activityId={activity.id} />
+      <ActivityAnalytics activityId={activity.id} />
       <EditActivityDialog
         dialog={editDialog}
         activity={activity}

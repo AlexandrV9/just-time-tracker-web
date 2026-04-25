@@ -1,13 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import type { ActivityDTO } from "@to-do-list/shared";
 import { useMemo } from "react";
-import { IconButton } from "@chakra-ui/react";
-import {
-  ArrowRightIcon,
-  Card,
-  Flex,
-  Text,
-} from "~/shared/ui";
+import { Card, Flex, Text } from "~/shared/ui";
 import {
   convertSecondsToTimeObject,
   convertTimeObjectToTimeString,
@@ -26,7 +20,7 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
   const displayedTime = useMemo(() => {
     const seconds = getTotalTrackedSeconds(activity);
     return convertTimeObjectToTimeString(convertSecondsToTimeObject(seconds));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activity.activeDurationMs, activity.pauseDurationMs]);
 
   return (
@@ -47,9 +41,6 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
           <Text textStyle="md" fontWeight="bold" lineClamp={2}>
             {activity.title}
           </Text>
-          <IconButton variant="ghost" size="xs">
-            <ArrowRightIcon />
-          </IconButton>
         </Flex>
         {activity.description && (
           <Text color="fg.subtle" lineClamp={2}>
@@ -60,11 +51,7 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
       <Card.Footer p={0} justifyContent="space-between" alignItems="end">
         <Text color="fg.muted" textStyle="md" fontWeight="medium">
           Total:{" "}
-          <Text
-            as="span"
-            color="fg"
-            fontFamily="Roboto Mono, monospace"
-          >
+          <Text as="span" color="fg" fontFamily="Roboto Mono, monospace">
             {displayedTime}
           </Text>
         </Text>

@@ -29,6 +29,8 @@ import type {
 import { baseApi } from "../base";
 import type { RequestResponse } from "../types";
 
+type DeleteActivitySessionDTO = { id: string };
+
 export class ActivityService {
   createActivity(data: CreateActivityDataDTO) {
     return baseApi.post<ActivityDTO>(`/api/activities`, { data });
@@ -89,6 +91,10 @@ export class ActivityService {
 
   getActivitySession(data: GetActivitySessionDTO) {
     return baseApi.get<ActivitySessionDTO>(`/api/activity-sessions/${data.id}`);
+  }
+
+  deleteActivitySession(data: DeleteActivitySessionDTO) {
+    return baseApi.delete<boolean>(`/api/activity-sessions/${data.id}`);
   }
 
   getActivitySessions(
