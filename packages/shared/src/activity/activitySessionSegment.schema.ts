@@ -23,3 +23,35 @@ export const getActivitySessionSegmentSchema = z.object({
 export type GetActivitySessionSegmentDTO = z.infer<
   typeof getActivitySessionSegmentSchema
 >;
+
+export const getActivitySessionSegmentsSchema = z
+  .object({
+    fromDate: z.iso.datetime().optional(),
+    toDate: z.iso.datetime().optional(),
+  })
+  .superRefine(({ fromDate, toDate }, ctx) => {
+    if (fromDate && toDate && new Date(toDate) < new Date(fromDate)) {
+      ctx.addIssue({
+        path: ["toDate"],
+        message: "toDate must be after fromDate",
+        code: "custom",
+      });
+    }
+  });
+
+export type GetActivitySessionSegmentsQueryDTO = z.infer<
+  typeof getActivitySessionSegmentsSchema
+>;
+
+export type GetActivitySessionSegmentsDTO =
+  GetActivitySessionSegmentsQueryDTO & {
+    activityId: string;
+  };
+
+export const getActivitySessionSegmentsResponseSchema = z.object({
+  segments: z.array(activitySessionSegmentSchema),
+});
+
+export type GetActivitySessionSegmentsResponseDTO = z.infer<
+  typeof getActivitySessionSegmentsResponseSchema
+>;

@@ -16,6 +16,8 @@ import type {
   GetGroupedActivitiesResponseDTO,
   GetActivitiesAnalyticsResponseDTO,
   GetActivitiesAnalyticsQueryDTO,
+  GetActivitySessionSegmentsDTO,
+  GetActivitySessionSegmentsResponseDTO,
 } from "@to-do-list/shared";
 
 import {
@@ -329,6 +331,44 @@ const getSessionsByActivityId = async (
     return {
       success: false,
       message: "Failed to fetch activity sessions",
+    };
+  }
+};
+
+type GetActivitySessionSegmentsByActivityIdResponse =
+  | SuccessResponse<GetActivitySessionSegmentsResponseDTO>
+  | ErrorResponse;
+
+const getSessionSegmentsByActivityId = async (
+  data: GetActivitySessionSegmentsDTO,
+): Promise<GetActivitySessionSegmentsByActivityIdResponse> => {
+  try {
+    const activity = await activityRepository.getActivityById(data.activityId);
+
+    if (!activity) {
+      return {
+        success: false,
+        message: "Activity not found",
+      };
+    }
+
+    const segments =
+      await activitySessionSegmentQueries.listSegmentsForActivityInRange(
+        data.activityId,
+        data.fromDate ?? null,
+        data.toDate ?? null,
+      );
+
+    return {
+      success: true,
+      data: { segments },
+    };
+  } catch (error) {
+    console.error("List activity session segments error:", error);
+
+    return {
+      success: false,
+      message: "Failed to fetch activity session segments",
     };
   }
 };
@@ -778,6 +818,7 @@ export const activitiesService = {
   pauseActivity,
   finishActivity,
   getSessionsByActivityId,
+  getSessionSegmentsByActivityId,
   getActivityAnalytics,
   getActivitiesAnalytics,
   getGroupedActivities,

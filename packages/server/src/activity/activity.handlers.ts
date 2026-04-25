@@ -14,6 +14,7 @@ import {
   getActivitiesAnalyticsQuerySchema,
   createActivityFromQuickTimerSchema,
   getGroupedActivitiesQuerySchema,
+  getActivitySessionSegmentsSchema,
 } from "@to-do-list/shared";
 
 type ValidatorType = "json" | "param" | "query";
@@ -164,6 +165,54 @@ export const activityHandlers = {
         },
         500,
       );
+    }
+  },
+
+  getSessionSegmentsByActivityId: async (c: Context) => {
+    const activityId = c.req.param("id");
+    if (!activityId) {
+      return c.json({ success: false, message: "Missing activity id" }, 400);
+    }
+
+    const idParsed = baseIdSchema.safeParse({ id: activityId });
+    if (!idParsed.success) {
+      return c.json(
+        {
+          success: false,
+          message: "Validation failed",
+          data: validationUtils.formatZodErrors(idParsed.error.message),
+        },
+        400,
+      );
+    }
+
+    const queryParsed = getActivitySessionSegmentsSchema.safeParse({
+      fromDate: c.req.query("fromDate") ?? undefined,
+      toDate: c.req.query("toDate") ?? undefined,
+    });
+
+    if (!queryParsed.success) {
+      return c.json(
+        {
+          success: false,
+          message: "Validation failed",
+          data: validationUtils.formatZodErrors(queryParsed.error.message),
+        },
+        400,
+      );
+    }
+
+    try {
+      const responseData =
+        await activitiesService.getSessionSegmentsByActivityId({
+          activityId: idParsed.data.id,
+          ...queryParsed.data,
+        });
+
+      return c.json(responseData);
+    } catch (error) {
+      console.error("Handler error:", error);
+      return c.json({ success: false, message: "Internal server error" }, 500);
     }
   },
 

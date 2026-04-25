@@ -23,6 +23,8 @@ import type {
   GetGroupedActivitiesResponseDTO,
   GetActivitiesAnalyticsResponseDTO,
   GetActivitiesAnalyticsQueryDTO,
+  GetActivitySessionSegmentsDTO,
+  GetActivitySessionSegmentsResponseDTO,
 } from "@to-do-list/shared";
 import { baseApi } from "../base";
 import type { RequestResponse } from "../types";
@@ -95,6 +97,18 @@ export class ActivityService {
     const { activityId, fromDate, toDate } = data;
     return baseApi.get<GetActivitySessionsResponseDTO>(
       `/api/activities/${activityId}/sessions`,
+      {
+        params: { fromDate, toDate },
+      },
+    );
+  }
+
+  getActivitySessionSegments(
+    data: GetActivitySessionSegmentsDTO,
+  ): Promise<RequestResponse<GetActivitySessionSegmentsResponseDTO, unknown>> {
+    const { activityId, fromDate, toDate } = data;
+    return baseApi.get<GetActivitySessionSegmentsResponseDTO>(
+      `/api/activities/${activityId}/session-segments`,
       {
         params: { fromDate, toDate },
       },

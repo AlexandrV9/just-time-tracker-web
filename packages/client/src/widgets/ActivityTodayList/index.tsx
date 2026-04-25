@@ -39,6 +39,11 @@ export const ActivityTodayList = ({
     planId,
   });
 
+  const handleStartActivity = async (activityId: string) => {
+    onSelectActivity?.(activityId);
+    return startActivity(activityId);
+  };
+
   const renderContent = () => {
     if (isLoading) {
       return <ActivityGroup.Skeleton />;
@@ -85,7 +90,7 @@ export const ActivityTodayList = ({
         data={activityGroup}
         selectedActivityId={selectedActivityId}
         onSelect={onSelectActivity}
-        onStart={startActivity}
+        onStart={handleStartActivity}
         onPause={pauseActivity}
         onFinish={finishActivity}
       />

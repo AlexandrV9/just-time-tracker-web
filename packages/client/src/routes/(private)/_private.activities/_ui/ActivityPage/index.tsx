@@ -1,34 +1,22 @@
 import { useDialog } from "@ark-ui/react";
 import { useNavigate, useParams, useRouter } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { IconButton } from "@chakra-ui/react";
 import {
   ArrowLeftIcon,
   Box,
   EditIcon,
   Flex,
-  List,
   Text,
   TrashIcon,
 } from "~/shared/ui";
 import { activityApiService } from "~/shared/api/services";
-import {
-  convertSecondsToTimeObject,
-  convertTimeObjectToTimeString,
-} from "~/shared/libs";
 import { useTranslation } from "~/shared/hooks";
-import type { ActivityDTO } from "@to-do-list/shared";
+import { ActivityDayAnalytics } from "~/widgets";
 
 import { DeleteActivityDialog } from "./DeleteActivityDialog";
 import { EditActivityDialog } from "./EditActivityDialog";
-
-/** Total wall time tracked across all sessions (active + pause intervals). */
-const getTotalTrackedSeconds = (item: ActivityDTO): number =>
-  Math.floor((item.activeDurationMs + item.pauseDurationMs) / 1000);
-
-const formatDuration = (seconds: number) =>
-  convertTimeObjectToTimeString(convertSecondsToTimeObject(seconds));
 
 export const ActivityPage = () => {
   const { t } = useTranslation();
@@ -51,28 +39,6 @@ export const ActivityPage = () => {
   });
 
   const activity = data?.success ? data.data : null;
-
-  const { data: historyResponse } = useQuery({
-    // Title is intentionally excluded from the key: renaming the activity
-    // must not cause the history to re-fetch under the new name.
-    queryKey: ["activities", "history", activityId, activity?.createdById],
-    queryFn: () => {
-      return activityApiService.getActivities({
-        createdById: activity!.createdById,
-        exactTitle: activity!.title,
-        limit: 100,
-        page: 0,
-        sortBy: "createdAt",
-        sortOrder: "desc",
-      });
-    },
-    enabled: !!activity?.createdById && !!activity?.title,
-  });
-
-  const historyItems = useMemo(() => {
-    if (!historyResponse?.success) return [];
-    return historyResponse.data.data;
-  }, [historyResponse]);
 
   const { mutateAsync: updateActivityAsync, isPending: isUpdating } =
     useMutation({
@@ -217,63 +183,7 @@ export const ActivityPage = () => {
         </Flex>
       </Box>
 
-      <Box px={1} pt={2}>
-        <Text textStyle="sm" fontWeight="bold" color="fg.muted" mb={2}>
-          {t("pages.activities.detail.historyTitle")}
-        </Text>
-        <List.Root
-          listStyleType="none"
-          display="flex"
-          flexDirection="column"
-          gap={3}
-        >
-          {historyItems.map((item) => {
-            const secs = getTotalTrackedSeconds(item);
-            const isCurrent = item.id === activityId;
-            return (
-              <List.Item key={item.id}>
-                <Flex gap={2} alignItems="flex-start">
-                  <Box flex="1" minW={0}>
-                    <Flex
-                      flexWrap="wrap"
-                      gap={2}
-                      alignItems="baseline"
-                      justifyContent="space-between"
-                    >
-                      <Text textStyle="xs" color="fg.muted">
-                        {t("pages.activities.detail.createdAtLabel")}:{" "}
-                        {new Date(item.createdAt).toLocaleString()}
-                      </Text>
-                      {isCurrent && (
-                        <Text
-                          textStyle="xs"
-                          color="purple.500"
-                          fontWeight="semibold"
-                        >
-                          {t("pages.activities.detail.currentBadge")}
-                        </Text>
-                      )}
-                    </Flex>
-                    <Text textStyle="xs" color="fg.muted" mt={1}>
-                      {t("pages.activities.detail.updatedAtLabel")}:{" "}
-                      {new Date(item.updatedAt).toLocaleString()}
-                    </Text>
-                    <Text
-                      textStyle="sm"
-                      fontWeight="medium"
-                      mt={1}
-                      fontFamily="Roboto Mono, monospace"
-                    >
-                      {t("pages.activities.detail.duration")}:{" "}
-                      {formatDuration(secs)}
-                    </Text>
-                  </Box>
-                </Flex>
-              </List.Item>
-            );
-          })}
-        </List.Root>
-      </Box>
+      <ActivityDayAnalytics activityId={activity.id} />
       <EditActivityDialog
         dialog={editDialog}
         activity={activity}

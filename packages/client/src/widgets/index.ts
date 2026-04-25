@@ -5,3 +5,4 @@ export * from "./NavBar";
 export * from "./SideBar";
 export * from "./ActivityTodayList";
 export * from "./ActivityHistory";
+export * from "./ActivityDayAnalytics";

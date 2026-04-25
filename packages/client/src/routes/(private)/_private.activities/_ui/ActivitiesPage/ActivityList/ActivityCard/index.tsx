@@ -26,6 +26,7 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
   const displayedTime = useMemo(() => {
     const seconds = getTotalTrackedSeconds(activity);
     return convertTimeObjectToTimeString(convertSecondsToTimeObject(seconds));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activity.activeDurationMs, activity.pauseDurationMs]);
 
   return (

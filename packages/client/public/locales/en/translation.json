@@ -86,6 +86,15 @@
         "History": "History"
       }
     },
+    "activityDayAnalytics": {
+      "showFor": "Show analytics for",
+      "active": "Active",
+      "pause": "Pause",
+      "total": "Total",
+      "loading": "Loading analytics…",
+      "empty": "No segments for the selected day",
+      "error": "Could not load analytics"
+    },
     "accountSettings": {
       "title": "Account Settings",
       "options": {
