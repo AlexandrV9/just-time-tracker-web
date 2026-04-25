@@ -10,13 +10,37 @@ import {
 import { useDisplayedSeconds } from "~/features/ActivityCard/useDisplayedSeconds";
 import { useRunningActivity } from "./useRunningActivity";
 
-export function Stopwatch() {
-  const { runningActivity } = useRunningActivity();
+type StopwatchProps = {
+  selectedActivityId?: string;
+};
 
-  const hasActiveSession = runningActivity?.status === "active";
+export function Stopwatch({ selectedActivityId }: StopwatchProps) {
+  const { runningActivity, activities } = useRunningActivity();
+
+  const selectedActivity = selectedActivityId
+    ? activities.find((a) => a.id === selectedActivityId)
+    : undefined;
+
+  const selectedActiveDurationMs = selectedActivity?.activeDurationMs;
+
+  const isLive = runningActivity?.status === "active";
   const activeDurationMs = runningActivity?.activeDurationMs ?? 0;
 
-  const seconds = useDisplayedSeconds({ activeDurationMs, hasActiveSession });
+  const tickSeconds = useDisplayedSeconds({
+    activeDurationMs,
+    hasActiveSession: isLive,
+  });
+
+  const seconds = useMemo(() => {
+    if (runningActivity) {
+      if (isLive) return tickSeconds;
+      return Math.floor(runningActivity.activeDurationMs / 1000);
+    }
+    if (selectedActiveDurationMs !== undefined) {
+      return Math.floor(selectedActiveDurationMs / 1000);
+    }
+    return 0;
+  }, [runningActivity, isLive, tickSeconds, selectedActiveDurationMs]);
 
   const timeObject = useMemo(
     (): TimeObject => convertSecondsToTimeObject(seconds),
@@ -27,6 +51,8 @@ export function Stopwatch() {
     return convertTimeObjectToTimeString(timeObject);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeObject.hours, timeObject.minutes, timeObject.seconds]);
+
+  const displayedTitle = selectedActivity?.title ?? runningActivity?.title;
 
   return (
     <Stack.VStack
@@ -46,11 +72,13 @@ export function Stopwatch() {
         justifyContent="center"
         position="relative"
       >
-        {runningActivity && (
-          <Text textStyle="sm" color="fg.muted" lineClamp={1}>
-            {runningActivity.title}
-          </Text>
-        )}
+        <Text
+          textStyle="sm"
+          color={displayedTitle ? "fg.muted" : "fg.subtle"}
+          lineClamp={1}
+        >
+          {displayedTitle ?? "Выберите активность"}
+        </Text>
         <Text
           style={{
             fontSize: 40,

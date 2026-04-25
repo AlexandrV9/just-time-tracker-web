@@ -3,6 +3,7 @@ import { useTodayActivities } from "~/widgets/ActivityTodayList/useTodayActiviti
 
 type UseRunningActivityResult = {
   runningActivity: ActivityDTO | undefined;
+  activities: ActivityDTO[];
 };
 
 export function useRunningActivity(): UseRunningActivityResult {
@@ -12,5 +13,5 @@ export function useRunningActivity(): UseRunningActivityResult {
     (activity) => activity.status === "active" || activity.status === "paused",
   );
 
-  return { runningActivity };
+  return { runningActivity, activities: activityGroup.activities };
 }

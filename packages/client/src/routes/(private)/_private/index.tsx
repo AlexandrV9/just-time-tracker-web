@@ -4,6 +4,7 @@ import z from "zod";
 
 const privateSearchSchema = z.object({
   tab: z.enum(["today", "history"]).catch("today"),
+  activityId: z.string().optional(),
 });
 
 export type PrivateSearch = z.infer<typeof privateSearchSchema>;

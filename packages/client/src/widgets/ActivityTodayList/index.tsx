@@ -19,7 +19,15 @@ import {
   useStartActivity,
 } from "./mutations";
 
-export const ActivityTodayList = () => {
+type ActivityTodayListProps = {
+  selectedActivityId?: string;
+  onSelectActivity?: (id: string) => void;
+};
+
+export const ActivityTodayList = ({
+  selectedActivityId,
+  onSelectActivity,
+}: ActivityTodayListProps) => {
   const addTodayActivityDialog = useDialog();
 
   const { planId, activityGroup, isLoading, isError } = useTodayActivities();
@@ -75,6 +83,8 @@ export const ActivityTodayList = () => {
       <ActivityGroup
         withControlButtons
         data={activityGroup}
+        selectedActivityId={selectedActivityId}
+        onSelect={onSelectActivity}
         onStart={startActivity}
         onPause={pauseActivity}
         onFinish={finishActivity}

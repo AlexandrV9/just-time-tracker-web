@@ -17,6 +17,8 @@ export type ActivityGroupDTO = {
 type ActivityGroupProps = {
   data: ActivityGroupDTO;
   withControlButtons?: boolean;
+  selectedActivityId?: string;
+  onSelect?: (id: string, title: string, activeDurationMs: number) => void;
   onStart?: (activityId: ActivityDTO["id"]) => void;
   onPause?: (activityId: ActivityDTO["id"]) => void;
   onFinish?: (activityId: ActivityDTO["id"]) => void;
@@ -28,6 +30,8 @@ export function ActivityGroup({
   onPause,
   onFinish,
   withControlButtons = false,
+  selectedActivityId,
+  onSelect,
 }: ActivityGroupProps) {
   const displayedActiveTotalTime = convertTimeObjectToTimeString(
     convertSecondsToTimeObject(data.totalActiveTime),
@@ -60,6 +64,10 @@ export function ActivityGroup({
                 activity={activity}
                 activeDurationMs={activity.activeDurationMs}
                 withControlButtons={withControlButtons}
+                isSelected={activity.id === selectedActivityId}
+                onClick={() =>
+                  onSelect?.(activity.id, activity.title, activity.activeDurationMs)
+                }
                 onStart={() => onStart?.(activity.id)}
                 onPause={() => onPause?.(activity.id)}
                 onFinish={() => onFinish?.(activity.id)}

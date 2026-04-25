@@ -12,6 +12,7 @@ export type ActivityCardProps = {
   activity: ActivityDTO;
   activeDurationMs: number;
   withControlButtons?: boolean;
+  isSelected?: boolean;
   onClick?: () => void;
   onStart?: () => void;
   onPause?: () => void;
@@ -22,6 +23,7 @@ export const ActivityCard = ({
   activity,
   activeDurationMs,
   withControlButtons = true,
+  isSelected = false,
   onStart,
   onPause,
   onFinish,
@@ -42,7 +44,11 @@ export const ActivityCard = ({
   );
 
   return (
-    <ActivityCardView onClick={onClick}>
+    <ActivityCardView
+      onClick={onClick}
+      outline={isSelected ? "2px solid" : undefined}
+      outlineColor={isSelected ? "purple.focusRing" : undefined}
+    >
       <ActivityCardView.Body>
         <Flex flex="1" minH={0} justifyContent="space-between">
           <Text textStyle="md" fontWeight="bold" lineClamp={2}>
@@ -56,6 +62,7 @@ export const ActivityCard = ({
           textStyle="sm"
           fontWeight="medium"
           fontFamily="Roboto Mono, monospace"
+          userSelect="none"
         >
           {displayedTime}
         </Text>
