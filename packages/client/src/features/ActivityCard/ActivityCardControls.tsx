@@ -22,7 +22,7 @@ export function ActivityCardControls({
 }: ActivityCardControlsProps) {
   if (sessionStatus === "active") {
     return (
-      <Flex justify="right" alignItems="center" gap="1rem">
+      <Flex justify="right" alignItems="center" gap="0.5rem">
         <IconButton
           variant="ghost"
           size="2xs"
@@ -32,6 +32,16 @@ export function ActivityCardControls({
           }}
         >
           <PauseIcon />
+        </IconButton>
+        <IconButton
+          variant="ghost"
+          size="2xs"
+          onClick={(event: MouseEvent<HTMLButtonElement>) => {
+            event.stopPropagation();
+            onFinish?.(activityId);
+          }}
+        >
+          <StopIcon />
         </IconButton>
       </Flex>
     );
