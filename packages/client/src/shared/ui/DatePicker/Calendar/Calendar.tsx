@@ -14,10 +14,9 @@ import { DayGrid } from "./DayGrid";
 
 export type CalendarProps = {
   selectedDate?: Date | null;
-  onChangeSelectedDate?: (date: Date | null) => void;
   minDate?: Date;
   maxDate?: Date;
-  // highlightedDates?: HighlightedDate[];
+  onChangeSelectedDate?: (date: Date | null) => void;
   getDateCellStyles?: (value: {
     date: Date;
     isDisabled?: boolean;
@@ -40,7 +39,7 @@ export const Calendar = ({
       const resultDate = converDateValueToDate(e.value[0]);
       onChangeSelectedDate?.(resultDate);
     },
-    [onChangeSelectedDate]
+    [onChangeSelectedDate],
   );
 
   return (

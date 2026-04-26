@@ -1,6 +1,7 @@
 import { useDialog } from "@ark-ui/react";
 import { useCallback } from "react";
 
+import { useTranslation } from "~/shared/hooks";
 import { Button, CloseButton, Dialog, Portal, Stack, Text } from "~/shared/ui";
 
 export type DeleteSessionDialogProps = {
@@ -18,6 +19,8 @@ export function DeleteSessionDialog({
   isDeleting,
   onConfirm,
 }: DeleteSessionDialogProps) {
+  const { t } = useTranslation();
+
   const handleConfirm = useCallback(() => {
     onConfirm();
     dialog.setOpen(false);
@@ -30,12 +33,14 @@ export function DeleteSessionDialog({
         <Dialog.Positioner zIndex={3}>
           <Dialog.Content maxW="md" w="full" mx={4} borderRadius="xl">
             <Dialog.Header>
-              <Dialog.Title fontSize="lg">Удалить сессию?</Dialog.Title>
+              <Dialog.Title fontSize="lg">
+                {t("widgets.activityAnalytics.deleteSession.title")}
+              </Dialog.Title>
             </Dialog.Header>
             <Dialog.Body>
               <Stack.VStack gap={3} align="stretch">
                 <Text textStyle="sm" color="fg.muted">
-                  Это действие нельзя отменить.
+                  {t("widgets.activityAnalytics.deleteSession.description")}
                 </Text>
                 <Stack.VStack gap={1} align="stretch">
                   <Text fontWeight="semibold">{sessionLabel}</Text>
@@ -55,7 +60,7 @@ export function DeleteSessionDialog({
             >
               <Dialog.ActionTrigger asChild>
                 <Button variant="outline" type="button" disabled={isDeleting}>
-                  Отмена
+                  {t("widgets.activityAnalytics.deleteSession.cancel")}
                 </Button>
               </Dialog.ActionTrigger>
               <Button
@@ -64,7 +69,7 @@ export function DeleteSessionDialog({
                 disabled={isDeleting}
                 loading={isDeleting}
               >
-                Удалить
+                {t("widgets.activityAnalytics.deleteSession.confirm")}
               </Button>
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild>

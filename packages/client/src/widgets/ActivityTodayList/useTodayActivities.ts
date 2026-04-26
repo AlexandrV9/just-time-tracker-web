@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "~/features/auth";
 import {
   ACTIVITIES_ANALYTICS_QUERY_KEY,
@@ -40,6 +40,7 @@ export const useTodayActivities = (): {
       }),
     enabled: !!userId,
     select: (response) => (response.success ? response.data : undefined),
+    placeholderData: keepPreviousData,
   });
 
   const todayPlan = todayPlanActivitiesQuery.data?.data?.[0];

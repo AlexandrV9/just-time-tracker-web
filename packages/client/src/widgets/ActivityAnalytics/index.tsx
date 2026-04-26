@@ -1,21 +1,31 @@
 import { useDialog } from "@ark-ui/react";
-import { IconButton } from "@chakra-ui/react";
+import { Badge, IconButton } from "@chakra-ui/react";
 import { Button, Popover } from "@chakra-ui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useEffect, useState, useCallback } from "react";
+import { useMemo, useState, useCallback } from "react";
 import type {
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
 } from "@to-do-list/shared";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { isValid, parseISO } from "date-fns";
+import { LuChevronDown } from "react-icons/lu";
 
 import {
   ACTIVITY_SESSIONS_QUERY_KEY,
   ACTIVITY_SESSION_SEGMENTS_QUERY_KEY,
   activityApiService,
 } from "~/shared/api/services";
-import { Accordion, Box, Calendar, Flex, Skeleton, Text, TrashIcon } from "~/shared/ui";
+import {
+  Accordion,
+  Box,
+  Calendar,
+  Flex,
+  Skeleton,
+  Text,
+  toast,
+  TrashIcon,
+} from "~/shared/ui";
 import { useTranslation } from "~/shared/hooks";
 import {
   convertSecondsToTimeObject,
@@ -100,22 +110,21 @@ const clipSegmentToDay = (
   };
 };
 
-type ActivityAnalyticsProps = {
+export type ActivityAnalyticsProps = {
   activityId: string;
 };
 
 export const ActivityAnalytics = ({ activityId }: ActivityAnalyticsProps) => {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
-  const navigate = useNavigate() as unknown as (opts: {
-    search?: unknown;
-    replace?: boolean;
-  }) => void;
-  const { date: dateSearch } = useSearch({ strict: false }) as {
-    date?: string;
-  };
+  const navigate = useNavigate();
+
+  const { date: dateFromSearchQuery } = useSearch({
+    from: "/(private)/_private/activities/$activityId",
+  });
 
   const deleteDialog = useDialog();
+
   const [sessionToDelete, setSessionToDelete] = useState<{
     id: string;
     label: string;
@@ -123,29 +132,38 @@ export const ActivityAnalytics = ({ activityId }: ActivityAnalyticsProps) => {
   } | null>(null);
 
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
-    if (!dateSearch) return new Date();
-    const parsed = parseISO(dateSearch);
-    return isValid(parsed) ? parsed : new Date();
+    if (!dateFromSearchQuery) {
+      return new Date();
+    }
+
+    const parsedDate = parseISO(dateFromSearchQuery);
+
+    return isValid(parsedDate) ? parsedDate : new Date();
   });
+
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const { mutate: deleteSession, isPending: isDeletingSession } = useMutation({
     mutationFn: async (id: string) => {
       const res = await activityApiService.deleteActivitySession({ id });
+
       if (!res.success) {
         throw new Error(res.message ?? "Failed to delete session");
       }
+
       return res.data;
     },
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: [ACTIVITY_SESSIONS_QUERY_KEY, activityId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: [ACTIVITY_SESSION_SEGMENTS_QUERY_KEY, activityId],
-        }),
-      ]);
+      queryClient.invalidateQueries({
+        queryKey: [ACTIVITY_SESSIONS_QUERY_KEY, activityId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [ACTIVITY_SESSION_SEGMENTS_QUERY_KEY, activityId],
+      });
+      toast.success(t("widgets.activityAnalytics.deleteSessionSuccess"));
+    },
+    onError: () => {
+      toast.error(t("widgets.activityAnalytics.deleteSessionError"));
     },
   });
 
@@ -166,17 +184,6 @@ export const ActivityAnalytics = ({ activityId }: ActivityAnalyticsProps) => {
     deleteSession(sessionToDelete.id);
     setSessionToDelete(null);
   }, [deleteSession, sessionToDelete]);
-
-  useEffect(() => {
-    if (!dateSearch) {
-      setSelectedDate(new Date());
-      return;
-    }
-    const parsed = parseISO(dateSearch);
-    if (isValid(parsed)) {
-      setSelectedDate(parsed);
-    }
-  }, [dateSearch]);
 
   const selectedCalendarDay = useMemo(
     () => getCalendarDay(selectedDate),
@@ -239,41 +246,72 @@ export const ActivityAnalytics = ({ activityId }: ActivityAnalyticsProps) => {
     enabled: !!activityId,
   });
 
-  const { sessions, dayChart, activeTotalSecs, pauseTotalSecs } = useMemo(() => {
-    const timeFormatter = new Intl.DateTimeFormat(i18n.language, {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const { sessions, dayChart, activeTotalSecs, pauseTotalSecs } =
+    useMemo(() => {
+      const timeFormatter = new Intl.DateTimeFormat(i18n.language, {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
 
-    const dayFromMs = Date.parse(fromDate);
-    const dayToMs = Date.parse(toDate);
+      const dayFromMs = Date.parse(fromDate);
+      const dayToMs = Date.parse(toDate);
 
-    const clippedSegments: ClippedSegment[] = (
-      segmentsQuery.data ?? []
-    ).flatMap((seg) => {
-      const c = clipSegmentToDay(seg, dayFromMs, dayToMs);
-      return c ? [c] : [];
-    });
+      const clippedSegments: ClippedSegment[] = (
+        segmentsQuery.data ?? []
+      ).flatMap((seg) => {
+        const c = clipSegmentToDay(seg, dayFromMs, dayToMs);
+        return c ? [c] : [];
+      });
 
-    const segsInDay = [...clippedSegments].sort((a, b) => a.startMs - b.startMs);
-    const dayChartData: ChartSegment[] = [];
-    let dayActiveSecs = 0;
-    let dayPauseSecs = 0;
-    let dayGapIdx = 0;
-    const dayBarFromMs =
-      segsInDay.length > 0
-        ? Math.max(dayFromMs, floorToStepMs(segsInDay[0]!.startMs))
-        : dayFromMs;
-    const dayBarToMs =
-      segsInDay.length > 0
-        ? Math.min(dayToMs, ceilToStepMs(segsInDay.at(-1)!.endMs))
-        : dayToMs;
+      const segsInDay = [...clippedSegments].sort(
+        (a, b) => a.startMs - b.startMs,
+      );
+      const dayChartData: ChartSegment[] = [];
+      let dayActiveSecs = 0;
+      let dayPauseSecs = 0;
+      let dayGapIdx = 0;
+      const dayBarFromMs =
+        segsInDay.length > 0
+          ? Math.max(dayFromMs, floorToStepMs(segsInDay[0]!.startMs))
+          : dayFromMs;
+      const dayBarToMs =
+        segsInDay.length > 0
+          ? Math.min(dayToMs, ceilToStepMs(segsInDay.at(-1)!.endMs))
+          : dayToMs;
 
-    let cursor = dayBarFromMs;
+      let cursor = dayBarFromMs;
 
-    for (const seg of segsInDay) {
-      if (seg.startMs > cursor) {
-        const gapSecs = Math.round((seg.startMs - cursor) / 1000);
+      for (const seg of segsInDay) {
+        if (seg.startMs > cursor) {
+          const gapSecs = Math.round((seg.startMs - cursor) / 1000);
+          if (gapSecs > 0) {
+            dayChartData.push({
+              name: `__gap__day__${dayGapIdx++}`,
+              value: gapSecs,
+              color: "gray.subtle",
+            });
+          }
+        }
+
+        const label =
+          seg.type === "active"
+            ? t("widgets.activityAnalytics.active")
+            : t("widgets.activityAnalytics.pause");
+
+        dayChartData.push({
+          name: `${label} ${timeFormatter.format(new Date(seg.startMs))}\u2013${timeFormatter.format(new Date(seg.endMs))}`,
+          value: seg.seconds,
+          color: seg.type === "active" ? "teal.solid" : "orange.solid",
+        });
+
+        if (seg.type === "active") dayActiveSecs += seg.seconds;
+        else dayPauseSecs += seg.seconds;
+
+        cursor = seg.endMs;
+      }
+
+      if (cursor < dayBarToMs) {
+        const gapSecs = Math.round((dayBarToMs - cursor) / 1000);
         if (gapSecs > 0) {
           dayChartData.push({
             name: `__gap__day__${dayGapIdx++}`,
@@ -283,88 +321,88 @@ export const ActivityAnalytics = ({ activityId }: ActivityAnalyticsProps) => {
         }
       }
 
-      const label =
-        seg.type === "active"
-          ? t("widgets.activityDayAnalytics.active")
-          : t("widgets.activityDayAnalytics.pause");
-
-      dayChartData.push({
-        name: `${label} ${timeFormatter.format(new Date(seg.startMs))}\u2013${timeFormatter.format(new Date(seg.endMs))}`,
-        value: seg.seconds,
-        color: seg.type === "active" ? "teal.solid" : "orange.solid",
-      });
-
-      if (seg.type === "active") dayActiveSecs += seg.seconds;
-      else dayPauseSecs += seg.seconds;
-
-      cursor = seg.endMs;
-    }
-
-    if (cursor < dayBarToMs) {
-      const gapSecs = Math.round((dayBarToMs - cursor) / 1000);
-      if (gapSecs > 0) {
+      if (dayChartData.length === 0) {
         dayChartData.push({
           name: `__gap__day__${dayGapIdx++}`,
-          value: gapSecs,
+          value: Math.max(1, Math.round((dayBarToMs - dayBarFromMs) / 1000)),
           color: "gray.subtle",
         });
       }
-    }
 
-    if (dayChartData.length === 0) {
-      dayChartData.push({
-        name: `__gap__day__${dayGapIdx++}`,
-        value: Math.max(1, Math.round((dayBarToMs - dayBarFromMs) / 1000)),
-        color: "gray.subtle",
-      });
-    }
+      const sessionsInDay: SessionChart[] = (sessionsQuery.data ?? [])
+        .flatMap((s) => {
+          const startedAtMs = Date.parse(s.startedAt);
+          const naturalEndMs = s.endedAt ? Date.parse(s.endedAt) : Date.now();
+          if (!Number.isFinite(startedAtMs) || !Number.isFinite(naturalEndMs)) {
+            return [];
+          }
 
-    const sessionsInDay: SessionChart[] = (sessionsQuery.data ?? [])
-      .flatMap((s) => {
-        const startedAtMs = Date.parse(s.startedAt);
-        const naturalEndMs = s.endedAt ? Date.parse(s.endedAt) : Date.now();
-        if (!Number.isFinite(startedAtMs) || !Number.isFinite(naturalEndMs)) {
-          return [];
-        }
+          const sessionStartMs = Math.max(startedAtMs, dayFromMs);
+          const sessionEndMs = Math.min(naturalEndMs, dayToMs);
+          if (sessionEndMs <= sessionStartMs) return [];
 
-        const sessionStartMs = Math.max(startedAtMs, dayFromMs);
-        const sessionEndMs = Math.min(naturalEndMs, dayToMs);
-        if (sessionEndMs <= sessionStartMs) return [];
+          const barFromMs = Math.max(dayFromMs, floorToStepMs(sessionStartMs));
+          const barToMs = Math.min(dayToMs, ceilToStepMs(sessionEndMs));
 
-        const barFromMs = Math.max(dayFromMs, floorToStepMs(sessionStartMs));
-        const barToMs = Math.min(dayToMs, ceilToStepMs(sessionEndMs));
+          const segs = clippedSegments
+            .filter((seg) => seg.sessionId === s.id)
+            .map((seg) => ({
+              ...seg,
+              startMs: Math.max(seg.startMs, sessionStartMs),
+              endMs: Math.min(seg.endMs, sessionEndMs),
+            }))
+            .flatMap((seg) => {
+              if (seg.endMs <= seg.startMs) return [];
+              return [
+                {
+                  ...seg,
+                  seconds: Math.max(
+                    1,
+                    Math.round((seg.endMs - seg.startMs) / 1000),
+                  ),
+                },
+              ];
+            })
+            .sort((a, b) => a.startMs - b.startMs);
 
-        const segs = clippedSegments
-          .filter((seg) => seg.sessionId === s.id)
-          .map((seg) => ({
-            ...seg,
-            startMs: Math.max(seg.startMs, sessionStartMs),
-            endMs: Math.min(seg.endMs, sessionEndMs),
-          }))
-          .flatMap((seg) => {
-            if (seg.endMs <= seg.startMs) return [];
-            return [
-              {
-                ...seg,
-                seconds: Math.max(
-                  1,
-                  Math.round((seg.endMs - seg.startMs) / 1000),
-                ),
-              },
-            ];
-          })
-          .sort((a, b) => a.startMs - b.startMs);
+          let cursor = barFromMs;
+          let activeSecs = 0;
+          let pauseSecs = 0;
+          let gapIdx = 0;
 
-        let cursor = barFromMs;
-        let activeSecs = 0;
-        let pauseSecs = 0;
-        let gapIdx = 0;
+          const chartData: ChartSegment[] = [];
 
-        const chartData: ChartSegment[] = [];
+          for (const seg of segs) {
+            if (seg.startMs > cursor) {
+              const gapSecs = Math.round((seg.startMs - cursor) / 1000);
+              if (gapSecs > 0) {
+                chartData.push({
+                  name: `__gap__${s.id}__${gapIdx++}`,
+                  value: gapSecs,
+                  color: "gray.subtle",
+                });
+              }
+            }
 
-        for (const seg of segs) {
-          if (seg.startMs > cursor) {
-            const gapSecs = Math.round((seg.startMs - cursor) / 1000);
+            const label =
+              seg.type === "active"
+                ? t("widgets.activityAnalytics.active")
+                : t("widgets.activityAnalytics.pause");
+
+            chartData.push({
+              name: `${label} ${timeFormatter.format(new Date(seg.startMs))}\u2013${timeFormatter.format(new Date(seg.endMs))}`,
+              value: seg.seconds,
+              color: seg.type === "active" ? "teal.solid" : "orange.solid",
+            });
+
+            if (seg.type === "active") activeSecs += seg.seconds;
+            else pauseSecs += seg.seconds;
+
+            cursor = seg.endMs;
+          }
+
+          if (cursor < barToMs) {
+            const gapSecs = Math.round((barToMs - cursor) / 1000);
             if (gapSecs > 0) {
               chartData.push({
                 name: `__gap__${s.id}__${gapIdx++}`,
@@ -374,80 +412,55 @@ export const ActivityAnalytics = ({ activityId }: ActivityAnalyticsProps) => {
             }
           }
 
-          const label =
-            seg.type === "active"
-              ? t("widgets.activityDayAnalytics.active")
-              : t("widgets.activityDayAnalytics.pause");
-
-          chartData.push({
-            name: `${label} ${timeFormatter.format(new Date(seg.startMs))}\u2013${timeFormatter.format(new Date(seg.endMs))}`,
-            value: seg.seconds,
-            color: seg.type === "active" ? "teal.solid" : "orange.solid",
-          });
-
-          if (seg.type === "active") activeSecs += seg.seconds;
-          else pauseSecs += seg.seconds;
-
-          cursor = seg.endMs;
-        }
-
-        if (cursor < barToMs) {
-          const gapSecs = Math.round((barToMs - cursor) / 1000);
-          if (gapSecs > 0) {
+          if (chartData.length === 0) {
             chartData.push({
               name: `__gap__${s.id}__${gapIdx++}`,
-              value: gapSecs,
+              value: Math.max(1, Math.round((barToMs - barFromMs) / 1000)),
               color: "gray.subtle",
             });
           }
-        }
 
-        if (chartData.length === 0) {
-          chartData.push({
-            name: `__gap__${s.id}__${gapIdx++}`,
-            value: Math.max(1, Math.round((barToMs - barFromMs) / 1000)),
-            color: "gray.subtle",
-          });
-        }
+          return [
+            {
+              session: s,
+              sessionStartMs,
+              sessionEndMs,
+              barFromMs,
+              barToMs,
+              chartData,
+              activeSecs,
+              pauseSecs,
+              label: `${timeFormatter.format(new Date(barFromMs))}\u2013${timeFormatter.format(new Date(barToMs))}`,
+            },
+          ];
+        })
+        .sort((a, b) => a.sessionStartMs - b.sessionStartMs);
 
-        return [
-          {
-            session: s,
-            sessionStartMs,
-            sessionEndMs,
-            barFromMs,
-            barToMs,
-            chartData,
-            activeSecs,
-            pauseSecs,
-            label: `${timeFormatter.format(new Date(barFromMs))}\u2013${timeFormatter.format(new Date(barToMs))}`,
-          },
-        ];
-      })
-      .sort((a, b) => a.sessionStartMs - b.sessionStartMs);
+      const totalActive = sessionsInDay.reduce(
+        (acc, s) => acc + s.activeSecs,
+        0,
+      );
+      const totalPause = sessionsInDay.reduce((acc, s) => acc + s.pauseSecs, 0);
 
-    const totalActive = sessionsInDay.reduce((acc, s) => acc + s.activeSecs, 0);
-    const totalPause = sessionsInDay.reduce((acc, s) => acc + s.pauseSecs, 0);
-
-    return {
-      sessions: sessionsInDay,
-      dayChart: {
-        chartData: dayChartData,
-        activeSecs: dayActiveSecs,
-        pauseSecs: dayPauseSecs,
-        label: `${timeFormatter.format(new Date(dayBarFromMs))}\u2013${timeFormatter.format(new Date(dayBarToMs))}`,
-      } satisfies DayChart,
-      activeTotalSecs: totalActive,
-      pauseTotalSecs: totalPause,
-    };
-  }, [
-    fromDate,
-    i18n.language,
-    segmentsQuery.data,
-    sessionsQuery.data,
-    t,
-    toDate,
-  ]);
+      return {
+        sessions: sessionsInDay,
+        dayChart: {
+          chartData: dayChartData,
+          activeSecs: dayActiveSecs,
+          pauseSecs: dayPauseSecs,
+          label: `${timeFormatter.format(new Date(dayBarFromMs))}\u2013${timeFormatter.format(new Date(dayBarToMs))}`,
+        } satisfies DayChart,
+        activeTotalSecs: totalActive,
+        pauseTotalSecs: totalPause,
+      };
+    }, [
+      fromDate,
+      i18n.language,
+      segmentsQuery.data,
+      sessionsQuery.data,
+      t,
+      toDate,
+    ]);
 
   const totalTrackedSecs = activeTotalSecs + pauseTotalSecs;
 
@@ -459,7 +472,7 @@ export const ActivityAnalytics = ({ activityId }: ActivityAnalyticsProps) => {
     if (segmentsQuery.isError || sessionsQuery.isError) {
       return (
         <Text textStyle="sm" color="fg.error">
-          {t("widgets.activityDayAnalytics.error")}
+          {t("widgets.activityAnalytics.error")}
         </Text>
       );
     }
@@ -474,28 +487,38 @@ export const ActivityAnalytics = ({ activityId }: ActivityAnalyticsProps) => {
           <Flex flexDirection="column" gap={1} mt={3}>
             {totalTrackedSecs === 0 && (
               <Text textStyle="sm" color="fg.muted">
-                {t("widgets.activityDayAnalytics.empty")}
+                {t("widgets.activityAnalytics.empty")}
               </Text>
             )}
           </Flex>
         )}
 
         {sessions.length > 0 && (
-          <Accordion.Root collapsible mt={3} defaultValue={[]}>
+          <Accordion.Root collapsible mt={3} defaultValue={["sessions"]}>
             <Accordion.Item value="sessions" border="none">
               <Accordion.ItemTrigger>
                 <Flex
                   w="full"
                   justifyContent="space-between"
                   alignItems="center"
+                  gap={2}
                   py={2}
                 >
-                  <Text textStyle="sm" fontWeight="bold" color="fg.muted">
-                    Сессии за день
-                  </Text>
-                  <Text textStyle="xs" color="fg.muted">
-                    {sessions.length}
-                  </Text>
+                  <Flex alignItems="center" gap={1} flexShrink={0}>
+                    <Text textStyle="sm" fontWeight="bold" color="fg.muted">
+                      {t("widgets.activityAnalytics.sessionsForDay")}
+                    </Text>
+
+                    <Badge size="xs">{sessions.length}</Badge>
+                  </Flex>
+                  <Flex alignItems="center" gap={1} flexShrink={0}>
+                    <Accordion.ItemIndicator
+                      color="fg.muted"
+                      display="inline-flex"
+                    >
+                      <LuChevronDown size={18} />
+                    </Accordion.ItemIndicator>
+                  </Flex>
                 </Flex>
               </Accordion.ItemTrigger>
               <Accordion.ItemContent>
@@ -511,7 +534,9 @@ export const ActivityAnalytics = ({ activityId }: ActivityAnalyticsProps) => {
                               <IconButton
                                 variant="ghost"
                                 size="xs"
-                                aria-label="Удалить сессию"
+                                aria-label={t(
+                                  "widgets.activityAnalytics.deleteSession.ariaLabel",
+                                )}
                                 onClick={() => handleRequestDeleteSession(s)}
                               >
                                 <TrashIcon size={16} />
@@ -531,19 +556,36 @@ export const ActivityAnalytics = ({ activityId }: ActivityAnalyticsProps) => {
     );
   };
 
+  const handleChangeSelectedDate = useCallback(
+    (date: Date | null) => {
+      if (date) {
+        setSelectedDate(date);
+        navigate({
+          to: "/activities/$activityId",
+          params: { activityId },
+          search: (prev) => ({ ...prev, date: getCalendarDay(date) }),
+          replace: true,
+        });
+        setIsCalendarOpen(false);
+      }
+    },
+    [activityId, navigate],
+  );
+
   return (
     <Box display="flex" flexDirection="column" gap={3} px={1} pt={2}>
       <Flex gap={1} alignItems="center" flexWrap="wrap">
         <Text textStyle="sm" fontWeight="bold" color="fg.muted">
-          {t("widgets.activityDayAnalytics.showFor")}
+          {t("widgets.activityAnalytics.title")}
         </Text>
+
         <Popover.Root
           open={isCalendarOpen}
           onOpenChange={(details) => setIsCalendarOpen(details.open)}
           positioning={{ placement: "bottom-start" }}
         >
           <Popover.Trigger asChild>
-            <Button variant="subtle" size="xs" height="auto">
+            <Button variant="subtle" size="xs" height="auto" px={1}>
               <Text textStyle="sm">{dateLabel}</Text>
             </Button>
           </Popover.Trigger>
@@ -551,20 +593,7 @@ export const ActivityAnalytics = ({ activityId }: ActivityAnalyticsProps) => {
             <Popover.Content p={0} bg="transparent" border="none" w="auto">
               <Calendar
                 selectedDate={selectedDate}
-                onChangeSelectedDate={(date) => {
-                  if (date) {
-                    const day = getCalendarDay(date);
-                    setSelectedDate(date);
-                    navigate({
-                      search: (prev: unknown) => ({
-                        ...(typeof prev === "object" && prev ? prev : {}),
-                        date: day,
-                      }),
-                      replace: true,
-                    });
-                    setIsCalendarOpen(false);
-                  }
-                }}
+                onChangeSelectedDate={handleChangeSelectedDate}
               />
             </Popover.Content>
           </Popover.Positioner>
@@ -573,7 +602,7 @@ export const ActivityAnalytics = ({ activityId }: ActivityAnalyticsProps) => {
 
       <Flex justifyContent="space-between" gap={4}>
         <Text textStyle="sm" color="fg.muted">
-          {t("widgets.activityDayAnalytics.total")}
+          {t("widgets.activityAnalytics.totalTime")}
         </Text>
         <Text
           textStyle="sm"

@@ -70,7 +70,7 @@ export const ActivitySessionBar = ({
               flexShrink={0}
             />
             <Text textStyle="xs" color="fg.muted" flex={1}>
-              {t("widgets.activityDayAnalytics.active")}
+              {t("widgets.activityAnalytics.active")}
             </Text>
             <Text textStyle="xs" fontFamily="Roboto Mono, monospace">
               {formatDuration(data.activeSecs)}
@@ -87,7 +87,7 @@ export const ActivitySessionBar = ({
               flexShrink={0}
             />
             <Text textStyle="xs" color="fg.muted" flex={1}>
-              {t("widgets.activityDayAnalytics.pause")}
+              {t("widgets.activityAnalytics.pause")}
             </Text>
             <Text textStyle="xs" fontFamily="Roboto Mono, monospace">
               {formatDuration(data.pauseSecs)}

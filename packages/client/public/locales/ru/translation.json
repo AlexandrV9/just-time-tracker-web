@@ -86,14 +86,24 @@
         "History": "История"
       }
     },
-    "activityDayAnalytics": {
-      "showFor": "Показать аналитику за",
+    "activityAnalytics": {
+      "title": "Аналитика за",
+      "totalTime": "Всего",
+      "empty": "За выбранный день нет сегментов",
       "active": "Активность",
       "pause": "Пауза",
-      "total": "Всего",
       "loading": "Загрузка аналитики…",
-      "empty": "За выбранный день нет сегментов",
-      "error": "Не удалось загрузить аналитику"
+      "error": "Не удалось загрузить аналитику",
+      "deleteSessionSuccess": "Сессия удалена",
+      "deleteSessionError": "Не удалось удалить сессию",
+      "sessionsForDay": "Сессии за день",
+      "deleteSession": {
+        "title": "Удалить сессию?",
+        "description": "Это действие нельзя отменить.",
+        "cancel": "Отмена",
+        "confirm": "Удалить",
+        "ariaLabel": "Удалить сессию"
+      }
     },
     "accountSettings": {
       "title": "Настройки аккаунта",

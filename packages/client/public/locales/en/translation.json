@@ -86,14 +86,24 @@
         "History": "History"
       }
     },
-    "activityDayAnalytics": {
-      "showFor": "Show analytics for",
+    "activityAnalytics": {
+      "title": "Analytics for",
+      "totalTime": "Total",
+      "empty": "No segments for the selected day",
       "active": "Active",
       "pause": "Pause",
-      "total": "Total",
       "loading": "Loading analytics…",
-      "empty": "No segments for the selected day",
-      "error": "Could not load analytics"
+      "error": "Could not load analytics",
+      "deleteSessionSuccess": "Session deleted",
+      "deleteSessionError": "Could not delete session",
+      "sessionsForDay": "Sessions for the day",
+      "deleteSession": {
+        "title": "Delete session?",
+        "description": "This action cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "ariaLabel": "Delete session"
+      }
     },
     "accountSettings": {
       "title": "Account Settings",
