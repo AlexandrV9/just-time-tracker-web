@@ -66,7 +66,11 @@ export function ActivityGroup({
                 withControlButtons={withControlButtons}
                 isSelected={activity.id === selectedActivityId}
                 onClick={() =>
-                  onSelect?.(activity.id, activity.title, activity.activeDurationMs)
+                  onSelect?.(
+                    activity.id,
+                    activity.title,
+                    activity.activeDurationMs,
+                  )
                 }
                 onStart={() => onStart?.(activity.id)}
                 onPause={() => onPause?.(activity.id)}

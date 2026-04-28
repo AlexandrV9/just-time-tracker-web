@@ -13,6 +13,7 @@ export type ActivityCardProps = {
   activeDurationMs: number;
   withControlButtons?: boolean;
   isSelected?: boolean;
+  isInteractive?: boolean;
   onClick?: () => void;
   onStart?: () => void;
   onPause?: () => void;
@@ -24,6 +25,7 @@ export const ActivityCard = ({
   activeDurationMs,
   withControlButtons = true,
   isSelected = false,
+  isInteractive = true,
   onStart,
   onPause,
   onFinish,
@@ -32,6 +34,8 @@ export const ActivityCard = ({
   const hasActiveSession = resolveHasActiveSession({
     activityStatus: activity.status,
   });
+
+  const isOutlined = isSelected || hasActiveSession;
 
   const displayedSeconds = useDisplayedSeconds({
     activeDurationMs,
@@ -46,8 +50,10 @@ export const ActivityCard = ({
   return (
     <ActivityCardView
       onClick={onClick}
-      outline={isSelected ? "2px solid" : undefined}
-      outlineColor={isSelected ? "purple.focusRing" : undefined}
+      cursor={isInteractive ? "pointer" : "default"}
+      _hover={isInteractive ? { bg: "bg.subtle" } : {}}
+      outline={isOutlined ? "2px solid" : undefined}
+      outlineColor={isOutlined ? "purple.focusRing" : undefined}
     >
       <ActivityCardView.Body>
         <Flex flex="1" minH={0} justifyContent="space-between">

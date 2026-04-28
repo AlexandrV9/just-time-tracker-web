@@ -28,20 +28,20 @@ export function ActivityCardControls({
           size="2xs"
           onClick={(event: MouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
-            onPause?.(activityId);
+            onFinish?.(activityId);
           }}
         >
-          <PauseIcon />
+          <StopIcon />
         </IconButton>
         <IconButton
           variant="ghost"
           size="2xs"
           onClick={(event: MouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
-            onFinish?.(activityId);
+            onPause?.(activityId);
           }}
         >
-          <StopIcon />
+          <PauseIcon />
         </IconButton>
       </Flex>
     );

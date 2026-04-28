@@ -164,7 +164,7 @@ export const ActivityPage = () => {
         {activity.description ? <Text>{activity.description}</Text> : null}
       </Flex>
 
-      <Box display="flex" flexDirection="column" gap="0.5rem" px={1}>
+      <Box display="flex" flexDirection="column" gap="0.5rem">
         <Flex justifyContent="space-between" gap={4}>
           <Text textStyle="sm" color="fg.muted">
             {t("pages.activities.detail.createdAtLabel")}

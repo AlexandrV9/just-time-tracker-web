@@ -39,9 +39,24 @@ export const ActivityTodayList = ({
     planId,
   });
 
+  const runningActivityId = activityGroup?.activities.find(
+    (item) => item.status === "active",
+  )?.id;
+
   const handleStartActivity = async (activityId: string) => {
+    if (runningActivityId && activityId !== runningActivityId) return;
     onSelectActivity?.(activityId);
     return startActivity(activityId);
+  };
+
+  const handleSelectActivity = (activityId: string) => {
+    if (runningActivityId && activityId !== runningActivityId) return;
+    onSelectActivity?.(activityId);
+  };
+
+  const handleFinishActivity = (activityId: string) => {
+    if (runningActivityId && activityId !== runningActivityId) return;
+    finishActivity?.(activityId);
   };
 
   const renderContent = () => {
@@ -89,10 +104,10 @@ export const ActivityTodayList = ({
         withControlButtons
         data={activityGroup}
         selectedActivityId={selectedActivityId}
-        onSelect={onSelectActivity}
+        onSelect={handleSelectActivity}
         onStart={handleStartActivity}
         onPause={pauseActivity}
-        onFinish={finishActivity}
+        onFinish={handleFinishActivity}
       />
     );
   };

@@ -1,6 +1,7 @@
 import { BarSegment, useChart } from "@chakra-ui/charts";
 
 import type { ReactNode } from "react";
+import { useTranslation } from "~/shared/hooks";
 
 import {
   convertSecondsToTimeObject,
@@ -26,13 +27,13 @@ const formatDuration = (seconds: number) =>
 
 export const ActivitySessionBar = ({
   data,
-  t,
   rightSlot,
 }: {
   data: SessionChart;
-  t: (key: string) => string;
   rightSlot?: ReactNode;
 }) => {
+  const { t } = useTranslation();
+
   const chart = useChart({ data: data.chartData });
 
   return (
