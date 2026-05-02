@@ -28,7 +28,9 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
       p="1rem"
       borderRadius="2xl"
       gap={1}
+      h="full"
       cursor="pointer"
+      userSelect="none"
       onClick={() =>
         navigate({
           to: "/activities/$activityId",

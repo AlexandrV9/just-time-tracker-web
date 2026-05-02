@@ -5,26 +5,15 @@ import {
   convertTimeObjectToTimeString,
   Stack,
   Text,
-  type TimeObject,
 } from "~/shared/ui";
 import { useDisplayedSeconds } from "~/features/ActivityCard/useDisplayedSeconds";
-import { useRunningActivity } from "./useRunningActivity";
+import { useCurrentActivity } from "../useCurrentActivity";
 
-type StopwatchProps = {
-  selectedActivityId?: string;
-};
+export function Stopwatch() {
+  const { currentActivity: resolvedActivity } = useCurrentActivity();
 
-export function Stopwatch({ selectedActivityId }: StopwatchProps) {
-  const { runningActivity, activities } = useRunningActivity();
-
-  const selectedActivity = selectedActivityId
-    ? activities.find((a) => a.id === selectedActivityId)
-    : undefined;
-
-  const selectedActiveDurationMs = selectedActivity?.activeDurationMs;
-
-  const isLive = runningActivity?.status === "active";
-  const activeDurationMs = runningActivity?.activeDurationMs ?? 0;
+  const isLive = resolvedActivity?.status === "active";
+  const activeDurationMs = resolvedActivity?.activeDurationMs ?? 0;
 
   const tickSeconds = useDisplayedSeconds({
     activeDurationMs,
@@ -32,27 +21,24 @@ export function Stopwatch({ selectedActivityId }: StopwatchProps) {
   });
 
   const seconds = useMemo(() => {
-    if (runningActivity) {
-      if (isLive) return tickSeconds;
-      return Math.floor(runningActivity.activeDurationMs / 1000);
+    if (!resolvedActivity) return 0;
+    if (resolvedActivity.status === "active") {
+      return tickSeconds;
     }
-    if (selectedActiveDurationMs !== undefined) {
-      return Math.floor(selectedActiveDurationMs / 1000);
-    }
-    return 0;
-  }, [runningActivity, isLive, tickSeconds, selectedActiveDurationMs]);
-
-  const timeObject = useMemo(
-    (): TimeObject => convertSecondsToTimeObject(seconds),
-    [seconds],
-  );
+    return Math.floor(resolvedActivity.activeDurationMs / 1000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    resolvedActivity?.id,
+    resolvedActivity?.status,
+    resolvedActivity?.activeDurationMs,
+    tickSeconds,
+  ]);
 
   const displayedTime = useMemo(() => {
-    return convertTimeObjectToTimeString(timeObject);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeObject.hours, timeObject.minutes, timeObject.seconds]);
+    return convertTimeObjectToTimeString(convertSecondsToTimeObject(seconds));
+  }, [seconds]);
 
-  const displayedTitle = selectedActivity?.title ?? runningActivity?.title;
+  const displayedTitle = resolvedActivity?.title;
 
   return (
     <Stack.VStack

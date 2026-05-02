@@ -1,6 +1,6 @@
 import type { ActivityDTO } from "@to-do-list/shared";
 import { useMemo } from "react";
-import { Flex, Text } from "~/shared/ui";
+import { Box, Flex, Text } from "~/shared/ui";
 
 import { ActivityCardControls } from "./ActivityCardControls";
 import { useDisplayedSeconds } from "./useDisplayedSeconds";
@@ -12,6 +12,7 @@ export type ActivityCardProps = {
   activity: ActivityDTO;
   activeDurationMs: number;
   withControlButtons?: boolean;
+  mutedControls?: boolean;
   isSelected?: boolean;
   isInteractive?: boolean;
   onClick?: () => void;
@@ -24,6 +25,7 @@ export const ActivityCard = ({
   activity,
   activeDurationMs,
   withControlButtons = true,
+  mutedControls = false,
   isSelected = false,
   isInteractive = true,
   onStart,
@@ -35,7 +37,8 @@ export const ActivityCard = ({
     activityStatus: activity.status,
   });
 
-  const isOutlined = isSelected || hasActiveSession;
+  const showRunningOutline = hasActiveSession;
+  const showSelectionOutline = isSelected && !hasActiveSession;
 
   const displayedSeconds = useDisplayedSeconds({
     activeDurationMs,
@@ -52,8 +55,21 @@ export const ActivityCard = ({
       onClick={onClick}
       cursor={isInteractive ? "pointer" : "default"}
       _hover={isInteractive ? { bg: "bg.subtle" } : {}}
-      outline={isOutlined ? "2px solid" : undefined}
-      outlineColor={isOutlined ? "purple.focusRing" : undefined}
+      outline={
+        showRunningOutline
+          ? "2px solid"
+          : showSelectionOutline
+            ? "1px solid"
+            : undefined
+      }
+      outlineColor={
+        showRunningOutline
+          ? "purple.focusRing"
+          : showSelectionOutline
+            ? "border.emphasized"
+            : undefined
+      }
+      outlineOffset={showSelectionOutline ? "0px" : undefined}
     >
       <ActivityCardView.Body>
         <Flex flex="1" minH={0} justifyContent="space-between">
@@ -68,19 +84,26 @@ export const ActivityCard = ({
           textStyle="sm"
           fontWeight="medium"
           fontFamily="Roboto Mono, monospace"
-          userSelect="none"
         >
           {displayedTime}
         </Text>
         {withControlButtons && (
-          <ActivityCardControls
-            activityId={activity.id}
-            hasActiveSession={hasActiveSession}
-            sessionStatus={activity.status}
-            onStart={onStart}
-            onPause={onPause}
-            onFinish={onFinish}
-          />
+          <Box
+            opacity={mutedControls ? 0.38 : 1}
+            pointerEvents={mutedControls ? "none" : "auto"}
+            cursor={mutedControls ? "not-allowed" : undefined}
+            display="flex"
+            alignItems="center"
+          >
+            <ActivityCardControls
+              activityId={activity.id}
+              hasActiveSession={hasActiveSession}
+              sessionStatus={activity.status}
+              onStart={onStart}
+              onPause={onPause}
+              onFinish={onFinish}
+            />
+          </Box>
         )}
       </ActivityCardView.Footer>
     </ActivityCardView>

@@ -22,11 +22,13 @@ import {
 type ActivityTodayListProps = {
   selectedActivityId?: string;
   onSelectActivity?: (id: string) => void;
+  onEnsureSelectedActivity?: (id: string) => void;
 };
 
 export const ActivityTodayList = ({
   selectedActivityId,
   onSelectActivity,
+  onEnsureSelectedActivity,
 }: ActivityTodayListProps) => {
   const addTodayActivityDialog = useDialog();
 
@@ -45,13 +47,19 @@ export const ActivityTodayList = ({
 
   const handleStartActivity = async (activityId: string) => {
     if (runningActivityId && activityId !== runningActivityId) return;
-    onSelectActivity?.(activityId);
+    onEnsureSelectedActivity?.(activityId);
     return startActivity(activityId);
   };
 
   const handleSelectActivity = (activityId: string) => {
     if (runningActivityId && activityId !== runningActivityId) return;
     onSelectActivity?.(activityId);
+  };
+
+  const handlePauseActivity = async (activityId: string) => {
+    if (runningActivityId && activityId !== runningActivityId) return;
+    await pauseActivity(activityId);
+    onEnsureSelectedActivity?.(activityId);
   };
 
   const handleFinishActivity = (activityId: string) => {
@@ -106,7 +114,7 @@ export const ActivityTodayList = ({
         selectedActivityId={selectedActivityId}
         onSelect={handleSelectActivity}
         onStart={handleStartActivity}
-        onPause={pauseActivity}
+        onPause={handlePauseActivity}
         onFinish={handleFinishActivity}
       />
     );
@@ -116,7 +124,7 @@ export const ActivityTodayList = ({
 
   return (
     <>
-      <Flex align="center" justify="center" h="30px">
+      <Flex align="center" justify="center" h="30px" position="relative">
         <Box w="full" h="1px" bg="bg.emphasized" />
         <IconButton
           size="2xs"

@@ -9,8 +9,9 @@ type UseRunningActivityResult = {
 export function useRunningActivity(): UseRunningActivityResult {
   const { activityGroup } = useTodayActivities();
 
+  /** Совпадает с карточкой с идущим счётом: только `active`, паузы смотреть только по выбору из URL. */
   const runningActivity = activityGroup.activities.find(
-    (activity) => activity.status === "active" || activity.status === "paused",
+    (a) => a.status === "active",
   );
 
   return { runningActivity, activities: activityGroup.activities };

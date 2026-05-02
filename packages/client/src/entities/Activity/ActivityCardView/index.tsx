@@ -23,6 +23,7 @@ export const ActivityCardView = (props: ActivityCardProps) => {
       gap={1}
       overflow="hidden"
       cursor="pointer"
+      userSelect="none"
       _hover={{ bg: "bg.subtle" }}
       {...props}
     />

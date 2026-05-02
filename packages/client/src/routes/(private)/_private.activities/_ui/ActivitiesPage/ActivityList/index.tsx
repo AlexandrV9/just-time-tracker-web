@@ -40,7 +40,12 @@ export const ActivityList = () => {
   }, [isLastInView, fetchNextPage, hasNextPage]);
 
   return (
-    <List.Root listStyleType="none" w="full" gap="1rem">
+    <List.Root
+      display="grid"
+      gap="1rem"
+      gridTemplateColumns="repeat(auto-fill, minmax(250px, 1fr))"
+      listStyleType="none"
+    >
       {activities.map((activity) => (
         <List.Item key={activity.id}>
           <ActivityCard activity={activity} />

@@ -37,6 +37,12 @@ export function ActivityGroup({
     convertSecondsToTimeObject(data.totalActiveTime),
   );
 
+  const runningActivityId = data.activities.find(
+    (a) => a.status === "active",
+  )?.id;
+
+  const freezeSelection = Boolean(withControlButtons && runningActivityId);
+
   return (
     <Box display="flex" flexDirection="column" gap="0.75rem">
       <Flex justifyContent="space-between" alignItems="center" px={1}>
@@ -58,19 +64,35 @@ export function ActivityGroup({
       </Flex>
       <ActivityListView>
         {data.activities.map((activity) => {
+          const mutedControls =
+            Boolean(
+              withControlButtons &&
+                runningActivityId &&
+                activity.id !== runningActivityId,
+            );
+
           return (
             <ActivityListView.Item key={activity.id}>
               <ActivityCard
                 activity={activity}
                 activeDurationMs={activity.activeDurationMs}
                 withControlButtons={withControlButtons}
-                isSelected={activity.id === selectedActivityId}
-                onClick={() =>
-                  onSelect?.(
-                    activity.id,
-                    activity.title,
-                    activity.activeDurationMs,
-                  )
+                mutedControls={mutedControls}
+                isSelected={
+                  !!selectedActivityId &&
+                  activity.id === selectedActivityId &&
+                  !freezeSelection
+                }
+                isInteractive={!freezeSelection}
+                onClick={
+                  freezeSelection
+                    ? undefined
+                    : () =>
+                        onSelect?.(
+                          activity.id,
+                          activity.title,
+                          activity.activeDurationMs,
+                        )
                 }
                 onStart={() => onStart?.(activity.id)}
                 onPause={() => onPause?.(activity.id)}

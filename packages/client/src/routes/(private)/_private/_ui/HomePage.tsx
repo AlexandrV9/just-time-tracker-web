@@ -1,21 +1,18 @@
-import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Box, Flex } from "~/shared/ui";
-import { Stopwatch } from "./Stopwatch";
 import { ActivityTodayList } from "~/widgets";
+import { Stopwatch } from "./Stopwatch";
+import { useCurrentActivityStore } from "./useCurrentActivity";
 
 export function HomePage() {
-  const { activityId } = useSearch({ from: "/(private)/_private/" });
-  const navigate = useNavigate({ from: "/" });
-
-  const handleSelectActivity = (id: string) => {
-    navigate({
-      to: "/",
-      search: (prev) => ({
-        ...prev,
-        activityId: prev.activityId === id ? undefined : id,
-      }),
-    });
-  };
+  const selectedActivityId = useCurrentActivityStore(
+    (s) => s.selectedActivityId,
+  );
+  const toggleSelectedActivity = useCurrentActivityStore(
+    (s) => s.toggleSelectedActivity,
+  );
+  const ensureSelectedActivity = useCurrentActivityStore(
+    (s) => s.ensureSelectedActivity,
+  );
 
   return (
     <Box
@@ -27,11 +24,12 @@ export function HomePage() {
       maxWidth="100vw"
     >
       <Flex justifyContent="center">
-        <Stopwatch selectedActivityId={activityId} />
+        <Stopwatch />
       </Flex>
       <ActivityTodayList
-        selectedActivityId={activityId}
-        onSelectActivity={handleSelectActivity}
+        selectedActivityId={selectedActivityId}
+        onSelectActivity={toggleSelectedActivity}
+        onEnsureSelectedActivity={ensureSelectedActivity}
       />
     </Box>
   );

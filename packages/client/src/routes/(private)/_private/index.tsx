@@ -3,7 +3,6 @@ import { HomePage } from "./_ui/HomePage";
 import z from "zod";
 
 const privateSearchSchema = z.object({
-  tab: z.enum(["today", "history"]).catch("today"),
   activityId: z.string().optional(),
 });
 
