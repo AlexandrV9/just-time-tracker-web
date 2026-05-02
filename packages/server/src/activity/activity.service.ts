@@ -617,9 +617,9 @@ const getGroupedActivities = async (
       }
     }
 
-    // Fetch limit + 1 days to detect whether a next page exists.
-    const { days: rawDays, activities: rawActivities } =
-      await activityQueries.listActivitiesGroupedCursor({
+    // Days reflect where time was tracked (segments), not `activities.updated_at`.
+    const { days: rawDays } =
+      await activityQueries.listGroupedHistoryCalendarDays({
         createdById,
         beforeDay,
         fromDay,
@@ -641,31 +641,8 @@ const getGroupedActivities = async (
       };
     }
 
-    // Filter activities to only those belonging to the returned days.
-    const daySet = new Set(days);
-    const activities = rawActivities.filter((r) =>
-      daySet.has(String(r["calendarDay"])),
-    );
-
-    // Group activities by day.
-    const activityMap = new Map<string, ActivityDTO[]>();
-    for (const day of days) {
-      activityMap.set(day, []);
-    }
-    for (const row of activities) {
-      const day = String(row["calendarDay"]);
-      const { calendarDay: _cd, ...rest } = row as Record<string, unknown> & {
-        calendarDay: string;
-      };
-      activityMap.get(day)?.push(mapActivityRowToDTO(rest));
-    }
-
-    // Compute segment durations for each day window.
-    const allActivityIds = activities.map((r) => String(r["id"]));
-
     const oldestDay = days[days.length - 1]!;
     const newestDay = days[0]!;
-    // Shift day boundaries to UTC using the user's offset.
     const offsetMs = utcOffsetMinutes * 60000;
     const rangeFrom = new Date(
       Date.parse(`${oldestDay}T00:00:00.000Z`) - offsetMs,
@@ -675,97 +652,123 @@ const getGroupedActivities = async (
     ).toISOString();
 
     const segments =
-      allActivityIds.length > 0
-        ? await activitySessionSegmentQueries.listSegmentIntervalsForMultipleActivitiesInRange(
-            allActivityIds,
-            rangeFrom,
-            rangeTo,
-          )
-        : [];
-
-    // Map each segment's activityId to its calendarDay so we can bucket durations.
-    const activityDayMap = new Map<string, string>();
-    for (const row of activities) {
-      activityDayMap.set(String(row["id"]), String(row["calendarDay"]));
-    }
+      await activitySessionSegmentQueries.listSegmentIntervalsForUserActivitiesInRange(
+        createdById,
+        rangeFrom,
+        rangeTo,
+      );
 
     const floorMs = (n: number) => Math.floor(Math.max(0, n));
 
     type DurAgg = { activeDurationMs: number; pauseDurationMs: number };
 
-    // Per-day group totals.
+    const activityDayDurKey = (activityId: string, day: string) =>
+      `${activityId}|${day}`;
+
     const dayDurations = new Map<string, DurAgg>();
     for (const day of days) {
       dayDurations.set(day, { activeDurationMs: 0, pauseDurationMs: 0 });
     }
 
-    // Per-activity durations clipped to the day they belong to.
+    /** Per (`activityId`, local `YYYY-MM-DD`), durations clipped to that day. */
     const activityDayDurations = new Map<string, DurAgg>();
-    for (const row of activities) {
-      activityDayDurations.set(String(row["id"]), {
-        activeDurationMs: 0,
-        pauseDurationMs: 0,
-      });
-    }
 
     for (const seg of segments) {
-      const day = activityDayMap.get(seg.activityId);
-      if (!day) continue;
+      for (const day of days) {
+        const windowFromMs =
+          Date.parse(`${day}T00:00:00.000Z`) - utcOffsetMinutes * 60000;
+        const windowToMs = windowFromMs + 86400000;
 
-      const dayAgg = dayDurations.get(day);
-      if (!dayAgg) continue;
+        const clip = clipSegmentToWindow(
+          seg.startedAt,
+          seg.endedAt,
+          windowFromMs,
+          windowToMs,
+        );
+        if (!clip) continue;
 
-      // day is a local calendar date; shift to UTC to get the actual window.
-      const windowFromMs =
-        Date.parse(`${day}T00:00:00.000Z`) - utcOffsetMinutes * 60000;
-      const windowToMs = windowFromMs + 86400000;
+        const ms = clip.end - clip.start;
 
-      const clip = clipSegmentToWindow(
-        seg.startedAt,
-        seg.endedAt,
-        windowFromMs,
-        windowToMs,
-      );
-      if (!clip) continue;
+        const dayAgg = dayDurations.get(day);
+        if (dayAgg) {
+          if (seg.type === "active") {
+            dayAgg.activeDurationMs += ms;
+          } else {
+            dayAgg.pauseDurationMs += ms;
+          }
+        }
 
-      const ms = clip.end - clip.start;
-
-      if (seg.type === "active") {
-        dayAgg.activeDurationMs += ms;
-      } else {
-        dayAgg.pauseDurationMs += ms;
-      }
-
-      const actAgg = activityDayDurations.get(seg.activityId);
-      if (actAgg) {
+        const dk = activityDayDurKey(seg.activityId, day);
+        let actDayAgg = activityDayDurations.get(dk);
+        if (!actDayAgg) {
+          actDayAgg = { activeDurationMs: 0, pauseDurationMs: 0 };
+          activityDayDurations.set(dk, actDayAgg);
+        }
         if (seg.type === "active") {
-          actAgg.activeDurationMs += ms;
+          actDayAgg.activeDurationMs += ms;
         } else {
-          actAgg.pauseDurationMs += ms;
+          actDayAgg.pauseDurationMs += ms;
         }
       }
     }
 
-    const groups: GetGroupedActivitiesResponseDTO["groups"] = days.map(
-      (day) => {
-        const dayFromMs = Date.parse(`${day}T00:00:00.000Z`);
-        const dayToMs = dayFromMs + 86400000;
+    const idsNeeded = new Set<string>();
+    for (const [k, dur] of activityDayDurations) {
+      if (
+        floorMs(dur.activeDurationMs) + floorMs(dur.pauseDurationMs) <=
+        0
+      ) {
+        continue;
+      }
+      const pipeIdx = k.lastIndexOf("|");
+      if (pipeIdx <= 0) continue;
+      idsNeeded.add(k.slice(0, pipeIdx));
+    }
+
+    const dtoById = new Map<string, ActivityDTO>();
+    if (idsNeeded.size > 0) {
+      const rows = await activityQueries.getActivitiesByIds({
+        activityIds: [...idsNeeded],
+      });
+      for (const row of rows) {
+        const dto = mapActivityRowToDTO(row as Record<string, unknown>);
+        dtoById.set(dto.id, dto);
+      }
+    }
+
+    const groups: GetGroupedActivitiesResponseDTO["groups"] = days
+      .map((day) => {
         const durations = dayDurations.get(day) ?? {
           activeDurationMs: 0,
           pauseDurationMs: 0,
         };
 
-        const items = (activityMap.get(day) ?? []).map((activity) => {
-          const dur = activityDayDurations.get(activity.id);
-          if (!dur) return activity;
-          return {
-            ...activity,
-            activeDurationMs: floorMs(dur.activeDurationMs),
-            pauseDurationMs: floorMs(dur.pauseDurationMs),
-          };
-        });
+        const items: ActivityDTO[] = [];
 
-        // groupDateStart/End represent the local day boundaries in UTC.
+        for (const [k, dur] of activityDayDurations) {
+          const pipeIdx = k.lastIndexOf("|");
+          if (k.slice(pipeIdx + 1) !== day) continue;
+
+          const active = floorMs(dur.activeDurationMs);
+          const pause = floorMs(dur.pauseDurationMs);
+          if (active + pause <= 0) continue;
+
+          const activityId = k.slice(0, pipeIdx);
+          const base = dtoById.get(activityId);
+          if (!base) continue;
+
+          items.push({
+            ...base,
+            activeDurationMs: active,
+            pauseDurationMs: pause,
+          });
+        }
+
+        items.sort(
+          (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt),
+        );
+
+        const dayFromMs = Date.parse(`${day}T00:00:00.000Z`);
         const localMidnightUtcMs = dayFromMs - utcOffsetMinutes * 60000;
 
         return {
@@ -776,8 +779,8 @@ const getGroupedActivities = async (
           totalActiveDurationMs: floorMs(durations.activeDurationMs),
           totalPauseDurationMs: floorMs(durations.pauseDurationMs),
         };
-      },
-    );
+      })
+      .filter((group) => group.items.length > 0);
 
     let nextCursor: string | null = null;
     if (hasNext) {
@@ -799,6 +802,7 @@ const getGroupedActivities = async (
     };
   } catch (error) {
     console.error("Get grouped activities error:", error);
+
     return {
       success: false,
       message: "Failed to fetch grouped activities",

@@ -335,49 +335,59 @@ const deleteActivity = async (id: ActivityDTO["id"]): Promise<boolean> => {
 };
 
 /**
- * Fetches (limit + 1) distinct local calendar days and all activities belonging to them.
- * Ordered newest-first so the caller can detect hasNext by checking if limit+1 days came back.
+ * Local calendar days where the user has session segment time (not `activities.updated_at`).
+ * Expands each segment onto every calendar day its interval touches in local time.
  *
- * `beforeDay` is exclusive (YYYY-MM-DD) — used to continue from a cursor.
- * `utcOffsetMinutes` shifts UTC timestamps to the user's local timezone before extracting the date.
+ * Ordered newest-first. `limit` is typically `(page limit) + 1` for pagination.
+ *
+ * `beforeDay` / `fromDay` / `toDay` are YYYY-MM-DD and compare against calendar_day.
  */
-const listActivitiesGroupedCursor = async (params: {
+const listGroupedHistoryCalendarDays = async (params: {
   createdById: string;
   beforeDay?: string;
   fromDay?: string;
   toDay?: string;
   limit: number;
   utcOffsetMinutes: number;
-}): Promise<{ days: string[]; activities: Array<Record<string, unknown>> }> => {
+}): Promise<{ days: string[] }> => {
   const { createdById, beforeDay, fromDay, toDay, limit, utcOffsetMinutes } =
     params;
 
-  // Shift updated_at to local time before extracting the calendar date.
-  const localDate = `(updated_at + ($2::int * INTERVAL '1 minute'))::date`;
-
-  const conditions: string[] = ["created_by_id = $1"];
+  const conditions: string[] = [];
   const baseParams: unknown[] = [createdById, utcOffsetMinutes];
 
   if (beforeDay) {
     baseParams.push(beforeDay);
-    conditions.push(`${localDate} < $${baseParams.length}::date`);
+    conditions.push(`calendar_day::date < $${baseParams.length}::date`);
   }
   if (fromDay) {
     baseParams.push(fromDay);
-    conditions.push(`${localDate} >= $${baseParams.length}::date`);
+    conditions.push(`calendar_day::date >= $${baseParams.length}::date`);
   }
   if (toDay) {
     baseParams.push(toDay);
-    conditions.push(`${localDate} <= $${baseParams.length}::date`);
+    conditions.push(`calendar_day::date <= $${baseParams.length}::date`);
   }
 
-  const where = `WHERE ${conditions.join(" AND ")}`;
+  const whereExtra =
+    conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
   const daysQuery = `
-    SELECT DISTINCT
-      to_char(${localDate}, 'YYYY-MM-DD') AS calendar_day
-    FROM activities
-    ${where}
+    WITH seg_calendar_days AS (
+      SELECT DISTINCT to_char(gs.day::date, 'YYYY-MM-DD') AS calendar_day
+      FROM activity_session_segments seg
+      INNER JOIN activity_sessions s ON s.id = seg.session_id
+      INNER JOIN activities a ON a.id = s.activity_id
+      CROSS JOIN LATERAL generate_series(
+        (seg.started_at + ($2::int * INTERVAL '1 minute'))::date,
+        (COALESCE(seg.ended_at, NOW()) + ($2::int * INTERVAL '1 minute'))::date,
+        INTERVAL '1 day'
+      ) AS gs(day)
+      WHERE a.created_by_id = $1
+    )
+    SELECT calendar_day
+    FROM seg_calendar_days
+    ${whereExtra}
     ORDER BY calendar_day DESC
     LIMIT $${baseParams.length + 1}
   `;
@@ -387,30 +397,7 @@ const listActivitiesGroupedCursor = async (params: {
     String(r["calendar_day"]),
   );
 
-  if (days.length === 0) {
-    return { days, activities: [] };
-  }
-
-  const activitiesQuery = `
-    SELECT
-      ${ACTIVITY_RETURNING_COLUMNS},
-      to_char(${localDate}, 'YYYY-MM-DD') AS "calendarDay"
-    FROM activities
-    WHERE created_by_id = $1
-      AND to_char(${localDate}, 'YYYY-MM-DD') = ANY($3::text[])
-    ORDER BY updated_at DESC
-  `;
-
-  const activitiesResult = await pool.query(activitiesQuery, [
-    createdById,
-    utcOffsetMinutes,
-    days,
-  ]);
-
-  return {
-    days,
-    activities: activitiesResult.rows as Array<Record<string, unknown>>,
-  };
+  return { days };
 };
 
 export const activityQueries = {
@@ -418,7 +405,7 @@ export const activityQueries = {
   createActivityFromQuickTimer,
   getActivityById,
   getActivitiesByIds,
-  listActivitiesGroupedCursor,
+  listGroupedHistoryCalendarDays,
   getActivities,
   updateActivity,
   deleteActivity,
