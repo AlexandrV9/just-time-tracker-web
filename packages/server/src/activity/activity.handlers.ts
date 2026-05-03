@@ -14,6 +14,7 @@ import {
   getActivitiesAnalyticsQuerySchema,
   createActivityFromQuickTimerSchema,
   getGroupedActivitiesQuerySchema,
+  getGroupedActivityItemsQuerySchema,
   getActivitySessionSegmentsSchema,
 } from "@to-do-list/shared";
 
@@ -123,6 +124,12 @@ export const activityHandlers = {
     "query",
     getGroupedActivitiesQuerySchema,
     activitiesService.getGroupedActivities,
+  ),
+
+  getGroupedActivityItems: createHandler(
+    "query",
+    getGroupedActivityItemsQuerySchema,
+    activitiesService.getGroupedActivityItems,
   ),
 
   getSessionsByActivityId: async (c: Context) => {

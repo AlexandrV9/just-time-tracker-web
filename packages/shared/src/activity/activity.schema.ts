@@ -233,20 +233,38 @@ export type GetActivitiesAnalyticsResponseDTO = z.infer<
   typeof getActivitiesAnalyticsResponseSchema
 >;
 
+/** Одна строка списка внутри группы: карточка активности + время за интервал группы. */
+export const groupedActivityTimeRowSchema = z.object({
+  activity: activitySchema,
+  activeDurationMs: z.number().int().nonnegative(),
+  pauseDurationMs: z.number().int().nonnegative(),
+});
+
+export type GroupedActivityTimeRowDTO = z.infer<
+  typeof groupedActivityTimeRowSchema
+>;
+
+export const groupedItemsPaginationSchema = z.object({
+  hasNext: z.boolean(),
+  nextCursor: z.string().nullable(),
+});
+
+/** Один календарный bucket (день / неделя / месяц) в ответе `GET /activities/grouped`. */
 export const activityGroupSchema = z.object({
+  groupBy: z.enum(["day", "week", "month"]),
   groupDateStart: z.iso.datetime(), // inclusive
   groupDateEnd: z.iso.datetime(), // exclusive
-  items: z.array(activitySchema),
-  hasMoreItems: z.boolean(),
   totalActiveDurationMs: z.number().int().nonnegative(),
   totalPauseDurationMs: z.number().int().nonnegative(),
+  items: z.array(groupedActivityTimeRowSchema),
+  itemsPagination: groupedItemsPaginationSchema,
 });
 
 export type ActivityGroupDTO = z.infer<typeof activityGroupSchema>;
 
 export const getGroupedActivitiesResponseSchema = z.object({
   groups: z.array(activityGroupSchema),
-  pagination: z.object({
+  groupsPagination: z.object({
     nextCursor: z.string().nullable(),
     hasNext: z.boolean(),
   }),
@@ -258,15 +276,37 @@ export type GetGroupedActivitiesResponseDTO = z.infer<
 
 export const getGroupedActivitiesQuerySchema = z.object({
   createdById: z.string().min(1, "createdById is required"),
-  groupBy: z.enum(["day"]).optional().default("day"),
-  cursor: z.string().min(1).optional(),
-  limit: z.coerce.number().int().positive(),
+  groupBy: z.enum(["day", "week", "month"]).optional().default("day"),
+  groupCursor: z.string().min(1).optional(),
+  groupLimit: z.number().int().positive().optional().default(5),
+  itemsLimit: z.number().int().positive().optional().default(8),
   fromDate: z.iso.datetime().optional(),
   toDate: z.iso.datetime().optional(),
-  /** UTC offset in minutes (e.g. 180 for UTC+3). Used to group activities by local calendar day. */
-  utcOffsetMinutes: z.coerce.number().int().min(-840).max(840).default(0),
 });
 
 export type GetGroupedActivitiesQueryDTO = z.infer<
   typeof getGroupedActivitiesQuerySchema
+>;
+
+/** Query для `GET /activities/grouped/items` — догрузка списка активностей внутри одной группы. */
+export const getGroupedActivityItemsQuerySchema = z.object({
+  createdById: z.string().min(1, "createdById is required"),
+  cursor: z.string().min(1, "cursor is required"),
+  limit: z.coerce.number().int().positive().max(100).optional().default(8),
+});
+
+export type GetGroupedActivityItemsQueryDTO = z.infer<
+  typeof getGroupedActivityItemsQuerySchema
+>;
+
+export const getGroupedActivityItemsResponseSchema = z.object({
+  groupBy: z.enum(["day", "week", "month"]),
+  groupDateStart: z.iso.datetime(),
+  groupDateEnd: z.iso.datetime(),
+  items: z.array(groupedActivityTimeRowSchema),
+  pagination: groupedItemsPaginationSchema,
+});
+
+export type GetGroupedActivityItemsResponseDTO = z.infer<
+  typeof getGroupedActivityItemsResponseSchema
 >;

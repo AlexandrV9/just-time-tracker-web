@@ -14,6 +14,7 @@ import type {
   CreateActivityFromQuickTimerDataDTO,
   GetGroupedActivitiesQueryDTO,
   GetGroupedActivitiesResponseDTO,
+  GetGroupedActivityItemsResponseDTO,
   GetActivitiesAnalyticsResponseDTO,
   GetActivitiesAnalyticsQueryDTO,
   GetActivitySessionSegmentsDTO,
@@ -566,238 +567,215 @@ const getActivitiesAnalytics = async (
   }
 };
 
-type CursorPayload = {
-  groupBy: "day";
-  groupStart: string;
-  groupEnd: string;
-  offsetInGroup: number;
-  [key: string]: unknown;
+type ActivityGroupBy = "day" | "week" | "month";
+
+/** Курсор страницы групп: сдвигаем верхнюю границу интервала вниз по времени (см. `beforeDate`). */
+type GroupCursorPayload = {
+  type: "groups";
+  groupBy: ActivityGroupBy;
+  /** Верхняя граница полуинтервала [fromDate, beforeDate) для следующего запроса (исключаем уже отданные группы). */
+  beforeDate: string;
+  /** Нижняя граница всей выборки; совпадает с fromDate первого запроса. */
+  fromDate: string;
+  /** Исходный toDate запроса (опционально, для отладки / будущего использования). */
+  toDate?: string;
 };
 
-function encodeCursor(payload: CursorPayload): string {
-  return Buffer.from(JSON.stringify(payload)).toString("base64");
-}
-
-function decodeCursor(cursor: string): CursorPayload | null {
-  try {
-    return JSON.parse(
-      Buffer.from(cursor, "base64").toString("utf8"),
-    ) as CursorPayload;
-  } catch {
-    return null;
-  }
-}
+/** Курсор страницы элементов внутри одной группы: OFFSET по списку активностей в bucket. */
+type ItemsCursorPayload = {
+  type: "items";
+  groupBy: ActivityGroupBy;
+  groupDateStart: string;
+  groupDateEnd: string;
+  offset: number;
+};
 
 type GetGroupedActivitiesResult =
   | SuccessResponse<GetGroupedActivitiesResponseDTO>
   | ErrorResponse;
 
-const getGroupedActivities = async (
+const encodeCursor = (payload: GroupCursorPayload | ItemsCursorPayload) => {
+  return Buffer.from(JSON.stringify(payload)).toString("base64");
+};
+
+const decodeCursor = <T>(cursor: string): T | null => {
+  try {
+    return JSON.parse(Buffer.from(cursor, "base64").toString("utf8")) as T;
+  } catch {
+    return null;
+  }
+};
+
+const getActivitiesByGroupedItems = async (
+  items: Array<{
+    activityId: string;
+    activeDurationMs: number;
+    pauseDurationMs: number;
+  }>,
+) => {
+  const activityIds = items.map((item) => item.activityId);
+  if (activityIds.length === 0) {
+    return [];
+  }
+
+  const activityRows = await activityQueries.getActivitiesByIds({
+    activityIds,
+  });
+
+  const activityById = new Map<string, ActivityDTO>();
+
+  for (const row of activityRows) {
+    const dto = mapActivityRowToDTO(row as Record<string, unknown>);
+    activityById.set(dto.id, dto);
+  }
+
+  return items
+    .map((item) => {
+      const activity = activityById.get(item.activityId);
+      if (!activity) {
+        return null;
+      }
+      return {
+        activity,
+        activeDurationMs: item.activeDurationMs,
+        pauseDurationMs: item.pauseDurationMs,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+};
+
+/**
+ * Первая ступень пагинации: непустые календарные группы за [fromDate, toDate) (toDate по умолчанию — «сейчас»),
+ * от новых к старым (`listNonEmptyActivityGroups` ORDER BY group_date_start DESC).
+ *
+ * Вторая ступень: для каждой группы на этой странице подгружается только первая порция элементов (`itemsLimit`);
+ * следующие порции — отдельным методом `getGroupedActivityItems` по `itemsPagination.nextCursor`.
+ *
+ * Следующая страница групп: `groupsPagination.nextCursor` кодирует `beforeDate` = `groupDateStart` самой «старой»
+ * группы на текущей странице, чтобы следующий запрос выбрал bucket'ы строго раньше без дубликатов.
+ */
+// GET /api/activities/grouped
+export const getGroupedActivities = async (
   params: GetGroupedActivitiesQueryDTO,
 ): Promise<GetGroupedActivitiesResult> => {
   try {
-    const { createdById, cursor, limit, fromDate, toDate, utcOffsetMinutes } =
-      params;
+    const {
+      createdById,
+      groupBy = "day",
+      groupCursor,
+      groupLimit = 5,
+      itemsLimit = 8,
+      fromDate,
+      toDate,
+    } = params;
 
-    const fromDay = fromDate
-      ? new Date(fromDate).toISOString().slice(0, 10)
-      : undefined;
+    const now = new Date().toISOString();
 
-    const toDay = toDate
-      ? new Date(toDate).toISOString().slice(0, 10)
-      : undefined;
+    const decodedGroupCursor = groupCursor
+      ? decodeCursor<GroupCursorPayload>(groupCursor)
+      : null;
 
-    let beforeDay: string | undefined;
-
-    if (cursor) {
-      const payload = decodeCursor(cursor);
-
-      if (payload?.groupStart) {
-        beforeDay = new Date(payload.groupStart).toISOString().slice(0, 10);
-      }
-    }
-
-    // Days reflect where time was tracked (segments), not `activities.updated_at`.
-    const { days: rawDays } =
-      await activityQueries.listGroupedHistoryCalendarDays({
-        createdById,
-        beforeDay,
-        fromDay,
-        toDay,
-        limit: limit + 1,
-        utcOffsetMinutes,
-      });
-
-    const hasNext = rawDays.length > limit;
-    const days = hasNext ? rawDays.slice(0, limit) : rawDays;
-
-    if (days.length === 0) {
+    if (groupCursor && (!decodedGroupCursor || decodedGroupCursor.type !== "groups")) {
       return {
-        success: true,
-        data: {
-          groups: [],
-          pagination: { nextCursor: null, hasNext: false },
-        },
+        success: false,
+        message: "Invalid group cursor",
       };
     }
 
-    const oldestDay = days[days.length - 1]!;
-    const newestDay = days[0]!;
-    const offsetMs = utcOffsetMinutes * 60000;
-    const rangeFrom = new Date(
-      Date.parse(`${oldestDay}T00:00:00.000Z`) - offsetMs,
-    ).toISOString();
-    const rangeTo = new Date(
-      Date.parse(`${newestDay}T00:00:00.000Z`) - offsetMs + 86400000 - 1,
-    ).toISOString();
+    const resolvedGroupBy = decodedGroupCursor?.groupBy ?? groupBy;
+    const effectiveFromDate = decodedGroupCursor?.fromDate ?? fromDate;
+    // Без курсора: [fromDate, toDate∪now). С курсором групп: верхняя граница = beforeDate из курсора.
+    const effectiveToDate = decodedGroupCursor?.beforeDate ?? toDate ?? now;
 
-    const segments =
-      await activitySessionSegmentQueries.listSegmentIntervalsForUserActivitiesInRange(
+    if (!effectiveFromDate) {
+      return {
+        success: false,
+        message: "fromDate is required",
+      };
+    }
+
+    const rawGroupsResult = await activitySessionQueries.listNonEmptyActivityGroups({
+      createdById,
+      groupBy: resolvedGroupBy,
+      fromDate: effectiveFromDate,
+      toDate: effectiveToDate,
+      limit: groupLimit + 1,
+    });
+
+    const hasNextGroups = rawGroupsResult.groups.length > groupLimit;
+    const selectedGroups = hasNextGroups
+      ? rawGroupsResult.groups.slice(0, groupLimit)
+      : rawGroupsResult.groups;
+
+    const responseGroups: GetGroupedActivitiesResponseDTO["groups"] = [];
+
+    // Для каждой группы на странице: суммарное время в bucket + первая страница активностей (offset 0).
+    for (const group of selectedGroups) {
+      const totals = await activitySessionQueries.getTotalTimeInRange({
         createdById,
-        rangeFrom,
-        rangeTo,
-      );
-
-    const floorMs = (n: number) => Math.floor(Math.max(0, n));
-
-    type DurAgg = { activeDurationMs: number; pauseDurationMs: number };
-
-    const activityDayDurKey = (activityId: string, day: string) =>
-      `${activityId}|${day}`;
-
-    const dayDurations = new Map<string, DurAgg>();
-    for (const day of days) {
-      dayDurations.set(day, { activeDurationMs: 0, pauseDurationMs: 0 });
-    }
-
-    /** Per (`activityId`, local `YYYY-MM-DD`), durations clipped to that day. */
-    const activityDayDurations = new Map<string, DurAgg>();
-
-    for (const seg of segments) {
-      for (const day of days) {
-        const windowFromMs =
-          Date.parse(`${day}T00:00:00.000Z`) - utcOffsetMinutes * 60000;
-        const windowToMs = windowFromMs + 86400000;
-
-        const clip = clipSegmentToWindow(
-          seg.startedAt,
-          seg.endedAt,
-          windowFromMs,
-          windowToMs,
-        );
-        if (!clip) continue;
-
-        const ms = clip.end - clip.start;
-
-        const dayAgg = dayDurations.get(day);
-        if (dayAgg) {
-          if (seg.type === "active") {
-            dayAgg.activeDurationMs += ms;
-          } else {
-            dayAgg.pauseDurationMs += ms;
-          }
-        }
-
-        const dk = activityDayDurKey(seg.activityId, day);
-        let actDayAgg = activityDayDurations.get(dk);
-        if (!actDayAgg) {
-          actDayAgg = { activeDurationMs: 0, pauseDurationMs: 0 };
-          activityDayDurations.set(dk, actDayAgg);
-        }
-        if (seg.type === "active") {
-          actDayAgg.activeDurationMs += ms;
-        } else {
-          actDayAgg.pauseDurationMs += ms;
-        }
-      }
-    }
-
-    const idsNeeded = new Set<string>();
-    for (const [k, dur] of activityDayDurations) {
-      if (
-        floorMs(dur.activeDurationMs) + floorMs(dur.pauseDurationMs) <=
-        0
-      ) {
-        continue;
-      }
-      const pipeIdx = k.lastIndexOf("|");
-      if (pipeIdx <= 0) continue;
-      idsNeeded.add(k.slice(0, pipeIdx));
-    }
-
-    const dtoById = new Map<string, ActivityDTO>();
-    if (idsNeeded.size > 0) {
-      const rows = await activityQueries.getActivitiesByIds({
-        activityIds: [...idsNeeded],
+        fromDate: group.groupDateStart,
+        toDate: group.groupDateEnd,
       });
-      for (const row of rows) {
-        const dto = mapActivityRowToDTO(row as Record<string, unknown>);
-        dtoById.set(dto.id, dto);
-      }
-    }
 
-    const groups: GetGroupedActivitiesResponseDTO["groups"] = days
-      .map((day) => {
-        const durations = dayDurations.get(day) ?? {
-          activeDurationMs: 0,
-          pauseDurationMs: 0,
-        };
+      const rawItemsResult = await activitySessionQueries.listActivityTimeItemsInRange({
+        createdById,
+        fromDate: group.groupDateStart,
+        toDate: group.groupDateEnd,
+        limit: itemsLimit + 1,
+        offset: 0,
+      });
 
-        const items: ActivityDTO[] = [];
+      const hasNextItems = rawItemsResult.items.length > itemsLimit;
+      const selectedItems = hasNextItems
+        ? rawItemsResult.items.slice(0, itemsLimit)
+        : rawItemsResult.items;
 
-        for (const [k, dur] of activityDayDurations) {
-          const pipeIdx = k.lastIndexOf("|");
-          if (k.slice(pipeIdx + 1) !== day) continue;
+      const items = await getActivitiesByGroupedItems(selectedItems);
 
-          const active = floorMs(dur.activeDurationMs);
-          const pause = floorMs(dur.pauseDurationMs);
-          if (active + pause <= 0) continue;
-
-          const activityId = k.slice(0, pipeIdx);
-          const base = dtoById.get(activityId);
-          if (!base) continue;
-
-          items.push({
-            ...base,
-            activeDurationMs: active,
-            pauseDurationMs: pause,
-          });
-        }
-
-        items.sort(
-          (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt),
-        );
-
-        const dayFromMs = Date.parse(`${day}T00:00:00.000Z`);
-        const localMidnightUtcMs = dayFromMs - utcOffsetMinutes * 60000;
-
-        return {
-          groupDateStart: new Date(localMidnightUtcMs).toISOString(),
-          groupDateEnd: new Date(localMidnightUtcMs + 86400000).toISOString(),
-          items,
-          hasMoreItems: false,
-          totalActiveDurationMs: floorMs(durations.activeDurationMs),
-          totalPauseDurationMs: floorMs(durations.pauseDurationMs),
-        };
-      })
-      .filter((group) => group.items.length > 0);
-
-    let nextCursor: string | null = null;
-    if (hasNext) {
-      const oldestReturnedDay = days[days.length - 1]!;
-      nextCursor = encodeCursor({
-        groupBy: "day",
-        groupStart: `${oldestReturnedDay}T00:00:00.000Z`,
-        groupEnd: `${oldestReturnedDay}T00:00:00.000Z`,
-        offsetInGroup: 0,
+      responseGroups.push({
+        groupBy: resolvedGroupBy,
+        groupDateStart: group.groupDateStart,
+        groupDateEnd: group.groupDateEnd,
+        totalActiveDurationMs: totals.activeDurationMs,
+        totalPauseDurationMs: totals.pauseDurationMs,
+        items,
+        itemsPagination: {
+          hasNext: hasNextItems,
+          nextCursor: hasNextItems
+            ? encodeCursor({
+                type: "items",
+                groupBy: resolvedGroupBy,
+                groupDateStart: group.groupDateStart,
+                groupDateEnd: group.groupDateEnd,
+                // Первая «догрузка» начинается с offset = число уже отданных строк.
+                offset: itemsLimit,
+              } satisfies ItemsCursorPayload)
+            : null,
+        },
       });
     }
+
+    const oldestReturnedGroup = selectedGroups.at(-1);
+
+    const nextGroupCursor =
+      hasNextGroups && oldestReturnedGroup
+        ? encodeCursor({
+            type: "groups",
+            groupBy: resolvedGroupBy,
+            beforeDate: oldestReturnedGroup.groupDateStart,
+            fromDate: effectiveFromDate,
+            toDate,
+          } satisfies GroupCursorPayload)
+        : null;
 
     return {
       success: true,
       data: {
-        groups,
-        pagination: { nextCursor, hasNext },
+        groups: responseGroups,
+        groupsPagination: {
+          hasNext: Boolean(nextGroupCursor),
+          nextCursor: nextGroupCursor,
+        },
       },
     };
   } catch (error) {
@@ -806,6 +784,94 @@ const getGroupedActivities = async (
     return {
       success: false,
       message: "Failed to fetch grouped activities",
+    };
+  }
+};
+
+type GetGroupedActivityItemsResult =
+  | SuccessResponse<GetGroupedActivityItemsResponseDTO>
+  | ErrorResponse;
+
+/** Вторая ступень пагинации: только элементы внутри одного bucket; `cursor` — `ItemsCursorPayload` в base64. */
+// GET /api/activities/grouped/items?cursor=...&limit=8
+export const getGroupedActivityItems = async (params: {
+  createdById: string;
+
+  cursor: string;
+
+  limit: number;
+}): Promise<GetGroupedActivityItemsResult> => {
+  try {
+    const { createdById, cursor, limit } = params;
+
+    const decodedCursor = decodeCursor<ItemsCursorPayload>(cursor);
+
+    if (!decodedCursor || decodedCursor.type !== "items") {
+      return {
+        success: false,
+
+        message: "Invalid items cursor",
+      };
+    }
+
+    const rawItemsResult = await activitySessionQueries.listActivityTimeItemsInRange({
+      createdById,
+
+      fromDate: decodedCursor.groupDateStart,
+
+      toDate: decodedCursor.groupDateEnd,
+
+      limit: limit + 1,
+
+      offset: decodedCursor.offset,
+    });
+
+    const hasNext = rawItemsResult.items.length > limit;
+
+    const selectedItems = hasNext
+      ? rawItemsResult.items.slice(0, limit)
+      : rawItemsResult.items;
+
+    const items = await getActivitiesByGroupedItems(selectedItems);
+
+    return {
+      success: true,
+
+      data: {
+        groupBy: decodedCursor.groupBy,
+
+        groupDateStart: decodedCursor.groupDateStart,
+
+        groupDateEnd: decodedCursor.groupDateEnd,
+
+        items,
+
+        pagination: {
+          hasNext,
+
+          nextCursor: hasNext
+            ? encodeCursor({
+                type: "items",
+
+                groupBy: decodedCursor.groupBy,
+
+                groupDateStart: decodedCursor.groupDateStart,
+
+                groupDateEnd: decodedCursor.groupDateEnd,
+
+                offset: decodedCursor.offset + limit,
+              } satisfies ItemsCursorPayload)
+            : null,
+        },
+      },
+    };
+  } catch (error) {
+    console.error("Get grouped activity items error:", error);
+
+    return {
+      success: false,
+
+      message: "Failed to fetch grouped activity items",
     };
   }
 };
@@ -826,4 +892,5 @@ export const activitiesService = {
   getActivityAnalytics,
   getActivitiesAnalytics,
   getGroupedActivities,
+  getGroupedActivityItems,
 };

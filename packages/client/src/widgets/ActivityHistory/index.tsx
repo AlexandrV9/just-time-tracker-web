@@ -37,15 +37,15 @@ export const ActivityHistory = () => {
       queryFn: ({ pageParam }) =>
         activityApiService.getGroupedActivities({
           groupBy: "day",
-          limit: 8,
-          cursor: pageParam ?? undefined,
+          groupLimit: 5,
+          itemsLimit: 8,
+          groupCursor: pageParam ?? undefined,
           createdById: userId!,
-          utcOffsetMinutes: -new Date().getTimezoneOffset(),
         }),
       initialPageParam: null as string | null,
       getNextPageParam: (lastPage) => {
         if (!lastPage?.success) return undefined;
-        return lastPage.data.pagination.nextCursor ?? undefined;
+        return lastPage.data.groupsPagination.nextCursor ?? undefined;
       },
     });
 

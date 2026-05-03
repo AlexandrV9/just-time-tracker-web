@@ -10,6 +10,7 @@ activitiesRouter.post(
 );
 activitiesRouter.post("/by-ids", activityHandlers.getActivitiesByIds);
 activitiesRouter.get("/", activityHandlers.getActivities);
+activitiesRouter.get("/grouped/items", activityHandlers.getGroupedActivityItems);
 activitiesRouter.get("/grouped", activityHandlers.getGroupedActivities);
 activitiesRouter.get("/analytics", activityHandlers.getActivitiesAnalytics);
 activitiesRouter.get("/:id/analytics", activityHandlers.getActivityAnalytics);

@@ -400,6 +400,73 @@ const listGroupedHistoryCalendarDays = async (params: {
   return { days };
 };
 
+type NonEmptyActivityGroupRow = {
+  groupDateStart: string;
+  groupDateEnd: string;
+};
+
+// Находит непустые временные группы по сегментам пользователя в заданном диапазоне.
+const listActivityGroups = async (params: {
+  createdById: string;
+  groupBy: "day";
+  fromDate: string; // inclusive
+  toDate: string; // exclusive
+  limit: number;
+}): Promise<{ groups: NonEmptyActivityGroupRow[] }> => {
+  const { createdById, groupBy, fromDate, toDate, limit } = params;
+
+  if (groupBy !== "day") {
+    throw new Error(`Unsupported groupBy: ${groupBy}`);
+  }
+
+  const query = `
+    WITH segment_intervals AS (
+      SELECT
+        seg.started_at AS started_at,
+        COALESCE(seg.ended_at, $3::timestamptz) AS ended_at
+      FROM activity_session_segments seg
+      INNER JOIN activity_sessions s ON s.id = seg.session_id
+      INNER JOIN activities a ON a.id = s.activity_id
+      WHERE a.created_by_id = $1
+        AND seg.started_at < $3::timestamptz
+        AND COALESCE(seg.ended_at, $3::timestamptz) > $2::timestamptz
+    ),
+    group_days AS (
+      SELECT DISTINCT
+        gs.day AS group_date_start,
+        gs.day + INTERVAL '1 day' AS group_date_end
+      FROM segment_intervals si
+      CROSS JOIN LATERAL generate_series(
+        date_trunc('day', si.started_at),
+        date_trunc('day', si.ended_at),
+        INTERVAL '1 day'
+      ) AS gs(day)
+      WHERE gs.day < $3::timestamptz
+        AND gs.day + INTERVAL '1 day' > $2::timestamptz
+    )
+    SELECT
+      group_date_start,
+      group_date_end
+    FROM group_days
+    ORDER BY group_date_start DESC
+    LIMIT $4
+  `;
+
+  const result = await pool.query(query, [
+    createdById,
+    fromDate,
+    toDate,
+    limit,
+  ]);
+
+  return {
+    groups: result.rows.map((row: Record<string, unknown>) => ({
+      groupDateStart: new Date(String(row["group_date_start"])).toISOString(),
+      groupDateEnd: new Date(String(row["group_date_end"])).toISOString(),
+    })),
+  };
+};
+
 export const activityQueries = {
   createActivity,
   createActivityFromQuickTimer,

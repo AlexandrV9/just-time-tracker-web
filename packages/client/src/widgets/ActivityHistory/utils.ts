@@ -1,6 +1,14 @@
 import type { ActivityDTO, ActivityGroupDTO } from "@to-do-list/shared";
 import { formatGroupLabel } from "~/shared/libs";
 
+function rowToActivityForGroup(row: ActivityGroupDTO["items"][number]): ActivityDTO {
+  return {
+    ...row.activity,
+    activeDurationMs: row.activeDurationMs,
+    pauseDurationMs: row.pauseDurationMs,
+  };
+}
+
 export const formatActivityGroups = (
   groups: ActivityGroupDTO[],
   locale: string,
@@ -8,6 +16,7 @@ export const formatActivityGroups = (
   const merged = new Map<
     string,
     {
+      groupBy: ActivityGroupDTO["groupBy"];
       groupDateStart: string;
       groupDateEnd: string;
       totalActiveDurationMs: number;
@@ -21,14 +30,15 @@ export const formatActivityGroups = (
 
     if (!merged.has(key)) {
       merged.set(key, {
+        groupBy: group.groupBy,
         groupDateStart: group.groupDateStart,
         groupDateEnd: group.groupDateEnd,
         totalActiveDurationMs: group.totalActiveDurationMs,
         totalPauseDurationMs: group.totalPauseDurationMs,
-        items: [...group.items],
+        items: group.items.map(rowToActivityForGroup),
       });
     } else {
-      merged.get(key)?.items.push(...group.items);
+      merged.get(key)?.items.push(...group.items.map(rowToActivityForGroup));
     }
   }
 
@@ -42,7 +52,7 @@ export const formatActivityGroups = (
       key: group.groupDateStart,
       label: formatGroupLabel({
         key: group.groupDateStart,
-        groupBy: "day",
+        groupBy: group.groupBy,
         locale,
       }),
       totalActiveTime: Math.floor(group.totalActiveDurationMs / 1000),
