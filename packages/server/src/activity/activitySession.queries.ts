@@ -262,7 +262,7 @@ export const getTotalTimeInRange = async (params: {
       COALESCE(
         SUM(
           CASE
-            WHEN seg.type = 'active' THEN
+            WHEN seg.segment_type = 'active' THEN
               EXTRACT(
                 EPOCH FROM (
                   LEAST(COALESCE(seg.ended_at, $3::timestamp), $3::timestamp)
@@ -278,7 +278,7 @@ export const getTotalTimeInRange = async (params: {
       COALESCE(
         SUM(
           CASE
-            WHEN seg.type = 'pause' THEN
+            WHEN seg.segment_type = 'pause' THEN
               EXTRACT(
                 EPOCH FROM (
                   LEAST(COALESCE(seg.ended_at, $3::timestamp), $3::timestamp)
@@ -332,7 +332,7 @@ export const listActivityTimeItemsInRange = async (params: {
         COALESCE(
           SUM(
             CASE
-              WHEN seg.type = 'active' THEN
+              WHEN seg.segment_type = 'active' THEN
                 EXTRACT(
                   EPOCH FROM (
                     LEAST(COALESCE(seg.ended_at, $3::timestamp), $3::timestamp)
@@ -348,7 +348,7 @@ export const listActivityTimeItemsInRange = async (params: {
         COALESCE(
           SUM(
             CASE
-              WHEN seg.type = 'pause' THEN
+              WHEN seg.segment_type = 'pause' THEN
                 EXTRACT(
                   EPOCH FROM (
                     LEAST(COALESCE(seg.ended_at, $3::timestamp), $3::timestamp)

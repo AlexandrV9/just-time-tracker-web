@@ -1,5 +1,5 @@
 import type { ActivityDTO } from "@to-do-list/shared";
-import { Box, Flex, Text } from "~/shared/ui";
+import { Box, Button, Flex, Text } from "~/shared/ui";
 import {
   convertSecondsToTimeObject,
   convertTimeObjectToTimeString,
@@ -12,6 +12,8 @@ export type ActivityGroupDTO = {
   label: string;
   totalActiveTime: number;
   activities: ActivityDTO[];
+  itemsHasMore?: boolean;
+  itemsNextCursor?: string | null;
 };
 
 type ActivityGroupProps = {
@@ -22,6 +24,9 @@ type ActivityGroupProps = {
   onStart?: (activityId: ActivityDTO["id"]) => void;
   onPause?: (activityId: ActivityDTO["id"]) => void;
   onFinish?: (activityId: ActivityDTO["id"]) => void;
+  hasMoreItems?: boolean;
+  isLoadingMoreItems?: boolean;
+  onLoadMoreItems?: () => void;
 };
 
 export function ActivityGroup({
@@ -32,6 +37,9 @@ export function ActivityGroup({
   withControlButtons = false,
   selectedActivityId,
   onSelect,
+  hasMoreItems = false,
+  isLoadingMoreItems = false,
+  onLoadMoreItems,
 }: ActivityGroupProps) {
   const displayedActiveTotalTime = convertTimeObjectToTimeString(
     convertSecondsToTimeObject(data.totalActiveTime),
@@ -102,6 +110,18 @@ export function ActivityGroup({
           );
         })}
       </ActivityListView>
+      {hasMoreItems && onLoadMoreItems ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          alignSelf="flex-start"
+          loading={isLoadingMoreItems}
+          disabled={isLoadingMoreItems}
+          onClick={() => onLoadMoreItems()}
+        >
+          Ещё
+        </Button>
+      ) : null}
     </Box>
   );
 }

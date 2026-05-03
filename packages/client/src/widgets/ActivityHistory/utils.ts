@@ -1,7 +1,9 @@
 import type { ActivityDTO, ActivityGroupDTO } from "@to-do-list/shared";
 import { formatGroupLabel } from "~/shared/libs";
 
-function rowToActivityForGroup(row: ActivityGroupDTO["items"][number]): ActivityDTO {
+export function rowToActivityForGroup(
+  row: ActivityGroupDTO["items"][number],
+): ActivityDTO {
   return {
     ...row.activity,
     activeDurationMs: row.activeDurationMs,
@@ -22,6 +24,7 @@ export const formatActivityGroups = (
       totalActiveDurationMs: number;
       totalPauseDurationMs: number;
       items: ActivityDTO[];
+      itemsPagination: ActivityGroupDTO["itemsPagination"];
     }
   >();
 
@@ -36,9 +39,12 @@ export const formatActivityGroups = (
         totalActiveDurationMs: group.totalActiveDurationMs,
         totalPauseDurationMs: group.totalPauseDurationMs,
         items: group.items.map(rowToActivityForGroup),
+        itemsPagination: group.itemsPagination,
       });
     } else {
-      merged.get(key)?.items.push(...group.items.map(rowToActivityForGroup));
+      const bucket = merged.get(key)!;
+      bucket.items.push(...group.items.map(rowToActivityForGroup));
+      bucket.itemsPagination = group.itemsPagination;
     }
   }
 
@@ -58,5 +64,7 @@ export const formatActivityGroups = (
       totalActiveTime: Math.floor(group.totalActiveDurationMs / 1000),
       activities: group.items,
       groupDateStart: group.groupDateStart,
+      itemsHasMore: group.itemsPagination.hasNext,
+      itemsNextCursor: group.itemsPagination.nextCursor,
     }));
 };

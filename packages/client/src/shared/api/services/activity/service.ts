@@ -21,6 +21,8 @@ import type {
   CreateActivityFromQuickTimerDataDTO,
   GetGroupedActivitiesQueryDTO,
   GetGroupedActivitiesResponseDTO,
+  GetGroupedActivityItemsQueryDTO,
+  GetGroupedActivityItemsResponseDTO,
   GetActivitiesAnalyticsResponseDTO,
   GetActivitiesAnalyticsQueryDTO,
   GetActivitySessionSegmentsDTO,
@@ -157,6 +159,15 @@ export class ActivityService {
   getGroupedActivities(data?: GetGroupedActivitiesQueryDTO) {
     return baseApi.get<GetGroupedActivitiesResponseDTO>(
       `/api/activities/grouped`,
+      { params: data },
+    );
+  }
+
+  getGroupedActivityItems(
+    data: GetGroupedActivityItemsQueryDTO,
+  ): Promise<RequestResponse<GetGroupedActivityItemsResponseDTO, unknown>> {
+    return baseApi.get<GetGroupedActivityItemsResponseDTO>(
+      `/api/activities/grouped/items`,
       { params: data },
     );
   }

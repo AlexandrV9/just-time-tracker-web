@@ -278,8 +278,8 @@ export const getGroupedActivitiesQuerySchema = z.object({
   createdById: z.string().min(1, "createdById is required"),
   groupBy: z.enum(["day", "week", "month"]).optional().default("day"),
   groupCursor: z.string().min(1).optional(),
-  groupLimit: z.number().int().positive().optional().default(5),
-  itemsLimit: z.number().int().positive().optional().default(8),
+  groupLimit: z.coerce.number().int().positive().max(100).optional().default(5),
+  itemsLimit: z.coerce.number().int().positive().max(100).optional().default(8),
   fromDate: z.iso.datetime().optional(),
   toDate: z.iso.datetime().optional(),
 });
