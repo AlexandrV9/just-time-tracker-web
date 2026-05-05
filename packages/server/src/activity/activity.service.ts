@@ -683,16 +683,19 @@ export const getGroupedActivities = async (
     }
 
     const resolvedGroupBy = decodedGroupCursor?.groupBy ?? groupBy;
-    const effectiveFromDate = decodedGroupCursor?.fromDate ?? fromDate;
+
+    // Дефолтный нижний bound — 90 дней до начала текущего UTC-дня.
+    const defaultFromDate = (() => {
+      const d = new Date(now);
+      d.setUTCDate(d.getUTCDate() - 90);
+      d.setUTCHours(0, 0, 0, 0);
+      return d.toISOString();
+    })();
+
+    const effectiveFromDate =
+      decodedGroupCursor?.fromDate ?? fromDate ?? defaultFromDate;
     // Без курсора: [fromDate, toDate∪now). С курсором групп: верхняя граница = beforeDate из курсора.
     const effectiveToDate = decodedGroupCursor?.beforeDate ?? toDate ?? now;
-
-    if (!effectiveFromDate) {
-      return {
-        success: false,
-        message: "fromDate is required",
-      };
-    }
 
     const rawGroupsResult = await activitySessionQueries.listNonEmptyActivityGroups({
       createdById,
@@ -796,9 +799,7 @@ type GetGroupedActivityItemsResult =
 // GET /api/activities/grouped/items?cursor=...&limit=8
 export const getGroupedActivityItems = async (params: {
   createdById: string;
-
   cursor: string;
-
   limit: number;
 }): Promise<GetGroupedActivityItemsResult> => {
   try {
@@ -809,20 +810,15 @@ export const getGroupedActivityItems = async (params: {
     if (!decodedCursor || decodedCursor.type !== "items") {
       return {
         success: false,
-
         message: "Invalid items cursor",
       };
     }
 
     const rawItemsResult = await activitySessionQueries.listActivityTimeItemsInRange({
       createdById,
-
       fromDate: decodedCursor.groupDateStart,
-
       toDate: decodedCursor.groupDateEnd,
-
       limit: limit + 1,
-
       offset: decodedCursor.offset,
     });
 
@@ -836,29 +832,19 @@ export const getGroupedActivityItems = async (params: {
 
     return {
       success: true,
-
       data: {
         groupBy: decodedCursor.groupBy,
-
         groupDateStart: decodedCursor.groupDateStart,
-
         groupDateEnd: decodedCursor.groupDateEnd,
-
         items,
-
         pagination: {
           hasNext,
-
           nextCursor: hasNext
             ? encodeCursor({
                 type: "items",
-
                 groupBy: decodedCursor.groupBy,
-
                 groupDateStart: decodedCursor.groupDateStart,
-
                 groupDateEnd: decodedCursor.groupDateEnd,
-
                 offset: decodedCursor.offset + limit,
               } satisfies ItemsCursorPayload)
             : null,
@@ -870,7 +856,6 @@ export const getGroupedActivityItems = async (params: {
 
     return {
       success: false,
-
       message: "Failed to fetch grouped activity items",
     };
   }

@@ -20,13 +20,13 @@ type ActivityGroupProps = {
   data: ActivityGroupDTO;
   withControlButtons?: boolean;
   selectedActivityId?: string;
-  onSelect?: (id: string, title: string, activeDurationMs: number) => void;
-  onStart?: (activityId: ActivityDTO["id"]) => void;
-  onPause?: (activityId: ActivityDTO["id"]) => void;
-  onFinish?: (activityId: ActivityDTO["id"]) => void;
+  onSelect?: (activity: ActivityDTO) => void;
+  onStart?: (activity: ActivityDTO) => void;
+  onPause?: (activity: ActivityDTO) => void;
+  onFinish?: (activity: ActivityDTO) => void;
   hasMoreItems?: boolean;
-  isLoadingMoreItems?: boolean;
-  onLoadMoreItems?: () => void;
+  isLoadingMoreGroupItems?: boolean;
+  onLoadMoreGroupItems?: () => void;
 };
 
 export function ActivityGroup({
@@ -38,8 +38,8 @@ export function ActivityGroup({
   selectedActivityId,
   onSelect,
   hasMoreItems = false,
-  isLoadingMoreItems = false,
-  onLoadMoreItems,
+  isLoadingMoreGroupItems = false,
+  onLoadMoreGroupItems,
 }: ActivityGroupProps) {
   const displayedActiveTotalTime = convertTimeObjectToTimeString(
     convertSecondsToTimeObject(data.totalActiveTime),
@@ -72,12 +72,11 @@ export function ActivityGroup({
       </Flex>
       <ActivityListView>
         {data.activities.map((activity) => {
-          const mutedControls =
-            Boolean(
-              withControlButtons &&
-                runningActivityId &&
-                activity.id !== runningActivityId,
-            );
+          const mutedControls = Boolean(
+            withControlButtons &&
+            runningActivityId &&
+            activity.id !== runningActivityId,
+          );
 
           return (
             <ActivityListView.Item key={activity.id}>
@@ -93,33 +92,27 @@ export function ActivityGroup({
                 }
                 isInteractive={!freezeSelection}
                 onClick={
-                  freezeSelection
-                    ? undefined
-                    : () =>
-                        onSelect?.(
-                          activity.id,
-                          activity.title,
-                          activity.activeDurationMs,
-                        )
+                  freezeSelection ? undefined : () => onSelect?.(activity)
                 }
-                onStart={() => onStart?.(activity.id)}
-                onPause={() => onPause?.(activity.id)}
-                onFinish={() => onFinish?.(activity.id)}
+                onStart={() => onStart?.(activity)}
+                onPause={() => onPause?.(activity)}
+                onFinish={() => onFinish?.(activity)}
               />
             </ActivityListView.Item>
           );
         })}
       </ActivityListView>
-      {hasMoreItems && onLoadMoreItems ? (
+      {hasMoreItems && onLoadMoreGroupItems ? (
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           alignSelf="flex-start"
-          loading={isLoadingMoreItems}
-          disabled={isLoadingMoreItems}
-          onClick={() => onLoadMoreItems()}
+          borderRadius="xl"
+          loading={isLoadingMoreGroupItems}
+          disabled={isLoadingMoreGroupItems}
+          onClick={onLoadMoreGroupItems}
         >
-          Ещё
+          Загрузить еще
         </Button>
       ) : null}
     </Box>

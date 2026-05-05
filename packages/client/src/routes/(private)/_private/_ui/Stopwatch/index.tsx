@@ -7,30 +7,32 @@ import {
   Text,
 } from "~/shared/ui";
 import { useDisplayedSeconds } from "~/features/ActivityCard/useDisplayedSeconds";
-import { useCurrentActivity } from "../useCurrentActivity";
+import { useSelectedActivity } from "~/features";
 
 export function Stopwatch() {
-  const { currentActivity: resolvedActivity } = useCurrentActivity();
+  const { activity: selectedActivity } = useSelectedActivity();
 
-  const isLive = resolvedActivity?.status === "active";
-  const activeDurationMs = resolvedActivity?.activeDurationMs ?? 0;
+  console.log("selectedActivity", selectedActivity)
 
   const tickSeconds = useDisplayedSeconds({
-    activeDurationMs,
-    hasActiveSession: isLive,
+    activeDurationMs: selectedActivity?.activeDurationMs ?? 0,
+    hasActiveSession: selectedActivity?.status === "active",
   });
 
   const seconds = useMemo(() => {
-    if (!resolvedActivity) return 0;
-    if (resolvedActivity.status === "active") {
+    if (!selectedActivity) {
+      return 0;
+    }
+
+    if (selectedActivity.status === "active") {
       return tickSeconds;
     }
-    return Math.floor(resolvedActivity.activeDurationMs / 1000);
+    return Math.floor(selectedActivity.activeDurationMs / 1000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    resolvedActivity?.id,
-    resolvedActivity?.status,
-    resolvedActivity?.activeDurationMs,
+    selectedActivity?.id,
+    selectedActivity?.status,
+    selectedActivity?.activeDurationMs,
     tickSeconds,
   ]);
 
@@ -38,7 +40,7 @@ export function Stopwatch() {
     return convertTimeObjectToTimeString(convertSecondsToTimeObject(seconds));
   }, [seconds]);
 
-  const displayedTitle = resolvedActivity?.title;
+  const displayedTitle = selectedActivity?.title;
 
   return (
     <Stack.VStack

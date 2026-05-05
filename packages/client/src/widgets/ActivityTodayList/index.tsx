@@ -18,18 +18,13 @@ import {
   usePauseActivity,
   useStartActivity,
 } from "./mutations";
+import { useSelectedActivity } from "~/features";
+import type { ActivityDTO } from "@to-do-list/shared";
 
-type ActivityTodayListProps = {
-  selectedActivityId?: string;
-  onSelectActivity?: (id: string) => void;
-  onEnsureSelectedActivity?: (id: string) => void;
-};
+export const ActivityTodayList = () => {
+  const { activity, setActivity } = useSelectedActivity();
+  const selectedActivityId = activity?.id;
 
-export const ActivityTodayList = ({
-  selectedActivityId,
-  onSelectActivity,
-  onEnsureSelectedActivity,
-}: ActivityTodayListProps) => {
   const addTodayActivityDialog = useDialog();
 
   const { planId, activityGroup, isLoading, isError } = useTodayActivities();
@@ -45,26 +40,28 @@ export const ActivityTodayList = ({
     (item) => item.status === "active",
   )?.id;
 
-  const handleStartActivity = async (activityId: string) => {
-    if (runningActivityId && activityId !== runningActivityId) return;
-    onEnsureSelectedActivity?.(activityId);
-    return startActivity(activityId);
+  console.log("runningActivityId", runningActivityId);
+
+  const handleSelectActivity = (activity: ActivityDTO) => {
+    if (runningActivityId && activity.id !== runningActivityId) return;
+    setActivity(activity);
   };
 
-  const handleSelectActivity = (activityId: string) => {
-    if (runningActivityId && activityId !== runningActivityId) return;
-    onSelectActivity?.(activityId);
+  const handleStartActivity = async (activity: ActivityDTO) => {
+    if (runningActivityId && activity.id !== runningActivityId) return;
+    setActivity(activity);
+    return startActivity(activity.id);
   };
 
-  const handlePauseActivity = async (activityId: string) => {
-    if (runningActivityId && activityId !== runningActivityId) return;
-    await pauseActivity(activityId);
-    onEnsureSelectedActivity?.(activityId);
+  const handlePauseActivity = async (activity: ActivityDTO) => {
+    if (runningActivityId && activity.id !== runningActivityId) return;
+    pauseActivity(activity.id);
+    setActivity(activity);
   };
 
-  const handleFinishActivity = (activityId: string) => {
-    if (runningActivityId && activityId !== runningActivityId) return;
-    finishActivity?.(activityId);
+  const handleFinishActivity = (activity: ActivityDTO) => {
+    if (runningActivityId && activity.id !== runningActivityId) return;
+    finishActivity?.(activity.id);
   };
 
   const renderContent = () => {

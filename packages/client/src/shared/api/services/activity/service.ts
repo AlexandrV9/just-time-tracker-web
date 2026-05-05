@@ -53,7 +53,7 @@ export class ActivityService {
       params: data,
     });
   }
-
+  
   getActivitiesByIds(
     data: GetActivitiesByIdsDTO,
   ): Promise<RequestResponse<ActivityDTO[], unknown>> {

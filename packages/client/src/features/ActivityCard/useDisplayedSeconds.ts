@@ -13,7 +13,9 @@ export function useDisplayedSeconds({
   const nowMs = useLiveTimestamp(hasActiveSession);
 
   const fetchedAtRef = useRef(Date.now());
+
   const prevMsRef = useRef(activeDurationMs);
+
   if (prevMsRef.current !== activeDurationMs) {
     prevMsRef.current = activeDurationMs;
     fetchedAtRef.current = Date.now();
