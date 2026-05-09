@@ -1,6 +1,9 @@
 import z from "zod";
 import { baseIdSchema, paginationResponseSchema } from "../common/index.js";
-import { activitySessionSchema } from "./activitySession.schema.js";
+import {
+  activitySessionSchema,
+  activitySessionStatusSchema,
+} from "./activitySession.schema.js";
 
 const tagListSchema = z.array(z.string()).max(10).optional();
 
@@ -36,7 +39,7 @@ export const activitySchema = z.object({
   updatedAt: z.iso.datetime(),
   createdById: z.string(),
   tags: z.array(z.string()),
-  status: activityStatusSchema, // возможно убрать в будущем
+  status: activityStatusSchema,
   currentSessionId: z.string().nullable(),
   activeDurationMs: z.number().int().nonnegative(),
   pauseDurationMs: z.number().int().nonnegative(),
@@ -73,6 +76,51 @@ export const getActivitiesSchema = z
 export type GetActivityDTO = z.infer<typeof baseIdSchema>;
 export type GetActivitiesDTO = z.infer<typeof getActivitiesSchema>;
 
+export const getCurrentActivitiesQuerySchema = z
+  .object({
+    createdById: z.string().min(1, "createdById is required"),
+    fromDate: z.iso.datetime(),
+    toDate: z.iso.datetime(),
+    page: z.coerce.number().int().min(0).default(0),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+    status: activityStatusSchema.optional(),
+  })
+  .superRefine(({ fromDate, toDate }, ctx) => {
+    if (new Date(toDate) < new Date(fromDate)) {
+      ctx.addIssue({
+        path: ["toDate"],
+        message: "toDate must be after fromDate",
+        code: "custom",
+      });
+    }
+  });
+
+export type GetCurrentActivitiesQueryDTO = z.infer<
+  typeof getCurrentActivitiesQuerySchema
+>;
+
+/**
+ * Response element for GET /activities/current.
+ *
+ * NOTE on duration semantics: `activity.activeDurationMs` and `activity.pauseDurationMs`
+ * are **interval-scoped** — sums within `[fromDate, toDate)`, aligned with analytics
+ * (open segments clipped with server `now()` and capped by `toDate`).
+ * `activity.status` reflects the last session backing this row (same join as `/current` filter).
+ */
+export const currentActivitySchema = z.object({
+  activity: activitySchema,
+});
+
+export type CurrentActivityDTO = z.infer<typeof currentActivitySchema>;
+
+export const currentActivitiesResponseSchema = paginationResponseSchema(
+  currentActivitySchema,
+);
+
+export type GetCurrentActivitiesResponseDTO = z.infer<
+  typeof currentActivitiesResponseSchema
+>;
+
 export const getActivitiesByIdsSchema = z.object({
   activityIds: z.array(z.string().min(1, "activityId is required")),
 });
@@ -92,23 +140,26 @@ export const deleteActivitySchema = baseIdSchema;
 
 export type DeleteActivityDataDTO = z.infer<typeof deleteActivitySchema>;
 
-export const startActivity = z.object({
+export const startActivitySchema = z.object({
   activityId: z.string().min(1, "activityId is required"),
+  startedAt: z.iso.datetime(),
 });
 
-export type StartActivityDTO = z.infer<typeof startActivity>;
+export type StartActivityDataDTO = z.infer<typeof startActivitySchema>;
 
-export const pauseActivity = z.object({
+export const pauseActivitySchema = z.object({
   activityId: z.string().min(1, "activityId is required"),
+  pausedAt: z.iso.datetime(),
 });
 
-export type PauseActivityDTO = z.infer<typeof pauseActivity>;
+export type PauseActivityDataDTO = z.infer<typeof pauseActivitySchema>;
 
-export const finishActivity = z.object({
+export const finishActivitySchema = z.object({
   activityId: z.string().min(1, "activityId is required"),
+  finishedAt: z.iso.datetime(),
 });
 
-export type FinishActivityDTO = z.infer<typeof finishActivity>;
+export type FinishActivityDataDTO = z.infer<typeof finishActivitySchema>;
 
 export const activitiesSchema = paginationResponseSchema(activitySchema);
 

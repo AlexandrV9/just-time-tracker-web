@@ -19,7 +19,8 @@ export const createActivitySessionsTable = async () => {
       active_duration_ms BIGINT NOT NULL DEFAULT 0,
       pause_duration_ms BIGINT NOT NULL DEFAULT 0,
 
-      last_heartbeat_at TIMESTAMPTZ
+      last_heartbeat_at TIMESTAMPTZ,
+      current_segment_id UUID
     );
   `;
 
@@ -29,6 +30,9 @@ export const createActivitySessionsTable = async () => {
 
     CREATE INDEX IF NOT EXISTS idx_activity_sessions_started_at
       ON activity_sessions(started_at);
+
+    CREATE INDEX IF NOT EXISTS idx_activity_sessions_current_segment_id
+      ON activity_sessions(current_segment_id);
   `;
 
   const addFk = `

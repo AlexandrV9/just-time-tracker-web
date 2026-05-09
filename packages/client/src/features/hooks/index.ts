@@ -1,1 +1,1 @@
-export * from "./useSelectedActivity";
+export { useCurrentActivity } from "./useCurrentActivity";

@@ -6,6 +6,8 @@ import {
 } from "~/shared/libs";
 import { ActivityListView } from "~/entities/Activity";
 import { ActivityCard } from "~/features";
+import { useCurrentActivityStore } from "~/features/hooks/useCurrentActivityStore";
+import { useShallow } from "zustand/react/shallow";
 import { Skeleton } from "./Skeleton";
 
 export type ActivityGroupDTO = {
@@ -41,6 +43,13 @@ export function ActivityGroup({
   isLoadingMoreGroupItems = false,
   onLoadMoreGroupItems,
 }: ActivityGroupProps) {
+  const { currentActivity, currentSegment } = useCurrentActivityStore(
+    useShallow((state) => ({
+      currentActivity: state.currentActivity,
+      currentSegment: state.currentSegment,
+    })),
+  );
+
   const displayedActiveTotalTime = convertTimeObjectToTimeString(
     convertSecondsToTimeObject(data.totalActiveTime),
   );
@@ -78,11 +87,18 @@ export function ActivityGroup({
             activity.id !== runningActivityId,
           );
 
+          const isCurrentActivity =
+            currentActivity?.id === activity.id &&
+            currentSegment?.type === "active";
+
           return (
             <ActivityListView.Item key={activity.id}>
               <ActivityCard
                 activity={activity}
                 activeDurationMs={activity.activeDurationMs}
+                activeSegmentStartedAt={
+                  isCurrentActivity ? currentSegment.startedAt : null
+                }
                 withControlButtons={withControlButtons}
                 mutedControls={mutedControls}
                 isSelected={

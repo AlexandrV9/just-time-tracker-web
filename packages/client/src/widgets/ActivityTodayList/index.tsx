@@ -18,51 +18,60 @@ import {
   usePauseActivity,
   useStartActivity,
 } from "./mutations";
-import { useSelectedActivity } from "~/features";
 import type { ActivityDTO } from "@to-do-list/shared";
+import { useCurrentActivity } from "~/features";
 
 export const ActivityTodayList = () => {
-  const { activity, setActivity } = useSelectedActivity();
-  const selectedActivityId = activity?.id;
-
   const addTodayActivityDialog = useDialog();
 
+  const { currentActivity, setCurrentActivity } = useCurrentActivity();
   const { planId, activityGroup, isLoading, isError } = useTodayActivities();
 
+  const currentActivityId = currentActivity?.id;
+  const hasRunningActivity = currentActivity?.status === "active";
+
+  const handleSelectActivity = (activity: ActivityDTO) => {
+    if (hasRunningActivity) return;
+    setCurrentActivity((prevActivity) =>
+      prevActivity?.id === activity.id ? null : activity,
+    );
+  };
+
   const { mutateAsync: startActivity } = useStartActivity();
+
+  const handleStartActivity = async (activity: ActivityDTO) => {
+    if (hasRunningActivity && activity.id !== currentActivityId) return;
+    setCurrentActivity(activity);
+    return startActivity({
+      activityId: activity.id,
+      startedAt: new Date().toISOString(),
+      activeDurationMs: activity.activeDurationMs,
+    });
+  };
+
   const { mutateAsync: pauseActivity } = usePauseActivity();
+
+  const handlePauseActivity = async (activity: ActivityDTO) => {
+    if (hasRunningActivity && activity.id !== currentActivityId) return;
+    return pauseActivity({
+      activityId: activity.id,
+      pausedAt: new Date().toISOString(),
+    });
+  };
+
   const { mutateAsync: finishActivity } = useFinishActivity();
+
+  const handleFinishActivity = (activity: ActivityDTO) => {
+    if (hasRunningActivity && activity.id !== currentActivityId) return;
+    return finishActivity?.({
+      activityId: activity.id,
+      finishedAt: new Date().toISOString(),
+    });
+  };
+
   const { mutateAsync: addTodayActivities } = useAddTodayActivities({
     planId,
   });
-
-  const runningActivityId = activityGroup?.activities.find(
-    (item) => item.status === "active",
-  )?.id;
-
-  console.log("runningActivityId", runningActivityId);
-
-  const handleSelectActivity = (activity: ActivityDTO) => {
-    if (runningActivityId && activity.id !== runningActivityId) return;
-    setActivity(activity);
-  };
-
-  const handleStartActivity = async (activity: ActivityDTO) => {
-    if (runningActivityId && activity.id !== runningActivityId) return;
-    setActivity(activity);
-    return startActivity(activity.id);
-  };
-
-  const handlePauseActivity = async (activity: ActivityDTO) => {
-    if (runningActivityId && activity.id !== runningActivityId) return;
-    pauseActivity(activity.id);
-    setActivity(activity);
-  };
-
-  const handleFinishActivity = (activity: ActivityDTO) => {
-    if (runningActivityId && activity.id !== runningActivityId) return;
-    finishActivity?.(activity.id);
-  };
 
   const renderContent = () => {
     if (isLoading) {
@@ -108,7 +117,7 @@ export const ActivityTodayList = () => {
       <ActivityGroup
         withControlButtons
         data={activityGroup}
-        selectedActivityId={selectedActivityId}
+        selectedActivityId={currentActivity?.id}
         onSelect={handleSelectActivity}
         onStart={handleStartActivity}
         onPause={handlePauseActivity}

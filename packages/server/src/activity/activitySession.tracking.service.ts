@@ -1,18 +1,21 @@
-import type { ActivityDTO, ActivitySessionDTO } from "@to-do-list/shared";
+import type {
+  ActivityDTO,
+  ActivitySessionDTO,
+  ActivitySessionSegmentDTO,
+} from "@to-do-list/shared";
 import type { PoolClient } from "pg";
 import { pool } from "../shared/index.js";
 import { activityRepository } from "./activity.repository.js";
 import { activitySessionQueries } from "./activitySession.queries.js";
+import { activitySessionSegmentQueries } from "./activitySessionSegment.queries.js";
 import type { ErrorResponse, SuccessResponse } from "../shared/types.js";
 
 type TrackingOk = SuccessResponse<{
   activity: ActivityDTO;
   session: ActivitySessionDTO;
+  segment: ActivitySessionSegmentDTO | null;
 }>;
 type TrackingErr = ErrorResponse;
-
-const nowIso = () => new Date().toISOString();
-const nowMs = () => Date.now();
 
 async function insertNewSessionWithActiveSegment(
   client: PoolClient,
@@ -39,14 +42,24 @@ async function insertNewSessionWithActiveSegment(
     `,
     [activityId, sessionId],
   );
-  await client.query(
+  const { rows: segRows } = await client.query<{ id: string }>(
     `
     INSERT INTO activity_session_segments (
       session_id, segment_type, started_at, ended_at, created_at, updated_at
     )
     VALUES ($1::uuid, 'active', $2::timestamptz, NULL, NOW(), NOW())
+    RETURNING id
     `,
     [sessionId, startedAtIso],
+  );
+  const segmentId = String(segRows[0].id);
+  await client.query(
+    `
+    UPDATE activity_sessions
+    SET current_segment_id = $2::uuid, updated_at = NOW()
+    WHERE id = $1::uuid
+    `,
+    [sessionId, segmentId],
   );
   return sessionId;
 }
@@ -75,6 +88,7 @@ async function loadActivityRowForUpdate(
 
 export async function startActivitySession(
   activityId: string,
+  timestamp: string,
 ): Promise<TrackingOk | TrackingErr> {
   const client = await pool.connect();
   let sessionIdOut: string | null = null;
@@ -86,8 +100,8 @@ export async function startActivitySession(
       return { success: false, message: "Activity not found" };
     }
 
-    const tIso = nowIso();
-    const tMs = nowMs();
+    const tIso = timestamp;
+    const tMs = new Date(timestamp).getTime();
 
     const startFresh = async () => {
       sessionIdOut = await insertNewSessionWithActiveSegment(
@@ -176,14 +190,24 @@ export async function startActivitySession(
           `,
           [activityId, pauseDeltaMs],
         );
-        await client.query(
+        const { rows: newSegRows } = await client.query<{ id: string }>(
           `
           INSERT INTO activity_session_segments (
             session_id, segment_type, started_at, ended_at, created_at, updated_at
           )
           VALUES ($1::uuid, 'active', $2::timestamptz, NULL, NOW(), NOW())
+          RETURNING id
           `,
           [sid, tIso],
+        );
+        const newSegId = String(newSegRows[0].id);
+        await client.query(
+          `
+          UPDATE activity_sessions
+          SET current_segment_id = $2::uuid, updated_at = NOW()
+          WHERE id = $1::uuid
+          `,
+          [sid, newSegId],
         );
         sessionIdOut = sid;
         await client.query("COMMIT");
@@ -210,11 +234,17 @@ export async function startActivitySession(
   if (!activity || !session) {
     return { success: false, message: "Failed to load result" };
   }
-  return { success: true, data: { activity, session } };
+  const segment = session.currentSegmentId
+    ? await activitySessionSegmentQueries.getSegmentById(
+        session.currentSegmentId,
+      )
+    : null;
+  return { success: true, data: { activity, session, segment } };
 }
 
 export async function pauseActivitySession(
   activityId: string,
+  timestamp: string,
 ): Promise<TrackingOk | TrackingErr> {
   const client = await pool.connect();
   let sessionIdOut: string | null = null;
@@ -227,8 +257,8 @@ export async function pauseActivitySession(
     }
 
     const sid = activityRow.last_activity_session_id;
-    const tIso = nowIso();
-    const tMs = nowMs();
+    const tIso = timestamp;
+    const tMs = new Date(timestamp).getTime();
 
     const { rows: sessRows } = await client.query<{ status: string }>(
       `
@@ -297,14 +327,24 @@ export async function pauseActivitySession(
       `,
       [activityId, activeDeltaMs],
     );
-    await client.query(
+    const { rows: pauseSegRows } = await client.query<{ id: string }>(
       `
       INSERT INTO activity_session_segments (
         session_id, segment_type, started_at, ended_at, created_at, updated_at
       )
       VALUES ($1::uuid, 'pause', $2::timestamptz, NULL, NOW(), NOW())
+      RETURNING id
       `,
       [sid, tIso],
+    );
+    const pauseSegId = String(pauseSegRows[0].id);
+    await client.query(
+      `
+      UPDATE activity_sessions
+      SET current_segment_id = $2::uuid, updated_at = NOW()
+      WHERE id = $1::uuid
+      `,
+      [sid, pauseSegId],
     );
 
     await client.query("COMMIT");
@@ -327,11 +367,17 @@ export async function pauseActivitySession(
   if (!activity || !session) {
     return { success: false, message: "Failed to load result" };
   }
-  return { success: true, data: { activity, session } };
+  const segment = session.currentSegmentId
+    ? await activitySessionSegmentQueries.getSegmentById(
+        session.currentSegmentId,
+      )
+    : null;
+  return { success: true, data: { activity, session, segment } };
 }
 
 export async function finishActivitySession(
   activityId: string,
+  timestamp: string,
 ): Promise<TrackingOk | TrackingErr> {
   const client = await pool.connect();
   let sessionIdOut: string | null = null;
@@ -344,8 +390,8 @@ export async function finishActivitySession(
     }
 
     const sid = activityRow.last_activity_session_id;
-    const tIso = nowIso();
-    const tMs = nowMs();
+    const tIso = timestamp;
+    const tMs = new Date(timestamp).getTime();
 
     const { rows: sessRows } = await client.query<{
       id: string;
@@ -407,6 +453,7 @@ export async function finishActivitySession(
           active_duration_ms = active_duration_ms + $2::bigint,
           status = 'finished',
           ended_at = $3::timestamptz,
+          current_segment_id = NULL,
           updated_at = NOW()
         WHERE id = $1::uuid
         `,
@@ -439,6 +486,7 @@ export async function finishActivitySession(
           pause_duration_ms = pause_duration_ms + $2::bigint,
           status = 'finished',
           ended_at = $3::timestamptz,
+          current_segment_id = NULL,
           updated_at = NOW()
         WHERE id = $1::uuid
         `,
@@ -479,5 +527,10 @@ export async function finishActivitySession(
   if (!activity || !session) {
     return { success: false, message: "Failed to load result" };
   }
-  return { success: true, data: { activity, session } };
+  const segment = session.currentSegmentId
+    ? await activitySessionSegmentQueries.getSegmentById(
+        session.currentSegmentId,
+      )
+    : null;
+  return { success: true, data: { activity, session, segment } };
 }

@@ -1,4 +1,8 @@
 import type { ActivitySessionSegmentDTO } from "@to-do-list/shared";
+import {
+  pgTimestampToIsoString,
+  pgTimestampToIsoStringOrNull,
+} from "../shared/db/pgTimestamp.js";
 import { pool } from "../shared/index.js";
 
 export const SEGMENT_RETURNING = `
@@ -13,15 +17,12 @@ export const SEGMENT_RETURNING = `
 
 const mapRow = (row: Record<string, unknown>): ActivitySessionSegmentDTO => ({
   id: String(row.id),
-  createdAt: String(row.createdAt),
-  updatedAt: String(row.updatedAt),
+  createdAt: pgTimestampToIsoString(row.createdAt),
+  updatedAt: pgTimestampToIsoString(row.updatedAt),
   sessionId: String(row.sessionId),
   type: row.type as ActivitySessionSegmentDTO["type"],
-  startedAt: String(row.startedAt),
-  endedAt:
-    row.endedAt === null || row.endedAt === undefined
-      ? null
-      : String(row.endedAt),
+  startedAt: pgTimestampToIsoString(row.startedAt),
+  endedAt: pgTimestampToIsoStringOrNull(row.endedAt),
 });
 
 export type InsertActivitySessionSegmentInput = {
@@ -109,11 +110,8 @@ const listSegmentIntervalsForActivityInRange = async (
 
   return rows.map((r) => ({
     type: r.type as ActivitySessionSegmentDTO["type"],
-    startedAt: String(r.startedAt),
-    endedAt:
-      r.endedAt === null || r.endedAt === undefined
-        ? null
-        : String(r.endedAt),
+    startedAt: pgTimestampToIsoString(r.startedAt),
+    endedAt: pgTimestampToIsoStringOrNull(r.endedAt),
   }));
 };
 
@@ -171,11 +169,8 @@ const listSegmentIntervalsForUserActivitiesInRange = async (
   return rows.map((r) => ({
     activityId: String(r.activityId),
     type: r.type as ActivitySessionSegmentDTO["type"],
-    startedAt: String(r.startedAt),
-    endedAt:
-      r.endedAt === null || r.endedAt === undefined
-        ? null
-        : String(r.endedAt),
+    startedAt: pgTimestampToIsoString(r.startedAt),
+    endedAt: pgTimestampToIsoStringOrNull(r.endedAt),
   }));
 };
 
@@ -206,11 +201,8 @@ const listSegmentIntervalsForMultipleActivitiesInRange = async (
   return rows.map((r) => ({
     activityId: String(r.activityId),
     type: r.type as ActivitySessionSegmentDTO["type"],
-    startedAt: String(r.startedAt),
-    endedAt:
-      r.endedAt === null || r.endedAt === undefined
-        ? null
-        : String(r.endedAt),
+    startedAt: pgTimestampToIsoString(r.startedAt),
+    endedAt: pgTimestampToIsoStringOrNull(r.endedAt),
   }));
 };
 

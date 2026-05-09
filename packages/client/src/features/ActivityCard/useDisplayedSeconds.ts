@@ -1,51 +1,54 @@
-import { useMemo, useRef } from "react";
-import { useLiveTimestamp } from "./useLiveTimestamp";
+import { convertMillisecondsToSeconds } from "~/shared/ui";
+import { useEffect, useMemo, useRef } from "react";
+import { useNowMs } from "./useNowMs";
 
 type UseDisplayedSecondsProps = {
   activeDurationMs: number;
   hasActiveSession: boolean;
+  startedAt?: string;
+  activityId?: string | null;
 };
 
 export function useDisplayedSeconds({
   activeDurationMs,
   hasActiveSession,
+  startedAt,
+  activityId,
 }: UseDisplayedSecondsProps) {
-  const nowMs = useLiveTimestamp(hasActiveSession);
+  const nowMs = useNowMs(hasActiveSession);
 
-  const fetchedAtRef = useRef(Date.now());
+  const lastSecondsRef = useRef(convertMillisecondsToSeconds(activeDurationMs));
 
-  const prevMsRef = useRef(activeDurationMs);
+  // Reset the lower-bound guard whenever the activity or its base duration changes.
+  useEffect(() => {
+    lastSecondsRef.current = convertMillisecondsToSeconds(activeDurationMs);
+  }, [activityId, activeDurationMs, startedAt]);
 
-  if (prevMsRef.current !== activeDurationMs) {
-    prevMsRef.current = activeDurationMs;
-    fetchedAtRef.current = Date.now();
-  }
-
-  /**
-   * Последнее отображённое значение во время активной фазы.
-   * Используется как нижняя граница при паузе, пока данные не обновились,
-   * и как fallback в первый тик после старта (nowMs ещё null).
-   */
-  const lastActiveSecondsRef = useRef(0);
-
-  return useMemo(() => {
-    if (!hasActiveSession) {
-      const serverSeconds = Math.floor(activeDurationMs / 1000);
-      return Math.max(serverSeconds, lastActiveSecondsRef.current);
+  const seconds = useMemo(() => {
+    if (!hasActiveSession || nowMs === null || !startedAt) {
+      return convertMillisecondsToSeconds(activeDurationMs);
     }
 
-    if (nowMs === null) {
-      return lastActiveSecondsRef.current;
+    const startedAtMs = Date.parse(startedAt);
+    if (!Number.isFinite(startedAtMs)) {
+      return convertMillisecondsToSeconds(activeDurationMs);
     }
 
-    const driftMs = Math.max(0, nowMs - fetchedAtRef.current);
-    const seconds = Math.max(
-      0,
-      Math.floor((activeDurationMs + driftMs) / 1000),
-    );
+    // activeDurationMs = historical completed segments only (server no longer
+    // includes the open segment). Add elapsed time of the current segment.
+    const elapsedMs = Math.max(0, nowMs - startedAtMs);
+    return convertMillisecondsToSeconds(activeDurationMs + elapsedMs);
+  }, [activeDurationMs, hasActiveSession, nowMs, startedAt]);
 
-    lastActiveSecondsRef.current = seconds;
+  // Prevent backward jumps that can occur when data refetches return slightly
+  // stale values (e.g. analytics settling after a mutation).
+  const stableSeconds = hasActiveSession
+    ? Math.max(seconds, lastSecondsRef.current)
+    : seconds;
 
-    return seconds;
-  }, [activeDurationMs, hasActiveSession, nowMs]);
+  useEffect(() => {
+    lastSecondsRef.current = stableSeconds;
+  }, [stableSeconds]);
+
+  return stableSeconds;
 }

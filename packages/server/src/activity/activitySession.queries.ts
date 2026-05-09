@@ -3,6 +3,10 @@ import type {
   CreateActivitySessionDataDTO,
   UpdateActivitySessionDataDTO,
 } from "@to-do-list/shared";
+import {
+  pgTimestampToIsoString,
+  pgTimestampToIsoStringOrNull,
+} from "../shared/db/pgTimestamp.js";
 import { pool } from "../shared/index.js";
 
 export const SESSION_RETURNING = `
@@ -14,19 +18,17 @@ export const SESSION_RETURNING = `
   ended_at AS "endedAt",
   status,
   active_duration_ms AS "activeDurationMs",
-  pause_duration_ms AS "pauseDurationMs"
+  pause_duration_ms AS "pauseDurationMs",
+  current_segment_id AS "currentSegmentId"
 `;
 
 const mapRow = (row: Record<string, unknown>): ActivitySessionDTO => ({
   id: String(row.id),
-  createdAt: String(row.createdAt),
-  updatedAt: String(row.updatedAt),
+  createdAt: pgTimestampToIsoString(row.createdAt),
+  updatedAt: pgTimestampToIsoString(row.updatedAt),
   activityId: String(row.activityId),
-  startedAt: String(row.startedAt),
-  endedAt:
-    row.endedAt === null || row.endedAt === undefined
-      ? null
-      : String(row.endedAt),
+  startedAt: pgTimestampToIsoString(row.startedAt),
+  endedAt: pgTimestampToIsoStringOrNull(row.endedAt),
   status: row.status as ActivitySessionDTO["status"],
   activeDurationMs: Number(row.activeDurationMs ?? 0),
   pauseDurationMs: Number(row.pauseDurationMs ?? 0),

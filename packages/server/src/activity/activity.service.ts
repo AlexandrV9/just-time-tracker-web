@@ -19,6 +19,11 @@ import type {
   GetActivitiesAnalyticsQueryDTO,
   GetActivitySessionSegmentsDTO,
   GetActivitySessionSegmentsResponseDTO,
+  GetCurrentActivitiesQueryDTO,
+  GetCurrentActivitiesResponseDTO,
+  StartActivityDataDTO,
+  PauseActivityDataDTO,
+  FinishActivityDataDTO,
 } from "@to-do-list/shared";
 
 import {
@@ -46,8 +51,13 @@ function clipSegmentToWindow(
   windowFromMs: number,
   windowToMs: number,
 ): { start: number; end: number } | null {
+  // Open segments (endedAt = null) are excluded so that activeDurationMs from
+  // analytics represents only completed work. The client adds the running
+  // segment's elapsed time via: activeDurationMs + (now - segmentStartedAt).
+  if (!endedAtIso) return null;
+
   const startMs = Date.parse(startedAtIso);
-  const naturalEndMs = endedAtIso ? Date.parse(endedAtIso) : Date.now();
+  const naturalEndMs = Date.parse(endedAtIso);
   if (!Number.isFinite(startMs) || !Number.isFinite(naturalEndMs)) {
     return null;
   }
@@ -278,24 +288,54 @@ const getActivities = async (
   }
 };
 
+type GetCurrentActivitiesResponse =
+  | SuccessResponse<GetCurrentActivitiesResponseDTO>
+  | ErrorResponse;
+
+const getCurrentActivities = async (
+  filters: GetCurrentActivitiesQueryDTO,
+): Promise<GetCurrentActivitiesResponse> => {
+  try {
+    const result = await activityQueries.getCurrentActivities(filters);
+
+    return {
+      success: true,
+      data: {
+        ...result,
+        data: result.data.map((row) => ({
+          activity: mapActivityRowToDTO(
+            row.activity as Record<string, unknown>,
+          ),
+        })),
+      },
+    };
+  } catch (error) {
+    console.error("Get current activities error:", error);
+    return {
+      success: false,
+      message: "Failed to fetch current activities",
+    };
+  }
+};
+
 type SessionTrackingResponse = Awaited<ReturnType<typeof startActivitySession>>;
 
 const startActivity = async (
-  data: GetActivityDTO,
+  data: StartActivityDataDTO,
 ): Promise<SessionTrackingResponse> => {
-  return startActivitySession(data.id);
+  return startActivitySession(data.activityId, data.startedAt);
 };
 
 const pauseActivity = async (
-  data: GetActivityDTO,
+  data: PauseActivityDataDTO,
 ): Promise<SessionTrackingResponse> => {
-  return pauseActivitySession(data.id);
+  return pauseActivitySession(data.activityId, data.pausedAt);
 };
 
 const finishActivity = async (
-  data: GetActivityDTO,
+  data: FinishActivityDataDTO,
 ): Promise<SessionTrackingResponse> => {
-  return finishActivitySession(data.id);
+  return finishActivitySession(data.activityId, data.finishedAt);
 };
 
 type GetActivitySessionsByActivityIdResponse =
@@ -397,6 +437,7 @@ const getActivityAnalytics = async (
 
     const fromMs = Date.parse(fromIso);
     const toMs = Date.parse(toIso);
+
     if (!Number.isFinite(fromMs) || !Number.isFinite(toMs) || toMs <= fromMs) {
       return {
         success: false,
@@ -675,7 +716,10 @@ export const getGroupedActivities = async (
       ? decodeCursor<GroupCursorPayload>(groupCursor)
       : null;
 
-    if (groupCursor && (!decodedGroupCursor || decodedGroupCursor.type !== "groups")) {
+    if (
+      groupCursor &&
+      (!decodedGroupCursor || decodedGroupCursor.type !== "groups")
+    ) {
       return {
         success: false,
         message: "Invalid group cursor",
@@ -697,13 +741,14 @@ export const getGroupedActivities = async (
     // Без курсора: [fromDate, toDate∪now). С курсором групп: верхняя граница = beforeDate из курсора.
     const effectiveToDate = decodedGroupCursor?.beforeDate ?? toDate ?? now;
 
-    const rawGroupsResult = await activitySessionQueries.listNonEmptyActivityGroups({
-      createdById,
-      groupBy: resolvedGroupBy,
-      fromDate: effectiveFromDate,
-      toDate: effectiveToDate,
-      limit: groupLimit + 1,
-    });
+    const rawGroupsResult =
+      await activitySessionQueries.listNonEmptyActivityGroups({
+        createdById,
+        groupBy: resolvedGroupBy,
+        fromDate: effectiveFromDate,
+        toDate: effectiveToDate,
+        limit: groupLimit + 1,
+      });
 
     const hasNextGroups = rawGroupsResult.groups.length > groupLimit;
     const selectedGroups = hasNextGroups
@@ -720,13 +765,14 @@ export const getGroupedActivities = async (
         toDate: group.groupDateEnd,
       });
 
-      const rawItemsResult = await activitySessionQueries.listActivityTimeItemsInRange({
-        createdById,
-        fromDate: group.groupDateStart,
-        toDate: group.groupDateEnd,
-        limit: itemsLimit + 1,
-        offset: 0,
-      });
+      const rawItemsResult =
+        await activitySessionQueries.listActivityTimeItemsInRange({
+          createdById,
+          fromDate: group.groupDateStart,
+          toDate: group.groupDateEnd,
+          limit: itemsLimit + 1,
+          offset: 0,
+        });
 
       const hasNextItems = rawItemsResult.items.length > itemsLimit;
       const selectedItems = hasNextItems
@@ -814,13 +860,14 @@ export const getGroupedActivityItems = async (params: {
       };
     }
 
-    const rawItemsResult = await activitySessionQueries.listActivityTimeItemsInRange({
-      createdById,
-      fromDate: decodedCursor.groupDateStart,
-      toDate: decodedCursor.groupDateEnd,
-      limit: limit + 1,
-      offset: decodedCursor.offset,
-    });
+    const rawItemsResult =
+      await activitySessionQueries.listActivityTimeItemsInRange({
+        createdById,
+        fromDate: decodedCursor.groupDateStart,
+        toDate: decodedCursor.groupDateEnd,
+        limit: limit + 1,
+        offset: decodedCursor.offset,
+      });
 
     const hasNext = rawItemsResult.items.length > limit;
 
@@ -869,6 +916,7 @@ export const activitiesService = {
   getActivityById,
   getActivitiesByIds,
   getActivities,
+  getCurrentActivities,
   startActivity,
   pauseActivity,
   finishActivity,

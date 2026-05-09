@@ -8,6 +8,7 @@ import {
   createActivitySchema,
   updateActivitySchema,
   getActivitiesSchema,
+  getCurrentActivitiesQuerySchema,
   getActivitiesByIdsSchema,
   getActivitySessionsSchema,
   getActivityAnalyticsQuerySchema,
@@ -16,6 +17,9 @@ import {
   getGroupedActivitiesQuerySchema,
   getGroupedActivityItemsQuerySchema,
   getActivitySessionSegmentsSchema,
+  startActivitySchema,
+  pauseActivitySchema,
+  finishActivitySchema,
 } from "@to-do-list/shared";
 
 type ValidatorType = "json" | "param" | "query";
@@ -70,6 +74,12 @@ export const activityHandlers = {
     activitiesService.getActivities,
   ),
 
+  getCurrentActivities: createHandler(
+    "query",
+    getCurrentActivitiesQuerySchema,
+    activitiesService.getCurrentActivities,
+  ),
+
   getActivitiesByIds: createHandler(
     "json",
     getActivitiesByIdsSchema,
@@ -103,20 +113,20 @@ export const activityHandlers = {
   ),
 
   startActivity: createHandler(
-    "param",
-    baseIdSchema,
+    "json",
+    startActivitySchema,
     activitiesService.startActivity,
   ),
 
   pauseActivity: createHandler(
-    "param",
-    baseIdSchema,
+    "json",
+    pauseActivitySchema,
     activitiesService.pauseActivity,
   ),
 
   finishActivity: createHandler(
-    "param",
-    baseIdSchema,
+    "json",
+    finishActivitySchema,
     activitiesService.finishActivity,
   ),
 

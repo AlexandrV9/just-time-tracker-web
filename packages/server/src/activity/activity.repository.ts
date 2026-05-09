@@ -5,6 +5,7 @@ import type {
   DeleteActivityDataDTO,
   CreateActivityFromQuickTimerDataDTO,
 } from "@to-do-list/shared";
+import { pgTimestampToIsoString } from "../shared/db/pgTimestamp.js";
 import { activityQueries } from "./activity.queries.js";
 
 const getActivityById = async (id: string): Promise<ActivityDTO | null> => {
@@ -73,8 +74,8 @@ export function mapActivityRowToDTO(
       entry.description === null || entry.description === undefined
         ? undefined
         : String(entry.description),
-    createdAt: String(entry.createdAt),
-    updatedAt: String(entry.updatedAt),
+    createdAt: pgTimestampToIsoString(entry.createdAt),
+    updatedAt: pgTimestampToIsoString(entry.updatedAt),
     createdById: String(entry.createdById),
     tags: Array.isArray(entry.tags)
       ? (entry.tags as unknown[]).map(String)

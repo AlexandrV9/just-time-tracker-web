@@ -10,6 +10,7 @@ activitiesRouter.post(
 );
 activitiesRouter.post("/by-ids", activityHandlers.getActivitiesByIds);
 activitiesRouter.get("/", activityHandlers.getActivities);
+activitiesRouter.get("/current", activityHandlers.getCurrentActivities);
 activitiesRouter.get("/grouped/items", activityHandlers.getGroupedActivityItems);
 activitiesRouter.get("/grouped", activityHandlers.getGroupedActivities);
 activitiesRouter.get("/analytics", activityHandlers.getActivitiesAnalytics);
@@ -23,6 +24,6 @@ activitiesRouter.get("/:id", activityHandlers.getActivityById);
 activitiesRouter.patch("/:id", activityHandlers.updateActivity);
 activitiesRouter.delete("/:id", activityHandlers.deleteActivity);
 
-activitiesRouter.post("/:id/start", activityHandlers.startActivity);
-activitiesRouter.post("/:id/pause", activityHandlers.pauseActivity);
-activitiesRouter.post("/:id/finish", activityHandlers.finishActivity);
+activitiesRouter.post("/start", activityHandlers.startActivity);
+activitiesRouter.post("/pause", activityHandlers.pauseActivity);
+activitiesRouter.post("/finish", activityHandlers.finishActivity);

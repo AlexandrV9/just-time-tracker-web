@@ -5,6 +5,7 @@ import type {
   UpdateActivityDataDTO,
   CreateActivityFromQuickTimerDataDTO,
   GetActivitiesByIdsDTO,
+  GetCurrentActivitiesQueryDTO,
 } from "@to-do-list/shared";
 import { pool } from "../shared/index.js";
 
@@ -275,7 +276,7 @@ const getActivities = async (filters: GetActivitiesDTO) => {
     pool.query(countQuery, params),
   ]);
 
-  const totalCount = countResult.rows[0]?.count ?? 0;
+  const totalCount = countResult?.rows?.[0]?.count ?? 0;
   const totalPages = Math.ceil(totalCount / limit);
 
   return {
@@ -288,6 +289,182 @@ const getActivities = async (filters: GetActivitiesDTO) => {
       hasNext: page < totalPages - 1,
       hasPrev: page > 0,
     },
+  };
+};
+
+type CurrentActivityRow = Record<string, unknown>;
+
+const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
+  const {
+    createdById,
+    fromDate,
+    toDate,
+    status,
+    page = 0,
+    limit = 10,
+  } = filters;
+
+  const pagination = (totalCount: number) => {
+    const totalPages = Math.ceil(totalCount / limit);
+    return {
+      page,
+      limit,
+      totalCount,
+      totalPages,
+      hasNext: page < totalPages - 1,
+      hasPrev: page > 0,
+    };
+  };
+
+  // Only completed (ended) segments are summed. Open segments (ended_at IS NULL)
+  // are excluded so that activeDurationMs represents purely historical accumulated
+  // time. The client adds the running segment's elapsed via: activeDurationMs + (now - startedAt).
+  // LEAST(x.ended_at, $3) yields NULL for open segments, which SUM ignores automatically.
+  const clippedDurationFragments = `
+      COALESCE((
+        SELECT SUM(
+          CASE
+            WHEN x.segment_type = 'active' THEN
+              GREATEST(0,
+                EXTRACT(EPOCH FROM (
+                  LEAST(x.ended_at, $3::timestamptz)
+                  - GREATEST(x.started_at, $2::timestamptz)
+                )) * 1000
+              )
+            ELSE 0
+          END
+        )
+        FROM activity_session_segments x
+        INNER JOIN activity_sessions sx ON sx.id = x.session_id
+        WHERE sx.activity_id = a.id
+          AND x.started_at < $3::timestamptz
+          AND COALESCE(x.ended_at, NOW()) > $2::timestamptz
+      ), 0)::bigint AS "activeDurationMs",
+      COALESCE((
+        SELECT SUM(
+          CASE
+            WHEN x.segment_type = 'pause' THEN
+              GREATEST(0,
+                EXTRACT(EPOCH FROM (
+                  LEAST(x.ended_at, $3::timestamptz)
+                  - GREATEST(x.started_at, $2::timestamptz)
+                )) * 1000
+              )
+            ELSE 0
+          END
+        )
+        FROM activity_session_segments x
+        INNER JOIN activity_sessions sx ON sx.id = x.session_id
+        WHERE sx.activity_id = a.id
+          AND x.started_at < $3::timestamptz
+          AND COALESCE(x.ended_at, NOW()) > $2::timestamptz
+      ), 0)::bigint AS "pauseDurationMs"`;
+
+  // `status` aligns with ActivityDTO.idle | active | paused (idle = no last session).
+  if (status === "idle") {
+    const idleDataQuery = `
+    SELECT
+      a.id,
+      a.title,
+      a.description,
+      a.created_at AS "createdAt",
+      a.updated_at AS "updatedAt",
+      a.created_by_id AS "createdById",
+      a.tags,
+      a.last_activity_session_id AS "currentActivitySessionId",
+      'idle'::text AS status,
+      ${clippedDurationFragments}
+    FROM activities a
+    WHERE a.created_by_id = $1
+      AND a.last_activity_session_id IS NULL
+    ORDER BY a.updated_at DESC
+    LIMIT $4
+    OFFSET $5
+  `;
+
+    const idleCountQuery = `
+    SELECT COUNT(*)::int AS count
+    FROM activities a
+    WHERE a.created_by_id = $1
+      AND a.last_activity_session_id IS NULL
+  `;
+
+    const [dataResult, countResult] = await Promise.all([
+      pool.query(idleDataQuery, [
+        createdById,
+        fromDate,
+        toDate,
+        limit,
+        page * limit,
+      ]),
+      pool.query(idleCountQuery, [createdById]),
+    ]);
+
+    const totalCount = countResult.rows[0]?.count ?? 0;
+
+    return {
+      data: (dataResult.rows as CurrentActivityRow[]).map((row) => ({
+        activity: row,
+      })),
+      pagination: pagination(totalCount),
+    };
+  }
+
+  // Last session overlaps the window; map activity rollup active/paused → session row status.
+  const overlapSessionStatuses: string[] =
+    status === undefined
+      ? ["active", "paused"]
+      : status === "active"
+        ? ["active"]
+        : ["paused"];
+
+  const baseParams: unknown[] = [createdById, fromDate, toDate, overlapSessionStatuses];
+
+  const dataQuery = `
+    SELECT
+      a.id,
+      a.title,
+      a.description,
+      a.created_at AS "createdAt",
+      a.updated_at AS "updatedAt",
+      a.created_by_id AS "createdById",
+      a.tags,
+      a.last_activity_session_id AS "currentActivitySessionId",
+      s.status::text AS status,
+      ${clippedDurationFragments}
+    FROM activities a
+    INNER JOIN activity_sessions s ON s.id = a.last_activity_session_id
+    WHERE a.created_by_id = $1
+      AND s.status = ANY($4::text[])
+      AND s.started_at < $3::timestamptz
+      AND COALESCE(s.ended_at, NOW()) > $2::timestamptz
+    ORDER BY s.started_at DESC, a.updated_at DESC
+    LIMIT $5
+    OFFSET $6
+  `;
+
+  const countQuery = `
+    SELECT COUNT(*)::int AS count
+    FROM activities a
+    INNER JOIN activity_sessions s ON s.id = a.last_activity_session_id
+    WHERE a.created_by_id = $1
+      AND s.status = ANY($4::text[])
+      AND s.started_at < $3::timestamptz
+      AND COALESCE(s.ended_at, NOW()) > $2::timestamptz
+  `;
+
+  const [dataResult, countResult] = await Promise.all([
+    pool.query(dataQuery, [...baseParams, limit, page * limit]),
+    pool.query(countQuery, baseParams),
+  ]);
+
+  const totalCount = countResult.rows[0]?.count ?? 0;
+
+  return {
+    data: (dataResult.rows as CurrentActivityRow[]).map((row) => ({
+      activity: row,
+    })),
+    pagination: pagination(totalCount),
   };
 };
 
@@ -474,6 +651,7 @@ export const activityQueries = {
   getActivitiesByIds,
   listGroupedHistoryCalendarDays,
   getActivities,
+  getCurrentActivities,
   updateActivity,
   deleteActivity,
 };

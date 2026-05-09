@@ -11,6 +11,7 @@ import { Skeleton } from "./Skeleton";
 export type ActivityCardProps = {
   activity: ActivityDTO;
   activeDurationMs: number;
+  activeSegmentStartedAt?: string | null;
   withControlButtons?: boolean;
   mutedControls?: boolean;
   isSelected?: boolean;
@@ -24,6 +25,7 @@ export type ActivityCardProps = {
 export const ActivityCard = ({
   activity,
   activeDurationMs,
+  activeSegmentStartedAt,
   withControlButtons = true,
   mutedControls = false,
   isSelected = false,
@@ -41,8 +43,10 @@ export const ActivityCard = ({
   const showSelectionOutline = isSelected && !hasActiveSession;
 
   const displayedSeconds = useDisplayedSeconds({
+    activityId: activity.id,
     activeDurationMs,
     hasActiveSession,
+    startedAt: activeSegmentStartedAt ?? undefined,
   });
 
   const displayedTime = useMemo(

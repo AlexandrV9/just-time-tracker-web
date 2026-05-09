@@ -6,13 +6,12 @@ import type {
   ActivitySessionSegmentDTO,
   UpdateActivityDataDTO,
   GetActivitySessionDTO,
-  StartActivityDTO,
   GetActivityDTO,
   GetActivitiesDTO,
   GetActivitiesByIdsDTO,
   GetActivitiesResponseDTO,
-  PauseActivityDTO,
-  FinishActivityDTO,
+  GetCurrentActivitiesQueryDTO,
+  GetCurrentActivitiesResponseDTO,
   GetActivitySessionsDTO,
   GetActivitySessionsResponseDTO,
   GetActivitySessionSegmentDTO,
@@ -27,6 +26,9 @@ import type {
   GetActivitiesAnalyticsQueryDTO,
   GetActivitySessionSegmentsDTO,
   GetActivitySessionSegmentsResponseDTO,
+  StartActivityDataDTO,
+  FinishActivityDataDTO,
+  PauseActivityDataDTO,
 } from "@to-do-list/shared";
 import { baseApi } from "../base";
 import type { RequestResponse } from "../types";
@@ -53,7 +55,16 @@ export class ActivityService {
       params: data,
     });
   }
-  
+
+  getCurrentActivities(data: GetCurrentActivitiesQueryDTO) {
+    return baseApi.get<GetCurrentActivitiesResponseDTO>(
+      `/api/activities/current`,
+      {
+        params: data,
+      },
+    );
+  }
+
   getActivitiesByIds(
     data: GetActivitiesByIdsDTO,
   ): Promise<RequestResponse<ActivityDTO[], unknown>> {
@@ -68,27 +79,28 @@ export class ActivityService {
     return baseApi.delete<boolean>(`/api/activities/${data.id}`);
   }
 
-  startActivity(data: StartActivityDTO) {
+  startActivity(data: StartActivityDataDTO) {
     return baseApi.post<{
       activity: ActivityDTO;
       session: ActivitySessionDTO;
       segment: ActivitySessionSegmentDTO;
-    }>(`/api/activities/${data.activityId}/start`);
+    }>(`/api/activities/start`, { data });
   }
 
-  pauseActivity(data: PauseActivityDTO) {
+  pauseActivity(data: PauseActivityDataDTO) {
     return baseApi.post<{
       activity: ActivityDTO;
       session: ActivitySessionDTO;
-      segment: ActivitySessionSegmentDTO;
-    }>(`/api/activities/${data.activityId}/pause`);
+      segment: ActivitySessionSegmentDTO | null;
+    }>(`/api/activities/pause`, { data });
   }
 
-  finishActivity(data: FinishActivityDTO) {
+  finishActivity(data: FinishActivityDataDTO) {
     return baseApi.post<{
       activity: ActivityDTO;
       session: ActivitySessionDTO;
-    }>(`/api/activities/${data.activityId}/finish`);
+      segment: ActivitySessionSegmentDTO | null;
+    }>(`/api/activities/finish`, { data });
   }
 
   getActivitySession(data: GetActivitySessionDTO) {
@@ -152,7 +164,7 @@ export class ActivityService {
 
   getSessionSegment(data: GetActivitySessionSegmentDTO) {
     return baseApi.get<ActivitySessionSegmentDTO>(
-      `/api/session-segments/${data.segmentId}`,
+      `/api/activity-session-segments/${data.segmentId}`,
     );
   }
 
