@@ -1,6 +1,7 @@
 import styles from "./DayEventsLayer.module.css";
 import { getHeight, getTop } from "./utils";
 import { mockCalendarEvents } from "./constants";
+import { useTranslation } from "~/shared/hooks";
 
 type DayEventsLayerProps = {
   startHour: number;
@@ -8,6 +9,8 @@ type DayEventsLayerProps = {
 };
 
 export const DayEventsLayer = ({ hourHeight }: DayEventsLayerProps) => {
+  const { t } = useTranslation();
+
   return (
     <div className={styles.eventsLayer}>
       {mockCalendarEvents.map((event) => {
@@ -16,7 +19,7 @@ export const DayEventsLayer = ({ hourHeight }: DayEventsLayerProps) => {
 
         return (
           <div key={event.id} className={styles.event} style={{ top, height }}>
-            <strong>{event.title}</strong>
+            <strong>{t(event.title)}</strong>
             <div className={styles.time}>
               {new Date(event.startDate).toLocaleTimeString([], {
                 hour: "2-digit",

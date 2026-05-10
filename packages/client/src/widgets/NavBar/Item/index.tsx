@@ -25,10 +25,17 @@ export const NavBarItem = memo(
         justifyContent="center"
         alignItems="center"
       >
-        <Box display="flex" justifyContent="center" alignItems="center">
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+        >
           <Button
             variant="ghost"
             height="auto"
+            _hover={{
+              bg: "transparent",
+            }}
             padding={2}
             color={isActive ? "purple.focusRing" : "gray"}
           >

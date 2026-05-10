@@ -1,5 +1,5 @@
-import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect } from "react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { useAuthStore } from "~/features/auth";
 import { Box, EmptyState, VersionIcon } from "~/shared/ui";
@@ -12,11 +12,35 @@ export const ActivityHistory = () => {
   const userId = user?.id;
   const navigate = useNavigate();
 
+  const { highlight, highlightDate } = useSearch({
+    from: "/(private)/_private/history/",
+  });
+
+  const [stableHighlightId, setStableHighlightId] = useState<
+    string | undefined
+  >(() => highlight);
+
+  const [stableHighlightDate, setStableHighlightDate] = useState<
+    string | undefined
+  >(() => highlightDate);
+
+  useEffect(() => {
+    if (!highlight) return;
+    setStableHighlightId(highlight);
+    setStableHighlightDate(highlightDate);
+    navigate({
+      to: "/history",
+      search: {},
+      replace: true,
+    });
+  }, [highlight, highlightDate, navigate]);
+
   const handleSelectActivity = useCallback(
-    (activityId: string) => {
+    (activityId: string, groupDateStart: string) => {
       navigate({
         to: "/activities/$activityId",
         params: { activityId },
+        search: { date: groupDateStart },
       });
     },
     [navigate],
@@ -87,10 +111,17 @@ export const ActivityHistory = () => {
         <ActivityGroup
           key={group.key}
           data={group}
+          highlightedActivityId={
+            group.groupDateStart === stableHighlightDate
+              ? stableHighlightId
+              : undefined
+          }
           hasMoreItems={Boolean(group.itemsHasMore && group.itemsNextCursor)}
           isLoadingMoreGroupItems={isLoadingMoreGroupItems(group.key)}
           onLoadMoreGroupItems={() => loadMoreGroupItems(group.key)}
-          onSelect={(activity) => handleSelectActivity(activity.id)}
+          onSelect={(activity) =>
+            handleSelectActivity(activity.id, group.groupDateStart)
+          }
         />
       ))}
       <div ref={fetchRef} style={{ height: 1, width: "100%" }} />

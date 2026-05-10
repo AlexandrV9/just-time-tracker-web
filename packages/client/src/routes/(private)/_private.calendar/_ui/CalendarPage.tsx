@@ -1,6 +1,5 @@
 import { Box, Flex, Text } from "~/shared/ui";
 import { useTranslation } from "~/shared/hooks";
-import { TimeGrid } from "./TimeGrid";
 
 export function CalendarPage() {
   const { t } = useTranslation();
@@ -28,7 +27,7 @@ export function CalendarPage() {
         </Text>
       </Flex>
 
-      <TimeGrid startHour={8} endHour={18} hourHeight={60} />
+      {/* <TimeGrid startHour={8} endHour={18} hourHeight={60} /> */}
       {/* <TaskList selectedDate={selectedDate} /> */}
     </Box>
   );

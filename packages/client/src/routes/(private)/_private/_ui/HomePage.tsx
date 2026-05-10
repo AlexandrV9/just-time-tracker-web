@@ -1,4 +1,4 @@
-import { Box, Flex, Text } from "~/shared/ui";
+import { Box, Flex } from "~/shared/ui";
 import { ActivitityUnfinishedList, ActivityTodayList } from "~/widgets";
 import { Stopwatch } from "./Stopwatch";
 

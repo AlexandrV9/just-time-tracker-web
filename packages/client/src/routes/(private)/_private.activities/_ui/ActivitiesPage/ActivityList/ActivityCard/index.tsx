@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import type { ActivityDTO } from "@to-do-list/shared";
 import { useMemo } from "react";
 import { Card, Flex, Text } from "~/shared/ui";
+import { useTranslation } from "~/shared/hooks";
 import {
   convertSecondsToTimeObject,
   convertTimeObjectToTimeString,
@@ -15,6 +16,7 @@ const getTotalTrackedSeconds = (a: ActivityDTO): number =>
   Math.floor((a.activeDurationMs + a.pauseDurationMs) / 1000);
 
 export const ActivityCard = ({ activity }: ActivityCardProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const displayedTime = useMemo(() => {
@@ -52,7 +54,7 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
       </Card.Body>
       <Card.Footer p={0} justifyContent="space-between" alignItems="end">
         <Text color="fg.muted" textStyle="md" fontWeight="medium">
-          Total:{" "}
+          {t("pages.activities.list.totalTracked")}:{" "}
           <Text as="span" color="fg" fontFamily="Roboto Mono, monospace">
             {displayedTime}
           </Text>

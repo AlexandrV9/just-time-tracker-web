@@ -1,5 +1,10 @@
 import { useDialog } from "@ark-ui/react";
-import { useNavigate, useParams, useRouter } from "@tanstack/react-router";
+import {
+  useNavigate,
+  useParams,
+  useRouter,
+  useSearch,
+} from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { IconButton } from "@chakra-ui/react";
@@ -27,6 +32,10 @@ export const ActivityPage = () => {
   const navigate = useNavigate();
 
   const router = useRouter();
+
+  const { date: dateFromSearch } = useSearch({
+    from: "/(private)/_private/activities/$activityId",
+  });
 
   const queryClient = useQueryClient();
 
@@ -89,8 +98,15 @@ export const ActivityPage = () => {
   }, [activity, deleteActivity]);
 
   const handleBack = useCallback(() => {
-    router.history.back();
-  }, [router.history]);
+    if (dateFromSearch) {
+      navigate({
+        to: "/history",
+        search: { highlight: activityId, highlightDate: dateFromSearch },
+      });
+    } else {
+      router.history.back();
+    }
+  }, [dateFromSearch, activityId, navigate, router.history]);
 
   if (isPending) {
     return (

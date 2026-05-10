@@ -3,9 +3,18 @@ import { useLayoutEffect } from "react";
 import { LangSwitcher, ThemeSwitcher } from "~/features";
 import { authManager, AuthUserAvatar, useAuthStore } from "~/features/auth";
 import { NotificationButton } from "~/features/notifications";
-import { useDeviceDetect, useOrientation } from "~/shared/hooks";
-import { Box, Flex, PageLayout } from "~/shared/ui";
+import { useDeviceDetect, useOrientation, useTranslation } from "~/shared/hooks";
+import { Box, Flex, PageLayout, Text } from "~/shared/ui";
 import { Header, NavBar, useHeaderStore } from "~/widgets";
+
+function PrivateRoutePending() {
+  const { t } = useTranslation();
+  return (
+    <Box display="flex" justifyContent="center" alignItems="center" p={8}>
+      <Text color="fg.muted">{t("pages.private.pending")}</Text>
+    </Box>
+  );
+}
 
 export const Route = createFileRoute("/(private)/_private")({
   beforeLoad: async ({ location }) => {
@@ -43,7 +52,7 @@ export const Route = createFileRoute("/(private)/_private")({
       console.log("Auth check in progress...");
     }
   },
-  loader: () => <div>Loader...</div>,
+  pendingComponent: PrivateRoutePending,
   component: PrivateLayout,
 });
 

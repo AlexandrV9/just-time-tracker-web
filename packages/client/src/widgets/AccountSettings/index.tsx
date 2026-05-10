@@ -5,7 +5,6 @@ import {
   Flex,
   Link,
   List,
-  SafeLockIcon,
   Text,
   UserCircleIcon,
 } from "~/shared/ui";
@@ -21,7 +20,7 @@ export const AccountSettings = () => {
       border="1px solid"
       borderRadius="xl"
       borderColor="border.emphasized"
-      p="0.5rem"
+      p="1rem"
     >
       <Text textStyle="xl" fontWeight="bold">
         {t("widgets.accountSettings.title")}
@@ -45,25 +44,6 @@ export const AccountSettings = () => {
             </Link>
           </Flex>
         </List.Item>
-
-        {/* <List.Item display="flex" alignItems="center" gap="0.5rem">
-          <Flex
-            asChild
-            width="full"
-            display="grid"
-            gap="0.3rem"
-            py="0.5rem"
-            gridTemplateColumns={"min-content 1fr min-content"}
-          >
-            <Link to="/settings">
-              <SafeLockIcon />
-              <Text textStyle="md" as="span">
-                Security & Password
-              </Text>
-              <ChevronRightIcon />
-            </Link>
-          </Flex>
-        </List.Item> */}
       </List.Root>
     </Box>
   );

@@ -19,6 +19,9 @@
     },
     "home": {
       "selectActivity": "Select activity or start timer",
+      "circularTimerStart": "Start",
+      "circularTimerPause": "Pause",
+      "circularTimerFinish": "Finish",
       "tabToday": "Today",
       "tabHistory": "History",
       "historyPlaceholder": "History will appear here",
@@ -35,10 +38,20 @@
       "dayPlanEditSelection": "Edit selection"
     },
     "calendar": {
-      "title": "Calendar"
+      "title": "Calendar",
+      "goToDateDialogTitle": "Go to date",
+      "dialogCancel": "Cancel",
+      "dialogApply": "Apply",
+      "mockEvents": {
+        "designSync": "Design sync",
+        "featureDevelopment": "Feature development"
+      }
     },
     "activities": {
       "title": "Activities",
+      "list": {
+        "totalTracked": "Total"
+      },
       "newActivityButton": "New activity",
       "createDialog": {
         "title": "New activity",
@@ -75,6 +88,16 @@
         "titleRequiredError": "Enter a name for the activity.",
         "editDialogTitle": "Edit activity"
       }
+    },
+    "settings": {
+      "profile": {
+        "namePlaceholder": "Name",
+        "emailPlaceholder": "Email",
+        "birthDatePlaceholder": "Date of birth"
+      }
+    },
+    "private": {
+      "pending": "Loading…"
     }
   },
   "widgets": {

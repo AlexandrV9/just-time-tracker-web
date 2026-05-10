@@ -1,5 +1,6 @@
 import { ButtonGroup } from "@chakra-ui/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "~/shared/hooks";
 import {
   Button,
   convertSecondsToTimeObject,
@@ -29,6 +30,7 @@ export function CircularTimer({
   onPause,
   onStop,
 }: CircularTimerProps) {
+  const { t } = useTranslation();
   const radius = size / 2 - 10;
   const center = size / 2;
   const lineLength = 20;
@@ -139,15 +141,15 @@ export function CircularTimer({
           size="lg"
           disabled={seconds === 0}
         >
-          Finish
+          {t("pages.home.circularTimerFinish")}
         </Button>
         {status !== "running" ? (
           <Button onClick={handleStart} variant="outline" size="lg">
-            Start
+            {t("pages.home.circularTimerStart")}
           </Button>
         ) : (
           <Button onClick={handlePause} variant="outline" size="lg">
-            Pause
+            {t("pages.home.circularTimerPause")}
           </Button>
         )}
       </ButtonGroup>

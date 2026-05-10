@@ -17,7 +17,7 @@ export const SignOutButton = () => {
   }, [navigate]);
 
   return (
-    <Button variant="outline" size="xl" onClick={handleClick}>
+    <Button variant="outline" size="lg" borderRadius="100px" onClick={handleClick}>
       {t("features.auth.signOut.textButton")}
     </Button>
   );

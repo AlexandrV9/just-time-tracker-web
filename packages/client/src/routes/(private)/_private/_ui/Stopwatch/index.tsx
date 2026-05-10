@@ -1,11 +1,11 @@
 import { Box, formatSecondsAsTimeString, Stack, Text } from "~/shared/ui";
 import { useDisplayedSeconds } from "~/features/ActivityCard/useDisplayedSeconds";
 import { useCurrentActivity } from "~/features";
+import { useTranslation } from "~/shared/hooks";
 
 export function Stopwatch() {
+  const { t } = useTranslation();
   const { currentActivity, currentSegment } = useCurrentActivity();
-
-  console.log({ currentActivity, currentSegment });
 
   const tickSeconds = useDisplayedSeconds({
     activityId: currentActivity?.id ?? null,
@@ -15,7 +15,6 @@ export function Stopwatch() {
   });
 
   const seconds = currentActivity ? tickSeconds : 0;
-
   const displayedTitle = currentActivity?.title;
   const displayedTime = formatSecondsAsTimeString(seconds);
 
@@ -42,7 +41,7 @@ export function Stopwatch() {
           color={displayedTitle ? "fg.muted" : "fg.subtle"}
           lineClamp={1}
         >
-          {displayedTitle ?? "Выберите активность"}
+          {displayedTitle ?? t("pages.home.selectActivity")}
         </Text>
         <Text
           style={{

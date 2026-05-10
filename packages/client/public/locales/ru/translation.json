@@ -19,6 +19,9 @@
     },
     "home": {
       "selectActivity": "Выберите активность или запустите таймер",
+      "circularTimerStart": "Старт",
+      "circularTimerPause": "Пауза",
+      "circularTimerFinish": "Завершить",
       "tabToday": "Сегодня",
       "tabHistory": "История",
       "historyPlaceholder": "История появится здесь",
@@ -35,10 +38,20 @@
       "dayPlanEditSelection": "Изменить выбор"
     },
     "calendar": {
-      "title": "Календарь"
+      "title": "Календарь",
+      "goToDateDialogTitle": "Перейти к дате",
+      "dialogCancel": "Отмена",
+      "dialogApply": "Применить",
+      "mockEvents": {
+        "designSync": "Дизайн созвон",
+        "featureDevelopment": "Разработка фичи"
+      }
     },
     "activities": {
       "title": "Активности",
+      "list": {
+        "totalTracked": "Всего"
+      },
       "newActivityButton": "Новая активность",
       "createDialog": {
         "title": "Новая активность",
@@ -75,6 +88,16 @@
         "titleRequiredError": "Введите название активности.",
         "editDialogTitle": "Редактировать активность"
       }
+    },
+    "settings": {
+      "profile": {
+        "namePlaceholder": "Имя",
+        "emailPlaceholder": "Почта",
+        "birthDatePlaceholder": "Дата рождения"
+      }
+    },
+    "private": {
+      "pending": "Загрузка…"
     }
   },
   "widgets": {

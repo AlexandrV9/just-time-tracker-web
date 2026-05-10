@@ -25,6 +25,7 @@ export const ActivitiesPage = () => {
           {t("pages.activities.title")}
         </Text>
         <IconButton
+          aria-label={t("pages.activities.newActivityButton")}
           variant="outline"
           size="sm"
           borderRadius="xl"

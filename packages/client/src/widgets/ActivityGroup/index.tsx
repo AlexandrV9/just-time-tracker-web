@@ -8,6 +8,7 @@ import { ActivityListView } from "~/entities/Activity";
 import { ActivityCard } from "~/features";
 import { useCurrentActivityStore } from "~/features/hooks/useCurrentActivityStore";
 import { useShallow } from "zustand/react/shallow";
+import { useEffect, useRef } from "react";
 import { Skeleton } from "./Skeleton";
 
 export type ActivityGroupDTO = {
@@ -22,6 +23,7 @@ type ActivityGroupProps = {
   data: ActivityGroupDTO;
   withControlButtons?: boolean;
   selectedActivityId?: string;
+  highlightedActivityId?: string;
   hasMoreItems?: boolean;
   isLoadingMoreGroupItems?: boolean;
   onSelect?: (activity: ActivityDTO) => void;
@@ -38,6 +40,7 @@ export function ActivityGroup({
   onFinish,
   withControlButtons = false,
   selectedActivityId,
+  highlightedActivityId,
   onSelect,
   hasMoreItems = false,
   isLoadingMoreGroupItems = false,
@@ -49,6 +52,17 @@ export function ActivityGroup({
       currentSegment: state.currentSegment,
     })),
   );
+
+  const highlightedItemRef = useRef<HTMLLIElement | null>(null);
+
+  useEffect(() => {
+    if (!highlightedActivityId || !highlightedItemRef.current) return;
+
+    highlightedItemRef.current.scrollIntoView({
+      behavior: "instant",
+      block: "center",
+    });
+  }, [highlightedActivityId]);
 
   const displayedActiveTotalTime = convertTimeObjectToTimeString(
     convertSecondsToTimeObject(data.totalActiveTime),
@@ -92,8 +106,13 @@ export function ActivityGroup({
             currentActivity?.id === activity.id &&
             currentSegment?.type === "active";
 
+          const isHighlighted = highlightedActivityId === activity.id;
+
           return (
-            <ActivityListView.Item key={activity.id}>
+            <ActivityListView.Item
+              key={activity.id}
+              ref={isHighlighted ? highlightedItemRef : undefined}
+            >
               <ActivityCard
                 activity={activity}
                 activeDurationMs={activity.activeDurationMs}
@@ -102,6 +121,7 @@ export function ActivityGroup({
                   isCurrentActivity ? currentSegment.startedAt : null
                 }
                 isRunning={isCurrentActivity}
+                isHighlighted={isHighlighted}
                 withControlButtons={withControlButtons}
                 showDurationBreakdown={!withControlButtons}
                 mutedControls={mutedControls}

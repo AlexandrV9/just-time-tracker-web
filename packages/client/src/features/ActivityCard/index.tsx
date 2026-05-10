@@ -1,5 +1,6 @@
 import type { ActivityDTO } from "@to-do-list/shared";
 import { useMemo } from "react";
+import { keyframes } from "@emotion/react";
 import { Box, Flex, PauseIcon, PlayIcon, Text } from "~/shared/ui";
 
 import { ActivityCardControls } from "./ActivityCardControls";
@@ -7,6 +8,14 @@ import { useDisplayedSeconds } from "./useDisplayedSeconds";
 import { formatDurationLabel, resolveHasActiveSession } from "./utils";
 import { ActivityCardView } from "~/entities/Activity";
 import { Skeleton } from "./Skeleton";
+
+// background-color: color-mix(in srgb, var(--chakra-colors-yellow-400) 15%, transparent
+
+const highlightFade = keyframes`
+  0%   { outline-color: var(--chakra-colors-yellow-400) }
+  70%  { outline-color: var(--chakra-colors-yellow-400) }
+  100% { outline-color: transparent }
+`;
 
 export type ActivityCardProps = {
   activity: ActivityDTO;
@@ -19,6 +28,7 @@ export type ActivityCardProps = {
   isSelected?: boolean;
   isInteractive?: boolean;
   isRunning?: boolean;
+  isHighlighted?: boolean;
   showDurationBreakdown?: boolean;
   onClick?: () => void;
   onStart?: () => void;
@@ -37,6 +47,7 @@ export const ActivityCard = ({
   isSelected = false,
   isInteractive = true,
   isRunning,
+  isHighlighted = false,
   showDurationBreakdown = false,
   onStart,
   onPause,
@@ -77,7 +88,9 @@ export const ActivityCard = ({
           ? "2px solid"
           : showSelectionOutline
             ? "1px solid"
-            : undefined
+            : isHighlighted
+              ? "2px solid"
+              : undefined
       }
       outlineColor={
         showRunningOutline
@@ -87,6 +100,11 @@ export const ActivityCard = ({
             : undefined
       }
       outlineOffset={showSelectionOutline ? "0px" : undefined}
+      css={
+        isHighlighted
+          ? { animation: `${highlightFade} 1.2s ease forwards` }
+          : undefined
+      }
     >
       <ActivityCardView.Body>
         <Flex flex="1" minH={0} justifyContent="space-between">

@@ -14,7 +14,7 @@ type DateNavigatorProps = {
 };
 
 export function DateNavigator({ value, onChange }: DateNavigatorProps) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const currentDate = dayjs(value);
 
@@ -81,7 +81,9 @@ export function DateNavigator({ value, onChange }: DateNavigatorProps) {
             <Dialog.Positioner>
               <Dialog.Content>
                 <Dialog.Header justifyContent="center">
-                  <Dialog.Title>Перейти</Dialog.Title>
+                  <Dialog.Title>
+                    {t("pages.calendar.goToDateDialogTitle")}
+                  </Dialog.Title>
                 </Dialog.Header>
                 <Dialog.Body>
                   <Calendar />
@@ -98,10 +100,10 @@ export function DateNavigator({ value, onChange }: DateNavigatorProps) {
                       w="full"
                       onClick={() => selectDateDialog.setOpen(false)}
                     >
-                      Отмена
+                      {t("pages.calendar.dialogCancel")}
                     </Button>
                     <Button variant="solid" w="full">
-                      Применить
+                      {t("pages.calendar.dialogApply")}
                     </Button>
                   </ButtonGroup>
                 </Dialog.Footer>

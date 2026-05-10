@@ -116,6 +116,7 @@ export const useActivityDayCharts = ({
     let dayActiveSecs = 0;
     let dayPauseSecs = 0;
     let dayGapIdx = 0;
+    const dayUsedNames = new Set<string>();
     const dayBarFromMs =
       segsInDay.length > 0
         ? Math.max(dayFromMs, floorToStepMs(segsInDay[0]!.startMs))
@@ -144,8 +145,16 @@ export const useActivityDayCharts = ({
           ? t("widgets.activityAnalytics.active")
           : t("widgets.activityAnalytics.pause");
 
+      const baseName = `${label} ${timeFormatter.format(new Date(seg.startMs))}\u2013${timeFormatter.format(new Date(seg.endMs))}`;
+      let uniqueName = baseName;
+      let nameCounter = 2;
+      while (dayUsedNames.has(uniqueName)) {
+        uniqueName = `${baseName} (${nameCounter++})`;
+      }
+      dayUsedNames.add(uniqueName);
+
       dayChartData.push({
-        name: `${label} ${timeFormatter.format(new Date(seg.startMs))}\u2013${timeFormatter.format(new Date(seg.endMs))}`,
+        name: uniqueName,
         value: seg.seconds,
         color: seg.type === "active" ? "teal.solid" : "orange.solid",
       });
@@ -215,6 +224,7 @@ export const useActivityDayCharts = ({
         let activeSecs = 0;
         let pauseSecs = 0;
         let gapIdx = 0;
+        const sessionUsedNames = new Set<string>();
 
         const chartData: ChartSegment[] = [];
 
@@ -235,8 +245,16 @@ export const useActivityDayCharts = ({
               ? t("widgets.activityAnalytics.active")
               : t("widgets.activityAnalytics.pause");
 
+          const segBaseName = `${segLabel} ${timeFormatter.format(new Date(seg.startMs))}\u2013${timeFormatter.format(new Date(seg.endMs))}`;
+          let segUniqueName = segBaseName;
+          let segNameCounter = 2;
+          while (sessionUsedNames.has(segUniqueName)) {
+            segUniqueName = `${segBaseName} (${segNameCounter++})`;
+          }
+          sessionUsedNames.add(segUniqueName);
+
           chartData.push({
-            name: `${segLabel} ${timeFormatter.format(new Date(seg.startMs))}\u2013${timeFormatter.format(new Date(seg.endMs))}`,
+            name: segUniqueName,
             value: seg.seconds,
             color: seg.type === "active" ? "teal.solid" : "orange.solid",
           });
