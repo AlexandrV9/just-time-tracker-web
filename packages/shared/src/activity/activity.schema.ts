@@ -79,14 +79,14 @@ export type GetActivitiesDTO = z.infer<typeof getActivitiesSchema>;
 export const getCurrentActivitiesQuerySchema = z
   .object({
     createdById: z.string().min(1, "createdById is required"),
-    fromDate: z.iso.datetime(),
-    toDate: z.iso.datetime(),
+    fromDate: z.iso.datetime().optional(),
+    toDate: z.iso.datetime().optional(),
     page: z.coerce.number().int().min(0).default(0),
     limit: z.coerce.number().int().min(1).max(100).default(10),
     status: activityStatusSchema.optional(),
   })
   .superRefine(({ fromDate, toDate }, ctx) => {
-    if (new Date(toDate) < new Date(fromDate)) {
+    if (fromDate && toDate && new Date(toDate) < new Date(fromDate)) {
       ctx.addIssue({
         path: ["toDate"],
         message: "toDate must be after fromDate",

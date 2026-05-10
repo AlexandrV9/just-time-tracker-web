@@ -1,7 +1,10 @@
 import { List } from "~/shared/ui";
 import { ActivityCard } from "./ActivityCard";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { activityApiService } from "~/shared/api/services";
+import {
+  ACTIVITIES_QUERY_KEY,
+  activityApiService,
+} from "~/shared/api/services";
 import { useInView } from "react-intersection-observer";
 import { useEffect, useMemo } from "react";
 import { useAuthStore } from "~/features/auth";
@@ -11,7 +14,7 @@ export const ActivityList = () => {
   const userId = user?.id;
 
   const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
-    queryKey: ["activities"],
+    queryKey: [ACTIVITIES_QUERY_KEY],
     queryFn: (ctx) =>
       activityApiService.getActivities({
         page: ctx.pageParam,

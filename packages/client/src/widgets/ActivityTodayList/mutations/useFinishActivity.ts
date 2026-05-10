@@ -7,6 +7,7 @@ import type {
 } from "@to-do-list/shared";
 import {
   activityApiService,
+  ACTIVITIES_CURRENT_QUERY_KEY,
   ACTIVITY_ANALYTICS_QUERY_KEY,
   ACTIVITIES_ANALYTICS_QUERY_KEY,
   ACTIVITY_SESSIONS_QUERY_KEY,
@@ -76,6 +77,9 @@ export const useFinishActivity = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: [ACTIVITIES_QUERY_KEY] });
+      queryClient.invalidateQueries({
+        queryKey: [ACTIVITIES_CURRENT_QUERY_KEY],
+      });
       queryClient.invalidateQueries({
         queryKey: [ACTIVITY_SESSIONS_QUERY_KEY],
       });

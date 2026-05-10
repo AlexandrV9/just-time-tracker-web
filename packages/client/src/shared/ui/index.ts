@@ -32,6 +32,7 @@ export * from "./Checkbox";
 export * from "./ButtonGroup";
 export * from "./Tabs";
 export * from "./EmptyState";
+export * from "./Grid";
 
 export * from "./icons";
 export * from "./controls";

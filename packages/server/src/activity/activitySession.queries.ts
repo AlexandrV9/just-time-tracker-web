@@ -267,7 +267,7 @@ export const getTotalTimeInRange = async (params: {
             WHEN seg.segment_type = 'active' THEN
               EXTRACT(
                 EPOCH FROM (
-                  LEAST(COALESCE(seg.ended_at, $3::timestamp), $3::timestamp)
+                  LEAST(COALESCE(seg.ended_at, NOW()), $3::timestamp)
                   -
                   GREATEST(seg.started_at, $2::timestamp)
                 )
@@ -283,7 +283,7 @@ export const getTotalTimeInRange = async (params: {
             WHEN seg.segment_type = 'pause' THEN
               EXTRACT(
                 EPOCH FROM (
-                  LEAST(COALESCE(seg.ended_at, $3::timestamp), $3::timestamp)
+                  LEAST(COALESCE(seg.ended_at, NOW()), $3::timestamp)
                   -
                   GREATEST(seg.started_at, $2::timestamp)
                 )
@@ -298,7 +298,7 @@ export const getTotalTimeInRange = async (params: {
     INNER JOIN activities a ON a.id = s.activity_id
     WHERE a.created_by_id = $1
       AND seg.started_at < $3::timestamp
-      AND COALESCE(seg.ended_at, $3::timestamp) > $2::timestamp
+      AND COALESCE(seg.ended_at, NOW()) > $2::timestamp
   `;
 
   const result = await pool.query(query, [createdById, fromDate, toDate]);
@@ -337,7 +337,7 @@ export const listActivityTimeItemsInRange = async (params: {
               WHEN seg.segment_type = 'active' THEN
                 EXTRACT(
                   EPOCH FROM (
-                    LEAST(COALESCE(seg.ended_at, $3::timestamp), $3::timestamp)
+                    LEAST(COALESCE(seg.ended_at, NOW()), $3::timestamp)
                     -
                     GREATEST(seg.started_at, $2::timestamp)
                   )
@@ -353,7 +353,7 @@ export const listActivityTimeItemsInRange = async (params: {
               WHEN seg.segment_type = 'pause' THEN
                 EXTRACT(
                   EPOCH FROM (
-                    LEAST(COALESCE(seg.ended_at, $3::timestamp), $3::timestamp)
+                    LEAST(COALESCE(seg.ended_at, NOW()), $3::timestamp)
                     -
                     GREATEST(seg.started_at, $2::timestamp)
                   )
@@ -369,7 +369,7 @@ export const listActivityTimeItemsInRange = async (params: {
       INNER JOIN activities a ON a.id = s.activity_id
       WHERE a.created_by_id = $1
         AND seg.started_at < $3::timestamp
-        AND COALESCE(seg.ended_at, $3::timestamp) > $2::timestamp
+        AND COALESCE(seg.ended_at, NOW()) > $2::timestamp
       GROUP BY a.id
     )
     SELECT
@@ -391,13 +391,12 @@ export const listActivityTimeItemsInRange = async (params: {
     offset,
   ]);
 
-  return {
-    items: result.rows.map((row: Record<string, unknown>) => ({
-      activityId: String(row["activity_id"]),
-      activeDurationMs: Math.floor(Number(row["active_duration_ms"] ?? 0)),
-      pauseDurationMs: Math.floor(Number(row["pause_duration_ms"] ?? 0)),
-    })),
-  };
+  const items = result.rows.map((row: Record<string, unknown>) => ({
+    activityId: String(row["activity_id"]),
+    activeDurationMs: Math.floor(Number(row["active_duration_ms"] ?? 0)),
+    pauseDurationMs: Math.floor(Number(row["pause_duration_ms"] ?? 0)),
+  }));
+  return { items };
 };
 
 export const activitySessionQueries = {

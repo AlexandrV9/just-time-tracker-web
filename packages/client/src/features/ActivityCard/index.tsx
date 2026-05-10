@@ -1,6 +1,6 @@
 import type { ActivityDTO } from "@to-do-list/shared";
 import { useMemo } from "react";
-import { Box, Flex, Text } from "~/shared/ui";
+import { Box, Flex, PauseIcon, PlayIcon, Text } from "~/shared/ui";
 
 import { ActivityCardControls } from "./ActivityCardControls";
 import { useDisplayedSeconds } from "./useDisplayedSeconds";
@@ -10,12 +10,16 @@ import { Skeleton } from "./Skeleton";
 
 export type ActivityCardProps = {
   activity: ActivityDTO;
-  activeDurationMs: number;
+  activeDurationMs?: number;
+  pauseDurationMs?: number;
   activeSegmentStartedAt?: string | null;
   withControlButtons?: boolean;
+  finishOnly?: boolean;
   mutedControls?: boolean;
   isSelected?: boolean;
   isInteractive?: boolean;
+  isRunning?: boolean;
+  showDurationBreakdown?: boolean;
   onClick?: () => void;
   onStart?: () => void;
   onPause?: () => void;
@@ -24,12 +28,16 @@ export type ActivityCardProps = {
 
 export const ActivityCard = ({
   activity,
-  activeDurationMs,
-  activeSegmentStartedAt,
+  activeDurationMs = 0,
+  pauseDurationMs = 0,
+  activeSegmentStartedAt = null,
   withControlButtons = true,
+  finishOnly = false,
   mutedControls = false,
   isSelected = false,
   isInteractive = true,
+  isRunning,
+  showDurationBreakdown = false,
   onStart,
   onPause,
   onFinish,
@@ -39,7 +47,7 @@ export const ActivityCard = ({
     activityStatus: activity.status,
   });
 
-  const showRunningOutline = hasActiveSession;
+  const showRunningOutline = isRunning ?? hasActiveSession;
   const showSelectionOutline = isSelected && !hasActiveSession;
 
   const displayedSeconds = useDisplayedSeconds({
@@ -49,9 +57,14 @@ export const ActivityCard = ({
     startedAt: activeSegmentStartedAt ?? undefined,
   });
 
-  const displayedTime = useMemo(
+  const activeTime = useMemo(
     () => formatDurationLabel(displayedSeconds),
     [displayedSeconds],
+  );
+
+  const pauseTime = useMemo(
+    () => formatDurationLabel(Math.floor((pauseDurationMs ?? 0) / 1000)),
+    [pauseDurationMs],
   );
 
   return (
@@ -83,14 +96,43 @@ export const ActivityCard = ({
         </Flex>
       </ActivityCardView.Body>
       <ActivityCardView.Footer>
-        <Text
-          color="fg.muted"
-          textStyle="sm"
-          fontWeight="medium"
-          fontFamily="Roboto Mono, monospace"
-        >
-          {displayedTime}
-        </Text>
+        {showDurationBreakdown ? (
+          <Flex justifyContent="flex-end" gap="0.5rem" w="full" flexWrap="wrap">
+            <Flex align="center" gap="0.2rem" color="fg.muted">
+              <Box color="orange.solid">
+                <PauseIcon size={16} />
+              </Box>
+              <Text
+                textStyle="xs"
+                fontWeight="medium"
+                fontFamily="Roboto Mono, monospace"
+              >
+                {pauseTime}
+              </Text>
+            </Flex>
+            <Flex align="center" gap="0.2rem" color="fg.muted">
+              <Box color="green.solid">
+                <PlayIcon size={16} />
+              </Box>
+              <Text
+                textStyle="xs"
+                fontWeight="medium"
+                fontFamily="Roboto Mono, monospace"
+              >
+                {activeTime}
+              </Text>
+            </Flex>
+          </Flex>
+        ) : (
+          <Text
+            color="fg.muted"
+            textStyle="sm"
+            fontWeight="medium"
+            fontFamily="Roboto Mono, monospace"
+          >
+            {activeTime}
+          </Text>
+        )}
         {withControlButtons && (
           <Box
             opacity={mutedControls ? 0.38 : 1}
@@ -103,6 +145,7 @@ export const ActivityCard = ({
               activityId={activity.id}
               hasActiveSession={hasActiveSession}
               sessionStatus={activity.status}
+              finishOnly={finishOnly}
               onStart={onStart}
               onPause={onPause}
               onFinish={onFinish}

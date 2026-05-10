@@ -22,12 +22,12 @@ type ActivityGroupProps = {
   data: ActivityGroupDTO;
   withControlButtons?: boolean;
   selectedActivityId?: string;
+  hasMoreItems?: boolean;
+  isLoadingMoreGroupItems?: boolean;
   onSelect?: (activity: ActivityDTO) => void;
   onStart?: (activity: ActivityDTO) => void;
   onPause?: (activity: ActivityDTO) => void;
   onFinish?: (activity: ActivityDTO) => void;
-  hasMoreItems?: boolean;
-  isLoadingMoreGroupItems?: boolean;
   onLoadMoreGroupItems?: () => void;
 };
 
@@ -62,13 +62,13 @@ export function ActivityGroup({
 
   return (
     <Box display="flex" flexDirection="column" gap="0.75rem">
-      <Flex justifyContent="space-between" alignItems="center" px={1}>
+      <Flex justifyContent="space-between" alignItems="center" gap="0.5rem">
         <Text textStyle="sm" fontWeight="bold" color="fg.muted">
           {data.label}
         </Text>
-        <Flex gap="0.25rem" alignItems="center">
+        <Flex gap="0.25rem" alignItems="center" wrap="wrap" justify="flex-end">
           <Text textStyle="sm" color="fg.muted">
-            Total:
+            Total Active Time:
           </Text>
           <Text
             textStyle="sm"
@@ -88,6 +88,7 @@ export function ActivityGroup({
           );
 
           const isCurrentActivity =
+            withControlButtons &&
             currentActivity?.id === activity.id &&
             currentSegment?.type === "active";
 
@@ -96,10 +97,13 @@ export function ActivityGroup({
               <ActivityCard
                 activity={activity}
                 activeDurationMs={activity.activeDurationMs}
+                pauseDurationMs={activity.pauseDurationMs}
                 activeSegmentStartedAt={
                   isCurrentActivity ? currentSegment.startedAt : null
                 }
+                isRunning={isCurrentActivity}
                 withControlButtons={withControlButtons}
+                showDurationBreakdown={!withControlButtons}
                 mutedControls={mutedControls}
                 isSelected={
                   !!selectedActivityId &&

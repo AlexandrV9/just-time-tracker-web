@@ -297,8 +297,8 @@ type CurrentActivityRow = Record<string, unknown>;
 const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
   const {
     createdById,
-    fromDate,
-    toDate,
+    fromDate = null,
+    toDate = null,
     status,
     page = 0,
     limit = 10,
@@ -316,10 +316,15 @@ const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
     };
   };
 
-  // Only completed (ended) segments are summed. Open segments (ended_at IS NULL)
-  // are excluded so that activeDurationMs represents purely historical accumulated
-  // time. The client adds the running segment's elapsed via: activeDurationMs + (now - startedAt).
-  // LEAST(x.ended_at, $3) yields NULL for open segments, which SUM ignores automatically.
+  // $2 = fromDate (nullable), $3 = toDate (nullable).
+  // When null, the bound is open:
+  //   • fromDate IS NULL → no lower bound on segment time
+  //   • toDate  IS NULL → no upper bound on segment time
+  //
+  // Duration clipping:
+  //   COALESCE($2, x.started_at)  → if no lower bound, clip start at segment start itself (= no clipping)
+  //   COALESCE($3, x.ended_at)    → if no upper bound, clip end at segment end itself (= no clipping)
+  //   Open segments (ended_at IS NULL) still return NULL from LEAST/GREATEST so SUM ignores them.
   const clippedDurationFragments = `
       COALESCE((
         SELECT SUM(
@@ -327,8 +332,8 @@ const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
             WHEN x.segment_type = 'active' THEN
               GREATEST(0,
                 EXTRACT(EPOCH FROM (
-                  LEAST(x.ended_at, $3::timestamptz)
-                  - GREATEST(x.started_at, $2::timestamptz)
+                  LEAST(x.ended_at, COALESCE($3::timestamptz, x.ended_at))
+                  - GREATEST(x.started_at, COALESCE($2::timestamptz, x.started_at))
                 )) * 1000
               )
             ELSE 0
@@ -337,8 +342,8 @@ const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
         FROM activity_session_segments x
         INNER JOIN activity_sessions sx ON sx.id = x.session_id
         WHERE sx.activity_id = a.id
-          AND x.started_at < $3::timestamptz
-          AND COALESCE(x.ended_at, NOW()) > $2::timestamptz
+          AND ($3::timestamptz IS NULL OR x.started_at < $3::timestamptz)
+          AND ($2::timestamptz IS NULL OR COALESCE(x.ended_at, NOW()) > $2::timestamptz)
       ), 0)::bigint AS "activeDurationMs",
       COALESCE((
         SELECT SUM(
@@ -346,8 +351,8 @@ const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
             WHEN x.segment_type = 'pause' THEN
               GREATEST(0,
                 EXTRACT(EPOCH FROM (
-                  LEAST(x.ended_at, $3::timestamptz)
-                  - GREATEST(x.started_at, $2::timestamptz)
+                  LEAST(x.ended_at, COALESCE($3::timestamptz, x.ended_at))
+                  - GREATEST(x.started_at, COALESCE($2::timestamptz, x.started_at))
                 )) * 1000
               )
             ELSE 0
@@ -356,8 +361,8 @@ const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
         FROM activity_session_segments x
         INNER JOIN activity_sessions sx ON sx.id = x.session_id
         WHERE sx.activity_id = a.id
-          AND x.started_at < $3::timestamptz
-          AND COALESCE(x.ended_at, NOW()) > $2::timestamptz
+          AND ($3::timestamptz IS NULL OR x.started_at < $3::timestamptz)
+          AND ($2::timestamptz IS NULL OR COALESCE(x.ended_at, NOW()) > $2::timestamptz)
       ), 0)::bigint AS "pauseDurationMs"`;
 
   // `status` aligns with ActivityDTO.idle | active | paused (idle = no last session).
@@ -436,8 +441,8 @@ const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
     INNER JOIN activity_sessions s ON s.id = a.last_activity_session_id
     WHERE a.created_by_id = $1
       AND s.status = ANY($4::text[])
-      AND s.started_at < $3::timestamptz
-      AND COALESCE(s.ended_at, NOW()) > $2::timestamptz
+      AND ($3::timestamptz IS NULL OR s.started_at < $3::timestamptz)
+      AND ($2::timestamptz IS NULL OR COALESCE(s.ended_at, NOW()) > $2::timestamptz)
     ORDER BY s.started_at DESC, a.updated_at DESC
     LIMIT $5
     OFFSET $6
@@ -449,8 +454,8 @@ const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
     INNER JOIN activity_sessions s ON s.id = a.last_activity_session_id
     WHERE a.created_by_id = $1
       AND s.status = ANY($4::text[])
-      AND s.started_at < $3::timestamptz
-      AND COALESCE(s.ended_at, NOW()) > $2::timestamptz
+      AND ($3::timestamptz IS NULL OR s.started_at < $3::timestamptz)
+      AND ($2::timestamptz IS NULL OR COALESCE(s.ended_at, NOW()) > $2::timestamptz)
   `;
 
   const [dataResult, countResult] = await Promise.all([
