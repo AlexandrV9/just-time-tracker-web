@@ -1,7 +1,6 @@
 import { devtools } from "zustand/middleware";
 import { create } from "zustand";
 import type { ReactNode } from "react";
-import { AuthUserAvatar } from "~/features/auth";
 
 type HeaderStore = {
   leftContent?: ReactNode;
@@ -13,7 +12,7 @@ type HeaderStore = {
 
 export const useHeaderStore = create<HeaderStore>()(
   devtools((set, get) => ({
-    leftContent: <AuthUserAvatar />,
+    leftContent: null,
     centerContent: null,
     rightContent: null,
 

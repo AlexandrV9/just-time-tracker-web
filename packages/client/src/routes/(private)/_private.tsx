@@ -35,16 +35,26 @@ export const Route = createFileRoute("/(private)/_private")({
         return;
       } catch {
         throw redirect({
-          to: "/signin",
-          search: { redirect: location.href },
+          to: "/landing",
+          search: {
+            redirect:
+              location.pathname === "/"
+                ? undefined
+                : `${location.pathname}${location.search}${location.hash}`,
+          },
         });
       }
     }
 
     if (authStatus === "UNAUTHENTICATED") {
       throw redirect({
-        to: "/signin",
-        search: { redirect: location.href },
+        to: "/landing",
+        search: {
+          redirect:
+            location.pathname === "/"
+              ? undefined
+              : `${location.pathname}${location.search}${location.hash}`,
+        },
       });
     }
 

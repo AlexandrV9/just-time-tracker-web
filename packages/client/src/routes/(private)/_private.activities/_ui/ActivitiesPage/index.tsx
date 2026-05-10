@@ -27,11 +27,10 @@ export const ActivitiesPage = () => {
         <IconButton
           aria-label={t("pages.activities.newActivityButton")}
           variant="outline"
-          size="sm"
-          borderRadius="xl"
+          size="xs"
           onClick={() => createActivityDialog.setOpen(true)}
         >
-          <PlusIcon />
+          <PlusIcon size={22} />
         </IconButton>
       </Flex>
       <ActivityList />

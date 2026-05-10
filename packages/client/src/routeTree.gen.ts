@@ -16,6 +16,9 @@ import { Route as privatePrivateRouteImport } from './routes/(private)/_private'
 import { Route as authAuthRouteImport } from './routes/(auth)/_auth'
 import { Route as privatePrivateIndexRouteImport } from './routes/(private)/_private/index'
 import { Route as publicPublicWelcomeIndexRouteImport } from './routes/(public)/_public.welcome/index'
+import { Route as publicPublicTermsOfServiceIndexRouteImport } from './routes/(public)/_public.terms-of-service/index'
+import { Route as publicPublicPrivacyPolicyIndexRouteImport } from './routes/(public)/_public.privacy-policy/index'
+import { Route as publicPublicLandingIndexRouteImport } from './routes/(public)/_public.landing/index'
 import { Route as privatePrivateSettingsIndexRouteImport } from './routes/(private)/_private.settings/index'
 import { Route as privatePrivateHistoryIndexRouteImport } from './routes/(private)/_private.history/index'
 import { Route as privatePrivateCalendarIndexRouteImport } from './routes/(private)/_private.calendar/index'
@@ -62,6 +65,24 @@ const publicPublicWelcomeIndexRoute =
   publicPublicWelcomeIndexRouteImport.update({
     id: '/welcome/',
     path: '/welcome/',
+    getParentRoute: () => publicPublicRoute,
+  } as any)
+const publicPublicTermsOfServiceIndexRoute =
+  publicPublicTermsOfServiceIndexRouteImport.update({
+    id: '/terms-of-service/',
+    path: '/terms-of-service/',
+    getParentRoute: () => publicPublicRoute,
+  } as any)
+const publicPublicPrivacyPolicyIndexRoute =
+  publicPublicPrivacyPolicyIndexRouteImport.update({
+    id: '/privacy-policy/',
+    path: '/privacy-policy/',
+    getParentRoute: () => publicPublicRoute,
+  } as any)
+const publicPublicLandingIndexRoute =
+  publicPublicLandingIndexRouteImport.update({
+    id: '/landing/',
+    path: '/landing/',
     getParentRoute: () => publicPublicRoute,
   } as any)
 const privatePrivateSettingsIndexRoute =
@@ -121,6 +142,9 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof privatePrivateCalendarIndexRoute
   '/history': typeof privatePrivateHistoryIndexRoute
   '/settings': typeof privatePrivateSettingsIndexRoute
+  '/landing': typeof publicPublicLandingIndexRoute
+  '/privacy-policy': typeof publicPublicPrivacyPolicyIndexRoute
+  '/terms-of-service': typeof publicPublicTermsOfServiceIndexRoute
   '/welcome': typeof publicPublicWelcomeIndexRoute
 }
 export interface FileRoutesByTo {
@@ -133,6 +157,9 @@ export interface FileRoutesByTo {
   '/calendar': typeof privatePrivateCalendarIndexRoute
   '/history': typeof privatePrivateHistoryIndexRoute
   '/settings': typeof privatePrivateSettingsIndexRoute
+  '/landing': typeof publicPublicLandingIndexRoute
+  '/privacy-policy': typeof publicPublicPrivacyPolicyIndexRoute
+  '/terms-of-service': typeof publicPublicTermsOfServiceIndexRoute
   '/welcome': typeof publicPublicWelcomeIndexRoute
 }
 export interface FileRoutesById {
@@ -152,6 +179,9 @@ export interface FileRoutesById {
   '/(private)/_private/calendar/': typeof privatePrivateCalendarIndexRoute
   '/(private)/_private/history/': typeof privatePrivateHistoryIndexRoute
   '/(private)/_private/settings/': typeof privatePrivateSettingsIndexRoute
+  '/(public)/_public/landing/': typeof publicPublicLandingIndexRoute
+  '/(public)/_public/privacy-policy/': typeof publicPublicPrivacyPolicyIndexRoute
+  '/(public)/_public/terms-of-service/': typeof publicPublicTermsOfServiceIndexRoute
   '/(public)/_public/welcome/': typeof publicPublicWelcomeIndexRoute
 }
 export interface FileRouteTypes {
@@ -166,6 +196,9 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/history'
     | '/settings'
+    | '/landing'
+    | '/privacy-policy'
+    | '/terms-of-service'
     | '/welcome'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -178,6 +211,9 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/history'
     | '/settings'
+    | '/landing'
+    | '/privacy-policy'
+    | '/terms-of-service'
     | '/welcome'
   id:
     | '__root__'
@@ -196,6 +232,9 @@ export interface FileRouteTypes {
     | '/(private)/_private/calendar/'
     | '/(private)/_private/history/'
     | '/(private)/_private/settings/'
+    | '/(public)/_public/landing/'
+    | '/(public)/_public/privacy-policy/'
+    | '/(public)/_public/terms-of-service/'
     | '/(public)/_public/welcome/'
   fileRoutesById: FileRoutesById
 }
@@ -261,6 +300,27 @@ declare module '@tanstack/react-router' {
       path: '/welcome'
       fullPath: '/welcome'
       preLoaderRoute: typeof publicPublicWelcomeIndexRouteImport
+      parentRoute: typeof publicPublicRoute
+    }
+    '/(public)/_public/terms-of-service/': {
+      id: '/(public)/_public/terms-of-service/'
+      path: '/terms-of-service'
+      fullPath: '/terms-of-service'
+      preLoaderRoute: typeof publicPublicTermsOfServiceIndexRouteImport
+      parentRoute: typeof publicPublicRoute
+    }
+    '/(public)/_public/privacy-policy/': {
+      id: '/(public)/_public/privacy-policy/'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof publicPublicPrivacyPolicyIndexRouteImport
+      parentRoute: typeof publicPublicRoute
+    }
+    '/(public)/_public/landing/': {
+      id: '/(public)/_public/landing/'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof publicPublicLandingIndexRouteImport
       parentRoute: typeof publicPublicRoute
     }
     '/(private)/_private/settings/': {
@@ -383,10 +443,16 @@ const privateRouteWithChildren =
   privateRoute._addFileChildren(privateRouteChildren)
 
 interface publicPublicRouteChildren {
+  publicPublicLandingIndexRoute: typeof publicPublicLandingIndexRoute
+  publicPublicPrivacyPolicyIndexRoute: typeof publicPublicPrivacyPolicyIndexRoute
+  publicPublicTermsOfServiceIndexRoute: typeof publicPublicTermsOfServiceIndexRoute
   publicPublicWelcomeIndexRoute: typeof publicPublicWelcomeIndexRoute
 }
 
 const publicPublicRouteChildren: publicPublicRouteChildren = {
+  publicPublicLandingIndexRoute: publicPublicLandingIndexRoute,
+  publicPublicPrivacyPolicyIndexRoute: publicPublicPrivacyPolicyIndexRoute,
+  publicPublicTermsOfServiceIndexRoute: publicPublicTermsOfServiceIndexRoute,
   publicPublicWelcomeIndexRoute: publicPublicWelcomeIndexRoute,
 }
 

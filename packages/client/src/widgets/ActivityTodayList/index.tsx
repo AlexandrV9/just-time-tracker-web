@@ -106,7 +106,12 @@ export const ActivityTodayList = () => {
               <VersionIcon size={60} />
             </EmptyState.Indicator>
             <VStack textAlign="center">
-              <EmptyState.Title>На сегодня нет активностей</EmptyState.Title>
+              <EmptyState.Title>
+                Нет активностей на сегодня
+              </EmptyState.Title>
+              <EmptyState.Description>
+                Добавьте активности, чтобы начать день
+              </EmptyState.Description>
             </VStack>
           </EmptyState.Content>
         </EmptyState.Root>

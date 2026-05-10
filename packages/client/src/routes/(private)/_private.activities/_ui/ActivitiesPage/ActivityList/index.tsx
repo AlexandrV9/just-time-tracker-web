@@ -1,4 +1,4 @@
-import { List } from "~/shared/ui";
+import { EmptyState, List, VersionIcon } from "~/shared/ui";
 import { ActivityCard } from "./ActivityCard";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
@@ -8,6 +8,7 @@ import {
 import { useInView } from "react-intersection-observer";
 import { useEffect, useMemo } from "react";
 import { useAuthStore } from "~/features/auth";
+import { VStack } from "@chakra-ui/react";
 
 export const ActivityList = () => {
   const { user } = useAuthStore();
@@ -41,6 +42,24 @@ export const ActivityList = () => {
       fetchNextPage();
     }
   }, [isLastInView, fetchNextPage, hasNextPage]);
+
+  if (activities.length === 0) {
+    return (
+      <EmptyState.Root>
+        <EmptyState.Content>
+          <EmptyState.Indicator>
+            <VersionIcon size={60} />
+          </EmptyState.Indicator>
+          <VStack textAlign="center">
+            <EmptyState.Title>У вас пока нет активностей</EmptyState.Title>
+            <EmptyState.Description>
+              Создайте новую активность
+            </EmptyState.Description>
+          </VStack>
+        </EmptyState.Content>
+      </EmptyState.Root>
+    );
+  }
 
   return (
     <List.Root

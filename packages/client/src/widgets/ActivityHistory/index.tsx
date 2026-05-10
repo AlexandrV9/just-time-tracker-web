@@ -98,7 +98,10 @@ export const ActivityHistory = () => {
             <VersionIcon size={60} />
           </EmptyState.Indicator>
           <VStack textAlign="center">
-            <EmptyState.Title>Пока нет активностей</EmptyState.Title>
+            <EmptyState.Title>История активности пока пуста</EmptyState.Title>
+            <EmptyState.Description>
+              Здесь будут отображаться ваши активности
+            </EmptyState.Description>
           </VStack>
         </EmptyState.Content>
       </EmptyState.Root>

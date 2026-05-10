@@ -34,12 +34,13 @@ export const Route = createFileRoute("/(auth)/_auth")({
 
 export function AuthLayout() {
   return (
-    <PageLayout px="1rem">
+    <PageLayout>
       <PageLayout.TopContainer
-        as="header"
         display="flex"
-        justifyContent="space-between"
+        justifyContent="center"
         alignItems="center"
+        borderBottom="1px solid"
+        borderColor="border.emphasized"
       >
         <Box
           width="full"
