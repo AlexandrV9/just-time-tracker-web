@@ -10,10 +10,10 @@ type FeatureCard = {
 export const LandingPage = () => {
   const { t } = useTranslation();
   const { redirect } = useSearch({ from: "/(public)/_public/landing/" });
+  const redirectPath = redirect?.trim();
 
-  const trimmed = redirect?.trim();
   const signInSearch = {
-    redirect: trimmed && trimmed.length > 0 ? trimmed : "/",
+    redirect: redirectPath && redirectPath.length > 0 ? redirectPath : "/",
   };
 
   const features = t("pages.landing.features", {
@@ -53,11 +53,13 @@ export const LandingPage = () => {
           textTransform="uppercase"
           letterSpacing="0.06em"
         >
-          {t("pages.landing.featuresHeading")}
+          {t("pages.landing.featuresTitle")}
         </Text>
         <Grid
           gap={{ base: 4, md: 5 }}
           gridTemplateColumns={{ base: "1fr", sm: "repeat(2, 1fr)" }}
+          md={{ gridTemplateColumns: "repeat(3, 1fr)" }}
+          xl={{ gridTemplateColumns: "repeat(4, 1fr)" }}
         >
           {list.map((item, idx) => (
             <Grid.Item key={`landing-feature-${idx}`}>
@@ -87,7 +89,7 @@ export const LandingPage = () => {
       >
         <Button asChild variant="outline" borderRadius="xl" size="md">
           <Link to="/signin" search={signInSearch}>
-            {t("pages.landing.ctaSecondary")}
+            {t("pages.landing.signInPageLink")}
           </Link>
         </Button>
       </Flex>

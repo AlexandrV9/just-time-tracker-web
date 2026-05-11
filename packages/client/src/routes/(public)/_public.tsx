@@ -57,7 +57,7 @@ export function PublicLayout() {
         headerSignInSearch ? (
           <Button asChild size="sm" variant="outline" borderRadius="xl">
             <Link to="/signin" search={headerSignInSearch}>
-              {t("pages.landing.signIn")}
+              {t("pages.landing.signInButton")}
             </Link>
           </Button>
         ) : null,

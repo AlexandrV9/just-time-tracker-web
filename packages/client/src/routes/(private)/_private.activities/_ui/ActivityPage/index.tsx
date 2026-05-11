@@ -16,7 +16,7 @@ import {
   Text,
   TrashIcon,
 } from "~/shared/ui";
-import { activityApiService } from "~/shared/api/services";
+import { ACTIVITIES_QUERY_KEY, activityApiService } from "~/shared/api/services";
 import { useTranslation } from "~/shared/hooks";
 import { ActivityAnalytics } from "~/widgets";
 
@@ -43,7 +43,7 @@ export const ActivityPage = () => {
   const deleteDialog = useDialog();
 
   const { data, isPending } = useQuery({
-    queryKey: ["activities", activityId],
+    queryKey: [ACTIVITIES_QUERY_KEY, activityId],
     queryFn: () => activityApiService.getActivity({ id: activityId }),
   });
 
@@ -81,11 +81,8 @@ export const ActivityPage = () => {
         };
       }
 
-      queryClient.invalidateQueries({ queryKey: ["activities"] });
-      queryClient.invalidateQueries({ queryKey: ["activities", activityId] });
-      // History is intentionally NOT invalidated on rename — the list must stay
-      // stable and continue showing activities under the original title.
-
+      queryClient.invalidateQueries({ queryKey: [ACTIVITIES_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [ACTIVITIES_QUERY_KEY, activityId] });
       editDialog.setOpen(false);
       return { success: true as const };
     },

@@ -12,6 +12,11 @@ type WithCreatedAt = {
   createdAt: string;
 };
 
+/**
+ * Группирует элементы по дате
+ * @example
+ * groupByDate([{ createdAt: "2021-01-01T12:34:56" }], "day") // { "2021-01-01": [{ createdAt: "2021-01-01T12:34:56" }] }
+ */
 export function groupByDate<T extends WithCreatedAt>(
   items: T[],
   groupBy: GroupByDate,

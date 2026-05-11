@@ -9,8 +9,6 @@ export const HistoryPage = () => {
       justifyContent="stretch"
       flexGrow={1}
       gap="1rem"
-      px={2}
-      py={5}
       maxWidth="100vw"
     >
       <ActivityHistory />

@@ -4,26 +4,10 @@
     "ru": "Русский"
   },
   "pages": {
-    "welcome": {
-      "description": "We're glad to have you in our app! Here you'll find all the tools you need for productive work and easy task management.",
-      "featureList": [
-        "Create and organize tasks",
-        "Track your progress in real-time",
-        "Plan with smart reminders",
-        "Take notes",
-        "Work more effectively with your team"
-      ],
-      "featureListTitle": "All your productivity tools in a single platform:",
-      "goToSignInButton": "Start Using Now",
-      "title": "Welcome!"
-    },
     "landing": {
-      "signIn": "Sign in",
       "title": "Track every minute — without spreadsheets",
       "subtitle": "A focused time-tracking app with a central timer, activities, analytics, calendar, and history — so you know where your day went.",
-      "ctaPrimary": "Sign in",
-      "ctaSecondary": "Already registered? Continue to login",
-      "featuresHeading": "What you get",
+      "featuresTitle": "What you get",
       "features": [
         {
           "title": "Unified stopwatch",
@@ -49,27 +33,16 @@
           "title": "Account & profile",
           "body": "Sign in securely, tweak profile text, theme, language, and notifications from one place."
         }
-      ]
+      ],
+      "signInButton": "Sign in",
+      "signInPageLink": "Already registered? Sign in"
     },
     "home": {
       "selectActivity": "Select activity or start timer",
       "circularTimerStart": "Start",
       "circularTimerPause": "Pause",
       "circularTimerFinish": "Finish",
-      "tabToday": "Today",
-      "tabHistory": "History",
-      "historyPlaceholder": "History will appear here",
-      "dayPlanEmptyTitle": "No activities planned for today",
-      "dayPlanEmptyHint": "Choose from your list to plan the day",
-      "dayPlanChooseActivities": "Choose activities",
-      "dayPlanDialogTitle": "Activities for today",
-      "dayPlanDialogCancel": "Cancel",
-      "dayPlanDialogAdd": "Add",
-      "dayPlanLoadingActivities": "Loading activities…",
-      "dayPlanNoActivities": "No activities yet. Create some under Activities.",
-      "dayPlanSaveSuccess": "Day plan updated",
-      "dayPlanSaveError": "Could not save day plan",
-      "dayPlanEditSelection": "Edit selection"
+      "dayPlanDialogAdd": "Add"
     },
     "calendar": {
       "title": "Calendar",
@@ -84,18 +57,11 @@
     "activities": {
       "title": "Activities",
       "list": {
-        "totalTracked": "Total"
+        "totalTracked": "Total",
+        "emptyTitle": "You don't have any activities yet",
+        "emptyDescription": "Create some under Activities."
       },
       "newActivityButton": "New activity",
-      "createDialog": {
-        "title": "New activity",
-        "nameLabel": "Name",
-        "namePlaceholder": "Activity name",
-        "descriptionLabel": "Description",
-        "descriptionPlaceholder": "Optional description",
-        "cancelButton": "Cancel",
-        "submitButton": "Create"
-      },
       "detail": {
         "loading": "Loading…",
         "notFound": "Activity not found",
@@ -133,76 +99,77 @@
     "private": {
       "pending": "Loading…"
     },
-    "legalBackAria": "Back",
     "termsOfService": {
+      "backButton": "Back",
       "title": "Terms of Service",
       "updatedLabel": "Last updated:",
       "updatedValue": "May 10, 2026",
       "intro": "These Terms of Service (“Terms”) govern your use of our time-tracking application and related services. Please read them carefully.",
       "sections": [
         {
-          "heading": "1. Acceptance of Terms",
-          "body": "By creating an account, signing in, or otherwise using the Service, you confirm that you are at least the age of majority in your jurisdiction and that you agree to comply with these Terms.\n\nIf you use the Service on behalf of an organization, you represent that you have authority to bind that organization to these Terms."
+          "title": "Acceptance of Terms",
+          "description": "By creating an account, signing in, or otherwise using the Service, you confirm that you are at least the age of majority in your jurisdiction and that you agree to comply with these Terms.\n\nIf you use the Service on behalf of an organization, you represent that you have authority to bind that organization to these Terms."
         },
         {
-          "heading": "2. Description of the Service",
-          "body": "The Service helps you record and analyze time spent on activities. Features may change over time.\n\nWe strive to maintain availability but do not guarantee uninterrupted or error-free operation."
+          "title": "Description of the Service",
+          "description": "The Service helps you record and analyze time spent on activities. Features may change over time.\n\nWe strive to maintain availability but do not guarantee uninterrupted or error-free operation."
         },
         {
-          "heading": "3. Accounts and Security",
-          "body": "You are responsible for maintaining the confidentiality of your credentials and for all activity under your account.\n\nNotify us promptly of any unauthorized access or security incident."
+          "title": "Accounts and Security",
+          "description": "You are responsible for maintaining the confidentiality of your credentials and for all activity under your account.\n\nNotify us promptly of any unauthorized access or security incident."
         },
         {
-          "heading": "4. Acceptable Use",
-          "body": "You agree not to misuse the Service—for example by attempting to disrupt systems, scrape data without permission, reverse engineer beyond what the law permits, upload malware, harass others, or violate applicable laws.\n\nWe may suspend or terminate access if we reasonably believe you have breached these Terms or pose a risk to the Service or other users."
+          "title": "Acceptable Use",
+          "description": "You agree not to misuse the Service—for example by attempting to disrupt systems, scrape data without permission, reverse engineer beyond what the law permits, upload malware, harass others, or violate applicable laws.\n\nWe may suspend or terminate access if we reasonably believe you have breached these Terms or pose a risk to the Service or other users."
         },
         {
-          "heading": "5. Intellectual Property",
-          "body": "The Service and its content (excluding your data that you submit) remain our intellectual property.\n\nYou retain ownership of the data you provide. By using the Service, you grant us a limited license to host, store, process, and display your data solely to operate and improve the Service as described in our Privacy Policy."
+          "title": "Intellectual Property",
+          "description": "The Service and its content (excluding your data that you submit) remain our intellectual property.\n\nYou retain ownership of the data you provide. By using the Service, you grant us a limited license to host, store, process, and display your data solely to operate and improve the Service as described in our Privacy Policy."
         },
         {
-          "heading": "6. Disclaimers and Limitation of Liability",
-          "body": "The Service is provided “as is” and “as available” without warranties of any kind to the fullest extent permitted by law.\n\nTo the fullest extent permitted by law, our liability for disputes arising out of these Terms or the Service is limited to amounts you paid us in the twelve (12) months preceding the claim, or one hundred USD (USD 100), whichever is greater—or the maximum permitted in your jurisdiction if lower."
+          "title": "Disclaimers and Limitation of Liability",
+          "description": "The Service is provided “as is” and “as available” without warranties of any kind to the fullest extent permitted by law.\n\nTo the fullest extent permitted by law, our liability for disputes arising out of these Terms or the Service is limited to amounts you paid us in the twelve (12) months preceding the claim, or one hundred USD (USD 100), whichever is greater—or the maximum permitted in your jurisdiction if lower."
         },
         {
-          "heading": "7. Changes and Termination",
-          "body": "We may modify the Service or these Terms. For material changes, we will provide notice where legally required—you should review updates periodically.\n\nYou may stop using the Service at any time. Some provisions survive termination—including limitations of liability, disclaimers where applicable, and governing law—as reasonable under law."
+          "title": "Changes and Termination",
+          "description": "We may modify the Service or these Terms. For material changes, we will provide notice where legally required—you should review updates periodically.\n\nYou may stop using the Service at any time. Some provisions survive termination—including limitations of liability, disclaimers where applicable, and governing law—as reasonable under law."
         }
       ]
     },
     "privacyPolicy": {
+      "backButton": "Back",
       "title": "Privacy Policy",
       "updatedLabel": "Last updated:",
       "updatedValue": "May 10, 2026",
       "intro": "This Privacy Policy describes how we collect, use, and safeguard information when you use our Service. By using the Service, you acknowledge the practices described here.",
       "sections": [
         {
-          "heading": "1. Information We Collect",
-          "body": "We collect information that you voluntarily provide—for example account details (such as login or email where applicable), activity names and time entries that you generate, and support communications.\n\nWe automatically collect limited technical information needed to operate the Service (such as logs, approximate device/browser type, and timestamps) consistent with ordinary web and mobile analytics."
+          "title": "Information We Collect",
+          "description": "We collect information that you voluntarily provide—for example account details (such as login or email where applicable), activity names and time entries that you generate, and support communications.\n\nWe automatically collect limited technical information needed to operate the Service (such as logs, approximate device/browser type, and timestamps) consistent with ordinary web and mobile analytics."
         },
         {
-          "heading": "2. How We Use Information",
-          "body": "We use information to deliver and secure the Service, authenticate users, troubleshoot issues, analyze usage trends in aggregate form, comply with legal obligations, and communicate with you about updates or incidents.\n\nWe do not sell your personal information for money as traditionally defined; we process data solely to operate the Service unless otherwise stated or required by law."
+          "title": "How We Use Information",
+          "description": "We use information to deliver and secure the Service, authenticate users, troubleshoot issues, analyze usage trends in aggregate form, comply with legal obligations, and communicate with you about updates or incidents.\n\nWe do not sell your personal information for money as traditionally defined; we process data solely to operate the Service unless otherwise stated or required by law."
         },
         {
-          "heading": "3. Legal Bases",
-          "body": "Where applicable privacy laws apply, we rely on bases such as: performance of a contract (providing the Service), legitimate interests (security and improving the Service, balanced against your rights), consent where requested, or legal obligation.\n\nYou may withdraw consent where processing depends on consent, subject to contractual or legal exceptions."
+          "title": "Legal Bases",
+          "description": "Where applicable privacy laws apply, we rely on bases such as: performance of a contract (providing the Service), legitimate interests (security and improving the Service, balanced against your rights), consent where requested, or legal obligation.\n\nYou may withdraw consent where processing depends on consent, subject to contractual or legal exceptions."
         },
         {
-          "heading": "4. Sharing & Processors",
-          "body": "We may engage service providers (“processors”) hosting infrastructure or analytics pursuant to contractual safeguards.\n\nWe may disclose information if required by law or to protect rights, safety, security, or the integrity of the Service."
+          "title": "Sharing & Processors",
+          "description": "We may engage service providers (“processors”) hosting infrastructure or analytics pursuant to contractual safeguards.\n\nWe may disclose information if required by law or to protect rights, safety, security, or the integrity of the Service."
         },
         {
-          "heading": "5. Retention & Security",
-          "body": "We retain personal data only as long as necessary for purposes described herein, including legal, security, accounting, backup, or dispute resolution needs.\n\nWe implement commercially reasonable safeguards; no transmission or storage method is guaranteed 100% secure."
+          "title": "Retention & Security",
+          "description": "We retain personal data only as long as necessary for purposes described herein, including legal, security, accounting, backup, or dispute resolution needs.\n\nWe implement commercially reasonable safeguards; no transmission or storage method is guaranteed 100% secure."
         },
         {
-          "heading": "6. Your Rights",
-          "body": "Depending on your jurisdiction, you may request access, correction, deletion, restriction, portability, or object to processing, and may lodge complaints with supervisory authorities.\n\nTo exercise applicable rights or ask questions about this Policy, please contact us through the contacts provided within the Service or documentation."
+          "title": "Your Rights",
+          "description": "Depending on your jurisdiction, you may request access, correction, deletion, restriction, portability, or object to processing, and may lodge complaints with supervisory authorities.\n\nTo exercise applicable rights or ask questions about this Policy, please contact us through the contacts provided within the Service or documentation."
         },
         {
-          "heading": "7. Changes to This Policy",
-          "body": "We may update this Privacy Policy periodically. Updates will indicate a new revision date.\n\nWhere materially required under law or our practices change significantly, we will provide additional notice or obtain consent consistent with regulatory expectations."
+          "title": "Changes to This Policy",
+          "description": "We may update this Privacy Policy periodically. Updates will indicate a new revision date.\n\nWhere materially required under law or our practices change significantly, we will provide additional notice or obtain consent consistent with regulatory expectations."
         }
       ]
     }
@@ -241,89 +208,57 @@
         "1": "Edit Profile"
       }
     },
-    "todayOverview": {
-      "title": "Today`s Analysis",
-      "tasksForToday_one": "You have <CountWrapper>{{count}}</CountWrapper> task for today",
-      "tasksForToday_other": "You have <CountWrapper>{{count}}</CountWrapper> tasks for today"
+    "unfinishedActivities": {
+      "title": "Unfinished Activities"
     },
-    "priorityTasks": {
-      "title": "Priority Tasks",
-      "notTasks": "You don't have any priorities.",
-      "goToAllTasks": "See all tasks"
+    "activityHistory": {
+      "title": "Activity History",
+      "empty": "Activity history is empty",
+      "emptyDescription": "Here will be your activities",
+      "error": "Could not load activity history",
+      "errorDescription": "Please try again"
     },
-    "inProgressTasksCount": {
-      "title": "In Progress",
-      "count_one": "{{count}} task",
-      "count_other": "{{count}} tasks"
-    },
-    "completedTasksChart": {
-      "title": "Completed"
-    },
-    "timeEntryHistory": {
-      "title": "Time Entry History",
-      "updateTimeEntryDialog": {
-        "update": {
-          "title": "Update Time Entry",
-          "inputTitle": {
-            "label": "Title",
-            "placeholder": "Enter time entry title",
-            "error": {
-              "required": "Title is required",
-              "max": "The title is too long, the maximum length is {{count}} characters"
-            }
-          },
-          "inputDescription": {
-            "label": "Description",
-            "placeholder": "Enter time entry description",
-            "error": {
-              "max": "The description is too long, the maximum length is {{count}} characters"
-            }
-          },
-          "startDateInput": {
-            "label": "Start Date"
-          },
-          "endDateInput": {
-            "label": "End Date"
-          },
-          "durationInput": {
-            "label": "Duration"
-          },
-          "submitButtonText": "Update",
-          "cancelButtonText": "Cancel",
-          "successMessage": "Time entry updated successfully",
-          "errorMessage": "Failed to update time entry. Please try again."
-        }
-      },
-      "confirmDeleteTimeEntryDialog": {
-        "title": "Time Entry Deletеion",
-        "description": "Are you sure you want to delete this time entry? This action cannot be undone.",
-        "submitButtonText": "Delete",
-        "cancelButtonText": "Cancel"
+    "todayActivityList": {
+      "title": "Today's Activities",
+      "newActivityButton": "Add activity",
+      "error": "Could not load activities",
+      "errorDescription": "Please try again",
+      "empty": "No activities for today",
+      "emptyDescription": "Add activities to start your day",
+      "addTodayActivitiesDialog": {
+        "title": "Add activities",
+        "empty": "You don't have any activities yet. Go to the activities section and create a new one",
+        "noActivities": "No activities to select",
+        "success": "Activities added",
+        "error": "Could not add activities"
       }
     },
-    "timeEntryTemplates": {
-      "title": "Time Entry Templates",
-      "notTemplates": "You don't have any templates yet.",
-      "noDescription": "No description",
-      "selectedTemplate": "Selected template",
-      "clearTemplate": "Clear",
-      "emptyLastEntryState": "There is no recent time entry to create a template from.",
-      "createTemplateDialog": {
-        "title": "Create template",
+    "activityGroup": {
+      "totalActiveTime": "Total active time",
+      "loadMoreButton": "Load more"
+    },
+    "activityList": {
+      "title": "Activities",
+      "emptyTitle": "You don't have any activities yet",
+      "emptyDescription": "Create some under Activities.",
+      "newActivityButton": "New activity",
+      "error": "Could not load activities",
+      "errorDescription": "Please try again",
+      "totalTracked": "Total",
+      "createDialog": {
+        "title": "New activity",
         "nameLabel": "Name",
-        "namePlaceholder": "Enter template name",
+        "namePlaceholder": "Activity name",
         "descriptionLabel": "Description",
-        "descriptionPlaceholder": "Enter template description",
-        "cancelButtonText": "Cancel",
-        "submitButtonText": "Create"
+        "descriptionPlaceholder": "Optional description",
+        "cancelButton": "Cancel",
+        "submitButton": "Create"
       }
     }
   },
   "features": {
     "auth": {
-      "signOut": {
-        "textButton": "Sign Out"
-      },
+      "signOutButton": "Sign Out",
       "signInByLoginForm": {
         "firstNameInput": {
           "placeholder": "Please enter your first name"
@@ -383,78 +318,6 @@
         "submitButtonLoadingText": "Registration...",
         "subtitleText": "Do you have an account?",
         "title": "Registration"
-      }
-    },
-    "tasks": {
-      "update": {
-        "dialogTitle": "Update Task",
-        "inputTitle": {
-          "label": "Title",
-          "placeholder": "Enter task title"
-        },
-        "inputDescription": {
-          "label": "Description",
-          "placeholder": "Enter task description"
-        },
-        "startDate": {
-          "label": "Start"
-        },
-        "endDate": {
-          "label": "End"
-        },
-        "submitButtonText": "Update",
-        "cancelButtonText": "Cancel"
-      },
-      "create": {
-        "dialogTitle": "Create New Task",
-        "inputTitle": {
-          "label": "Title",
-          "placeholder": "Enter task title"
-        },
-        "inputDescription": {
-          "label": "Description",
-          "placeholder": "Enter task description"
-        },
-        "startDate": {
-          "label": "Start"
-        },
-        "endDate": {
-          "label": "End"
-        },
-        "submitButtonText": "Create",
-        "cancelButtonText": "Cancel"
-      },
-      "search": {
-        "input": {
-          "placeholder": "Enter name your task"
-        }
-      }
-    },
-    "timeEntries": {
-      "baseUpdateTaskDialog": {
-        "titleInput": {
-          "label": "Title",
-          "placeholder": "Enter task title",
-          "error": {
-            "required": "Title is required",
-            "max": "The title is too long, the maximum length is {{count}} characters"
-          }
-        },
-        "descriptionInput": {
-          "label": "Description",
-          "placeholder": "Enter task description",
-          "error": {
-            "max": "The description is too long, the maximum length is {{count}} characters"
-          }
-        },
-        "startDateInput": {
-          "label": "Start"
-        },
-        "endDateInput": {
-          "label": "End"
-        },
-        "submitButtonText": "Update",
-        "cancelButtonText": "Cancel"
       }
     }
   }

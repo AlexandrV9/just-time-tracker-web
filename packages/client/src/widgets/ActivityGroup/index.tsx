@@ -10,6 +10,7 @@ import { useCurrentActivityStore } from "~/features/hooks/useCurrentActivityStor
 import { useShallow } from "zustand/react/shallow";
 import { useEffect, useRef } from "react";
 import { Skeleton } from "./Skeleton";
+import { useTranslation } from "~/shared/hooks";
 
 export type ActivityGroupDTO = {
   label: string;
@@ -46,6 +47,8 @@ export function ActivityGroup({
   isLoadingMoreGroupItems = false,
   onLoadMoreGroupItems,
 }: ActivityGroupProps) {
+  const { t } = useTranslation();
+
   const { currentActivity, currentSegment } = useCurrentActivityStore(
     useShallow((state) => ({
       currentActivity: state.currentActivity,
@@ -82,7 +85,7 @@ export function ActivityGroup({
         </Text>
         <Flex gap="0.25rem" alignItems="center" wrap="wrap" justify="flex-end">
           <Text textStyle="sm" color="fg.muted">
-            Total Active Time:
+            {t("widgets.activityGroup.totalActiveTime")}:
           </Text>
           <Text
             textStyle="sm"
@@ -152,7 +155,7 @@ export function ActivityGroup({
           disabled={isLoadingMoreGroupItems}
           onClick={onLoadMoreGroupItems}
         >
-          Загрузить еще
+          {t("widgets.activityGroup.loadMoreButton")}
         </Button>
       ) : null}
     </Box>

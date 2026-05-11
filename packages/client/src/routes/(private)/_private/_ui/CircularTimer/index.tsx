@@ -62,7 +62,7 @@ export function CircularTimer({
 
   const timeObject = useMemo(
     (): TimeObject => convertSecondsToTimeObject(seconds),
-    [seconds]
+    [seconds],
   );
 
   const displayedTime = useMemo(() => {
@@ -90,7 +90,7 @@ export function CircularTimer({
           />
         );
       }),
-    [segments, center, radius]
+    [segments, center, radius],
   );
 
   const handleStart = useCallback(() => {

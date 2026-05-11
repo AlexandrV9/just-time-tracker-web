@@ -5,6 +5,7 @@ import {
   DAY_PLANS_QUERY_KEY,
   dayPlanApiService,
 } from "~/shared/api/services";
+import { useTranslation } from "~/shared/hooks";
 import { getCalendarDay } from "~/shared/libs";
 import { toast } from "~/shared/ui";
 
@@ -15,6 +16,7 @@ export type UseAddTodayActivitiesProps = {
 export const useAddTodayActivities = ({
   planId,
 }: UseAddTodayActivitiesProps) => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const { user } = useAuthStore();
@@ -45,7 +47,7 @@ export const useAddTodayActivities = ({
       });
     },
     onSuccess: () => {
-      toast.success("Активности добавлены");
+      toast.success(t("widgets.todayActivityList.addTodayActivitiesDialog.success"));
 
       queryClient.invalidateQueries({
         queryKey: [DAY_PLANS_QUERY_KEY, userId, todayCalendarDay],
@@ -55,7 +57,7 @@ export const useAddTodayActivities = ({
       });
     },
     onError: () => {
-      toast.error("Не удалось добавить активности");
+      toast.error(t("widgets.todayActivityList.addTodayActivitiesDialog.error"));
     },
   });
 };

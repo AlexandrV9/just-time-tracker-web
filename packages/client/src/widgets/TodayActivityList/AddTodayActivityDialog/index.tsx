@@ -24,6 +24,7 @@ import { VStack } from "@chakra-ui/react";
 export type AddTodayActivitiesDialogProps = {
   dialog: UseDialogReturn;
   selectedActivityIds?: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSubmit?: (activityIds: string[]) => Promise<any>;
 };
 
@@ -115,8 +116,7 @@ export function AddTodayActivitiesDialog({
     if (activities.length === 0) {
       return (
         <Text color="fg.muted" textAlign="center">
-          У вас еще нету активностей. Перейдите в раздел активности и создайте
-          новую
+          {t("widgets.todayActivityList.addTodayActivitiesDialog.empty")}
         </Text>
       );
     }
@@ -124,7 +124,7 @@ export function AddTodayActivitiesDialog({
     if (visibleActivities.length === 0) {
       return (
         <Text color="fg.muted" textAlign="center">
-          Нет активностей для выбора
+          {t("widgets.todayActivityList.addTodayActivitiesDialog.noActivities")}
         </Text>
       );
     }
@@ -176,7 +176,9 @@ export function AddTodayActivitiesDialog({
             overflow="hidden"
           >
             <Dialog.Header>
-              <Dialog.Title fontSize="xl">Добавить активности</Dialog.Title>
+              <Dialog.Title fontSize="xl">
+                {t("widgets.todayActivityList.addTodayActivitiesDialog.title")}
+              </Dialog.Title>
             </Dialog.Header>
             <Dialog.Body
               flex="1"

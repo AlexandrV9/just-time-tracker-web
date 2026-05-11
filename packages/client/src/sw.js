@@ -1,4 +1,4 @@
-const CACHE_NAME = "notes-app-v1.0.0";
+const CACHE_NAME = "time-tracker-v1.0.0";
 
 const STATIC_CACHE_URLS = ["/", "https://fonts.googleapis.com/"];
 

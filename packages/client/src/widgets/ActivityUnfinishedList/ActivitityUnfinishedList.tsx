@@ -10,7 +10,8 @@ import {
 } from "~/shared/api/services";
 import { getCalendarDay, getDateIntervalByCalendarDay } from "~/shared/libs";
 import { Flex, List, Text } from "~/shared/ui";
-import { useFinishActivity } from "../ActivityTodayList/mutations/useFinishActivity";
+import { useFinishActivity } from "../TodayActivityList/mutations/useFinishActivity";
+import { useTranslation } from "~/shared/hooks";
 
 const getEndOfYesterdayIso = () => {
   const yesterday = subDays(new Date(), 1);
@@ -18,7 +19,11 @@ const getEndOfYesterdayIso = () => {
   return toDate;
 };
 
+/**
+ * @deprecated Use useTodayActivities instead
+ */
 export const ActivitityUnfinishedList = () => {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const userId = user?.id;
 
@@ -72,9 +77,9 @@ export const ActivitityUnfinishedList = () => {
   }
 
   return (
-    <Flex direction="column" p="0.5rem">
-      <Text textStyle="sm" fontWeight="medium">
-        Unfinished Activities
+    <Flex direction="column" p="0.5rem" gap="1rem">
+      <Text textStyle="lg" fontWeight="medium">
+        {t("widgets.unfinishedActivities.title")}
       </Text>
       <List.Root
         display="grid"

@@ -15,7 +15,6 @@ import { Route as publicPublicRouteImport } from './routes/(public)/_public'
 import { Route as privatePrivateRouteImport } from './routes/(private)/_private'
 import { Route as authAuthRouteImport } from './routes/(auth)/_auth'
 import { Route as privatePrivateIndexRouteImport } from './routes/(private)/_private/index'
-import { Route as publicPublicWelcomeIndexRouteImport } from './routes/(public)/_public.welcome/index'
 import { Route as publicPublicTermsOfServiceIndexRouteImport } from './routes/(public)/_public.terms-of-service/index'
 import { Route as publicPublicPrivacyPolicyIndexRouteImport } from './routes/(public)/_public.privacy-policy/index'
 import { Route as publicPublicLandingIndexRouteImport } from './routes/(public)/_public.landing/index'
@@ -61,12 +60,6 @@ const privatePrivateIndexRoute = privatePrivateIndexRouteImport.update({
   path: '/',
   getParentRoute: () => privatePrivateRoute,
 } as any)
-const publicPublicWelcomeIndexRoute =
-  publicPublicWelcomeIndexRouteImport.update({
-    id: '/welcome/',
-    path: '/welcome/',
-    getParentRoute: () => publicPublicRoute,
-  } as any)
 const publicPublicTermsOfServiceIndexRoute =
   publicPublicTermsOfServiceIndexRouteImport.update({
     id: '/terms-of-service/',
@@ -145,7 +138,6 @@ export interface FileRoutesByFullPath {
   '/landing': typeof publicPublicLandingIndexRoute
   '/privacy-policy': typeof publicPublicPrivacyPolicyIndexRoute
   '/terms-of-service': typeof publicPublicTermsOfServiceIndexRoute
-  '/welcome': typeof publicPublicWelcomeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof privatePrivateIndexRoute
@@ -160,7 +152,6 @@ export interface FileRoutesByTo {
   '/landing': typeof publicPublicLandingIndexRoute
   '/privacy-policy': typeof publicPublicPrivacyPolicyIndexRoute
   '/terms-of-service': typeof publicPublicTermsOfServiceIndexRoute
-  '/welcome': typeof publicPublicWelcomeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -182,7 +173,6 @@ export interface FileRoutesById {
   '/(public)/_public/landing/': typeof publicPublicLandingIndexRoute
   '/(public)/_public/privacy-policy/': typeof publicPublicPrivacyPolicyIndexRoute
   '/(public)/_public/terms-of-service/': typeof publicPublicTermsOfServiceIndexRoute
-  '/(public)/_public/welcome/': typeof publicPublicWelcomeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -199,7 +189,6 @@ export interface FileRouteTypes {
     | '/landing'
     | '/privacy-policy'
     | '/terms-of-service'
-    | '/welcome'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -214,7 +203,6 @@ export interface FileRouteTypes {
     | '/landing'
     | '/privacy-policy'
     | '/terms-of-service'
-    | '/welcome'
   id:
     | '__root__'
     | '/(auth)'
@@ -235,7 +223,6 @@ export interface FileRouteTypes {
     | '/(public)/_public/landing/'
     | '/(public)/_public/privacy-policy/'
     | '/(public)/_public/terms-of-service/'
-    | '/(public)/_public/welcome/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -294,13 +281,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof privatePrivateIndexRouteImport
       parentRoute: typeof privatePrivateRoute
-    }
-    '/(public)/_public/welcome/': {
-      id: '/(public)/_public/welcome/'
-      path: '/welcome'
-      fullPath: '/welcome'
-      preLoaderRoute: typeof publicPublicWelcomeIndexRouteImport
-      parentRoute: typeof publicPublicRoute
     }
     '/(public)/_public/terms-of-service/': {
       id: '/(public)/_public/terms-of-service/'
@@ -446,14 +426,12 @@ interface publicPublicRouteChildren {
   publicPublicLandingIndexRoute: typeof publicPublicLandingIndexRoute
   publicPublicPrivacyPolicyIndexRoute: typeof publicPublicPrivacyPolicyIndexRoute
   publicPublicTermsOfServiceIndexRoute: typeof publicPublicTermsOfServiceIndexRoute
-  publicPublicWelcomeIndexRoute: typeof publicPublicWelcomeIndexRoute
 }
 
 const publicPublicRouteChildren: publicPublicRouteChildren = {
   publicPublicLandingIndexRoute: publicPublicLandingIndexRoute,
   publicPublicPrivacyPolicyIndexRoute: publicPublicPrivacyPolicyIndexRoute,
   publicPublicTermsOfServiceIndexRoute: publicPublicTermsOfServiceIndexRoute,
-  publicPublicWelcomeIndexRoute: publicPublicWelcomeIndexRoute,
 }
 
 const publicPublicRouteWithChildren = publicPublicRoute._addFileChildren(

@@ -7,6 +7,8 @@ import {
   Flex,
   IconButton,
   PlusIcon,
+  Stack,
+  Text,
   VersionIcon,
 } from "~/shared/ui";
 import { AddTodayActivitiesDialog } from "./AddTodayActivityDialog";
@@ -20,8 +22,10 @@ import {
 } from "./mutations";
 import type { ActivityDTO } from "@to-do-list/shared";
 import { useCurrentActivity } from "~/features";
+import { useTranslation } from "~/shared/hooks";
 
-export const ActivityTodayList = () => {
+export const TodayActivityList = () => {
+  const { t } = useTranslation();
   const addTodayActivityDialog = useDialog();
 
   const { currentActivity, setCurrentActivity } = useCurrentActivity();
@@ -87,10 +91,10 @@ export const ActivityTodayList = () => {
             </EmptyState.Indicator>
             <VStack textAlign="center">
               <EmptyState.Title>
-                Не удалось загрузить активности
+                {t("widgets.todayActivityList.error")}
               </EmptyState.Title>
               <EmptyState.Description>
-                Попробуйте перезагрузить страницу
+                {t("widgets.todayActivityList.errorDescription")}
               </EmptyState.Description>
             </VStack>
           </EmptyState.Content>
@@ -107,10 +111,10 @@ export const ActivityTodayList = () => {
             </EmptyState.Indicator>
             <VStack textAlign="center">
               <EmptyState.Title>
-                Нет активностей на сегодня
+                {t("widgets.todayActivityList.empty")}
               </EmptyState.Title>
               <EmptyState.Description>
-                Добавьте активности, чтобы начать день
+                {t("widgets.todayActivityList.emptyDescription")}
               </EmptyState.Description>
             </VStack>
           </EmptyState.Content>
@@ -137,22 +141,23 @@ export const ActivityTodayList = () => {
     <>
       <Flex align="center" justify="center" h="30px" position="relative">
         <Box w="full" h="1px" bg="bg.emphasized" />
-        <IconButton
-          size="2xs"
-          bg="bg.emphasized"
-          position="absolute"
-          h="30px"
-          w="60px"
-          rounded="2xl"
-          color="fg"
-          onClick={() => addTodayActivityDialog.setOpen(true)}
-        >
-          <PlusIcon />
-        </IconButton>
       </Flex>
-      <Box w="full" p="0.5rem">
-        {content}
-      </Box>
+      <Stack.VStack w="full" p="0.5rem" alignItems="stretch">
+        <Flex gap="1rem" alignItems="center">
+          <Text textStyle="2xl" fontWeight="bolder">
+            {t("widgets.todayActivityList.title")}
+          </Text>
+          <IconButton
+            aria-label={t("widgets.todayActivityList.newActivityButton")}
+            variant="outline"
+            size="xs"
+            onClick={() => addTodayActivityDialog.setOpen(true)}
+          >
+            <PlusIcon size={22} />
+          </IconButton>
+        </Flex>
+        <Box w="full">{content}</Box>
+      </Stack.VStack>
       <AddTodayActivitiesDialog
         dialog={addTodayActivityDialog}
         selectedActivityIds={activityGroup.activities.map((item) => item.id)}

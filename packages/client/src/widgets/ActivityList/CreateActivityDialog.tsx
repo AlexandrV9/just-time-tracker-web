@@ -28,7 +28,6 @@ export const CreateActivityDialog = ({ dialog }: CreateActivityDialogProps) => {
   const userId = user?.id;
 
   const [title, setTitle] = useState("");
-
   const [description, setDescription] = useState("");
 
   const resetForm = useCallback(() => {
@@ -74,32 +73,32 @@ export const CreateActivityDialog = ({ dialog }: CreateActivityDialogProps) => {
           >
             <Dialog.Header>
               <Dialog.Title fontSize="xl">
-                {t("pages.activities.createDialog.title")}
+                {t("widgets.activityList.createDialog.title")}
               </Dialog.Title>
             </Dialog.Header>
             <Dialog.Body>
               <Stack.VStack gap={4} align="stretch">
                 <Field.Root>
                   <Field.Label>
-                    {t("pages.activities.createDialog.nameLabel")}
+                    {t("widgets.activityList.createDialog.nameLabel")}
                   </Field.Label>
                   <Input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder={t(
-                      "pages.activities.createDialog.namePlaceholder",
+                      "widgets.activityList.createDialog.namePlaceholder",
                     )}
                   />
                 </Field.Root>
                 <Field.Root>
                   <Field.Label>
-                    {t("pages.activities.createDialog.descriptionLabel")}
+                    {t("widgets.activityList.createDialog.descriptionLabel")}
                   </Field.Label>
                   <TextArea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder={t(
-                      "pages.activities.createDialog.descriptionPlaceholder",
+                      "widgets.activityList.createDialog.descriptionPlaceholder",
                     )}
                   />
                 </Field.Root>
@@ -111,10 +110,10 @@ export const CreateActivityDialog = ({ dialog }: CreateActivityDialogProps) => {
               p="1rem"
             >
               <Button variant="outline" onClick={closeDialog}>
-                {t("pages.activities.createDialog.cancelButton")}
+                {t("widgets.activityList.createDialog.cancelButton")}
               </Button>
               <Button onClick={handleSubmit} disabled={isSubmitDisabled}>
-                {t("pages.activities.createDialog.submitButton")}
+                {t("widgets.activityList.createDialog.submitButton")}
               </Button>
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild>

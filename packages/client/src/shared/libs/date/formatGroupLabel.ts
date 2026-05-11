@@ -7,6 +7,14 @@ export type FormatGroupLabelProps = {
   locale?: string;
 };
 
+/**
+ * Преобразует ключ группировки в строку метки группы
+ * @example
+ * formatGroupLabel({ key: "2021-01-01", groupBy: "day" }) // "Friday, January 1"
+ * formatGroupLabel({ key: "2021-01-01", groupBy: "month" }) // "January 2021"
+ * formatGroupLabel({ key: "2021-01-01", groupBy: "year" }) // "2021"
+ * formatGroupLabel({ key: "2021-W01", groupBy: "week" }) // "January 4 – January 10"
+ */
 export const formatGroupLabel = ({
   key,
   groupBy,

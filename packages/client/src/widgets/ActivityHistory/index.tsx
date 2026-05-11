@@ -2,12 +2,15 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { useAuthStore } from "~/features/auth";
-import { Box, EmptyState, VersionIcon } from "~/shared/ui";
+import { Box, EmptyState, Flex, Text, VersionIcon } from "~/shared/ui";
 import { VStack } from "@chakra-ui/react";
 import { ActivityGroup } from "../ActivityGroup";
 import { useActivityHistory } from "./useActivityHistory";
+import { useTranslation } from "~/shared/hooks";
 
 export const ActivityHistory = () => {
+  const { t } = useTranslation();
+
   const { user } = useAuthStore();
   const userId = user?.id;
   const navigate = useNavigate();
@@ -80,9 +83,11 @@ export const ActivityHistory = () => {
             <VersionIcon size={60} />
           </EmptyState.Indicator>
           <VStack textAlign="center">
-            <EmptyState.Title>Не удалось загрузить историю</EmptyState.Title>
+            <EmptyState.Title>
+              {t("widgets.activityHistory.error")}
+            </EmptyState.Title>
             <EmptyState.Description>
-              Попробуйте перезагрузить страницу
+              {t("widgets.activityHistory.errorDescription")}
             </EmptyState.Description>
           </VStack>
         </EmptyState.Content>
@@ -98,9 +103,11 @@ export const ActivityHistory = () => {
             <VersionIcon size={60} />
           </EmptyState.Indicator>
           <VStack textAlign="center">
-            <EmptyState.Title>История активности пока пуста</EmptyState.Title>
+            <EmptyState.Title>
+              {t("widgets.activityHistory.empty")}
+            </EmptyState.Title>
             <EmptyState.Description>
-              Здесь будут отображаться ваши активности
+              {t("widgets.activityHistory.emptyDescription")}
             </EmptyState.Description>
           </VStack>
         </EmptyState.Content>
@@ -109,25 +116,30 @@ export const ActivityHistory = () => {
   }
 
   return (
-    <Box display="flex" flexDirection="column" gap="1.5rem">
-      {groups.map((group) => (
-        <ActivityGroup
-          key={group.key}
-          data={group}
-          highlightedActivityId={
-            group.groupDateStart === stableHighlightDate
-              ? stableHighlightId
-              : undefined
-          }
-          hasMoreItems={Boolean(group.itemsHasMore && group.itemsNextCursor)}
-          isLoadingMoreGroupItems={isLoadingMoreGroupItems(group.key)}
-          onLoadMoreGroupItems={() => loadMoreGroupItems(group.key)}
-          onSelect={(activity) =>
-            handleSelectActivity(activity.id, group.groupDateStart)
-          }
-        />
-      ))}
-      <div ref={fetchRef} style={{ height: 1, width: "100%" }} />
-    </Box>
+    <Flex flexDirection="column" gap="1rem" p="0.5rem">
+      <Text textStyle="2xl" fontWeight="bolder">
+        {t("widgets.activityHistory.title")}
+      </Text>
+      <Box display="flex" flexDirection="column" gap="1.5rem">
+        {groups.map((group) => (
+          <ActivityGroup
+            key={group.key}
+            data={group}
+            highlightedActivityId={
+              group.groupDateStart === stableHighlightDate
+                ? stableHighlightId
+                : undefined
+            }
+            hasMoreItems={Boolean(group.itemsHasMore && group.itemsNextCursor)}
+            isLoadingMoreGroupItems={isLoadingMoreGroupItems(group.key)}
+            onLoadMoreGroupItems={() => loadMoreGroupItems(group.key)}
+            onSelect={(activity) =>
+              handleSelectActivity(activity.id, group.groupDateStart)
+            }
+          />
+        ))}
+        <div ref={fetchRef} style={{ height: 1, width: "100%" }} />
+      </Box>
+    </Flex>
   );
 };

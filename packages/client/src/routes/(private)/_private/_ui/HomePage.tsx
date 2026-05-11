@@ -1,5 +1,5 @@
 import { Box, Flex } from "~/shared/ui";
-import { ActivitityUnfinishedList, ActivityTodayList } from "~/widgets";
+import { TodayActivityList } from "~/widgets";
 import { Stopwatch } from "./Stopwatch";
 
 export function HomePage() {
@@ -15,10 +15,7 @@ export function HomePage() {
       <Flex justifyContent="center">
         <Stopwatch />
       </Flex>
-      <Flex direction="column" p="0.5rem">
-        <ActivityTodayList />
-        <ActivitityUnfinishedList />
-      </Flex>
+      <TodayActivityList />
     </Box>
   );
 }

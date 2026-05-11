@@ -1,7 +1,10 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { subDays } from "date-fns";
+import { useMemo } from "react";
 import { useAuthStore } from "~/features/auth";
 import {
   ACTIVITIES_ANALYTICS_QUERY_KEY,
+  ACTIVITIES_CURRENT_QUERY_KEY,
   ACTIVITIES_QUERY_KEY,
   activityApiService,
   DAY_PLAN_ITEMS_QUERY_KEY,
@@ -28,6 +31,11 @@ export const useTodayActivities = (): {
 
   const todayCalendarDay = getCalendarDay();
   const { fromDate, toDate } = getDateIntervalByCalendarDay(todayCalendarDay);
+
+  const yesterdayToDate = useMemo(() => {
+    const yesterday = subDays(new Date(), 1);
+    return getDateIntervalByCalendarDay(getCalendarDay(yesterday)).toDate;
+  }, []);
 
   const todayPlanActivitiesQuery = useQuery({
     queryKey: [DAY_PLANS_QUERY_KEY, userId, todayCalendarDay],
@@ -72,6 +80,23 @@ export const useTodayActivities = (): {
   });
   const todayActivities = todayActivitiesQuery.data ?? [];
 
+  const unfinishedActivitiesQuery = useQuery({
+    queryKey: [ACTIVITIES_CURRENT_QUERY_KEY, { toDate: yesterdayToDate }],
+    queryFn: () =>
+      activityApiService.getCurrentActivities({
+        toDate: yesterdayToDate,
+        limit: 100,
+        page: 0,
+        createdById: userId!,
+      }),
+    enabled: !!userId,
+    select: (response) =>
+      response.success
+        ? response.data.data.map((item) => item.activity)
+        : [],
+  });
+  const unfinishedActivities = unfinishedActivitiesQuery.data ?? [];
+
   const todayAnalyticsQuery = useQuery({
     queryKey: [
       ACTIVITIES_ANALYTICS_QUERY_KEY,
@@ -109,6 +134,12 @@ export const useTodayActivities = (): {
     return { ...activity, activeDurationMs: todayMs };
   });
 
+  const todayActivityIdSet = new Set(activitiesToday.map((a) => a.id));
+  const mergedActivities = [
+    ...activitiesToday,
+    ...unfinishedActivities.filter((a) => !todayActivityIdSet.has(a.id)),
+  ];
+
   return {
     planId: todayPlanId,
     activityGroup: {
@@ -118,17 +149,19 @@ export const useTodayActivities = (): {
         locale: i18n.language,
       }),
       totalActiveTime: todayAnalyticsQuery.data?.totalSeconds ?? 0,
-      activities: activitiesToday,
+      activities: mergedActivities,
     } satisfies ActivityGroup,
     isLoading:
       todayPlanActivitiesQuery.isLoading ||
       todayPlanItemsQuery.isLoading ||
       todayActivitiesQuery.isLoading ||
-      todayAnalyticsQuery.isLoading,
+      todayAnalyticsQuery.isLoading ||
+      unfinishedActivitiesQuery.isLoading,
     isError:
       todayPlanActivitiesQuery.isError ||
       todayPlanItemsQuery.isError ||
       todayActivitiesQuery.isError ||
-      todayAnalyticsQuery.isError,
+      todayAnalyticsQuery.isError ||
+      unfinishedActivitiesQuery.isError,
   };
 };

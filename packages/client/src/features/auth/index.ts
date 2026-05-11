@@ -1,4 +1,9 @@
 export * from "./types";
 export * from "./useAuthStore";
 export * from "./AuthManager";
-export * from "./ui";
+export {
+  AuthUserAvatar,
+  SignOutButton,
+  SignInByLoginForm,
+  SignUpForm,
+} from "./ui";
