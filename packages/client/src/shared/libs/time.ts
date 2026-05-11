@@ -135,6 +135,7 @@ const DURATION_UNITS: Record<
 > = {
   en: { d: "d", h: "h", m: "m", s: "s" },
   ru: { d: "д", h: "ч", m: "м", s: "с" },
+  zh: { d: "天", h: "时", m: "分", s: "秒" },
 };
 
 const getFallbackUnits = () => DURATION_UNITS["en"];

@@ -122,7 +122,7 @@ export function EditActivityDialog({
                 ) : null}
                 <Field.Root invalid={!!errors.title}>
                   <Field.Label>
-                    {t("pages.activities.createDialog.nameLabel")}
+                    {t("widgets.activityList.createDialog.nameLabel")}
                   </Field.Label>
                   <Input
                     placeholder={t("pages.activities.detail.titlePlaceholder")}
@@ -134,7 +134,7 @@ export function EditActivityDialog({
                 </Field.Root>
                 <Field.Root invalid={!!errors.description}>
                   <Field.Label>
-                    {t("pages.activities.createDialog.descriptionLabel")}
+                    {t("widgets.activityList.createDialog.descriptionLabel")}
                   </Field.Label>
                   <TextArea
                     placeholder={t(

@@ -1,7 +1,8 @@
 {
   "languages": {
     "en": "English",
-    "ru": "Русский"
+    "ru": "Русский",
+    "zh": "中文（简体）"
   },
   "pages": {
     "landing": {
@@ -230,7 +231,9 @@
         "empty": "You don't have any activities yet. Go to the activities section and create a new one",
         "noActivities": "No activities to select",
         "success": "Activities added",
-        "error": "Could not add activities"
+        "error": "Could not add activities",
+        "cancelButton": "Cancel",
+        "addButton": "Add"
       }
     },
     "activityGroup": {

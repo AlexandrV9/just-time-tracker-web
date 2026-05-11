@@ -1,0 +1,327 @@
+{
+  "languages": {
+    "en": "English",
+    "ru": "Русский",
+    "zh": "中文（简体）"
+  },
+  "pages": {
+    "landing": {
+      "title": "记录每一分钟——告别电子表格",
+      "subtitle": "一款专注的时间追踪应用：中央计时器、活动、分析、日历与历史，让你清楚时间都去了哪里。",
+      "featuresTitle": "你将获得",
+      "features": [
+        {
+          "title": "统一秒表",
+          "body": "在主计时器与活动卡片上开始、暂停与结束会话——数字始终保持一致。"
+        },
+        {
+          "title": "活动与今日看板",
+          "body": "创建可复用的活动并打标签，与今日计划并行运行，并掌控未完成的会话。"
+        },
+        {
+          "title": "日历视图",
+          "body": "在网格上查看会话，快速了解各日期的时间分布。"
+        },
+        {
+          "title": "历史记录",
+          "body": "按日分组的历史便于回顾过去的时段并重新打开详情，无需在表格里翻找。"
+        },
+        {
+          "title": "按活动分析",
+          "body": "当日时间轴、会话拆分与时长，帮助你发现规律与异常。"
+        },
+        {
+          "title": "账户与个人资料",
+          "body": "安全登录，并在一处调整个人资料文案、主题、语言与通知。"
+        }
+      ],
+      "signInButton": "登录",
+      "signInPageLink": "已有账号？去登录"
+    },
+    "home": {
+      "selectActivity": "选择活动或启动计时器",
+      "circularTimerStart": "开始",
+      "circularTimerPause": "暂停",
+      "circularTimerFinish": "结束",
+      "dayPlanDialogAdd": "添加"
+    },
+    "calendar": {
+      "title": "日历",
+      "goToDateDialogTitle": "跳转到日期",
+      "dialogCancel": "取消",
+      "dialogApply": "应用",
+      "mockEvents": {
+        "designSync": "设计同步会",
+        "featureDevelopment": "功能开发"
+      }
+    },
+    "activities": {
+      "title": "活动",
+      "list": {
+        "totalTracked": "合计",
+        "emptyTitle": "你还没有任何活动",
+        "emptyDescription": "请在「活动」中创建。"
+      },
+      "newActivityButton": "新建活动",
+      "detail": {
+        "loading": "加载中…",
+        "notFound": "未找到活动",
+        "done": "完成",
+        "edit": "编辑",
+        "delete": "删除活动",
+        "deleteDialogTitle": "删除活动",
+        "deleteDialogCancel": "取消",
+        "deleteDialogConfirm": "删除",
+        "deleteConfirm": "确定删除此活动？此操作无法撤销。",
+        "saveError": "无法保存更改，请重试。",
+        "historyTitle": "历史",
+        "createdAtLabel": "创建时间",
+        "updatedAtLabel": "最后更新",
+        "sessionStart": "开始",
+        "sessionEnd": "结束",
+        "duration": "时长",
+        "currentBadge": "本会话",
+        "trackingBadge": "进行中",
+        "titlePlaceholder": "活动名称",
+        "descriptionPlaceholder": "描述",
+        "saveButton": "保存",
+        "cancelEditButton": "取消",
+        "titleRequiredError": "请输入活动名称。",
+        "editDialogTitle": "编辑活动"
+      }
+    },
+    "settings": {
+      "profile": {
+        "namePlaceholder": "姓名",
+        "emailPlaceholder": "邮箱",
+        "birthDatePlaceholder": "出生日期"
+      }
+    },
+    "private": {
+      "pending": "加载中…"
+    },
+    "termsOfService": {
+      "backButton": "返回",
+      "title": "服务条款",
+      "updatedLabel": "最后更新：",
+      "updatedValue": "2026年5月10日",
+      "intro": "本服务条款（「条款」）规范您对我们时间追踪应用及相关服务的使用。请仔细阅读。",
+      "sections": [
+        {
+          "title": "接受条款",
+          "description": "创建账户、登录或以其他方式使用服务，即表示您已达到所在司法辖区的成年年龄，并同意遵守本条款。\n\n若您代表组织使用服务，即表示您有权使该组织受本条款约束。"
+        },
+        {
+          "title": "服务说明",
+          "description": "服务帮助您记录并分析在各活动上花费的时间。功能可能随时间变化。\n\n我们努力保持可用性，但不保证服务不间断或无错误。"
+        },
+        {
+          "title": "账户与安全",
+          "description": "您有责任保管登录凭据，并对您账户下的所有活动负责。\n\n如发现未经授权的访问或安全事件，请及时通知我们。"
+        },
+        {
+          "title": "可接受的使用",
+          "description": "您同意不滥用服务——例如试图破坏系统、未经许可抓取数据、在法律允许范围之外进行逆向工程、上传恶意软件、骚扰他人或违反适用法律。\n\n若我们有合理理由认为您违反本条款或对服务及其他用户构成风险，我们可能暂停或终止访问。"
+        },
+        {
+          "title": "知识产权",
+          "description": "服务及其内容（不包括您提交的数据）仍为我们或权利人的知识产权。\n\n您保留所提供数据的所有权。使用服务即授予我们在运营与改进服务所必需的范围内托管、存储、处理与展示您数据的有限许可，具体见我们的隐私政策。"
+        },
+        {
+          "title": "免责声明与责任限制",
+          "description": "在法律允许的最大范围内，服务按「现状」与「可用」提供，不作任何明示或默示保证。\n\n在法律允许的最大范围内，因本条款或服务引起的争议，我们的责任以您于索赔前十二（12）个月内向我们支付的金额与一百美元（USD 100）中较高者为准，或以您所在司法辖区允许的更低上限为准。"
+        },
+        {
+          "title": "变更与终止",
+          "description": "我们可能修改服务或本条款。对重大变更，我们将在法律要求之处提供通知——您应定期查阅更新。\n\n您可以随时停止使用服务。部分条款在终止后仍然有效——包括在法律合理范围内的责任限制、免责声明（如适用）及适用法律。"
+        }
+      ]
+    },
+    "privacyPolicy": {
+      "backButton": "返回",
+      "title": "隐私政策",
+      "updatedLabel": "最后更新：",
+      "updatedValue": "2026年5月10日",
+      "intro": "本隐私政策说明在您使用我们的服务时，我们如何收集、使用与保护信息。使用服务即表示您知悉并同意此处描述的做法。",
+      "sections": [
+        {
+          "title": "我们收集的信息",
+          "description": "我们收集您自愿提供的信息——例如账户信息（如适用的登录名或邮箱）、您创建的活动名称与时间记录，以及客服沟通内容。\n\n我们还会自动收集为运营服务所需的有限技术信息（如日志、大致的设备/浏览器类型与时间戳），与常见的网页与移动分析一致。"
+        },
+        {
+          "title": "我们如何使用信息",
+          "description": "我们使用信息来提供并保障服务、验证用户、排查问题、以汇总形式分析使用趋势、履行法律义务，并就更新或事件与您沟通。\n\n我们不会以传统意义上的「出售个人信息换取金钱」的方式出售您的个人信息；除法律另有规定或要求外，我们仅为运营服务而处理数据。"
+        },
+        {
+          "title": "法律依据",
+          "description": "在适用隐私法下，我们可能依赖以下依据：履行合同（提供服务）、正当利益（在平衡您权利的前提下保障与改进服务）、在需要时取得同意，或法律义务。\n\n在依赖同意的情况下，您可撤回同意，但可能受合同或法律例外限制。"
+        },
+        {
+          "title": "共享与处理者",
+          "description": "我们可能聘请在合同保障下的服务提供商（「处理者」）提供托管基础设施或分析等服务。\n\n在法律要求或为保护权利、安全、安保或服务完整性时，我们可能披露信息。"
+        },
+        {
+          "title": "保留与安全",
+          "description": "我们仅在实现本政策所述目的所必需的期间内保留个人数据，包括法律、安全、会计、备份或争议解决等需要。\n\n我们采取商业上合理的安全措施；任何传输或存储方式都无法保证百分之百安全。"
+        },
+        {
+          "title": "您的权利",
+          "description": "根据您所在司法辖区，您可能有权请求访问、更正、删除、限制处理、数据可携带或反对处理，并有权向监管机构投诉。\n\n如需行使适用权利或对本政策有疑问，请通过服务或文档中提供的联系方式与我们联系。"
+        },
+        {
+          "title": "本政策的变更",
+          "description": "我们可能不时更新本隐私政策，更新将标明新的修订日期。\n\n在法律有实质要求或我们的做法发生重大变化时，我们将提供额外通知或按监管期望取得同意。"
+        }
+      ]
+    }
+  },
+  "widgets": {
+    "navbar": {
+      "menuItems": {
+        "Home": "首页",
+        "Settings": "设置",
+        "Activities": "活动",
+        "History": "历史"
+      }
+    },
+    "activityAnalytics": {
+      "title": "分析 ·",
+      "totalTime": "合计",
+      "empty": "所选日期没有分段",
+      "active": "活动",
+      "pause": "暂停",
+      "loading": "正在加载分析…",
+      "error": "无法加载分析",
+      "deleteSessionSuccess": "会话已删除",
+      "deleteSessionError": "无法删除会话",
+      "sessionsForDay": "当日会话",
+      "deleteSession": {
+        "title": "删除会话？",
+        "description": "此操作无法撤销。",
+        "cancel": "取消",
+        "confirm": "删除",
+        "ariaLabel": "删除会话"
+      }
+    },
+    "accountSettings": {
+      "title": "账户设置",
+      "options": {
+        "1": "编辑资料"
+      }
+    },
+    "unfinishedActivities": {
+      "title": "未完成的活动"
+    },
+    "activityHistory": {
+      "title": "活动历史",
+      "empty": "活动历史为空",
+      "emptyDescription": "你的活动将显示在这里",
+      "error": "无法加载活动历史",
+      "errorDescription": "请重试"
+    },
+    "todayActivityList": {
+      "title": "今日活动",
+      "newActivityButton": "添加活动",
+      "error": "无法加载活动",
+      "errorDescription": "请重试",
+      "empty": "今日暂无活动",
+      "emptyDescription": "添加活动以开始新的一天",
+      "addTodayActivitiesDialog": {
+        "title": "添加活动",
+        "empty": "你还没有任何活动。请前往活动分区并新建一个",
+        "noActivities": "没有可选活动",
+        "success": "活动已添加",
+        "error": "无法添加活动",
+        "cancelButton": "取消",
+        "addButton": "添加"
+      }
+    },
+    "activityGroup": {
+      "totalActiveTime": "活动总时长",
+      "loadMoreButton": "加载更多"
+    },
+    "activityList": {
+      "title": "活动",
+      "emptyTitle": "你还没有任何活动",
+      "emptyDescription": "请在「活动」中创建。",
+      "newActivityButton": "新建活动",
+      "error": "无法加载活动",
+      "errorDescription": "请重试",
+      "totalTracked": "合计",
+      "createDialog": {
+        "title": "新建活动",
+        "nameLabel": "名称",
+        "namePlaceholder": "活动名称",
+        "descriptionLabel": "描述",
+        "descriptionPlaceholder": "可选描述",
+        "cancelButton": "取消",
+        "submitButton": "创建"
+      }
+    }
+  },
+  "features": {
+    "auth": {
+      "signOutButton": "退出登录",
+      "signInByLoginForm": {
+        "firstNameInput": {
+          "placeholder": "请输入你的名字"
+        },
+        "loginInput": {
+          "label": "登录名",
+          "placeholder": "请输入登录名",
+          "errors": {
+            "required": "登录名为必填"
+          }
+        },
+        "passwordInput": {
+          "label": "密码",
+          "placeholder": "请输入密码",
+          "errors": {
+            "minLength": "密码过短，最少 {{count}} 个字符"
+          }
+        },
+        "linkText": "注册",
+        "submitButton": "进入",
+        "submitButtonLoadingText": "正在登录…",
+        "subtitleText": "还没有账号？",
+        "title": "登录"
+      },
+      "signUpForm": {
+        "firstNameInput": {
+          "label": "名字",
+          "placeholder": "请输入你的名字",
+          "errors": {
+            "required": "姓名为必填"
+          }
+        },
+        "loginInput": {
+          "label": "登录名",
+          "placeholder": "创建登录名",
+          "errors": {
+            "required": "登录名为必填"
+          }
+        },
+        "passwordInput": {
+          "label": "密码",
+          "placeholder": "设置强密码",
+          "errors": {
+            "minLength": "密码过短，最少 {{count}} 个字符"
+          }
+        },
+        "repeatPasswordInput": {
+          "label": "确认密码",
+          "placeholder": "请再次输入密码",
+          "errors": {
+            "mismatch": "两次密码不一致",
+            "required": "此项为必填"
+          }
+        },
+        "linkText": "去登录",
+        "submitButton": "进入",
+        "submitButtonLoadingText": "正在注册…",
+        "subtitleText": "已有账号？",
+        "title": "注册"
+      }
+    }
+  }
+}

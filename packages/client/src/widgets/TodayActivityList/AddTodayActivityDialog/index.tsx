@@ -207,14 +207,18 @@ export function AddTodayActivitiesDialog({
               justifyContent="flex-end"
             >
               <Button variant="outline" onClick={handleCloseDialog}>
-                {t("pages.home.dayPlanDialogCancel")}
+                {t(
+                  "widgets.todayActivityList.addTodayActivitiesDialog.cancelButton",
+                )}
               </Button>
               <Button
                 disabled={isDisableSubmitButton}
                 form={formId}
                 type="submit"
               >
-                {t("pages.home.dayPlanDialogAdd")}
+                {t(
+                  "widgets.todayActivityList.addTodayActivitiesDialog.addButton",
+                )}
               </Button>
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild>
