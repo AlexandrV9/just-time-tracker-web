@@ -9,13 +9,20 @@
     "dev:shared": "pnpm --filter @to-do-list/shared dev",
     "dev": "concurrently \"pnpm run dev:server\" \"pnpm run dev:client\" \"pnpm run dev:shared\"",
     "build:shared": "pnpm --filter @to-do-list/shared build",
-    "build": "concurrently \"pnpm run build:shared\" \"pnpm run build --workspace=client\" \"pnpm run build --workspace=server\""
+    "build:client": "pnpm --filter @to-do-list/client build",
+    "build:server": "pnpm --filter @to-do-list/server build",
+    "build": "concurrently \"pnpm run build:shared\" \"pnpm run build:client\" \"pnpm run build:server\"",
+    "lint": "pnpm --filter @to-do-list/client eslint",
+    "test": "pnpm --filter @to-do-list/server test",
+    "verify": "pnpm lint && pnpm test && pnpm build",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.26.2",
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "husky": "^9.1.7"
   }
 }

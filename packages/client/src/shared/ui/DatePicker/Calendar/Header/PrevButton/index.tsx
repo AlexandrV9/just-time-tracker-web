@@ -2,7 +2,7 @@ import { DatePicker } from "@ark-ui/react";
 import { Box } from "~/shared/ui/Box";
 import { ArrowLeftIcon } from "~/shared/ui/icons";
 
-export interface PrevButtonProps extends DatePicker.PrevTriggerProps {}
+export type PrevButtonProps = DatePicker.PrevTriggerProps;
 
 export const PrevButton = ({ disabled, ...props }: PrevButtonProps) => {
   return (

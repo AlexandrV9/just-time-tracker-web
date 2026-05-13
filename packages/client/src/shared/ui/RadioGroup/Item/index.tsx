@@ -3,7 +3,7 @@ import {
   type RadioGroupItemProps as BaseRadioItemProps,
 } from "@chakra-ui/react";
 
-export interface RadioItemProps extends BaseRadioItemProps {}
+export type RadioItemProps = BaseRadioItemProps;
 
 export const Item = (props: RadioItemProps) => (
   <BaseRadioItem {...props} />

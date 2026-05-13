@@ -4,7 +4,7 @@ import {
   type GridProps as BaseGridProps,
 } from "@chakra-ui/react";
 
-export interface GridProps extends BaseGridProps {}
+export type GridProps = BaseGridProps;
 
 export function Grid(props: GridProps) {
   return <BaseGrid {...props} />;

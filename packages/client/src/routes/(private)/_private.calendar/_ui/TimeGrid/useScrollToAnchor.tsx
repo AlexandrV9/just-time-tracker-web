@@ -3,9 +3,10 @@ import { useEffect } from "react";
 type UseScrollToAnchorParams = {
   containerRef: React.RefObject<HTMLElement | null>;
   targetRef: React.RefObject<HTMLElement | null>;
-  anchor?: number; // 0 = top, 0.5 = center, 1 = bottom
+  anchor?: number;
   behavior?: ScrollBehavior;
-  deps?: React.DependencyList;
+  /** When this identity changes, scroll position is recomputed (e.g. `hourHeight`). */
+  revalidateKey?: unknown;
 };
 
 export const useScrollToAnchor = ({
@@ -13,7 +14,7 @@ export const useScrollToAnchor = ({
   targetRef,
   anchor = 0.5,
   behavior = "auto",
-  deps = [],
+  revalidateKey,
 }: UseScrollToAnchorParams) => {
   useEffect(() => {
     const container = containerRef.current;
@@ -34,5 +35,5 @@ export const useScrollToAnchor = ({
       top: Math.max(0, scrollTo),
       behavior,
     });
-  }, deps);
+  }, [anchor, behavior, containerRef, targetRef, revalidateKey]);
 };

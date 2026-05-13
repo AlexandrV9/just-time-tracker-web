@@ -1,6 +1,6 @@
 import { ArrowLeftIcon, Box, type BoxProps } from "~/shared/ui";
 
-export interface PrevTriggerProps extends Omit<BoxProps, "children"> {}
+export type PrevTriggerProps = Omit<BoxProps, "children">;
 
 export const PrevTrigger = ({ ...props }: PrevTriggerProps) => {
   return (

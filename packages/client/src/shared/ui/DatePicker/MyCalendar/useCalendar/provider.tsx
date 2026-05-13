@@ -1,27 +1,7 @@
-import dayjs, { Dayjs } from "dayjs";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  type ReactNode,
-} from "react";
+import dayjs, { type Dayjs } from "dayjs";
+import { useCallback, useMemo, type ReactNode } from "react";
 
-type CalendarContext = {
-  // date
-  minDate: Dayjs | null;
-  maxDate: Dayjs | null;
-  isToday: (date: Dayjs) => boolean;
-  isDateDisabled: (date: Dayjs) => boolean;
-
-  // month
-  month: Dayjs;
-  goToMonth: (targetMonth: Dayjs) => void;
-  goToPrevMonth: () => void;
-  goToNextMonth: () => void;
-};
-
-const CalendarContext = createContext<CalendarContext | null>(null);
+import { CalendarContext, type CalendarContextValue } from "./context";
 
 type CalendarProviderProps = {
   children: ReactNode;
@@ -51,7 +31,7 @@ export const CalendarProvider = ({
     (targetMonth: Dayjs) => {
       setMonth(targetMonth);
     },
-    [setMonth]
+    [setMonth],
   );
 
   const _minDate = useMemo(() => (minDate ? dayjs(minDate) : null), [minDate]);
@@ -64,12 +44,12 @@ export const CalendarProvider = ({
 
       return false;
     },
-    [_minDate, _maxDate]
+    [_minDate, _maxDate],
   );
 
   const isToday = useCallback((date: Dayjs) => date.isSame(dayjs(), "day"), []);
 
-  const value: CalendarContext = useMemo(() => {
+  const value: CalendarContextValue = useMemo(() => {
     const dateOptions = {
       minDate,
       maxDate,
@@ -104,14 +84,4 @@ export const CalendarProvider = ({
       {children}
     </CalendarContext.Provider>
   );
-};
-
-export const useCalendar = () => {
-  const context = useContext(CalendarContext);
-
-  if (!context) {
-    throw new Error("CalendarProvider not found");
-  }
-
-  return context;
 };

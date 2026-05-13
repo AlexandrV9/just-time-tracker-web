@@ -1,6 +1,6 @@
 import { Box, type BoxProps } from "~/shared/ui";
 
-export interface BottomContainerProps extends BoxProps {}
+export type BottomContainerProps = BoxProps;
 
 export const BottomContainer = ({ ...props }: BottomContainerProps) => {
   return (

@@ -1,4 +1,4 @@
-import { useMemo, type RefObject } from "react";
+import { type RefObject } from "react";
 import {
   convertSecondsToTimeObject,
   getTotalSecondsFromDay,
@@ -18,22 +18,18 @@ export const CurrentTimePointer = ({
   hourHeight = 60,
   ref,
 }: CurrentTimePointerProps) => {
-  const { value } = useCounter({ autoStart: true });
+  useCounter({ autoStart: true });
 
-  const currentTime = useMemo(() => {
-    const { minutes, hours } = convertSecondsToTimeObject(
-      getTotalSecondsFromDay(),
-    );
+  const { minutes, hours } = convertSecondsToTimeObject(
+    getTotalSecondsFromDay(),
+  );
 
-    return [
-      hours.toString().padStart(2, "0"),
-      minutes.toString().padStart(2, "0"),
-    ].join(":");
-  }, [value]);
+  const currentTime = [
+    hours.toString().padStart(2, "0"),
+    minutes.toString().padStart(2, "0"),
+  ].join(":");
 
-  const pointerTop = useMemo(() => {
-    return (getTotalSecondsFromDay() / 3600) * hourHeight;
-  }, [hourHeight, value]);
+  const pointerTop = (getTotalSecondsFromDay() / 3600) * hourHeight;
 
   return (
     <div ref={ref}>

@@ -1,8 +1,9 @@
 import { useCallback } from "react";
-import { ArrowLeftIcon, IconButton, type IconButtonProps } from "../..";
+import { ArrowLeftIcon, IconButton } from "../..";
 import { useNavigate, useRouter } from "@tanstack/react-router";
+import type { IconButtonProps } from "@chakra-ui/react";
 
-export interface BackButtonProps extends Omit<IconButtonProps, "onClick"> {}
+export type BackButtonProps = Omit<IconButtonProps, "onClick">;
 
 export const BackButton = ({ ...props }: BackButtonProps) => {
   const router = useRouter();

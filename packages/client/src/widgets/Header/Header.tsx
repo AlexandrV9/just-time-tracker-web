@@ -1,7 +1,7 @@
 import { Box } from "~/shared/ui";
 import { useHeaderStore } from "./useHeaderStore";
 
-export type HeaderProps = {};
+export type HeaderProps = Record<string, never>;
 
 export const Header = () => {
   const { leftContent, centerContent, rightContent } = useHeaderStore();

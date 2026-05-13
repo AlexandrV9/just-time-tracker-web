@@ -4,7 +4,7 @@ import {
 } from "@chakra-ui/react";
 import { Item } from "./Item";
 
-export interface RadioGroupProps extends BaseRadioGroupRootProps {}
+export type RadioGroupProps = BaseRadioGroupRootProps;
 
 export function RadioGroup(props: RadioGroupProps) {
   return <BaseRadioGroup.Root {...props} />;

@@ -1,8 +1,8 @@
 import { useRef } from "react";
 import { ScrollArea, type ScrollAreaRootProps } from "~/shared/ui";
-import { MainContainerProvider } from "./context";
+import { MainContainerProvider } from "./MainContainerProvider";
 
-export interface MainContainerProps extends ScrollAreaRootProps {}
+export type MainContainerProps = ScrollAreaRootProps;
 
 export const MainContainer = ({ children, ...props }: MainContainerProps) => {
   const viewportRef = useRef(null);

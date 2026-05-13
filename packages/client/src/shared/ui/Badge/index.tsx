@@ -3,6 +3,6 @@ import {
   type BadgeProps as BaseBadgeProps,
 } from "@chakra-ui/react";
 
-export interface BadgeProps extends BaseBadgeProps {}
+export type BadgeProps = BaseBadgeProps;
 
 export const Badge = BaseBadge;

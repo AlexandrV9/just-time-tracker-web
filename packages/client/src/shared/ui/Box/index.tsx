@@ -3,7 +3,7 @@ import {
   type BoxProps as BaseBoxProps,
 } from "@chakra-ui/react";
 
-export interface BoxProps extends BaseBoxProps {}
+export type BoxProps = BaseBoxProps;
 
 export const Box = (props: BaseBoxProps) => {
   return <BaseBox {...props} />;

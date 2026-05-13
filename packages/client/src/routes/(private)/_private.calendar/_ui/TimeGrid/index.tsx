@@ -19,7 +19,7 @@ export const TimeGrid = ({ hourHeight = 60 }: TimeGridProps) => {
   //   containerRef: mainContainerRef,
   //   targetRef: currentTimePointerRef,
   //   anchor: 0.4,
-  //   deps: [hourHeight],
+  //   revalidateKey: hourHeight,
   // });
 
   return (

@@ -25,21 +25,21 @@ const updateToastFn =
   (content: React.ReactNode, options?: ToastOptions) => {
     return method(
       (props) => (
-        <Toast {...props} {...options}>
+        <ToastContent {...props} {...options}>
           {content}
-        </Toast>
+        </ToastContent>
       ),
       {
         ...defaultOptions,
         ...options,
-      }
+      },
     );
   };
 
-const Toast = ({
+function ToastContent({
   closeToast,
   children,
-}: ToastContentProps & { children: React.ReactNode }) => {
+}: ToastContentProps & { children: React.ReactNode }) {
   return (
     <div className={styles.toast}>
       <Text fontSize="md" className={styles.message}>
@@ -53,8 +53,9 @@ const Toast = ({
       />
     </div>
   );
-};
+}
 
+// eslint-disable-next-line react-refresh/only-export-components -- imperative toast API alongside ToastContainer
 export const toast = Object.assign(updateToastFn(defaultToast), {
   success: updateToastFn(defaultToast.success),
   error: updateToastFn(defaultToast.error),
