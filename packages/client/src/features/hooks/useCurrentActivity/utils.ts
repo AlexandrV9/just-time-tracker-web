@@ -24,11 +24,10 @@ export async function fetchCurrentActivityData({
 }: FetchCurrentActivityDataParams): Promise<FetchCurrentActivityDataResult> {
   const activityResponse = await activityApiService.getCurrentActivities({
     createdById,
-    status: "active",
     fromDate,
     toDate,
     page: 0,
-    limit: 1,
+    limit: 25,
   });
 
   if (!activityResponse.success) {
@@ -37,17 +36,21 @@ export async function fetchCurrentActivityData({
     );
   }
 
-  const activity =
-    activityResponse.data?.data?.find((row) => row.activity.status === "active")
-      ?.activity ?? null;
+  const rows = activityResponse.data?.data ?? [];
+  const chosen =
+    rows.find((row) => row.activity.status === "active") ??
+    rows.find((row) => row.activity.status === "paused") ??
+    null;
 
-  if (!activity?.currentSessionId) {
-    return { activity, session: null, segment: null };
+  if (!chosen?.activity?.currentSessionId || !chosen.session) {
+    return { activity: null, session: null, segment: null };
   }
+
+  const { activity, session } = chosen;
 
   const activityAnalyticsResponse =
     await activityApiService.getActivityAnalytics({
-      activityId: activity!.id,
+      activityId: activity.id,
       fromDate,
       toDate,
     });
@@ -61,18 +64,16 @@ export async function fetchCurrentActivityData({
 
   const activityAnalytics = activityAnalyticsResponse.data;
 
-  const sessionResponse = await activityApiService.getActivitySession({
-    id: activity.currentSessionId,
-  });
-
-  if (!sessionResponse.success) {
-    throw new Error(sessionResponse.message ?? "Failed to get current session");
-  }
-
-  const session = sessionResponse.data;
-
-  if (!session?.currentSegmentId) {
-    return { activity, session, segment: null };
+  if (!session.currentSegmentId) {
+    return {
+      activity: {
+        ...activity,
+        activeDurationMs: activityAnalytics.activeDurationMs ?? 0,
+        pauseDurationMs: activityAnalytics.pauseDurationMs ?? 0,
+      },
+      session,
+      segment: null,
+    };
   }
 
   const segmentResponse = await activityApiService.getSessionSegment({

@@ -1,9 +1,7 @@
 import z from "zod";
 import { baseIdSchema, paginationResponseSchema } from "../common/index.js";
-import {
-  activitySessionSchema,
-  activitySessionStatusSchema,
-} from "./activitySession.schema.js";
+import { activitySessionSchema } from "./activitySession.schema.js";
+import { activitySessionSegmentSchema } from "./activitySessionSegment.schema.js";
 
 const tagListSchema = z.array(z.string()).max(10).optional();
 
@@ -106,9 +104,17 @@ export type GetCurrentActivitiesQueryDTO = z.infer<
  * are **interval-scoped** — sums within `[fromDate, toDate)`, aligned with analytics
  * (open segments clipped with server `now()` and capped by `toDate`).
  * `activity.status` reflects the last session backing this row (same join as `/current` filter).
+ *
+ * `session` / `segment` are the backing session and its current segment row (if any),
+ * for UI such as cross-day cards; omitted semantics: `session` is null for `idle` rows.
+ *
+ * Home UI: live **session** active time uses `session.activeDurationMs` plus the open active
+ * segment elapsed; **day** totals for the list use interval-scoped `activity.activeDurationMs`.
  */
 export const currentActivitySchema = z.object({
   activity: activitySchema,
+  session: activitySessionSchema.nullable(),
+  segment: activitySessionSegmentSchema.nullable(),
 });
 
 export type CurrentActivityDTO = z.infer<typeof currentActivitySchema>;

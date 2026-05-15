@@ -294,6 +294,19 @@ const getActivities = async (filters: GetActivitiesDTO) => {
 
 type CurrentActivityRow = Record<string, unknown>;
 
+function splitCurrentActivityQueryRow(row: Record<string, unknown>): {
+  activity: Record<string, unknown>;
+  session: unknown;
+  segment: unknown;
+} {
+  const { session, segment, ...activity } = row;
+  return {
+    activity,
+    session: session ?? null,
+    segment: segment ?? null,
+  };
+}
+
 const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
   const {
     createdById,
@@ -378,7 +391,9 @@ const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
       a.tags,
       a.last_activity_session_id AS "currentActivitySessionId",
       'idle'::text AS status,
-      ${clippedDurationFragments}
+      ${clippedDurationFragments},
+      NULL::json AS session,
+      NULL::json AS segment
     FROM activities a
     WHERE a.created_by_id = $1
       AND a.last_activity_session_id IS NULL
@@ -408,9 +423,9 @@ const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
     const totalCount = countResult.rows[0]?.count ?? 0;
 
     return {
-      data: (dataResult.rows as CurrentActivityRow[]).map((row) => ({
-        activity: row,
-      })),
+      data: (dataResult.rows as CurrentActivityRow[]).map((row) =>
+        splitCurrentActivityQueryRow(row),
+      ),
       pagination: pagination(totalCount),
     };
   }
@@ -423,7 +438,46 @@ const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
         ? ["active"]
         : ["paused"];
 
-  const baseParams: unknown[] = [createdById, fromDate, toDate, overlapSessionStatuses];
+  const baseParams: unknown[] = [
+    createdById,
+    fromDate,
+    toDate,
+    overlapSessionStatuses,
+  ];
+
+  const currentSessionPayload = `
+    (
+      jsonb_build_object(
+        'id', s.id::text,
+        'createdAt', s.created_at,
+        'updatedAt', s.updated_at,
+        'activityId', s.activity_id::text,
+        'startedAt', s.started_at,
+        'endedAt', s.ended_at,
+        'status', s.status::text,
+        'activeDurationMs', s.active_duration_ms,
+        'pauseDurationMs', s.pause_duration_ms,
+        'currentSegmentId',
+          CASE
+            WHEN s.current_segment_id IS NULL THEN NULL
+            ELSE s.current_segment_id::text
+          END
+      )
+    )::json AS session,
+    CASE
+      WHEN seg.id IS NULL THEN NULL::json
+      ELSE (
+        jsonb_build_object(
+          'id', seg.id::text,
+          'createdAt', seg.created_at,
+          'updatedAt', seg.updated_at,
+          'sessionId', seg.session_id::text,
+          'type', seg.segment_type::text,
+          'startedAt', seg.started_at,
+          'endedAt', seg.ended_at
+        )
+      )::json
+    END AS segment`;
 
   const dataQuery = `
     SELECT
@@ -436,9 +490,11 @@ const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
       a.tags,
       a.last_activity_session_id AS "currentActivitySessionId",
       s.status::text AS status,
-      ${clippedDurationFragments}
+      ${clippedDurationFragments},
+      ${currentSessionPayload}
     FROM activities a
     INNER JOIN activity_sessions s ON s.id = a.last_activity_session_id
+    LEFT JOIN activity_session_segments seg ON seg.id = s.current_segment_id
     WHERE a.created_by_id = $1
       AND s.status = ANY($4::text[])
       AND ($3::timestamptz IS NULL OR s.started_at < $3::timestamptz)
@@ -466,9 +522,9 @@ const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
   const totalCount = countResult.rows[0]?.count ?? 0;
 
   return {
-    data: (dataResult.rows as CurrentActivityRow[]).map((row) => ({
-      activity: row,
-    })),
+    data: (dataResult.rows as CurrentActivityRow[]).map((row) =>
+      splitCurrentActivityQueryRow(row),
+    ),
     pagination: pagination(totalCount),
   };
 };

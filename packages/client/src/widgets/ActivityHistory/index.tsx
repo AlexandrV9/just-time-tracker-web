@@ -4,9 +4,9 @@ import { useInView } from "react-intersection-observer";
 import { useAuthStore } from "~/features/auth";
 import { Box, EmptyState, Flex, Text, VersionIcon } from "~/shared/ui";
 import { VStack } from "@chakra-ui/react";
-import { ActivityGroup } from "../ActivityGroup";
 import { useActivityHistory } from "./useActivityHistory";
 import { useTranslation } from "~/shared/hooks";
+import { HistoryActivityGroup } from "./HistoryActivityGroup";
 
 export const ActivityHistory = () => {
   const { t } = useTranslation();
@@ -72,7 +72,7 @@ export const ActivityHistory = () => {
   }
 
   if (isLoading) {
-    return <ActivityGroup.Skeleton />;
+    return <HistoryActivityGroup.Skeleton />;
   }
 
   if (isError) {
@@ -122,7 +122,7 @@ export const ActivityHistory = () => {
       </Text>
       <Box display="flex" flexDirection="column" gap="1.5rem">
         {groups.map((group) => (
-          <ActivityGroup
+          <HistoryActivityGroup
             key={group.key}
             data={group}
             highlightedActivityId={
@@ -133,8 +133,8 @@ export const ActivityHistory = () => {
             hasMoreItems={Boolean(group.itemsHasMore && group.itemsNextCursor)}
             isLoadingMoreGroupItems={isLoadingMoreGroupItems(group.key)}
             onLoadMoreGroupItems={() => loadMoreGroupItems(group.key)}
-            onSelect={(activity) =>
-              handleSelectActivity(activity.id, group.groupDateStart)
+            onSelect={(data) =>
+              handleSelectActivity(data.activity.id, group.groupDateStart)
             }
           />
         ))}

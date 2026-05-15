@@ -1,60 +1,62 @@
-import type { ActivityDTO } from "@to-do-list/shared";
+import type {
+  ActivityDTO,
+  ActivitySessionDTO,
+  ActivitySessionSegmentDTO,
+} from "@to-do-list/shared";
 import { Box, Button, Flex, Text } from "~/shared/ui";
 import {
   convertSecondsToTimeObject,
   convertTimeObjectToTimeString,
 } from "~/shared/libs";
 import { ActivityListView } from "~/entities/Activity";
-import { ActivityCard } from "~/features";
-import { useCurrentActivityStore } from "~/features/hooks/useCurrentActivityStore";
-import { useShallow } from "zustand/react/shallow";
 import { useEffect, useRef } from "react";
 import { Skeleton } from "./Skeleton";
 import { useTranslation } from "~/shared/hooks";
+import type { ActivityGroupRow } from "~/shared/api/services/activity/types";
+import type { CalendarDay } from "~/shared/libs";
+import { TodayActivityCard } from "./TodayActivityCard";
 
 export type ActivityGroupDTO = {
   label: string;
   totalActiveTime: number;
-  activities: ActivityDTO[];
+  activities: ActivityGroupRow[];
+  activeTimerCalendarDay?: CalendarDay;
   itemsHasMore?: boolean;
   itemsNextCursor?: string | null;
 };
 
-type ActivityGroupProps = {
+type ActivityData = {
+  activity: ActivityDTO;
+  session: ActivitySessionDTO | null;
+  segment: ActivitySessionSegmentDTO | null;
+};
+
+type TodayActivityGroupProps = {
   data: ActivityGroupDTO;
-  withControlButtons?: boolean;
-  selectedActivityId?: string;
+  currentActivityId?: string;
   highlightedActivityId?: string;
   hasMoreItems?: boolean;
   isLoadingMoreGroupItems?: boolean;
-  onSelect?: (activity: ActivityDTO) => void;
   onStart?: (activity: ActivityDTO) => void;
-  onPause?: (activity: ActivityDTO) => void;
-  onFinish?: (activity: ActivityDTO) => void;
+  onSelect?: (data: ActivityData) => void;
+  onPause?: (data: ActivityData) => void;
+  onFinish?: (data: ActivityData) => void;
   onLoadMoreGroupItems?: () => void;
 };
 
-export function ActivityGroup({
+export function TodayActivityGroup({
   data,
   onStart,
   onPause,
   onFinish,
-  withControlButtons = false,
-  selectedActivityId,
+  currentActivityId,
   highlightedActivityId,
   onSelect,
   hasMoreItems = false,
   isLoadingMoreGroupItems = false,
   onLoadMoreGroupItems,
-}: ActivityGroupProps) {
+}: TodayActivityGroupProps) {
   const { t } = useTranslation();
-
-  const { currentActivity, currentSegment } = useCurrentActivityStore(
-    useShallow((state) => ({
-      currentActivity: state.currentActivity,
-      currentSegment: state.currentSegment,
-    })),
-  );
 
   const highlightedItemRef = useRef<HTMLLIElement | null>(null);
 
@@ -70,12 +72,6 @@ export function ActivityGroup({
   const displayedActiveTotalTime = convertTimeObjectToTimeString(
     convertSecondsToTimeObject(data.totalActiveTime),
   );
-
-  const runningActivityId = data.activities.find(
-    (a) => a.status === "active",
-  )?.id;
-
-  const freezeSelection = Boolean(withControlButtons && runningActivityId);
 
   return (
     <Box display="flex" flexDirection="column" gap="0.75rem">
@@ -97,49 +93,31 @@ export function ActivityGroup({
         </Flex>
       </Flex>
       <ActivityListView>
-        {data.activities.map((activity) => {
-          const mutedControls = Boolean(
-            withControlButtons &&
-            runningActivityId &&
-            activity.id !== runningActivityId,
-          );
-
-          const isCurrentActivity =
-            withControlButtons &&
-            currentActivity?.id === activity.id &&
-            currentSegment?.type === "active";
-
+        {data.activities.map(({ activity, session = null, segment = null }) => {
+          const isCurrentActivity = activity.id === currentActivityId;
           const isHighlighted = highlightedActivityId === activity.id;
+          const isSelected = isCurrentActivity;
+          const disableControls =
+            data.activities.some((row) => row.segment?.type === "active") &&
+            segment?.type !== "active";
 
           return (
             <ActivityListView.Item
               key={activity.id}
               ref={isHighlighted ? highlightedItemRef : undefined}
             >
-              <ActivityCard
+              <TodayActivityCard
                 activity={activity}
-                activeDurationMs={activity.activeDurationMs}
-                pauseDurationMs={activity.pauseDurationMs}
-                activeSegmentStartedAt={
-                  isCurrentActivity ? currentSegment.startedAt : null
-                }
-                isRunning={isCurrentActivity}
+                session={session}
+                segment={segment}
+                activeTimerCalendarDay={data.activeTimerCalendarDay}
                 isHighlighted={isHighlighted}
-                withControlButtons={withControlButtons}
-                showDurationBreakdown={!withControlButtons}
-                mutedControls={mutedControls}
-                isSelected={
-                  !!selectedActivityId &&
-                  activity.id === selectedActivityId &&
-                  !freezeSelection
-                }
-                isInteractive={!freezeSelection}
-                onClick={
-                  freezeSelection ? undefined : () => onSelect?.(activity)
-                }
+                disableControls={disableControls}
+                isSelected={isSelected}
                 onStart={() => onStart?.(activity)}
-                onPause={() => onPause?.(activity)}
-                onFinish={() => onFinish?.(activity)}
+                onClick={() => onSelect?.({ activity, session, segment })}
+                onPause={() => onPause?.({ activity, session, segment })}
+                onFinish={() => onFinish?.({ activity, session, segment })}
               />
             </ActivityListView.Item>
           );
@@ -162,4 +140,4 @@ export function ActivityGroup({
   );
 }
 
-ActivityGroup.Skeleton = Skeleton;
+TodayActivityGroup.Skeleton = Skeleton;

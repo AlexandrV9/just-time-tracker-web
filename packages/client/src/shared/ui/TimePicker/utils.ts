@@ -95,9 +95,9 @@ export const formatSecondsAsTimeString = (
 };
 
 /**
- * Convert duration in milliseconds to seconds
- * @param durationMs - Duration in milliseconds
- * @returns Duration in seconds
+ * Преобразует длительность в миллисекундах в секунды
+ * @param durationMs - Время в миллисекундах
+ * @returns Время в секундах
  */
 export const convertMillisecondsToSeconds = (durationMs: number): number => {
   return Math.floor(durationMs / 1000);

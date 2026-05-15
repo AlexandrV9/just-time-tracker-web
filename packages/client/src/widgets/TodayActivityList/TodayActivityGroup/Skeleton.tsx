@@ -1,5 +1,4 @@
-import { ActivityListView } from "~/entities/Activity";
-import { ActivityCard } from "~/features";
+import { ActivityCardView, ActivityListView } from "~/entities/Activity";
 import { Box, Flex } from "~/shared/ui";
 
 import { Skeleton as BaseSkeleton } from "~/shared/ui";
@@ -16,7 +15,8 @@ export const Skeleton = () => {
       <ActivityListView>
         {Array.from({ length: 4 }).map((_, index) => (
           <ActivityListView.Item key={index}>
-            <ActivityCard.Skeleton />
+            Skeleton
+            {/* <ActivityCardView.Skeleton /> */}
           </ActivityListView.Item>
         ))}
       </ActivityListView>

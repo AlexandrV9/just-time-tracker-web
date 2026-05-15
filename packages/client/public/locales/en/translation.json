@@ -240,6 +240,13 @@
       "totalActiveTime": "Total active time",
       "loadMoreButton": "Load more"
     },
+    "activityCard": {
+      "dayTotal": "Today: {{time}}",
+      "crossDay": {
+        "sessionStart": "Session start: {{date}}",
+        "totalActiveTime": "Total active time"
+      }
+    },
     "activityList": {
       "title": "Activities",
       "emptyTitle": "You don't have any activities yet",

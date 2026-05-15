@@ -38,6 +38,11 @@ const mapRow = (row: Record<string, unknown>): ActivitySessionDTO => ({
       : String(row.currentSegmentId),
 });
 
+/** Maps a DB row or JSON-shaped session object to `ActivitySessionDTO`. */
+export const mapActivitySessionRowToDTO = (
+  row: Record<string, unknown>,
+): ActivitySessionDTO => mapRow(row);
+
 const createActivitySession = async (
   data: CreateActivitySessionDataDTO,
 ): Promise<ActivitySessionDTO> => {

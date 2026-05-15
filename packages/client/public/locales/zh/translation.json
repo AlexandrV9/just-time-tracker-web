@@ -240,6 +240,13 @@
       "totalActiveTime": "活动总时长",
       "loadMoreButton": "加载更多"
     },
+    "activityCard": {
+      "dayTotal": "今天：{{time}}",
+      "crossDay": {
+        "sessionStart": "会话开始：{{date}}",
+        "totalActiveTime": "累计活动时间"
+      }
+    },
     "activityList": {
       "title": "活动",
       "emptyTitle": "你还没有任何活动",

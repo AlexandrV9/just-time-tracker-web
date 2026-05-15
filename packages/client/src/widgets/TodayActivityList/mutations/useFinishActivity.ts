@@ -3,7 +3,6 @@ import type {
   ActivityDTO,
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
-  FinishActivityDataDTO,
 } from "@to-do-list/shared";
 import {
   activityApiService,
@@ -15,14 +14,21 @@ import {
 } from "~/shared/api/services";
 import { useCurrentActivityStore } from "~/features/hooks/useCurrentActivityStore";
 
+type FinishActivityData = {
+  activity: ActivityDTO;
+  session: ActivitySessionDTO | null;
+  segment: ActivitySessionSegmentDTO | null;
+  finishedAt: string;
+};
+
 export const useFinishActivity = () => {
   const queryClient = useQueryClient();
   const { updateData } = useCurrentActivityStore();
 
   return useMutation({
-    mutationFn: async (data: FinishActivityDataDTO) => {
+    mutationFn: async (data: FinishActivityData) => {
       const response = await activityApiService.finishActivity({
-        activityId: data.activityId,
+        activityId: data.activity.id,
         finishedAt: data.finishedAt,
       });
 
@@ -32,29 +38,30 @@ export const useFinishActivity = () => {
 
       return response.data;
     },
-    onMutate: (data: FinishActivityDataDTO) => {
-      updateData((prev) => {
-        const prevActivity = prev.currentActivity;
-        const prevSegment = prev.currentSegment;
-
-        const segmentElapsedMs = prevSegment?.startedAt
+    onMutate: (data: FinishActivityData) => {
+      const segmentElapsedMs =
+        data.segment?.type === "active" && data.segment.startedAt
           ? Math.max(
               0,
-              Date.parse(data.finishedAt) - Date.parse(prevSegment.startedAt),
+              Date.parse(data.finishedAt) - Date.parse(data.segment.startedAt),
             )
           : 0;
 
-        const activeDurationMs =
-          (prevActivity?.activeDurationMs ?? 0) + segmentElapsedMs;
+      const activityActiveDurationMs =
+        data.activity.activeDurationMs + segmentElapsedMs;
+
+      updateData((prev) => {
+        if (prev.currentActivity?.id !== data.activity.id) {
+          return prev;
+        }
 
         return {
-          currentActivity: prevActivity
-            ? {
-                ...prevActivity,
-                status: "paused",
-                activeDurationMs,
-              }
-            : null,
+          currentActivity: {
+            ...data.activity,
+            status: "idle",
+            currentSessionId: null,
+            activeDurationMs: activityActiveDurationMs,
+          },
           currentSession: null,
           currentSegment: null,
         };

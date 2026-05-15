@@ -1,5 +1,4 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { subDays } from "date-fns";
 import { useMemo } from "react";
 import { useAuthStore } from "~/features/auth";
 import {
@@ -31,11 +30,6 @@ export const useTodayActivities = (): {
 
   const todayCalendarDay = getCalendarDay();
   const { fromDate, toDate } = getDateIntervalByCalendarDay(todayCalendarDay);
-
-  const yesterdayToDate = useMemo(() => {
-    const yesterday = subDays(new Date(), 1);
-    return getDateIntervalByCalendarDay(getCalendarDay(yesterday)).toDate;
-  }, []);
 
   const todayPlanActivitiesQuery = useQuery({
     queryKey: [DAY_PLANS_QUERY_KEY, userId, todayCalendarDay],
@@ -80,22 +74,45 @@ export const useTodayActivities = (): {
   });
   const todayActivities = todayActivitiesQuery.data ?? [];
 
-  const unfinishedActivitiesQuery = useQuery({
-    queryKey: [ACTIVITIES_CURRENT_QUERY_KEY, { toDate: yesterdayToDate }],
+  const overlappingCurrentQuery = useQuery({
+    queryKey: [
+      ACTIVITIES_CURRENT_QUERY_KEY,
+      "todayOverlap",
+      userId,
+      todayCalendarDay,
+      fromDate,
+      toDate,
+    ],
     queryFn: () =>
       activityApiService.getCurrentActivities({
-        toDate: yesterdayToDate,
+        createdById: userId!,
+        fromDate,
+        toDate,
         limit: 100,
         page: 0,
-        createdById: userId!,
       }),
     enabled: !!userId,
     select: (response) =>
       response.success
-        ? response.data.data.map((item) => item.activity)
+        ? response.data.data.map((item) => ({
+            activity: item.activity,
+            session: item.session,
+            segment: item.segment,
+          }))
         : [],
   });
-  const unfinishedActivities = unfinishedActivitiesQuery.data ?? [];
+  const currentRows = useMemo(
+    () => overlappingCurrentQuery.data ?? [],
+    [overlappingCurrentQuery.data],
+  );
+
+  const currentById = useMemo(() => {
+    const m = new Map<string, (typeof currentRows)[number]>();
+    for (const row of currentRows) {
+      m.set(row.activity.id, row);
+    }
+    return m;
+  }, [currentRows]);
 
   const todayAnalyticsQuery = useQuery({
     queryKey: [
@@ -130,15 +147,28 @@ export const useTodayActivities = (): {
   const analyticsItemsMap = todayAnalyticsQuery.data?.itemsMap ?? {};
   const activitiesToday = todayActivities.map((activity) => {
     const todayMs = analyticsItemsMap[activity.id];
-    if (todayMs === undefined) return activity;
-    return { ...activity, activeDurationMs: todayMs };
+    const activityWithMs =
+      todayMs === undefined ? activity : { ...activity, activeDurationMs: todayMs };
+    const cur = currentById.get(activity.id);
+    return {
+      activity: activityWithMs,
+      session: cur?.session ?? undefined,
+      segment: cur?.segment ?? undefined,
+    };
   });
 
-  const todayActivityIdSet = new Set(activitiesToday.map((a) => a.id));
-  const mergedActivities = [
-    ...activitiesToday,
-    ...unfinishedActivities.filter((a) => !todayActivityIdSet.has(a.id)),
-  ];
+  const todayActivityIdSet = new Set(
+    activitiesToday.map((row) => row.activity.id),
+  );
+  const appendedRows = currentRows.filter(
+    (row) => !todayActivityIdSet.has(row.activity.id),
+  );
+  const mergedActivities = [...activitiesToday, ...appendedRows];
+
+  const extraSecondsFromAppended = appendedRows.reduce(
+    (acc, row) => acc + Math.floor(row.activity.activeDurationMs / 1000),
+    0,
+  );
 
   return {
     planId: todayPlanId,
@@ -148,20 +178,22 @@ export const useTodayActivities = (): {
         groupBy: "day",
         locale: i18n.language,
       }),
-      totalActiveTime: todayAnalyticsQuery.data?.totalSeconds ?? 0,
+      totalActiveTime:
+        (todayAnalyticsQuery.data?.totalSeconds ?? 0) + extraSecondsFromAppended,
       activities: mergedActivities,
+      activeTimerCalendarDay: todayCalendarDay,
     } satisfies ActivityGroup,
     isLoading:
       todayPlanActivitiesQuery.isLoading ||
       todayPlanItemsQuery.isLoading ||
       todayActivitiesQuery.isLoading ||
       todayAnalyticsQuery.isLoading ||
-      unfinishedActivitiesQuery.isLoading,
+      overlappingCurrentQuery.isLoading,
     isError:
       todayPlanActivitiesQuery.isError ||
       todayPlanItemsQuery.isError ||
       todayActivitiesQuery.isError ||
       todayAnalyticsQuery.isError ||
-      unfinishedActivitiesQuery.isError,
+      overlappingCurrentQuery.isError,
   };
 };

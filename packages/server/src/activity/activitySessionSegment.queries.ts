@@ -15,7 +15,9 @@ export const SEGMENT_RETURNING = `
   ended_at AS "endedAt"
 `;
 
-const mapRow = (row: Record<string, unknown>): ActivitySessionSegmentDTO => ({
+export const mapSegmentRow = (
+  row: Record<string, unknown>,
+): ActivitySessionSegmentDTO => ({
   id: String(row.id),
   createdAt: pgTimestampToIsoString(row.createdAt),
   updatedAt: pgTimestampToIsoString(row.updatedAt),
@@ -52,7 +54,7 @@ const createSegment = async (
     endedAt,
   ]);
 
-  return mapRow(rows[0]);
+  return mapSegmentRow(rows[0]);
 };
 
 const getSegmentById = async (
@@ -63,7 +65,7 @@ const getSegmentById = async (
     [id],
   );
   const row = rows[0];
-  return row ? mapRow(row) : null;
+  return row ? mapSegmentRow(row) : null;
 };
 
 const getSegmentsBySessionId = async (
@@ -78,7 +80,7 @@ const getSegmentsBySessionId = async (
     `,
     [sessionId],
   );
-  return rows.map((r) => mapRow(r));
+  return rows.map((r) => mapSegmentRow(r));
 };
 
 export type SegmentIntervalRow = {
@@ -140,7 +142,7 @@ const listSegmentsForActivityInRange = async (
     [activityId, toDate, fromDate],
   );
 
-  return rows.map((r) => mapRow(r));
+  return rows.map((r) => mapSegmentRow(r));
 };
 
 const listSegmentIntervalsForUserActivitiesInRange = async (
@@ -220,7 +222,7 @@ const getSegmentBySessionId = async (
     [sessionId],
   );
   const row = rows[0];
-  return row ? mapRow(row) : null;
+  return row ? mapSegmentRow(row) : null;
 };
 
 export type UpdateActivitySessionSegmentInput = {
@@ -261,7 +263,7 @@ const updateActivitySessionSegment = async (
 
   const { rows } = await pool.query(query, [...params, id]);
   const row = rows[0];
-  return row ? mapRow(row) : null;
+  return row ? mapSegmentRow(row) : null;
 };
 
 export const activitySessionSegmentQueries = {

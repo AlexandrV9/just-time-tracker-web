@@ -6,5 +6,4 @@ export * from "./SideBar";
 export * from "./TodayActivityList";
 export * from "./ActivityHistory";
 export * from "./ActivityAnalytics";
-export * from "./ActivityUnfinishedList";
 export * from "./ActivityList";

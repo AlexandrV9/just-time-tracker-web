@@ -240,6 +240,13 @@
       "totalActiveTime": "Активное время",
       "loadMoreButton": "Загрузить еще"
     },
+    "activityCard": {
+      "dayTotal": "Сегодня: {{time}}",
+      "crossDay": {
+        "sessionStart": "Начало сессии: {{date}}",
+        "totalActiveTime": "Суммарное активное время"
+      }
+    },
     "activityList": {
       "title": "Активности",
       "emptyTitle": "У вас пока нет активностей",

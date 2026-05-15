@@ -21,11 +21,13 @@ import type {
   GetActivitySessionSegmentsResponseDTO,
   GetCurrentActivitiesQueryDTO,
   GetCurrentActivitiesResponseDTO,
+  ActivitySessionSegmentDTO,
   StartActivityDataDTO,
   PauseActivityDataDTO,
   FinishActivityDataDTO,
 } from "@to-do-list/shared";
 
+import { pgTimestampToIsoString } from "../shared/db/pgTimestamp.js";
 import {
   activityRepository,
   mapActivityRowToDTO,
@@ -36,8 +38,14 @@ import {
   pauseActivitySession,
   startActivitySession,
 } from "./activitySession.tracking.service.js";
-import { activitySessionQueries } from "./activitySession.queries.js";
-import { activitySessionSegmentQueries } from "./activitySessionSegment.queries.js";
+import {
+  activitySessionQueries,
+  mapActivitySessionRowToDTO,
+} from "./activitySession.queries.js";
+import {
+  activitySessionSegmentQueries,
+  mapSegmentRow,
+} from "./activitySessionSegment.queries.js";
 import type { ErrorResponse, SuccessResponse } from "../shared/types.js";
 
 type DayTotalsAgg = {
@@ -288,6 +296,19 @@ const getActivities = async (
   }
 };
 
+function mapCurrentActivitySegmentPayload(
+  value: unknown,
+): ActivitySessionSegmentDTO | null {
+  if (value === null || value === undefined || typeof value !== "object") {
+    return null;
+  }
+  try {
+    return mapSegmentRow(value as Record<string, unknown>);
+  } catch {
+    return null;
+  }
+}
+
 type GetCurrentActivitiesResponse =
   | SuccessResponse<GetCurrentActivitiesResponseDTO>
   | ErrorResponse;
@@ -306,6 +327,13 @@ const getCurrentActivities = async (
           activity: mapActivityRowToDTO(
             row.activity as Record<string, unknown>,
           ),
+          session:
+            row.session == null
+              ? null
+              : mapActivitySessionRowToDTO(
+                  row.session as Record<string, unknown>,
+                ),
+          segment: mapCurrentActivitySegmentPayload(row.segment),
         })),
       },
     };

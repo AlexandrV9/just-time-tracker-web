@@ -1,5 +1,8 @@
 import type { ActivityDTO, ActivityGroupDTO } from "@to-do-list/shared";
-import { formatGroupLabel } from "~/shared/libs";
+import { parseISO } from "date-fns";
+import type { ActivityGroupRow } from "~/shared/api/services/activity/types";
+import { formatGroupLabel, getCalendarDay } from "~/shared/libs";
+import type { CalendarDay } from "~/shared/libs/date/types";
 
 export function rowToActivityForGroup(
   row: ActivityGroupDTO["items"][number],
@@ -23,7 +26,7 @@ export const formatActivityGroups = (
       groupDateEnd: string;
       totalActiveDurationMs: number;
       totalPauseDurationMs: number;
-      items: ActivityDTO[];
+      items: ActivityGroupRow[];
       itemsPagination: ActivityGroupDTO["itemsPagination"];
     }
   >();
@@ -38,12 +41,18 @@ export const formatActivityGroups = (
         groupDateEnd: group.groupDateEnd,
         totalActiveDurationMs: group.totalActiveDurationMs,
         totalPauseDurationMs: group.totalPauseDurationMs,
-        items: group.items.map(rowToActivityForGroup),
+        items: group.items.map((item) => ({
+          activity: rowToActivityForGroup(item),
+        })),
         itemsPagination: group.itemsPagination,
       });
     } else {
       const bucket = merged.get(key)!;
-      bucket.items.push(...group.items.map(rowToActivityForGroup));
+      bucket.items.push(
+        ...group.items.map((item) => ({
+          activity: rowToActivityForGroup(item),
+        })),
+      );
       bucket.itemsPagination = group.itemsPagination;
     }
   }
@@ -64,6 +73,9 @@ export const formatActivityGroups = (
       totalActiveTime: Math.floor(group.totalActiveDurationMs / 1000),
       activities: group.items,
       groupDateStart: group.groupDateStart,
+      activeTimerCalendarDay: getCalendarDay(
+        parseISO(group.groupDateStart),
+      ) as CalendarDay,
       itemsHasMore: group.itemsPagination.hasNext,
       itemsNextCursor: group.itemsPagination.nextCursor,
     }));

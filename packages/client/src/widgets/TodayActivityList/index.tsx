@@ -1,5 +1,3 @@
-import { ActivityGroup } from "../ActivityGroup";
-
 import { useDialog } from "@ark-ui/react";
 import {
   Box,
@@ -20,25 +18,49 @@ import {
   usePauseActivity,
   useStartActivity,
 } from "./mutations";
-import type { ActivityDTO } from "@to-do-list/shared";
+import type {
+  ActivityDTO,
+  ActivitySessionDTO,
+  ActivitySessionSegmentDTO,
+} from "@to-do-list/shared";
 import { useCurrentActivity } from "~/features";
 import { useTranslation } from "~/shared/hooks";
+import { TodayActivityGroup } from "./TodayActivityGroup";
 
 export const TodayActivityList = () => {
   const { t } = useTranslation();
   const addTodayActivityDialog = useDialog();
 
-  const { currentActivity, setCurrentActivity } = useCurrentActivity();
+  const { currentActivity, setCurrentActivity, updateData } =
+    useCurrentActivity();
   const { planId, activityGroup, isLoading, isError } = useTodayActivities();
 
   const currentActivityId = currentActivity?.id;
   const hasRunningActivity = currentActivity?.status === "active";
 
-  const handleSelectActivity = (activity: ActivityDTO) => {
+  const handleSelectActivity = (data: {
+    activity: ActivityDTO;
+    session: ActivitySessionDTO | null;
+    segment: ActivitySessionSegmentDTO | null;
+  }) => {
     if (hasRunningActivity) return;
-    setCurrentActivity((prevActivity) =>
-      prevActivity?.id === activity.id ? null : activity,
-    );
+
+    updateData((prev) => {
+      const isSomeActivity = prev.currentActivity?.id === data.activity.id;
+      if (isSomeActivity) {
+        return {
+          currentActivity: null,
+          currentSession: null,
+          currentSegment: null,
+        };
+      }
+
+      return {
+        currentActivity: data.activity,
+        currentSession: data.session,
+        currentSegment: data.segment,
+      };
+    });
   };
 
   const { mutateAsync: startActivity } = useStartActivity();
@@ -55,20 +77,28 @@ export const TodayActivityList = () => {
 
   const { mutateAsync: pauseActivity } = usePauseActivity();
 
-  const handlePauseActivity = async (activity: ActivityDTO) => {
-    if (hasRunningActivity && activity.id !== currentActivityId) return;
+  const handlePauseActivity = async (data: {
+    activity: ActivityDTO;
+    session: ActivitySessionDTO | null;
+    segment: ActivitySessionSegmentDTO | null;
+  }) => {
+    if (hasRunningActivity && data.activity.id !== currentActivityId) return;
     return pauseActivity({
-      activityId: activity.id,
+      ...data,
       pausedAt: new Date().toISOString(),
     });
   };
 
   const { mutateAsync: finishActivity } = useFinishActivity();
 
-  const handleFinishActivity = (activity: ActivityDTO) => {
-    if (hasRunningActivity && activity.id !== currentActivityId) return;
+  const handleFinishActivity = (data: {
+    activity: ActivityDTO;
+    session: ActivitySessionDTO | null;
+    segment: ActivitySessionSegmentDTO | null;
+  }) => {
+    if (hasRunningActivity && data.activity.id !== currentActivityId) return;
     return finishActivity?.({
-      activityId: activity.id,
+      ...data,
       finishedAt: new Date().toISOString(),
     });
   };
@@ -79,7 +109,7 @@ export const TodayActivityList = () => {
 
   const renderContent = () => {
     if (isLoading) {
-      return <ActivityGroup.Skeleton />;
+      return <TodayActivityGroup.Skeleton />;
     }
 
     if (isError) {
@@ -123,10 +153,9 @@ export const TodayActivityList = () => {
     }
 
     return (
-      <ActivityGroup
-        withControlButtons
+      <TodayActivityGroup
         data={activityGroup}
-        selectedActivityId={currentActivity?.id}
+        currentActivityId={currentActivity?.id}
         onSelect={handleSelectActivity}
         onStart={handleStartActivity}
         onPause={handlePauseActivity}
@@ -160,7 +189,9 @@ export const TodayActivityList = () => {
       </Stack.VStack>
       <AddTodayActivitiesDialog
         dialog={addTodayActivityDialog}
-        selectedActivityIds={activityGroup.activities.map((item) => item.id)}
+        selectedActivityIds={activityGroup.activities.map(
+          (item) => item.activity.id,
+        )}
         onSubmit={addTodayActivities}
       />
     </>

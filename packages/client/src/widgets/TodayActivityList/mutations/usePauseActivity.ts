@@ -3,7 +3,6 @@ import type {
   ActivityDTO,
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
-  PauseActivityDataDTO,
 } from "@to-do-list/shared";
 import { useCurrentActivityStore } from "~/features/hooks/useCurrentActivityStore";
 import {
@@ -15,14 +14,21 @@ import {
   ACTIVITIES_CURRENT_QUERY_KEY,
 } from "~/shared/api/services";
 
+type PauseActivityData = {
+  activity: ActivityDTO;
+  session: ActivitySessionDTO | null;
+  segment: ActivitySessionSegmentDTO | null;
+  pausedAt: string;
+};
+
 export const usePauseActivity = () => {
   const queryClient = useQueryClient();
   const { updateData } = useCurrentActivityStore();
 
   return useMutation({
-    mutationFn: async (data: PauseActivityDataDTO) => {
+    mutationFn: async (data: PauseActivityData) => {
       const response = await activityApiService.pauseActivity({
-        activityId: data.activityId,
+        activityId: data.activity.id,
         pausedAt: data.pausedAt,
       });
 
@@ -32,38 +38,38 @@ export const usePauseActivity = () => {
 
       return response.data;
     },
-    onMutate: (data: PauseActivityDataDTO) => {
-      updateData((prev) => {
-        const prevActivity = prev.currentActivity;
-        const prevSession = prev.currentSession;
-        const prevSegment = prev.currentSegment;
-
-        // activeDurationMs from the server represents only completed segments.
-        // Add the current segment's elapsed time to get the full accumulated value.
-        const segmentElapsedMs = prevSegment?.startedAt
+    onMutate: (data: PauseActivityData) => {
+      const segmentElapsedMs =
+        data.segment?.type === "active" && data.segment.startedAt
           ? Math.max(
               0,
-              Date.parse(data.pausedAt) - Date.parse(prevSegment.startedAt),
+              Date.parse(data.pausedAt) - Date.parse(data.segment.startedAt),
             )
           : 0;
 
-        const activeDurationMs =
-          (prevActivity?.activeDurationMs ?? 0) + segmentElapsedMs;
+      const activityActiveDurationMs =
+        data.activity.activeDurationMs + segmentElapsedMs;
+
+      const sessionActiveDurationMs =
+        (data.session?.activeDurationMs ?? 0) + segmentElapsedMs;
+
+      updateData((prev) => {
+        if (prev.currentActivity?.id !== data.activity.id) {
+          return prev;
+        }
 
         return {
-          currentActivity: prevActivity
+          currentActivity: {
+            ...data.activity,
+            status: "paused",
+            activeDurationMs: activityActiveDurationMs,
+          },
+          currentSession: data.session
             ? {
-                ...prevActivity,
-                status: "paused",
-                activeDurationMs,
-              }
-            : null,
-          currentSession: prevSession
-            ? {
-                ...prevSession,
+                ...data.session,
                 status: "paused",
                 currentSegmentId: null,
-                activeDurationMs,
+                activeDurationMs: sessionActiveDurationMs,
                 updatedAt: data.pausedAt,
               }
             : null,
