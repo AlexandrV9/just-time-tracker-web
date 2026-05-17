@@ -2,6 +2,9 @@ const CACHE_NAME = "time-tracker-v1.0.0";
 
 const STATIC_CACHE_URLS = ["/", "https://fonts.googleapis.com/"];
 
+/** Injected at build time by vite-plugin-pwa (injectManifest). */
+const PRECACHE_MANIFEST = self.__WB_MANIFEST;
+
 self.addEventListener("install", (event) => {
   console.log("🛠️ Service Worker: Installing...");
 
@@ -10,16 +13,28 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => {
+      .then(async (cache) => {
         console.log("📦 Service Worker: Caching static assets", cache);
-        return cache.addAll(STATIC_CACHE_URLS);
+        await cache.addAll(STATIC_CACHE_URLS);
+
+        const precacheUrls = PRECACHE_MANIFEST.map((entry) =>
+          typeof entry === "string" ? entry : entry.url,
+        );
+
+        await Promise.all(
+          precacheUrls.map((url) =>
+            cache.add(url).catch((error) => {
+              console.warn("Service Worker: precache skipped", url, error);
+            }),
+          ),
+        );
       })
       .then(() => {
         console.log("✅ Service Worker: Installation completed");
       })
       .catch((error) => {
         console.error("❌ Service Worker: Installation failed", error);
-      })
+      }),
   );
 });
 
