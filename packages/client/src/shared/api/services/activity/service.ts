@@ -17,7 +17,6 @@ import type {
   GetActivitySessionSegmentDTO,
   GetActivityAnalyticsDTO,
   GetActivityAnalyticsResponseDTO,
-  CreateActivityFromQuickTimerDataDTO,
   GetGroupedActivitiesQueryDTO,
   GetGroupedActivitiesResponseDTO,
   GetGroupedActivityItemsQueryDTO,
@@ -38,10 +37,6 @@ type DeleteActivitySessionDTO = { id: string };
 export class ActivityService {
   createActivity(data: CreateActivityDataDTO) {
     return baseApi.post<ActivityDTO>(`/api/activities`, { data });
-  }
-
-  createActivityFromQuickTimer(data: CreateActivityFromQuickTimerDataDTO) {
-    return baseApi.post<ActivityDTO>(`/api/activities/quick-timer`, { data });
   }
 
   getActivity({

@@ -4,10 +4,6 @@ import { activityHandlers } from "./activity.handlers.js";
 export const activitiesRouter = new Hono();
 
 activitiesRouter.post("/", activityHandlers.createActivity);
-activitiesRouter.post(
-  "/quick-timer",
-  activityHandlers.createActivityFromQuickTimer,
-);
 activitiesRouter.post("/by-ids", activityHandlers.getActivitiesByIds);
 activitiesRouter.get("/", activityHandlers.getActivities);
 activitiesRouter.get("/current", activityHandlers.getCurrentActivities);

@@ -1,6 +1,8 @@
 import type { ActivityDTO, ActivityGroupDTO } from "@to-do-list/shared";
 import { parseISO } from "date-fns";
-import type { ActivityGroupRow } from "~/shared/api/services/activity/types";
+import type {
+  ActivityState,
+} from "~/shared/api/services/activity/types";
 import { formatGroupLabel, getCalendarDay } from "~/shared/libs";
 import type { CalendarDay } from "~/shared/libs/date/types";
 
@@ -26,7 +28,7 @@ export const formatActivityGroups = (
       groupDateEnd: string;
       totalActiveDurationMs: number;
       totalPauseDurationMs: number;
-      items: ActivityGroupRow[];
+      items: ActivityState[];
       itemsPagination: ActivityGroupDTO["itemsPagination"];
     }
   >();

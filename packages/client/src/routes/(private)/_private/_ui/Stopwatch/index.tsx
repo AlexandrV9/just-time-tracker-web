@@ -1,17 +1,16 @@
 import { Box, formatSecondsAsTimeString, Stack, Text } from "~/shared/ui";
-import { useCurrentActivity } from "~/features";
+import { useCurrentActivity, useDisplayedSessionSeconds } from "~/features";
 import { useTranslation } from "~/shared/hooks";
-import { useDisplayedSeconds } from "~/widgets/TodayActivityList/TodayActivityGroup/TodayActivityCard";
 
 export function Stopwatch() {
   const { t } = useTranslation();
+
   const { currentActivity, currentSession, currentSegment } =
     useCurrentActivity();
 
-  const seconds = useDisplayedSeconds({
+  const seconds = useDisplayedSessionSeconds({
     session: currentSession,
     segment: currentSegment,
-    activityId: currentActivity?.id,
   });
 
   const displayedTitle = currentActivity?.title;

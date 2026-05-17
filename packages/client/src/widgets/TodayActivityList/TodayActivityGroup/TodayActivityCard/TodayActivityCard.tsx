@@ -5,19 +5,15 @@ import type {
 } from "@to-do-list/shared";
 import { useMemo } from "react";
 import { keyframes } from "@emotion/react";
-import { Box, Flex, Text } from "~/shared/ui";
+import { Box, Flex, Text, convertMillisecondsToSeconds } from "~/shared/ui";
 
 import { ActivityCardControls } from "./ActivityCardControls";
-import { useDayDisplayedSeconds } from "./useDayDisplayedSeconds";
-import { useDisplayedSeconds } from "./useDisplayedSeconds";
 import { formatDurationLabel } from "./utils";
 import { ActivityCardView } from "~/entities/Activity";
 import { Skeleton } from "./Skeleton";
-import {
-  getDateIntervalByCalendarDay,
-  type CalendarDay,
-} from "~/shared/libs";
+import type { CalendarDay } from "~/shared/libs";
 import { useTranslation } from "~/shared/hooks";
+import { useDisplayedSessionSeconds } from "~/features";
 
 const highlightFade = keyframes`
   0%   { outline-color: var(--chakra-colors-yellow-400) }
@@ -29,7 +25,7 @@ export type TodayActivityCardProps = {
   activity: ActivityDTO;
   session?: ActivitySessionDTO | null;
   segment?: ActivitySessionSegmentDTO | null;
-  /** Today's calendar day (clips live elapsed in the «today» summary line). */
+  /** When set, show snapshot totals for that calendar day (no live ticking). */
   activeTimerCalendarDay?: CalendarDay;
   disableControls?: boolean;
   finishOnly?: boolean;
@@ -62,38 +58,21 @@ export const TodayActivityCard = ({
   const hasRunningSession =
     sessionStatus === "active" || sessionStatus === "paused";
 
-  const hasActiveSession =
-    activity.status === "active" || activity.status === "paused";
-
-  const activeSegmentStartedAt =
-    segment?.type === "active" ? segment.startedAt : null;
-
-  const liveElapsedClipFromIso =
-    activeTimerCalendarDay != null && hasActiveSession
-      ? getDateIntervalByCalendarDay(activeTimerCalendarDay).fromDate
-      : null;
-
-  const dayDisplayedSeconds = useDayDisplayedSeconds({
-    activityId: activity.id,
-    activeDurationMs: activity.activeDurationMs,
-    hasActiveSession,
-    startedAt: activeSegmentStartedAt ?? undefined,
-    liveElapsedClipFromIso,
-  });
-
   const dayTotalLabel = useMemo(
-    () => formatDurationLabel(dayDisplayedSeconds),
-    [dayDisplayedSeconds],
+    () =>
+      formatDurationLabel(
+        convertMillisecondsToSeconds(activity.activeDurationMs),
+      ),
+    [activity.activeDurationMs],
   );
 
   const showRunningOutline = sessionStatus === "active";
 
   const showSelectionOutline = isSelected && sessionStatus !== "active";
 
-  const sessionDisplayedSeconds = useDisplayedSeconds({
+  const sessionDisplayedSeconds = useDisplayedSessionSeconds({
     session,
     segment,
-    activityId: activity.id,
   });
 
   const sessionActiveTime = useMemo(

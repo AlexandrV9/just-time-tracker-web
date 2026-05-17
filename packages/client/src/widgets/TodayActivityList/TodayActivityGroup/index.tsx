@@ -1,8 +1,3 @@
-import type {
-  ActivityDTO,
-  ActivitySessionDTO,
-  ActivitySessionSegmentDTO,
-} from "@to-do-list/shared";
 import { Box, Button, Flex, Text } from "~/shared/ui";
 import {
   convertSecondsToTimeObject,
@@ -12,23 +7,17 @@ import { ActivityListView } from "~/entities/Activity";
 import { useEffect, useRef } from "react";
 import { Skeleton } from "./Skeleton";
 import { useTranslation } from "~/shared/hooks";
-import type { ActivityGroupRow } from "~/shared/api/services/activity/types";
+import type { ActivityState } from "~/shared/api/services/activity/types";
 import type { CalendarDay } from "~/shared/libs";
 import { TodayActivityCard } from "./TodayActivityCard";
 
 export type ActivityGroupDTO = {
   label: string;
   totalActiveTime: number;
-  activities: ActivityGroupRow[];
+  activities: ActivityState[];
   activeTimerCalendarDay?: CalendarDay;
   itemsHasMore?: boolean;
   itemsNextCursor?: string | null;
-};
-
-type ActivityData = {
-  activity: ActivityDTO;
-  session: ActivitySessionDTO | null;
-  segment: ActivitySessionSegmentDTO | null;
 };
 
 type TodayActivityGroupProps = {
@@ -37,10 +26,10 @@ type TodayActivityGroupProps = {
   highlightedActivityId?: string;
   hasMoreItems?: boolean;
   isLoadingMoreGroupItems?: boolean;
-  onStart?: (activity: ActivityDTO) => void;
-  onSelect?: (data: ActivityData) => void;
-  onPause?: (data: ActivityData) => void;
-  onFinish?: (data: ActivityData) => void;
+  onStart?: (data: ActivityState) => void;
+  onSelect?: (data: ActivityState) => void;
+  onPause?: (data: ActivityState) => void;
+  onFinish?: (data: ActivityState) => void;
   onLoadMoreGroupItems?: () => void;
 };
 
@@ -58,12 +47,12 @@ export function TodayActivityGroup({
 }: TodayActivityGroupProps) {
   const { t } = useTranslation();
 
-  const highlightedItemRef = useRef<HTMLLIElement | null>(null);
+  const activityListItemRef = useRef<HTMLLIElement | null>(null);
 
   useEffect(() => {
-    if (!highlightedActivityId || !highlightedItemRef.current) return;
+    if (!highlightedActivityId || !activityListItemRef.current) return;
 
-    highlightedItemRef.current.scrollIntoView({
+    activityListItemRef.current.scrollIntoView({
       behavior: "instant",
       block: "center",
     });
@@ -104,7 +93,7 @@ export function TodayActivityGroup({
           return (
             <ActivityListView.Item
               key={activity.id}
-              ref={isHighlighted ? highlightedItemRef : undefined}
+              ref={isHighlighted ? activityListItemRef : undefined}
             >
               <TodayActivityCard
                 activity={activity}
@@ -114,7 +103,7 @@ export function TodayActivityGroup({
                 isHighlighted={isHighlighted}
                 disableControls={disableControls}
                 isSelected={isSelected}
-                onStart={() => onStart?.(activity)}
+                onStart={() => onStart?.({ activity, session, segment })}
                 onClick={() => onSelect?.({ activity, session, segment })}
                 onPause={() => onPause?.({ activity, session, segment })}
                 onFinish={() => onFinish?.({ activity, session, segment })}

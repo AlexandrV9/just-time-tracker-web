@@ -1,11 +1,11 @@
 import { convertMillisecondsToSeconds } from "~/shared/ui";
 import { useEffect, useMemo, useRef } from "react";
-import { useNowMs } from "./useNowMs";
+import { useNowMs } from "~/shared/hooks";
 
 type UseDayDisplayedSecondsProps = {
   activeDurationMs: number;
   hasActiveSession: boolean;
-  startedAt?: string;
+  startedAt?: string | null;
   activityId?: string | null;
   /**
    * When set with an active session, live elapsed uses
@@ -16,7 +16,8 @@ type UseDayDisplayedSecondsProps = {
 };
 
 /**
- * Interval-scoped active time (e.g. for a calendar day in history) plus open active segment elapsed.
+ * Interval-scoped active time for a window (e.g. calendar day) plus open **active** segment elapsed.
+ * Ticks only when both `hasActiveSession` and `startedAt` are set (live active segment).
  */
 export function useDayDisplayedSeconds({
   activeDurationMs,
@@ -25,11 +26,10 @@ export function useDayDisplayedSeconds({
   activityId,
   liveElapsedClipFromIso,
 }: UseDayDisplayedSecondsProps) {
-  const nowMs = useNowMs(hasActiveSession);
+  const shouldTick = Boolean(startedAt && hasActiveSession);
+  const nowMs = useNowMs(shouldTick);
 
-  const lastSecondsRef = useRef(
-    convertMillisecondsToSeconds(activeDurationMs),
-  );
+  const lastSecondsRef = useRef(convertMillisecondsToSeconds(activeDurationMs));
 
   useEffect(() => {
     lastSecondsRef.current = convertMillisecondsToSeconds(activeDurationMs);
@@ -63,7 +63,7 @@ export function useDayDisplayedSeconds({
     liveElapsedClipFromIso,
   ]);
 
-  const stableSeconds = hasActiveSession
+  const stableSeconds = shouldTick
     ? Math.max(seconds, lastSecondsRef.current)
     : seconds;
 

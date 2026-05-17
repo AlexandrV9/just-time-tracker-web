@@ -3,6 +3,7 @@ import { Card } from "~/shared/ui";
 
 import { ActivityCardViewFooter } from "./ActivityCardViewFooter";
 import { ActivityCardViewBody } from "./ActivityCardViewBody";
+import { ActivityCardViewSkeleton } from "./ActivityCardViewSkeleton";
 import type { CardRootProps } from "@chakra-ui/react";
 
 export interface ActivityCardProps extends CardRootProps {
@@ -32,3 +33,4 @@ export const ActivityCardView = (props: ActivityCardProps) => {
 
 ActivityCardView.Body = ActivityCardViewBody;
 ActivityCardView.Footer = ActivityCardViewFooter;
+ActivityCardView.Skeleton = ActivityCardViewSkeleton;

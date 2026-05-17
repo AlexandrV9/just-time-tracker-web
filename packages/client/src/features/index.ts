@@ -1,2 +1,2 @@
-export * from "./hooks";
+export * from "./activity";
 export * from "./ui";

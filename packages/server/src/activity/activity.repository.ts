@@ -3,7 +3,6 @@ import type {
   CreateActivityDataDTO,
   UpdateActivityDataDTO,
   DeleteActivityDataDTO,
-  CreateActivityFromQuickTimerDataDTO,
 } from "@to-do-list/shared";
 import { pgTimestampToIsoString } from "../shared/db/pgTimestamp.js";
 import { activityQueries } from "./activity.queries.js";
@@ -18,14 +17,6 @@ const createActivity = async (
   data: CreateActivityDataDTO,
 ): Promise<ActivityDTO> => {
   const entry = await activityQueries.createActivity(data);
-
-  return mapActivityRowToDTO(entry);
-};
-
-const createActivityFromQuickTimer = async (
-  data: CreateActivityFromQuickTimerDataDTO,
-): Promise<ActivityDTO> => {
-  const entry = await activityQueries.createActivityFromQuickTimer(data);
 
   return mapActivityRowToDTO(entry);
 };
@@ -63,7 +54,6 @@ const deleteActivity = async (
   }
 };
 
-/** Coerce pg row (bigint ms may arrive as string) into ActivityDTO. */
 export function mapActivityRowToDTO(
   entry: Record<string, unknown>,
 ): ActivityDTO {
@@ -94,7 +84,6 @@ export function mapActivityRowToDTO(
 export const activityRepository = {
   getActivityById,
   createActivity,
-  createActivityFromQuickTimer,
   updateActivity,
   deleteActivity,
 };

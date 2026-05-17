@@ -10,22 +10,17 @@ import {
   VersionIcon,
 } from "~/shared/ui";
 import { AddTodayActivitiesDialog } from "./AddTodayActivityDialog";
-import { VStack } from "@chakra-ui/react";
-import { useAddTodayActivities } from "./useAddTodayActivities";
 import { useTodayActivities } from "./useTodayActivities";
 import {
   useFinishActivity,
   usePauseActivity,
   useStartActivity,
+  useAddTodayActivities,
 } from "./mutations";
-import type {
-  ActivityDTO,
-  ActivitySessionDTO,
-  ActivitySessionSegmentDTO,
-} from "@to-do-list/shared";
-import { useCurrentActivity } from "~/features";
 import { useTranslation } from "~/shared/hooks";
 import { TodayActivityGroup } from "./TodayActivityGroup";
+import type { ActivityState } from "~/shared/api/services";
+import { useCurrentActivity } from "~/features";
 
 export const TodayActivityList = () => {
   const { t } = useTranslation();
@@ -33,16 +28,13 @@ export const TodayActivityList = () => {
 
   const { currentActivity, setCurrentActivity, updateData } =
     useCurrentActivity();
+
   const { planId, activityGroup, isLoading, isError } = useTodayActivities();
 
   const currentActivityId = currentActivity?.id;
   const hasRunningActivity = currentActivity?.status === "active";
 
-  const handleSelectActivity = (data: {
-    activity: ActivityDTO;
-    session: ActivitySessionDTO | null;
-    segment: ActivitySessionSegmentDTO | null;
-  }) => {
+  const handleSelectActivity = (data: ActivityState) => {
     if (hasRunningActivity) return;
 
     updateData((prev) => {
@@ -65,23 +57,19 @@ export const TodayActivityList = () => {
 
   const { mutateAsync: startActivity } = useStartActivity();
 
-  const handleStartActivity = async (activity: ActivityDTO) => {
-    if (hasRunningActivity && activity.id !== currentActivityId) return;
-    setCurrentActivity(activity);
+  const handleStartActivity = async (data: ActivityState) => {
+    if (hasRunningActivity && data.activity.id !== currentActivityId) return;
+    setCurrentActivity(data.activity);
     return startActivity({
-      activityId: activity.id,
+      activityId: data.activity.id,
       startedAt: new Date().toISOString(),
-      activeDurationMs: activity.activeDurationMs,
+      activeDurationMs: data.activity.activeDurationMs,
     });
   };
 
   const { mutateAsync: pauseActivity } = usePauseActivity();
 
-  const handlePauseActivity = async (data: {
-    activity: ActivityDTO;
-    session: ActivitySessionDTO | null;
-    segment: ActivitySessionSegmentDTO | null;
-  }) => {
+  const handlePauseActivity = async (data: ActivityState) => {
     if (hasRunningActivity && data.activity.id !== currentActivityId) return;
     return pauseActivity({
       ...data,
@@ -91,11 +79,7 @@ export const TodayActivityList = () => {
 
   const { mutateAsync: finishActivity } = useFinishActivity();
 
-  const handleFinishActivity = (data: {
-    activity: ActivityDTO;
-    session: ActivitySessionDTO | null;
-    segment: ActivitySessionSegmentDTO | null;
-  }) => {
+  const handleFinishActivity = (data: ActivityState) => {
     if (hasRunningActivity && data.activity.id !== currentActivityId) return;
     return finishActivity?.({
       ...data,
@@ -119,14 +103,14 @@ export const TodayActivityList = () => {
             <EmptyState.Indicator>
               <VersionIcon size={60} />
             </EmptyState.Indicator>
-            <VStack textAlign="center">
+            <Stack.VStack textAlign="center">
               <EmptyState.Title>
                 {t("widgets.todayActivityList.error")}
               </EmptyState.Title>
               <EmptyState.Description>
                 {t("widgets.todayActivityList.errorDescription")}
               </EmptyState.Description>
-            </VStack>
+            </Stack.VStack>
           </EmptyState.Content>
         </EmptyState.Root>
       );
@@ -139,14 +123,14 @@ export const TodayActivityList = () => {
             <EmptyState.Indicator>
               <VersionIcon size={60} />
             </EmptyState.Indicator>
-            <VStack textAlign="center">
+            <Stack.VStack textAlign="center">
               <EmptyState.Title>
                 {t("widgets.todayActivityList.empty")}
               </EmptyState.Title>
               <EmptyState.Description>
                 {t("widgets.todayActivityList.emptyDescription")}
               </EmptyState.Description>
-            </VStack>
+            </Stack.VStack>
           </EmptyState.Content>
         </EmptyState.Root>
       );

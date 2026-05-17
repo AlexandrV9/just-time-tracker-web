@@ -11,7 +11,6 @@ import type {
   ActivitySessionDTO,
   GetActivityAnalyticsDTO,
   GetActivityAnalyticsResponseDTO,
-  CreateActivityFromQuickTimerDataDTO,
   GetGroupedActivitiesQueryDTO,
   GetGroupedActivitiesResponseDTO,
   GetGroupedActivityItemsResponseDTO,
@@ -27,7 +26,6 @@ import type {
   FinishActivityDataDTO,
 } from "@to-do-list/shared";
 
-import { pgTimestampToIsoString } from "../shared/db/pgTimestamp.js";
 import {
   activityRepository,
   mapActivityRowToDTO,
@@ -128,26 +126,6 @@ const createActivity = async (
     return {
       success: false,
       message: "Failed to create activity",
-    };
-  }
-};
-
-const createActivityFromQuickTimer = async (
-  data: CreateActivityFromQuickTimerDataDTO,
-): Promise<CreateActivityResponse> => {
-  try {
-    const entry = await activityRepository.createActivityFromQuickTimer(data);
-
-    return {
-      success: true,
-      data: entry,
-    };
-  } catch (error) {
-    console.error("Create activity from quick timer error:", error);
-
-    return {
-      success: false,
-      message: "Failed to create activity from quick timer",
     };
   }
 };
@@ -938,7 +916,6 @@ export const getGroupedActivityItems = async (params: {
 
 export const activitiesService = {
   createActivity,
-  createActivityFromQuickTimer,
   updateActivity,
   deleteActivity,
   getActivityById,

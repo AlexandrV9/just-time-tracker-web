@@ -12,14 +12,14 @@ import { ActivityListView } from "~/entities/Activity";
 import { useEffect, useRef } from "react";
 import { Skeleton } from "./Skeleton";
 import { useTranslation } from "~/shared/hooks";
-import type { ActivityGroupRow } from "~/shared/api/services/activity/types";
 import type { CalendarDay } from "~/shared/libs";
 import { HistoryActivityCard } from "./HistoryActivityCard";
+import type { ActivityState } from "~/shared/api/services";
 
 export type ActivityGroupDTO = {
   label: string;
   totalActiveTime: number;
-  activities: ActivityGroupRow[];
+  activities: ActivityState[];
   activeTimerCalendarDay?: CalendarDay;
   itemsHasMore?: boolean;
   itemsNextCursor?: string | null;

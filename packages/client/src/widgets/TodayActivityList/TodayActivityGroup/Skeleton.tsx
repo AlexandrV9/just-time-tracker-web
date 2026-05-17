@@ -15,8 +15,7 @@ export const Skeleton = () => {
       <ActivityListView>
         {Array.from({ length: 4 }).map((_, index) => (
           <ActivityListView.Item key={index}>
-            Skeleton
-            {/* <ActivityCardView.Skeleton /> */}
+            <ActivityCardView.Skeleton />
           </ActivityListView.Item>
         ))}
       </ActivityListView>

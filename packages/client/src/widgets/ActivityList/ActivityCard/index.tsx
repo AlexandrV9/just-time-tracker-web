@@ -1,7 +1,14 @@
 import { useNavigate } from "@tanstack/react-router";
 import type { ActivityDTO } from "@to-do-list/shared";
 import { useMemo } from "react";
-import { Box, Flex, PauseIcon, PlayIcon, Text } from "~/shared/ui";
+import {
+  Box,
+  convertMillisecondsToSeconds,
+  Flex,
+  PauseIcon,
+  PlayIcon,
+  Text,
+} from "~/shared/ui";
 import { useTranslation } from "~/shared/hooks";
 import { formatDuration } from "~/shared/libs";
 import { ActivityCardView } from "~/entities/Activity";
@@ -15,12 +22,20 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
   const navigate = useNavigate();
 
   const activeTime = useMemo(
-    () => formatDuration(Math.floor(activity.activeDurationMs / 1000), i18n.language),
+    () =>
+      formatDuration(
+        convertMillisecondsToSeconds(activity.activeDurationMs),
+        i18n.language,
+      ),
     [activity.activeDurationMs, i18n.language],
   );
 
   const pauseTime = useMemo(
-    () => formatDuration(Math.floor(activity.pauseDurationMs / 1000), i18n.language),
+    () =>
+      formatDuration(
+        convertMillisecondsToSeconds(activity.pauseDurationMs),
+        i18n.language,
+      ),
     [activity.pauseDurationMs, i18n.language],
   );
 

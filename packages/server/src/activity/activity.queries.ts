@@ -3,7 +3,6 @@ import type {
   GetActivitiesDTO,
   ActivityDTO,
   UpdateActivityDataDTO,
-  CreateActivityFromQuickTimerDataDTO,
   GetActivitiesByIdsDTO,
   GetCurrentActivitiesQueryDTO,
 } from "@to-do-list/shared";
@@ -31,8 +30,6 @@ export const ACTIVITY_RETURNING_COLUMNS = `
   pause_duration_ms AS "pauseDurationMs"
 `;
 
-const MAX_INITIAL_ACTIVE_MS = 24 * 60 * 60 * 1000;
-
 const createActivity = async (
   data: CreateActivityDataDTO,
 ): Promise<ActivityDTO> => {
@@ -56,123 +53,6 @@ const createActivity = async (
   ]);
 
   return rows[0];
-};
-
-const DEFAULT_ACTIVITY_TITLE = "Quick timer";
-
-const createActivityFromQuickTimer = async (
-  data: CreateActivityFromQuickTimerDataDTO,
-): Promise<ActivityDTO> => {
-  const {
-    createdById,
-    startedAt: startedAtRaw,
-    endedAt: endedAtRaw,
-    title = DEFAULT_ACTIVITY_TITLE,
-  } = data;
-  const tagList: string[] = [];
-
-  const parsedStart = Date.parse(startedAtRaw);
-  const parsedEnd = Date.parse(endedAtRaw);
-
-  let clipStart = Number.isFinite(parsedStart) ? parsedStart : parsedEnd;
-  let clipEnd = Number.isFinite(parsedEnd) ? parsedEnd : Date.now();
-  if (!Number.isFinite(clipStart)) clipStart = clipEnd;
-  if (!Number.isFinite(clipEnd)) clipEnd = Date.now();
-  if (clipEnd < clipStart) {
-    const t = clipStart;
-    clipStart = clipEnd;
-    clipEnd = t;
-  }
-
-  let durationMs = Math.floor(clipEnd - clipStart);
-  if (durationMs > MAX_INITIAL_ACTIVE_MS) {
-    clipStart = clipEnd - MAX_INITIAL_ACTIVE_MS;
-    durationMs = MAX_INITIAL_ACTIVE_MS;
-  }
-
-  const startedAtIso = new Date(clipStart).toISOString();
-  const endedAtIso = new Date(clipEnd).toISOString();
-
-  if (durationMs <= 0) {
-    const { rows } = await pool.query(
-      `
-      INSERT INTO activities (
-        title, description, created_by_id, tags, created_at, updated_at,
-        active_duration_ms, pause_duration_ms
-      )
-      VALUES ($1, $2, $3, $4::text[], NOW(), NOW(), 0, 0)
-      RETURNING ${ACTIVITY_RETURNING_COLUMNS}
-      `,
-      [title, null, createdById, tagList],
-    );
-    return rows[0];
-  }
-
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-
-    const { rows: actRows } = await client.query(
-      `
-      INSERT INTO activities (
-        title, description, created_by_id, tags, created_at, updated_at,
-        active_duration_ms, pause_duration_ms
-      )
-      VALUES ($1, $2, $3, $4::text[], NOW(), NOW(), 0, 0)
-      RETURNING id
-      `,
-      [title, null, createdById, tagList],
-    );
-    const activityId = String(actRows[0].id);
-
-    const { rows: sessRows } = await client.query<{ id: string }>(
-      `
-      INSERT INTO activity_sessions (
-        activity_id, started_at, ended_at, status,
-        active_duration_ms, pause_duration_ms, created_at, updated_at
-      )
-      VALUES ($1::uuid, $2::timestamptz, $3::timestamptz, 'finished', $4::bigint, 0, NOW(), NOW())
-      RETURNING id
-      `,
-      [activityId, startedAtIso, endedAtIso, durationMs],
-    );
-    const sessionId = String(sessRows[0].id);
-
-    await client.query(
-      `
-      INSERT INTO activity_session_segments (
-        session_id, segment_type, started_at, ended_at, created_at, updated_at
-      )
-      VALUES ($1::uuid, 'active', $2::timestamptz, $3::timestamptz, NOW(), NOW())
-      `,
-      [sessionId, startedAtIso, endedAtIso],
-    );
-
-    await client.query(
-      `
-      UPDATE activities
-      SET
-        last_activity_session_id = $1::uuid,
-        active_duration_ms = $2::bigint,
-        updated_at = NOW()
-      WHERE id = $3::uuid
-      `,
-      [sessionId, durationMs, activityId],
-    );
-
-    const { rows } = await client.query(
-      `SELECT ${ACTIVITY_RETURNING_COLUMNS} FROM activities WHERE id = $1::uuid`,
-      [activityId],
-    );
-
-    await client.query("COMMIT");
-    return rows[0];
-  } catch (e) {
-    await client.query("ROLLBACK").catch(() => {});
-    throw e;
-  } finally {
-    client.release();
-  }
 };
 
 const getActivityById = async (
@@ -707,7 +587,6 @@ const listActivityGroups = async (params: {
 
 export const activityQueries = {
   createActivity,
-  createActivityFromQuickTimer,
   getActivityById,
   getActivitiesByIds,
   listGroupedHistoryCalendarDays,

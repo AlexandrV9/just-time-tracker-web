@@ -13,7 +13,6 @@ import {
   getActivitySessionsSchema,
   getActivityAnalyticsQuerySchema,
   getActivitiesAnalyticsQuerySchema,
-  createActivityFromQuickTimerSchema,
   getGroupedActivitiesQuerySchema,
   getGroupedActivityItemsQuerySchema,
   getActivitySessionSegmentsSchema,
@@ -90,13 +89,6 @@ export const activityHandlers = {
     "json",
     createActivitySchema,
     activitiesService.createActivity,
-    201,
-  ),
-
-  createActivityFromQuickTimer: createHandler(
-    "json",
-    createActivityFromQuickTimerSchema,
-    activitiesService.createActivityFromQuickTimer,
     201,
   ),
 

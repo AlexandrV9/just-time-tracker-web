@@ -3,7 +3,7 @@ import { getCalendarDay, getDateIntervalByCalendarDay } from "~/shared/libs";
 
 import { useAuthStore } from "../../auth/useAuthStore";
 import { useShallow } from "zustand/react/shallow";
-import { useCurrentActivityStore } from "../useCurrentActivityStore";
+import { useCurrentActivityStore } from "./useCurrentActivityStore";
 import { fetchCurrentActivityData } from "./utils";
 
 export function useCurrentActivity() {

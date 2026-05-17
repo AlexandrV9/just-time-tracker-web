@@ -57,7 +57,7 @@ export const ActivityHistory = () => {
     fetchNextPage,
     loadMoreGroupItems,
     isLoadingMoreGroupItems,
-  } = useActivityHistory(userId ?? "");
+  } = useActivityHistory();
 
   const { ref: fetchRef, inView: isLastInView } = useInView();
 

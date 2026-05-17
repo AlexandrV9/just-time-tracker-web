@@ -15,6 +15,7 @@ import {
   ACTIVITY_HISTORY_QUERY_KEY,
 } from "./constants";
 import { formatActivityGroups } from "./utils";
+import { useAuthStore } from "~/features/auth";
 
 type InfiniteGroupsData = {
   pages: Array<{ success: boolean; data: GetGroupedActivitiesResponseDTO }>;
@@ -26,7 +27,10 @@ type AppendItemsVars = {
   cursor: string;
 };
 
-export const useActivityHistory = (userId: string) => {
+export const useActivityHistory = () => {
+  const { user } = useAuthStore();
+  const userId = user!.id;
+
   const { i18n } = useTranslation();
   const queryClient = useQueryClient();
 

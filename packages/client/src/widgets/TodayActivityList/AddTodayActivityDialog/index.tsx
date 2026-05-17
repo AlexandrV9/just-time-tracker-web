@@ -19,7 +19,6 @@ import {
 } from "~/shared/api/services";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "~/features/auth";
-import { VStack } from "@chakra-ui/react";
 
 export type AddTodayActivitiesDialogProps = {
   dialog: UseDialogReturn;
@@ -187,7 +186,7 @@ export function AddTodayActivitiesDialog({
               flexDirection="column"
               overflow="hidden"
             >
-              <VStack
+              <Stack.VStack
                 as="form"
                 gap={4}
                 align="stretch"
@@ -196,7 +195,7 @@ export function AddTodayActivitiesDialog({
                 onSubmit={handleSubmit}
               >
                 {renderActivities()}
-              </VStack>
+              </Stack.VStack>
             </Dialog.Body>
             <Dialog.Footer
               borderTop="1px solid"

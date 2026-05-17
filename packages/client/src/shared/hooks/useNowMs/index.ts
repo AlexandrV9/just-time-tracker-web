@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 
 export function useNowMs(enabled: boolean): number | null {
-  const [nowMs, setNowMs] = useState<number | null>(() =>
-    enabled ? Date.now() : null,
-  );
+  const [nowMs, setNowMs] = useState<number | null>(null);
 
   useEffect(() => {
     if (!enabled) {

@@ -5,16 +5,20 @@ import type {
 } from "@to-do-list/shared";
 import { useMemo } from "react";
 import { keyframes } from "@emotion/react";
-import { Box, Flex, PauseIcon, PlayIcon, Text } from "~/shared/ui";
+import {
+  Box,
+  convertMillisecondsToSeconds,
+  Flex,
+  PauseIcon,
+  PlayIcon,
+  Text,
+} from "~/shared/ui";
 
-import { useDayDisplayedSeconds } from "./useDayDisplayedSeconds";
 import { formatDurationLabel } from "./utils";
 import { ActivityCardView } from "~/entities/Activity";
 import { Skeleton } from "./Skeleton";
-import {
-  getDateIntervalByCalendarDay,
-  type CalendarDay,
-} from "~/shared/libs";
+import { getDateIntervalByCalendarDay, type CalendarDay } from "~/shared/libs";
+import { useDayDisplayedSeconds } from "~/features";
 
 const highlightFade = keyframes`
   0%   { outline-color: var(--chakra-colors-yellow-400) }
@@ -41,28 +45,25 @@ export const HistoryActivityCard = ({
   isHighlighted = false,
   onClick,
 }: HistoryActivityCardProps) => {
-  const hasActiveSession =
-    activity.status === "active" || activity.status === "paused";
-
   const sessionStatus = session?.status;
+
+  const hasRunningSession =
+    sessionStatus === "active" || sessionStatus === "paused";
 
   const showRunningOutline = sessionStatus === "active";
 
   const showSelectionOutline = isSelected && sessionStatus !== "active";
 
-  const activeSegmentStartedAt =
-    segment?.type === "active" ? segment.startedAt : null;
-
   const liveElapsedClipFromIso =
-    activeTimerCalendarDay != null && hasActiveSession
+    activeTimerCalendarDay != null && hasRunningSession
       ? getDateIntervalByCalendarDay(activeTimerCalendarDay).fromDate
       : null;
 
   const dayDisplayedSeconds = useDayDisplayedSeconds({
     activityId: activity.id,
     activeDurationMs: activity.activeDurationMs,
-    hasActiveSession,
-    startedAt: activeSegmentStartedAt ?? undefined,
+    hasActiveSession: hasRunningSession,
+    startedAt: segment?.startedAt,
     liveElapsedClipFromIso,
   });
 
@@ -73,7 +74,9 @@ export const HistoryActivityCard = ({
 
   const pauseTime = useMemo(
     () =>
-      formatDurationLabel(Math.floor((activity.pauseDurationMs ?? 0) / 1000)),
+      formatDurationLabel(
+        convertMillisecondsToSeconds(activity.pauseDurationMs),
+      ),
     [activity.pauseDurationMs],
   );
 
