@@ -1,4 +1,3 @@
-import type { TaskDTO } from "~/shared/api/services/task/types";
 import {
   EntityType,
   OperationPriority,
@@ -79,8 +78,8 @@ export interface SyncEvents {
   SYNC_COMPLETED: void;
 
   // События по сущностям
-  CREATE_TASK: { operation: BaseOperation; responseData: TaskDTO };
-  UPDATE_TASK: { operation: BaseOperation; responseData: TaskDTO };
+  CREATE_TASK: { operation: BaseOperation; responseData: unknown };
+  UPDATE_TASK: { operation: BaseOperation; responseData: unknown };
   DELETE_TASK: { operation: BaseOperation; responseData: boolean };
 }
 

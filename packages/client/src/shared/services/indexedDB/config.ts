@@ -6,7 +6,6 @@ const operationTableColumns: (keyof BaseOperation)[] = [
   "type",
   "priority",
   "entity",
-  "entityId",
   "data",
   "createdAt",
   "updatedAt",

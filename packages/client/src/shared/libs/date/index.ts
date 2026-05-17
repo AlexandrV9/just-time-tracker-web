@@ -1,3 +1,4 @@
+export * from "./formatDate";
 export * from "./formatGroupLabel";
 export * from "./groupByDate";
 export * from "./getCalendarDay";

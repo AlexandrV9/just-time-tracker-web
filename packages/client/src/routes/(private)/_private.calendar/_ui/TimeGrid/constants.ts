@@ -1,4 +1,12 @@
-import type { CalendarEventDTO } from "@to-do-list/shared";
+export type CalendarEventDTO = {
+  id: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  createdById: string;
+  createdAt: string;
+  updatedAt: string | null;
+};
 
 export const mockCalendarEvents: CalendarEventDTO[] = [
   {
