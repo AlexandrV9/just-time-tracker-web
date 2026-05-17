@@ -43,6 +43,27 @@ export type GetActivitySessionSegmentsQueryDTO = z.infer<
   typeof getActivitySessionSegmentsSchema
 >;
 
+/** Route params + query for `GET /activities/:id/session-segments`. */
+export const getActivitySessionSegmentsByActivityIdParamsSchema = z
+  .object({
+    id: z.string().min(1, "Id is required"),
+    fromDate: z.iso.datetime().optional(),
+    toDate: z.iso.datetime().optional(),
+  })
+  .superRefine(({ fromDate, toDate }, ctx) => {
+    if (fromDate && toDate && new Date(toDate) < new Date(fromDate)) {
+      ctx.addIssue({
+        path: ["toDate"],
+        message: "toDate must be after fromDate",
+        code: "custom",
+      });
+    }
+  });
+
+export type GetActivitySessionSegmentsByActivityIdParamsDTO = z.infer<
+  typeof getActivitySessionSegmentsByActivityIdParamsSchema
+>;
+
 export type GetActivitySessionSegmentsDTO =
   GetActivitySessionSegmentsQueryDTO & {
     activityId: string;

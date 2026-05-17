@@ -1,22 +1,11 @@
-import type { Context } from "hono";
-import { activitySessionSegmentQueries } from "./activitySessionSegment.queries.js";
+import { baseIdSchema } from "@to-do-list/shared";
+import { createValidatedHandler } from "../shared/utils/request.js";
+import { activitySessionSegmentService } from "./activitySessionSegment.service.js";
 
 export const activitySessionSegmentsHandlers = {
-  getById: async (c: Context) => {
-    const id = c.req.param("id");
-    if (!id) {
-      return c.json({ success: false, message: "Missing id" }, 400);
-    }
-
-    const segment = await activitySessionSegmentQueries.getSegmentById(id);
-
-    if (!segment) {
-      return c.json({ success: false, message: "Segment not found" }, 404);
-    }
-
-    return c.json({
-      success: true,
-      data: segment,
-    });
-  },
+  getById: createValidatedHandler({
+    parse: (c) => ({ id: c.req.param("id") }),
+    schema: baseIdSchema,
+    service: activitySessionSegmentService.getById,
+  }),
 };

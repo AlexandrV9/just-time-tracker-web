@@ -194,6 +194,32 @@ export const getActivitySessionsSchema = z
     }
   });
 
+/** Route params + query for `GET /activities/:id/sessions`. */
+export const getActivitySessionsByActivityIdParamsSchema = z
+  .object({
+    id: z.string().min(1, "Id is required"),
+    fromDate: z.iso.datetime().optional(),
+    toDate: z.iso.datetime().optional(),
+    sortBy: z
+      .enum(["startedAt", "endedAt", "status"])
+      .default("startedAt")
+      .optional(),
+    sortOrder: z.enum(["asc", "desc"]).default("desc").optional(),
+  })
+  .superRefine(({ fromDate, toDate }, ctx) => {
+    if (fromDate && toDate && new Date(toDate) < new Date(fromDate)) {
+      ctx.addIssue({
+        path: ["toDate"],
+        message: "toDate must be after fromDate",
+        code: "custom",
+      });
+    }
+  });
+
+export type GetActivitySessionsByActivityIdParamsDTO = z.infer<
+  typeof getActivitySessionsByActivityIdParamsSchema
+>;
+
 export const getActivitySessionsResponseSchema = z.object({
   sessions: z.array(activitySessionSchema),
 });
@@ -230,6 +256,27 @@ export const getActivityAnalyticsQuerySchema = z
 
 export type GetActivityAnalyticsQueryDTO = z.infer<
   typeof getActivityAnalyticsQuerySchema
+>;
+
+/** Route params + query for `GET /activities/:id/analytics`. */
+export const getActivityAnalyticsByActivityIdParamsSchema = z
+  .object({
+    id: z.string().min(1, "Id is required"),
+    fromDate: z.iso.datetime().optional(),
+    toDate: z.iso.datetime().optional(),
+  })
+  .superRefine(({ fromDate, toDate }, ctx) => {
+    if (fromDate && toDate && new Date(toDate) < new Date(fromDate)) {
+      ctx.addIssue({
+        path: ["toDate"],
+        message: "toDate must be after fromDate",
+        code: "custom",
+      });
+    }
+  });
+
+export type GetActivityAnalyticsByActivityIdParamsDTO = z.infer<
+  typeof getActivityAnalyticsByActivityIdParamsSchema
 >;
 
 export const getActivityAnalyticsResponseSchema = z.object({
