@@ -17,7 +17,6 @@ const createActivity = async (
   data: CreateActivityDataDTO,
 ): Promise<ActivityDTO> => {
   const entry = await activityQueries.createActivity(data);
-
   return mapActivityRowToDTO(entry);
 };
 
