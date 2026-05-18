@@ -20,7 +20,7 @@ export const ActivityCardView = (props: ActivityCardProps) => {
       display="flex"
       flexDirection="column"
       p="0.8rem"
-      borderRadius="2xl"
+      borderRadius="16px"
       gap="1rem"
       overflow="hidden"
       cursor="pointer"

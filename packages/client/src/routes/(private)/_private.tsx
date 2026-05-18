@@ -4,6 +4,7 @@ import { LangSwitcher, ThemeSwitcher } from "~/features";
 import { authManager, AuthUserAvatar, useAuthStore } from "~/features/auth";
 import { NotificationButton } from "~/features/notifications";
 import { useDeviceDetect, useOrientation, useTranslation } from "~/shared/hooks";
+import { buildLocationRedirectPath } from "~/shared/libs";
 import { Box, Flex, PageLayout, Text } from "~/shared/ui";
 import { Header, NavBar, useHeaderStore } from "~/widgets";
 
@@ -19,6 +20,7 @@ function PrivateRoutePending() {
 export const Route = createFileRoute("/(private)/_private")({
   beforeLoad: async ({ location }) => {
     const authStatus = useAuthStore.getState().status;
+    const authRedirect = buildLocationRedirectPath(location);
 
     if (authStatus === "AUTHENTICATED") {
       return;
@@ -37,10 +39,7 @@ export const Route = createFileRoute("/(private)/_private")({
         throw redirect({
           to: "/landing",
           search: {
-            redirect:
-              location.pathname === "/"
-                ? undefined
-                : `${location.pathname}${location.search}${location.hash}`,
+            redirect: authRedirect,
           },
         });
       }
@@ -50,10 +49,7 @@ export const Route = createFileRoute("/(private)/_private")({
       throw redirect({
         to: "/landing",
         search: {
-          redirect:
-            location.pathname === "/"
-              ? undefined
-              : `${location.pathname}${location.search}${location.hash}`,
+          redirect: authRedirect,
         },
       });
     }

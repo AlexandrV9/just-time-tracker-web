@@ -14,11 +14,12 @@ import { Skeleton } from "./Skeleton";
 import type { CalendarDay } from "~/shared/libs";
 import { useTranslation } from "~/shared/hooks";
 import { useDisplayedSessionSeconds } from "~/features";
+import shineStyles from "~/shared/styles/shineRing.module.css";
 
 const highlightFade = keyframes`
-  0%   { outline-color: var(--chakra-colors-yellow-400) }
-  70%  { outline-color: var(--chakra-colors-yellow-400) }
-  100% { outline-color: transparent }
+  0%   { border-color: var(--chakra-colors-yellow-400) }
+  70%  { border-color: var(--chakra-colors-yellow-400) }
+  100% { border-color: transparent }
 `;
 
 export type TodayActivityCardProps = {
@@ -80,24 +81,20 @@ export const TodayActivityCard = ({
     [sessionDisplayedSeconds],
   );
 
-  return (
+  const card = (
     <ActivityCardView
       onClick={onClick}
       cursor={disableControls ? "default" : "pointer"}
       _hover={disableControls ? undefined : { bg: "bg.subtle" }}
-      outline={
-        showRunningOutline || showSelectionOutline || isHighlighted
-          ? "2px solid"
-          : undefined
-      }
-      outlineColor={
-        showRunningOutline
-          ? "purple.focusRing"
-          : showSelectionOutline
-            ? "border.emphasized"
+      borderRadius="8px"
+      border="2px solid border.muted"
+      borderColor={
+        showSelectionOutline
+          ? "border.emphasized"
+          : isHighlighted
+            ? "transparent"
             : undefined
       }
-      outlineOffset={showSelectionOutline ? "0px" : undefined}
       css={
         isHighlighted
           ? { animation: `${highlightFade} 1.2s ease forwards` }
@@ -150,6 +147,22 @@ export const TodayActivityCard = ({
         </Box>
       </ActivityCardView.Footer>
     </ActivityCardView>
+  );
+
+  return (
+    <Box
+      className={
+        showRunningOutline
+          ? `${shineStyles.shineRingCardShell} ${shineStyles.shineRingCardActive}`
+          : shineStyles.shineRingCardShell
+      }
+      flex={1}
+      w="100%"
+      display="flex"
+      flexDirection="column"
+    >
+      {card}
+    </Box>
   );
 };
 
