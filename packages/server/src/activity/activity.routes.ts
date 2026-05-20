@@ -7,6 +7,7 @@ activitiesRouter.post("/", activityHandlers.createActivity);
 activitiesRouter.post("/by-ids", activityHandlers.getActivitiesByIds);
 activitiesRouter.get("/", activityHandlers.getActivities);
 activitiesRouter.get("/current", activityHandlers.getCurrentActivities);
+activitiesRouter.get("/tracked", activityHandlers.getTrackedActivities);
 activitiesRouter.get("/grouped/items", activityHandlers.getGroupedActivityItems);
 activitiesRouter.get("/grouped", activityHandlers.getGroupedActivities);
 activitiesRouter.get("/analytics", activityHandlers.getActivitiesAnalytics);

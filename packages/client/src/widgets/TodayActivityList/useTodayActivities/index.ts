@@ -9,6 +9,7 @@ import {
 import { useTodayPlanItems } from "./useTodayPlanItems";
 import { useTodayPlanActivities } from "./useTodayPlanActivities";
 import { useTodayCurrentActivities } from "./useTodayCurrentActivities";
+import { useTodayTrackedActivities } from "./useTodayTrackedActivities";
 import { useTodayAnalytics } from "./useTodayAnalytics";
 import { buildTodayActivityRows } from "./buildTodayActivityRows";
 
@@ -48,14 +49,21 @@ export const useTodayActivities = (): {
     isError: currentActivitiesError,
   } = useTodayCurrentActivities();
 
+  const {
+    trackedActivities,
+    isLoading: trackedActivitiesLoading,
+    isError: trackedActivitiesError,
+  } = useTodayTrackedActivities();
+
   const analyticsActivityIds = useMemo(() => {
     return [
       ...new Set([
         ...todayPlanItemIds,
         ...currentActivities.map((item) => item.activity.id),
+        ...trackedActivities.map((item) => item.activity.id),
       ]),
     ].sort();
-  }, [todayPlanItemIds, currentActivities]);
+  }, [todayPlanItemIds, currentActivities, trackedActivities]);
 
   const {
     analytics: todayAnalytics,
@@ -73,10 +81,16 @@ export const useTodayActivities = (): {
       buildTodayActivityRows({
         planActivities: todayPlanActivities,
         currentActivities,
+        trackedActivities,
         analyticsItemsMap: todayAnalytics?.itemsMap ?? {},
       }),
 
-    [todayPlanActivities, currentActivities, todayAnalytics?.itemsMap],
+    [
+      todayPlanActivities,
+      currentActivities,
+      trackedActivities,
+      todayAnalytics?.itemsMap,
+    ],
   );
 
   return {
@@ -95,11 +109,13 @@ export const useTodayActivities = (): {
       todayPlanItemsLoading ||
       todayPlanActivitiesLoading ||
       todayAnalyticsLoading ||
-      currentActivitiesLoading,
+      currentActivitiesLoading ||
+      trackedActivitiesLoading,
     isError:
       todayPlanItemsError ||
       todayPlanActivitiesError ||
       todayAnalyticsError ||
-      currentActivitiesError,
+      currentActivitiesError ||
+      trackedActivitiesError,
   };
 };

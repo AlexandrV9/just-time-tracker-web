@@ -4,12 +4,14 @@ import type { ActivityState } from "~/shared/api/services";
 type BuildTodayActivityRowsProps = {
   planActivities: ActivityDTO[];
   currentActivities: ActivityState[];
+  trackedActivities: ActivityState[];
   analyticsItemsMap: Record<string, number>;
 };
 
 export function buildTodayActivityRows({
   planActivities,
   currentActivities,
+  trackedActivities,
   analyticsItemsMap,
 }: BuildTodayActivityRowsProps): ActivityState[] {
   const currentByActivityId = new Map(
@@ -39,7 +41,31 @@ export function buildTodayActivityRows({
         }) satisfies ActivityState,
     );
 
-  return [...plannedRows, ...appendedCurrentRows];
+  const mergedIds = new Set([
+    ...plannedActivityIds,
+    ...appendedCurrentRows.map((row) => row.activity.id),
+  ]);
+
+  const appendedTrackedRows = trackedActivities
+    .filter((row) => !mergedIds.has(row.activity.id))
+    .filter((row) => getTodayActiveDurationMs(row.activity, analyticsItemsMap) > 0)
+    .map(
+      (row) =>
+        ({
+          session: null,
+          segment: null,
+          activity: withTodayActiveDuration(row.activity, analyticsItemsMap),
+        }) satisfies ActivityState,
+    );
+
+  return [...plannedRows, ...appendedCurrentRows, ...appendedTrackedRows];
+}
+
+function getTodayActiveDurationMs(
+  activity: ActivityDTO,
+  analyticsItemsMap: Record<string, number>,
+): number {
+  return analyticsItemsMap[activity.id] ?? activity.activeDurationMs ?? 0;
 }
 
 function withTodayActiveDuration(
@@ -48,6 +74,6 @@ function withTodayActiveDuration(
 ): ActivityDTO {
   return {
     ...activity,
-    activeDurationMs: analyticsItemsMap[activity.id] ?? 0,
+    activeDurationMs: getTodayActiveDurationMs(activity, analyticsItemsMap),
   };
 }

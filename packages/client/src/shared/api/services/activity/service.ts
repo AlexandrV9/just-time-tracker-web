@@ -12,6 +12,8 @@ import type {
   GetActivitiesResponseDTO,
   GetCurrentActivitiesQueryDTO,
   GetCurrentActivitiesResponseDTO,
+  GetTrackedActivitiesQueryDTO,
+  GetTrackedActivitiesResponseDTO,
   GetActivitySessionsDTO,
   GetActivitySessionsResponseDTO,
   GetActivitySessionSegmentDTO,
@@ -54,6 +56,15 @@ export class ActivityService {
   getCurrentActivities(data: GetCurrentActivitiesQueryDTO) {
     return baseApi.get<GetCurrentActivitiesResponseDTO>(
       `/api/activities/current`,
+      {
+        params: data,
+      },
+    );
+  }
+
+  getTrackedActivities(data: GetTrackedActivitiesQueryDTO) {
+    return baseApi.get<GetTrackedActivitiesResponseDTO>(
+      `/api/activities/tracked`,
       {
         params: data,
       },

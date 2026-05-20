@@ -208,6 +208,110 @@ describe("activitiesRouter", () => {
     });
   });
 
+  describe("GET /tracked", () => {
+    it("returns finished activity with segment time in range", async () => {
+      const activity = await seedTrackedActivity();
+
+      const res = await activitiesRouter.request(
+        `/tracked?createdById=user-1&fromDate=${RANGE_FROM}&toDate=${RANGE_TO}`,
+      );
+      const body = await json(res);
+
+      expect(res.status).toBe(200);
+      expect(body.success).toBe(true);
+
+      const data = body.data as {
+        data: Array<{
+          activity: { id: string; activeDurationMs: number };
+          session: null;
+          segment: null;
+        }>;
+      };
+      expect(data.data).toHaveLength(1);
+      expect(data.data[0]).toMatchObject({
+        activity: {
+          id: activity.id,
+          activeDurationMs: 300_000,
+        },
+        session: null,
+        segment: null,
+      });
+    });
+
+    it("returns cross-day finished activity on completion day, not in /current", async () => {
+      const activity = await seedActivity("Cross-midnight HTTP");
+
+      const startedYesterday = "2025-01-01T23:50:00.000Z";
+      const pausedAfter20Min = "2025-01-02T00:10:00.000Z";
+      const resumedAfter5MinPause = "2025-01-02T00:15:00.000Z";
+      const finishedAfter5MinActive = "2025-01-02T00:20:00.000Z";
+      const jan2From = "2025-01-02T00:00:00.000Z";
+      const jan2To = "2025-01-03T00:00:00.000Z";
+
+      await activitiesRouter.request("/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          activityId: activity.id,
+          startedAt: startedYesterday,
+        }),
+      });
+
+      await activitiesRouter.request("/pause", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          activityId: activity.id,
+          pausedAt: pausedAfter20Min,
+        }),
+      });
+
+      await activitiesRouter.request("/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          activityId: activity.id,
+          startedAt: resumedAfter5MinPause,
+        }),
+      });
+
+      await activitiesRouter.request("/finish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          activityId: activity.id,
+          finishedAt: finishedAfter5MinActive,
+        }),
+      });
+
+      const trackedRes = await activitiesRouter.request(
+        `/tracked?createdById=user-1&fromDate=${jan2From}&toDate=${jan2To}`,
+      );
+      const trackedBody = await json(trackedRes);
+
+      expect(trackedRes.status).toBe(200);
+      expect(trackedBody.success).toBe(true);
+
+      const tracked = trackedBody.data as {
+        data: Array<{ activity: { id: string; activeDurationMs: number } }>;
+      };
+      expect(tracked.data).toHaveLength(1);
+      expect(tracked.data[0].activity).toMatchObject({
+        id: activity.id,
+        activeDurationMs: 900_000,
+      });
+
+      const currentRes = await activitiesRouter.request(
+        `/current?createdById=user-1&fromDate=${jan2From}&toDate=${jan2To}&status=active`,
+      );
+      const currentBody = await json(currentRes);
+
+      expect(currentBody.success).toBe(true);
+      const current = currentBody.data as { data: unknown[] };
+      expect(current.data).toHaveLength(0);
+    });
+  });
+
   describe("GET /current", () => {
     it("returns active activity in date range", async () => {
       const activity = await seedActivity("Current");

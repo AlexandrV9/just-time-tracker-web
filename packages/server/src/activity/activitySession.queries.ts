@@ -328,10 +328,22 @@ export const listActivityTimeItemsInRange = async (params: {
   toDate: string; // exclusive
   limit: number;
   offset?: number;
+  /** When true, only activities with active (not pause-only) time in range. */
+  activeOnly?: boolean;
 }): Promise<{
   items: ActivityTimeInRangeDTO[];
 }> => {
-  const { createdById, fromDate, toDate, limit, offset = 0 } = params;
+  const {
+    createdById,
+    fromDate,
+    toDate,
+    limit,
+    offset = 0,
+    activeOnly = false,
+  } = params;
+  const durationFilter = activeOnly
+    ? "active_duration_ms > 0"
+    : "active_duration_ms + pause_duration_ms > 0";
   const query = `
     WITH activity_durations AS (
       SELECT
@@ -382,7 +394,7 @@ export const listActivityTimeItemsInRange = async (params: {
       active_duration_ms,
       pause_duration_ms
     FROM activity_durations
-    WHERE active_duration_ms + pause_duration_ms > 0
+    WHERE ${durationFilter}
     ORDER BY last_tracked_at DESC, activity_id ASC
     LIMIT $4
     OFFSET $5
@@ -404,6 +416,69 @@ export const listActivityTimeItemsInRange = async (params: {
   return { items };
 };
 
+const countActivityTimeItemsInRange = async (params: {
+  createdById: string;
+  fromDate: string;
+  toDate: string;
+  activeOnly?: boolean;
+}): Promise<number> => {
+  const { createdById, fromDate, toDate, activeOnly = false } = params;
+  const durationFilter = activeOnly
+    ? "active_duration_ms > 0"
+    : "active_duration_ms + pause_duration_ms > 0";
+  const query = `
+    WITH activity_durations AS (
+      SELECT
+        a.id AS activity_id,
+        COALESCE(
+          SUM(
+            CASE
+              WHEN seg.segment_type = 'active' THEN
+                EXTRACT(
+                  EPOCH FROM (
+                    LEAST(COALESCE(seg.ended_at, NOW()), $3::timestamp)
+                    -
+                    GREATEST(seg.started_at, $2::timestamp)
+                  )
+                ) * 1000
+              ELSE 0
+            END
+          ),
+          0
+        ) AS active_duration_ms,
+        COALESCE(
+          SUM(
+            CASE
+              WHEN seg.segment_type = 'pause' THEN
+                EXTRACT(
+                  EPOCH FROM (
+                    LEAST(COALESCE(seg.ended_at, NOW()), $3::timestamp)
+                    -
+                    GREATEST(seg.started_at, $2::timestamp)
+                  )
+                ) * 1000
+              ELSE 0
+            END
+          ),
+          0
+        ) AS pause_duration_ms
+      FROM activity_session_segments seg
+      INNER JOIN activity_sessions s ON s.id = seg.session_id
+      INNER JOIN activities a ON a.id = s.activity_id
+      WHERE a.created_by_id = $1
+        AND seg.started_at < $3::timestamp
+        AND COALESCE(seg.ended_at, NOW()) > $2::timestamp
+      GROUP BY a.id
+    )
+    SELECT COUNT(*)::int AS count
+    FROM activity_durations
+    WHERE ${durationFilter}
+  `;
+
+  const result = await pool.query(query, [createdById, fromDate, toDate]);
+  return Number(result.rows[0]?.count ?? 0);
+};
+
 export const activitySessionQueries = {
   createActivitySession,
   getActivitySessionById,
@@ -413,4 +488,5 @@ export const activitySessionQueries = {
   listNonEmptyActivityGroups,
   getTotalTimeInRange,
   listActivityTimeItemsInRange,
+  countActivityTimeItemsInRange,
 };

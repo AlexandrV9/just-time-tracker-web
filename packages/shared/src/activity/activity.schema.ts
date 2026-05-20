@@ -116,6 +116,48 @@ export type GetCurrentActivitiesResponseDTO = z.infer<
   typeof currentActivitiesResponseSchema
 >;
 
+/**
+ * Activities with segment time in `[fromDate, toDate)` (fact / tracked today).
+ * Includes finished sessions; `session` and `segment` are always null.
+ */
+export const getTrackedActivitiesQuerySchema = z
+  .object({
+    createdById: z.string().min(1, "createdById is required"),
+    fromDate: z.iso.datetime().optional(),
+    toDate: z.iso.datetime().optional(),
+    page: z.coerce.number().int().min(0).default(0),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+  })
+  .superRefine(({ fromDate, toDate }, ctx) => {
+    if (fromDate && toDate && new Date(toDate) < new Date(fromDate)) {
+      ctx.addIssue({
+        path: ["toDate"],
+        message: "toDate must be after fromDate",
+        code: "custom",
+      });
+    }
+  });
+
+export type GetTrackedActivitiesQueryDTO = z.infer<
+  typeof getTrackedActivitiesQuerySchema
+>;
+
+export const trackedActivitySchema = z.object({
+  activity: activitySchema,
+  session: z.null(),
+  segment: z.null(),
+});
+
+export type TrackedActivityDTO = z.infer<typeof trackedActivitySchema>;
+
+export const trackedActivitiesResponseSchema = paginationResponseSchema(
+  trackedActivitySchema,
+);
+
+export type GetTrackedActivitiesResponseDTO = z.infer<
+  typeof trackedActivitiesResponseSchema
+>;
+
 export const getActivitiesByIdsSchema = z.object({
   activityIds: z.array(z.string().min(1, "activityId is required")),
 });

@@ -20,6 +20,8 @@ import type {
   GetActivitySessionSegmentsResponseDTO,
   GetCurrentActivitiesQueryDTO,
   GetCurrentActivitiesResponseDTO,
+  GetTrackedActivitiesQueryDTO,
+  GetTrackedActivitiesResponseDTO,
   ActivitySessionSegmentDTO,
   StartActivityDataDTO,
   PauseActivityDataDTO,
@@ -653,7 +655,7 @@ const decodeCursor = <T>(cursor: string): T | null => {
   }
 };
 
-const getActivitiesByGroupedItems = async (
+const hydrateTrackedActivityRows = async (
   items: Array<{
     activityId: string;
     activeDurationMs: number;
@@ -689,6 +691,81 @@ const getActivitiesByGroupedItems = async (
       };
     })
     .filter((item): item is NonNullable<typeof item> => item !== null);
+};
+
+type GetTrackedActivitiesResponse =
+  | SuccessResponse<GetTrackedActivitiesResponseDTO>
+  | ErrorResponse;
+
+const getTrackedActivities = async (
+  filters: GetTrackedActivitiesQueryDTO,
+): Promise<GetTrackedActivitiesResponse> => {
+  try {
+    const {
+      createdById,
+      fromDate,
+      toDate,
+      page = 0,
+      limit = 10,
+    } = filters;
+
+    if (!fromDate || !toDate) {
+      return {
+        success: false,
+        message: "fromDate and toDate are required",
+      };
+    }
+
+    const [rawItemsResult, totalCount] = await Promise.all([
+      activitySessionQueries.listActivityTimeItemsInRange({
+        createdById,
+        fromDate,
+        toDate,
+        limit,
+        offset: page * limit,
+        activeOnly: true,
+      }),
+      activitySessionQueries.countActivityTimeItemsInRange({
+        createdById,
+        fromDate,
+        toDate,
+        activeOnly: true,
+      }),
+    ]);
+
+    const hydrated = await hydrateTrackedActivityRows(rawItemsResult.items);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return {
+      success: true,
+      data: {
+        data: hydrated.map((item) => ({
+          activity: {
+            ...item.activity,
+            activeDurationMs: item.activeDurationMs,
+            pauseDurationMs: item.pauseDurationMs,
+          },
+          session: null,
+          segment: null,
+        })),
+        pagination: {
+          page,
+          limit,
+          totalCount,
+          totalPages,
+          hasNext: page < totalPages - 1,
+          hasPrev: page > 0,
+        },
+      },
+    };
+  } catch (error) {
+    console.error("Get tracked activities error:", error);
+    return {
+      success: false,
+      message: "Failed to fetch tracked activities",
+    };
+  }
 };
 
 /**
@@ -785,7 +862,7 @@ export const getGroupedActivities = async (
         ? rawItemsResult.items.slice(0, itemsLimit)
         : rawItemsResult.items;
 
-      const items = await getActivitiesByGroupedItems(selectedItems);
+      const items = await hydrateTrackedActivityRows(selectedItems);
 
       responseGroups.push({
         groupBy: resolvedGroupBy,
@@ -881,7 +958,7 @@ export const getGroupedActivityItems = async (params: {
       ? rawItemsResult.items.slice(0, limit)
       : rawItemsResult.items;
 
-    const items = await getActivitiesByGroupedItems(selectedItems);
+    const items = await hydrateTrackedActivityRows(selectedItems);
 
     return {
       success: true,
@@ -922,6 +999,7 @@ export const activitiesService = {
   getActivitiesByIds,
   getActivities,
   getCurrentActivities,
+  getTrackedActivities,
   startActivity,
   pauseActivity,
   finishActivity,

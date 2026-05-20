@@ -6,6 +6,7 @@ import {
   updateActivitySchema,
   getActivitiesSchema,
   getCurrentActivitiesQuerySchema,
+  getTrackedActivitiesQuerySchema,
   getActivitiesByIdsSchema,
   getActivitySessionsByActivityIdParamsSchema,
   getActivityAnalyticsByActivityIdParamsSchema,
@@ -40,6 +41,12 @@ export const activityHandlers = {
     parse: (c) => c.req.query(),
     schema: getCurrentActivitiesQuerySchema,
     service: activitiesService.getCurrentActivities,
+  }),
+
+  getTrackedActivities: createValidatedHandler({
+    parse: (c) => c.req.query(),
+    schema: getTrackedActivitiesQuerySchema,
+    service: activitiesService.getTrackedActivities,
   }),
 
   getActivitiesByIds: createValidatedHandler({

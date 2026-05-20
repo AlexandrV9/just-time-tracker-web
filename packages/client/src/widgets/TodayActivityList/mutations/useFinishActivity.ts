@@ -8,6 +8,7 @@ import { useCurrentActivity } from "~/features";
 import {
   activityApiService,
   ACTIVITIES_CURRENT_QUERY_KEY,
+  ACTIVITIES_TRACKED_QUERY_KEY,
   ACTIVITY_ANALYTICS_QUERY_KEY,
   ACTIVITIES_ANALYTICS_QUERY_KEY,
   ACTIVITY_SESSIONS_QUERY_KEY,
@@ -84,6 +85,9 @@ export const useFinishActivity = () => {
       queryClient.invalidateQueries({ queryKey: [ACTIVITIES_QUERY_KEY] });
       queryClient.invalidateQueries({
         queryKey: [ACTIVITIES_CURRENT_QUERY_KEY],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [ACTIVITIES_TRACKED_QUERY_KEY],
       });
       queryClient.invalidateQueries({
         queryKey: [ACTIVITY_SESSIONS_QUERY_KEY],
