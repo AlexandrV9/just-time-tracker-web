@@ -6,6 +6,7 @@ import type {
 import { devtools } from "zustand/middleware";
 import { create } from "zustand";
 import type { Updater } from "~/shared/types";
+import { stateUpdater } from "~/shared/utils";
 
 export type CurrentActivityStore = {
   currentActivity: ActivityDTO | null;
@@ -37,33 +38,23 @@ export const useCurrentActivityStore = create<CurrentActivityStore>()(
       currentActivity: null,
       setCurrentActivity: (updater) =>
         set((state) => ({
-          currentActivity:
-            typeof updater === "function"
-              ? updater(state.currentActivity)
-              : updater,
+          currentActivity: stateUpdater(state.currentActivity, updater),
         })),
       currentSession: null,
       setCurrentSession: (updater) =>
         set((state) => ({
-          currentSession:
-            typeof updater === "function"
-              ? updater(state.currentSession)
-              : updater,
+          currentSession: stateUpdater(state.currentSession, updater),
         })),
       currentSegment: null,
       setCurrentSegment: (updater) =>
         set((state) => ({
-          currentSegment:
-            typeof updater === "function"
-              ? updater(state.currentSegment)
-              : updater,
+          currentSegment: stateUpdater(state.currentSegment, updater),
         })),
       updateData: (updater) =>
-        set((prevState) => {
-          const nextState =
-            typeof updater === "function" ? updater(prevState) : updater;
-          return { ...prevState, ...nextState } as CurrentActivityStore;
-        }),
+        set((prevState) => ({
+          ...prevState,
+          ...stateUpdater(prevState, updater),
+        })),
     }),
     { name: "currentActivityStore" },
   ),

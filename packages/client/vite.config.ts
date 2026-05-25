@@ -44,6 +44,22 @@ export default defineConfig(({ mode }) => {
           target: apiEndpoint,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, ""),
+          configure: (proxy) => {
+            proxy.on("proxyReq", (proxyReq, req) => {
+              if (req.url?.includes("/activities/events")) {
+                proxyReq.setHeader("Accept", "text/event-stream");
+                proxyReq.setHeader("Cache-Control", "no-cache");
+              }
+            });
+            proxy.on("proxyRes", (proxyRes, req) => {
+              if (req.url?.includes("/activities/events")) {
+                delete proxyRes.headers["content-length"];
+                proxyRes.headers["cache-control"] = "no-cache";
+                proxyRes.headers["connection"] = "keep-alive";
+                proxyRes.headers["x-accel-buffering"] = "no";
+              }
+            });
+          },
         },
       },
     },

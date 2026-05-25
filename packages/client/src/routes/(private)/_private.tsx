@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useLayoutEffect } from "react";
-import { LangSwitcher, ThemeSwitcher } from "~/features";
+import { LangSwitcher, ThemeSwitcher, useActivityEvents } from "~/features";
 import { authManager, AuthUserAvatar, useAuthStore } from "~/features/auth";
 import { NotificationButton } from "~/features/notifications";
 import { useDeviceDetect, useOrientation, useTranslation } from "~/shared/hooks";
@@ -64,6 +64,8 @@ export const Route = createFileRoute("/(private)/_private")({
 
 export function PrivateLayout() {
   const { setContent } = useHeaderStore();
+
+  useActivityEvents();
 
   useLayoutEffect(() => {
     setContent("left", <AuthUserAvatar />);

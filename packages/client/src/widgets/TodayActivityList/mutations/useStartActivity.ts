@@ -14,6 +14,7 @@ import {
   ACTIVITIES_QUERY_KEY,
   ACTIVITIES_CURRENT_QUERY_KEY,
 } from "~/shared/api/services";
+import { getOrCreateClientId } from "~/shared/libs";
 
 export const useStartActivity = () => {
   const queryClient = useQueryClient();
@@ -26,6 +27,7 @@ export const useStartActivity = () => {
       const response = await activityApiService.startActivity({
         activityId: data.activityId,
         startedAt: data.startedAt,
+        clientId: getOrCreateClientId(),
       });
 
       if (!response.success) {

@@ -177,9 +177,12 @@ export const deleteActivitySchema = baseIdSchema;
 
 export type DeleteActivityDataDTO = z.infer<typeof deleteActivitySchema>;
 
+const clientIdSchema = z.string().min(1).optional();
+
 export const startActivitySchema = z.object({
   activityId: z.string().min(1, "activityId is required"),
   startedAt: z.iso.datetime(),
+  clientId: clientIdSchema,
 });
 
 export type StartActivityDataDTO = z.infer<typeof startActivitySchema>;
@@ -187,6 +190,7 @@ export type StartActivityDataDTO = z.infer<typeof startActivitySchema>;
 export const pauseActivitySchema = z.object({
   activityId: z.string().min(1, "activityId is required"),
   pausedAt: z.iso.datetime(),
+  clientId: clientIdSchema,
 });
 
 export type PauseActivityDataDTO = z.infer<typeof pauseActivitySchema>;
@@ -194,6 +198,7 @@ export type PauseActivityDataDTO = z.infer<typeof pauseActivitySchema>;
 export const finishActivitySchema = z.object({
   activityId: z.string().min(1, "activityId is required"),
   finishedAt: z.iso.datetime(),
+  clientId: clientIdSchema,
 });
 
 export type FinishActivityDataDTO = z.infer<typeof finishActivitySchema>;

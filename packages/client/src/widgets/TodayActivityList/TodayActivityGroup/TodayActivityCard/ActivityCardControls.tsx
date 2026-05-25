@@ -8,6 +8,8 @@ type ActivityCardControlsProps = {
   sessionStatus?: ActivityStatusDTO;
   activityId: ActivityDTO["id"];
   finishOnly?: boolean;
+  /** Blocks start / resume / pause on this card while another activity is running. */
+  disableStartPause?: boolean;
   onStart?: (activityId: ActivityDTO["id"]) => void;
   onPause?: (activityId: ActivityDTO["id"]) => void;
   onFinish?: (activityId: ActivityDTO["id"]) => void;
@@ -18,6 +20,7 @@ export function ActivityCardControls({
   hasActiveSession,
   sessionStatus,
   finishOnly = false,
+  disableStartPause = false,
   onStart,
   onPause,
   onFinish,
@@ -53,6 +56,9 @@ export function ActivityCardControls({
         <IconButton
           variant="ghost"
           size="2xs"
+          disabled={disableStartPause}
+          opacity={disableStartPause ? 0.38 : 1}
+          cursor={disableStartPause ? "not-allowed" : undefined}
           onClick={(event: MouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
             onPause?.(activityId);
@@ -80,6 +86,9 @@ export function ActivityCardControls({
         <IconButton
           variant="ghost"
           size="2xs"
+          disabled={disableStartPause}
+          opacity={disableStartPause ? 0.38 : 1}
+          cursor={disableStartPause ? "not-allowed" : undefined}
           onClick={(event: MouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
             onStart?.(activityId);
@@ -96,6 +105,9 @@ export function ActivityCardControls({
       <IconButton
         variant="ghost"
         size="2xs"
+        disabled={disableStartPause}
+        opacity={disableStartPause ? 0.38 : 1}
+        cursor={disableStartPause ? "not-allowed" : undefined}
         onClick={(event: MouseEvent<HTMLButtonElement>) => {
           event.stopPropagation();
           onStart?.(activityId);

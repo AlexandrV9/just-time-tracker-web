@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 // import { cors } from "hono/cors";
 import { authMiddleware, authRouter } from "./auth/index.js";
+import type { AuthVariables } from "./shared/auth/auth.variables.js";
 import { config } from "./shared/index.js";
 import { healthRouter } from "./health/health.routes.js";
 import {
@@ -24,13 +25,18 @@ const app = new Hono();
 app.route("/auth", authRouter);
 app.route("/health", healthRouter);
 
-// app.use("/tasks/*", authMiddleware);
+const protectedRouter = new Hono<{ Variables: AuthVariables }>();
+protectedRouter.use("*", authMiddleware);
+protectedRouter.route("/activities", activitiesRouter);
+protectedRouter.route("/activity-sessions", activitySessionsRouter);
+protectedRouter.route(
+  "/activity-session-segments",
+  activitySessionSegmentsRouter,
+);
+protectedRouter.route("/day-plans", dayPlansRouter);
+protectedRouter.route("/day-plan-items", dayPlanItemsRouter);
 
-app.route("/activities", activitiesRouter);
-app.route("/activity-sessions", activitySessionsRouter);
-app.route("/activity-session-segments", activitySessionSegmentsRouter);
-app.route("/day-plans", dayPlansRouter);
-app.route("/day-plan-items", dayPlanItemsRouter);
+app.route("/", protectedRouter);
 
 serve(
   {

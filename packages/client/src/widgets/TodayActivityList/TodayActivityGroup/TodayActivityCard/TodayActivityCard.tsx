@@ -2,6 +2,7 @@ import type {
   ActivityDTO,
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
+  ActivityStatusDTO,
 } from "@to-do-list/shared";
 import { useMemo } from "react";
 import { keyframes } from "@emotion/react";
@@ -28,7 +29,8 @@ export type TodayActivityCardProps = {
   segment?: ActivitySessionSegmentDTO | null;
   /** When set, show snapshot totals for that calendar day (no live ticking). */
   activeTimerCalendarDay?: CalendarDay;
-  disableControls?: boolean;
+  /** Disables start / pause controls when another activity is running. */
+  disableStartPause?: boolean;
   finishOnly?: boolean;
   isSelected?: boolean;
   isHighlighted?: boolean;
@@ -44,7 +46,7 @@ export const TodayActivityCard = ({
   segment = null,
   activeTimerCalendarDay,
   finishOnly = false,
-  disableControls = false,
+  disableStartPause = false,
   isSelected = false,
   isHighlighted = false,
   onStart,
@@ -55,6 +57,11 @@ export const TodayActivityCard = ({
   const { t } = useTranslation();
 
   const sessionStatus = session?.status;
+
+  const controlsSessionStatus: ActivityStatusDTO =
+    sessionStatus === "active" || sessionStatus === "paused"
+      ? sessionStatus
+      : "idle";
 
   const hasRunningSession =
     sessionStatus === "active" || sessionStatus === "paused";
@@ -84,8 +91,8 @@ export const TodayActivityCard = ({
   const card = (
     <ActivityCardView
       onClick={onClick}
-      cursor={disableControls ? "default" : "pointer"}
-      _hover={disableControls ? undefined : { bg: "bg.subtle" }}
+      cursor="pointer"
+      _hover={{ bg: "bg.subtle" }}
       borderRadius="8px"
       border="2px solid border.muted"
       borderColor={
@@ -128,18 +135,13 @@ export const TodayActivityCard = ({
         >
           {sessionActiveTime}
         </Text>
-        <Box
-          opacity={disableControls ? 0.38 : 1}
-          pointerEvents={disableControls ? "none" : "auto"}
-          cursor={disableControls ? "not-allowed" : undefined}
-          display="flex"
-          alignItems="center"
-        >
+        <Box display="flex" alignItems="center">
           <ActivityCardControls
             activityId={activity.id}
             hasActiveSession={hasRunningSession}
-            sessionStatus={activity.status}
+            sessionStatus={controlsSessionStatus}
             finishOnly={finishOnly}
+            disableStartPause={disableStartPause}
             onStart={onStart}
             onPause={onPause}
             onFinish={onFinish}

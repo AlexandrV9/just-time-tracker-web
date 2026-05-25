@@ -1,3 +1,4 @@
+import type { ActivityTrackingEventTypeDTO } from "@to-do-list/shared";
 import type {
   CreateActivityDataDTO,
   UpdateActivityDataDTO,
@@ -46,6 +47,7 @@ import {
   activitySessionSegmentQueries,
   mapSegmentRow,
 } from "./activitySessionSegment.queries.js";
+import { activityEventsHub } from "./activityEvents.hub.js";
 import type { ErrorResponse, SuccessResponse } from "../shared/types.js";
 
 type DayTotalsAgg = {
@@ -328,22 +330,46 @@ const getCurrentActivities = async (
 
 type SessionTrackingResponse = Awaited<ReturnType<typeof startActivitySession>>;
 
+const publishTrackingEvent = (
+  type: ActivityTrackingEventTypeDTO,
+  clientId: string | undefined,
+  result: Extract<SessionTrackingResponse, { success: true }>,
+) => {
+  activityEventsHub.publish(result.data.activity.createdById, {
+    type,
+    clientId,
+    data: result.data,
+  });
+};
+
 const startActivity = async (
   data: StartActivityDataDTO,
 ): Promise<SessionTrackingResponse> => {
-  return startActivitySession(data.activityId, data.startedAt);
+  const result = await startActivitySession(data.activityId, data.startedAt);
+  if (result.success) {
+    publishTrackingEvent("started", data.clientId, result);
+  }
+  return result;
 };
 
 const pauseActivity = async (
   data: PauseActivityDataDTO,
 ): Promise<SessionTrackingResponse> => {
-  return pauseActivitySession(data.activityId, data.pausedAt);
+  const result = await pauseActivitySession(data.activityId, data.pausedAt);
+  if (result.success) {
+    publishTrackingEvent("paused", data.clientId, result);
+  }
+  return result;
 };
 
 const finishActivity = async (
   data: FinishActivityDataDTO,
 ): Promise<SessionTrackingResponse> => {
-  return finishActivitySession(data.activityId, data.finishedAt);
+  const result = await finishActivitySession(data.activityId, data.finishedAt);
+  if (result.success) {
+    publishTrackingEvent("finished", data.clientId, result);
+  }
+  return result;
 };
 
 type GetActivitySessionsByActivityIdResponse =

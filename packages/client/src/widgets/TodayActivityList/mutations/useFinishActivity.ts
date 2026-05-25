@@ -15,6 +15,7 @@ import {
   ACTIVITIES_QUERY_KEY,
   type ActivityState,
 } from "~/shared/api/services";
+import { getOrCreateClientId } from "~/shared/libs";
 
 type FinishActivityData = {
   finishedAt: string;
@@ -29,6 +30,7 @@ export const useFinishActivity = () => {
       const response = await activityApiService.finishActivity({
         activityId: data.activity.id,
         finishedAt: data.finishedAt,
+        clientId: getOrCreateClientId(),
       });
 
       if (!response.success) {

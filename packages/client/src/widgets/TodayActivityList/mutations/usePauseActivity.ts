@@ -14,6 +14,7 @@ import {
   ACTIVITIES_CURRENT_QUERY_KEY,
   type ActivityState,
 } from "~/shared/api/services";
+import { getOrCreateClientId } from "~/shared/libs";
 
 type PauseActivityData = {
   pausedAt: string;
@@ -28,6 +29,7 @@ export const usePauseActivity = () => {
       const response = await activityApiService.pauseActivity({
         activityId: data.activity.id,
         pausedAt: data.pausedAt,
+        clientId: getOrCreateClientId(),
       });
 
       if (!response.success) {

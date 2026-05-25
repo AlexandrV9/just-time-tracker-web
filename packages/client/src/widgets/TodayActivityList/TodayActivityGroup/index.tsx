@@ -86,9 +86,13 @@ export function TodayActivityGroup({
           const isCurrentActivity = activity.id === currentActivityId;
           const isHighlighted = highlightedActivityId === activity.id;
           const isSelected = isCurrentActivity;
-          const disableControls =
-            data.activities.some((row) => row.segment?.type === "active") &&
-            segment?.type !== "active";
+          const runningActivityId = data.activities.find(
+            (row) => row.segment?.type === "active",
+          )?.activity.id;
+
+          const disableStartPause =
+            runningActivityId != null &&
+            activity.id !== runningActivityId;
 
           return (
             <ActivityListView.Item
@@ -101,7 +105,7 @@ export function TodayActivityGroup({
                 segment={segment}
                 activeTimerCalendarDay={data.activeTimerCalendarDay}
                 isHighlighted={isHighlighted}
-                disableControls={disableControls}
+                disableStartPause={disableStartPause}
                 isSelected={isSelected}
                 onStart={() => onStart?.({ activity, session, segment })}
                 onClick={() => onSelect?.({ activity, session, segment })}

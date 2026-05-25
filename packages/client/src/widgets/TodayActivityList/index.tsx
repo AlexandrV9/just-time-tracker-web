@@ -80,7 +80,6 @@ export const TodayActivityList = () => {
   const { mutateAsync: finishActivity } = useFinishActivity();
 
   const handleFinishActivity = (data: ActivityState) => {
-    if (hasRunningActivity && data.activity.id !== currentActivityId) return;
     return finishActivity?.({
       ...data,
       finishedAt: new Date().toISOString(),
