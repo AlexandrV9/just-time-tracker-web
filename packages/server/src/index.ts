@@ -2,9 +2,15 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 // import { cors } from "hono/cors";
 import { authMiddleware, authRouter } from "./auth/index.js";
-import { tasksRouter } from "./task/index.js";
+import type { AuthVariables } from "./shared/auth/auth.variables.js";
 import { config } from "./shared/index.js";
 import { healthRouter } from "./health/health.routes.js";
+import {
+  activitiesRouter,
+  activitySessionSegmentsRouter,
+  activitySessionsRouter,
+} from "./activity/index.js";
+import { dayPlanItemsRouter, dayPlansRouter } from "./dayPlan/index.js";
 
 const app = new Hono();
 
@@ -19,8 +25,18 @@ const app = new Hono();
 app.route("/auth", authRouter);
 app.route("/health", healthRouter);
 
-app.use("/tasks/*", authMiddleware);
-app.route("/tasks", tasksRouter);
+const protectedRouter = new Hono<{ Variables: AuthVariables }>();
+protectedRouter.use("*", authMiddleware);
+protectedRouter.route("/activities", activitiesRouter);
+protectedRouter.route("/activity-sessions", activitySessionsRouter);
+protectedRouter.route(
+  "/activity-session-segments",
+  activitySessionSegmentsRouter,
+);
+protectedRouter.route("/day-plans", dayPlansRouter);
+protectedRouter.route("/day-plan-items", dayPlanItemsRouter);
+
+app.route("/", protectedRouter);
 
 serve(
   {
@@ -29,5 +45,5 @@ serve(
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);
-  }
+  },
 );

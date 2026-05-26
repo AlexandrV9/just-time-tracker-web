@@ -15,15 +15,17 @@ import { Route as publicPublicRouteImport } from './routes/(public)/_public'
 import { Route as privatePrivateRouteImport } from './routes/(private)/_private'
 import { Route as authAuthRouteImport } from './routes/(auth)/_auth'
 import { Route as privatePrivateIndexRouteImport } from './routes/(private)/_private/index'
-import { Route as publicPublicWelcomeIndexRouteImport } from './routes/(public)/_public.welcome/index'
-import { Route as privatePrivateTasksIndexRouteImport } from './routes/(private)/_private.tasks/index'
+import { Route as publicPublicTermsOfServiceIndexRouteImport } from './routes/(public)/_public.terms-of-service/index'
+import { Route as publicPublicPrivacyPolicyIndexRouteImport } from './routes/(public)/_public.privacy-policy/index'
+import { Route as publicPublicLandingIndexRouteImport } from './routes/(public)/_public.landing/index'
 import { Route as privatePrivateSettingsIndexRouteImport } from './routes/(private)/_private.settings/index'
-import { Route as privatePrivateNotesIndexRouteImport } from './routes/(private)/_private.notes/index'
-import { Route as privatePrivateMoreIndexRouteImport } from './routes/(private)/_private.more/index'
+import { Route as privatePrivateHistoryIndexRouteImport } from './routes/(private)/_private.history/index'
+import { Route as privatePrivateCalendarIndexRouteImport } from './routes/(private)/_private.calendar/index'
+import { Route as privatePrivateActivitiesIndexRouteImport } from './routes/(private)/_private.activities/index'
 import { Route as authAuthSignupIndexRouteImport } from './routes/(auth)/_auth.signup/index'
 import { Route as authAuthSigninIndexRouteImport } from './routes/(auth)/_auth.signin/index'
-import { Route as privatePrivateTasksTaskIdRouteImport } from './routes/(private)/_private.tasks/$taskId'
 import { Route as privatePrivateSettingsProfileRouteImport } from './routes/(private)/_private.settings/profile'
+import { Route as privatePrivateActivitiesActivityIdRouteImport } from './routes/(private)/_private.activities/$activityId'
 
 const publicRouteImport = createFileRoute('/(public)')()
 const privateRouteImport = createFileRoute('/(private)')()
@@ -58,17 +60,23 @@ const privatePrivateIndexRoute = privatePrivateIndexRouteImport.update({
   path: '/',
   getParentRoute: () => privatePrivateRoute,
 } as any)
-const publicPublicWelcomeIndexRoute =
-  publicPublicWelcomeIndexRouteImport.update({
-    id: '/welcome/',
-    path: '/welcome/',
+const publicPublicTermsOfServiceIndexRoute =
+  publicPublicTermsOfServiceIndexRouteImport.update({
+    id: '/terms-of-service/',
+    path: '/terms-of-service/',
     getParentRoute: () => publicPublicRoute,
   } as any)
-const privatePrivateTasksIndexRoute =
-  privatePrivateTasksIndexRouteImport.update({
-    id: '/tasks/',
-    path: '/tasks/',
-    getParentRoute: () => privatePrivateRoute,
+const publicPublicPrivacyPolicyIndexRoute =
+  publicPublicPrivacyPolicyIndexRouteImport.update({
+    id: '/privacy-policy/',
+    path: '/privacy-policy/',
+    getParentRoute: () => publicPublicRoute,
+  } as any)
+const publicPublicLandingIndexRoute =
+  publicPublicLandingIndexRouteImport.update({
+    id: '/landing/',
+    path: '/landing/',
+    getParentRoute: () => publicPublicRoute,
   } as any)
 const privatePrivateSettingsIndexRoute =
   privatePrivateSettingsIndexRouteImport.update({
@@ -76,17 +84,24 @@ const privatePrivateSettingsIndexRoute =
     path: '/settings/',
     getParentRoute: () => privatePrivateRoute,
   } as any)
-const privatePrivateNotesIndexRoute =
-  privatePrivateNotesIndexRouteImport.update({
-    id: '/notes/',
-    path: '/notes/',
+const privatePrivateHistoryIndexRoute =
+  privatePrivateHistoryIndexRouteImport.update({
+    id: '/history/',
+    path: '/history/',
     getParentRoute: () => privatePrivateRoute,
   } as any)
-const privatePrivateMoreIndexRoute = privatePrivateMoreIndexRouteImport.update({
-  id: '/more/',
-  path: '/more/',
-  getParentRoute: () => privatePrivateRoute,
-} as any)
+const privatePrivateCalendarIndexRoute =
+  privatePrivateCalendarIndexRouteImport.update({
+    id: '/calendar/',
+    path: '/calendar/',
+    getParentRoute: () => privatePrivateRoute,
+  } as any)
+const privatePrivateActivitiesIndexRoute =
+  privatePrivateActivitiesIndexRouteImport.update({
+    id: '/activities/',
+    path: '/activities/',
+    getParentRoute: () => privatePrivateRoute,
+  } as any)
 const authAuthSignupIndexRoute = authAuthSignupIndexRouteImport.update({
   id: '/signup/',
   path: '/signup/',
@@ -97,42 +112,46 @@ const authAuthSigninIndexRoute = authAuthSigninIndexRouteImport.update({
   path: '/signin/',
   getParentRoute: () => authAuthRoute,
 } as any)
-const privatePrivateTasksTaskIdRoute =
-  privatePrivateTasksTaskIdRouteImport.update({
-    id: '/tasks/$taskId',
-    path: '/tasks/$taskId',
-    getParentRoute: () => privatePrivateRoute,
-  } as any)
 const privatePrivateSettingsProfileRoute =
   privatePrivateSettingsProfileRouteImport.update({
     id: '/settings/profile',
     path: '/settings/profile',
     getParentRoute: () => privatePrivateRoute,
   } as any)
+const privatePrivateActivitiesActivityIdRoute =
+  privatePrivateActivitiesActivityIdRouteImport.update({
+    id: '/activities/$activityId',
+    path: '/activities/$activityId',
+    getParentRoute: () => privatePrivateRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof privatePrivateIndexRoute
+  '/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
   '/settings/profile': typeof privatePrivateSettingsProfileRoute
-  '/tasks/$taskId': typeof privatePrivateTasksTaskIdRoute
   '/signin': typeof authAuthSigninIndexRoute
   '/signup': typeof authAuthSignupIndexRoute
-  '/more': typeof privatePrivateMoreIndexRoute
-  '/notes': typeof privatePrivateNotesIndexRoute
+  '/activities': typeof privatePrivateActivitiesIndexRoute
+  '/calendar': typeof privatePrivateCalendarIndexRoute
+  '/history': typeof privatePrivateHistoryIndexRoute
   '/settings': typeof privatePrivateSettingsIndexRoute
-  '/tasks': typeof privatePrivateTasksIndexRoute
-  '/welcome': typeof publicPublicWelcomeIndexRoute
+  '/landing': typeof publicPublicLandingIndexRoute
+  '/privacy-policy': typeof publicPublicPrivacyPolicyIndexRoute
+  '/terms-of-service': typeof publicPublicTermsOfServiceIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof privatePrivateIndexRoute
+  '/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
   '/settings/profile': typeof privatePrivateSettingsProfileRoute
-  '/tasks/$taskId': typeof privatePrivateTasksTaskIdRoute
   '/signin': typeof authAuthSigninIndexRoute
   '/signup': typeof authAuthSignupIndexRoute
-  '/more': typeof privatePrivateMoreIndexRoute
-  '/notes': typeof privatePrivateNotesIndexRoute
+  '/activities': typeof privatePrivateActivitiesIndexRoute
+  '/calendar': typeof privatePrivateCalendarIndexRoute
+  '/history': typeof privatePrivateHistoryIndexRoute
   '/settings': typeof privatePrivateSettingsIndexRoute
-  '/tasks': typeof privatePrivateTasksIndexRoute
-  '/welcome': typeof publicPublicWelcomeIndexRoute
+  '/landing': typeof publicPublicLandingIndexRoute
+  '/privacy-policy': typeof publicPublicPrivacyPolicyIndexRoute
+  '/terms-of-service': typeof publicPublicTermsOfServiceIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -143,41 +162,47 @@ export interface FileRoutesById {
   '/(public)': typeof publicRouteWithChildren
   '/(public)/_public': typeof publicPublicRouteWithChildren
   '/(private)/_private/': typeof privatePrivateIndexRoute
+  '/(private)/_private/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
   '/(private)/_private/settings/profile': typeof privatePrivateSettingsProfileRoute
-  '/(private)/_private/tasks/$taskId': typeof privatePrivateTasksTaskIdRoute
   '/(auth)/_auth/signin/': typeof authAuthSigninIndexRoute
   '/(auth)/_auth/signup/': typeof authAuthSignupIndexRoute
-  '/(private)/_private/more/': typeof privatePrivateMoreIndexRoute
-  '/(private)/_private/notes/': typeof privatePrivateNotesIndexRoute
+  '/(private)/_private/activities/': typeof privatePrivateActivitiesIndexRoute
+  '/(private)/_private/calendar/': typeof privatePrivateCalendarIndexRoute
+  '/(private)/_private/history/': typeof privatePrivateHistoryIndexRoute
   '/(private)/_private/settings/': typeof privatePrivateSettingsIndexRoute
-  '/(private)/_private/tasks/': typeof privatePrivateTasksIndexRoute
-  '/(public)/_public/welcome/': typeof publicPublicWelcomeIndexRoute
+  '/(public)/_public/landing/': typeof publicPublicLandingIndexRoute
+  '/(public)/_public/privacy-policy/': typeof publicPublicPrivacyPolicyIndexRoute
+  '/(public)/_public/terms-of-service/': typeof publicPublicTermsOfServiceIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/activities/$activityId'
     | '/settings/profile'
-    | '/tasks/$taskId'
     | '/signin'
     | '/signup'
-    | '/more'
-    | '/notes'
+    | '/activities'
+    | '/calendar'
+    | '/history'
     | '/settings'
-    | '/tasks'
-    | '/welcome'
+    | '/landing'
+    | '/privacy-policy'
+    | '/terms-of-service'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/activities/$activityId'
     | '/settings/profile'
-    | '/tasks/$taskId'
     | '/signin'
     | '/signup'
-    | '/more'
-    | '/notes'
+    | '/activities'
+    | '/calendar'
+    | '/history'
     | '/settings'
-    | '/tasks'
-    | '/welcome'
+    | '/landing'
+    | '/privacy-policy'
+    | '/terms-of-service'
   id:
     | '__root__'
     | '/(auth)'
@@ -187,15 +212,17 @@ export interface FileRouteTypes {
     | '/(public)'
     | '/(public)/_public'
     | '/(private)/_private/'
+    | '/(private)/_private/activities/$activityId'
     | '/(private)/_private/settings/profile'
-    | '/(private)/_private/tasks/$taskId'
     | '/(auth)/_auth/signin/'
     | '/(auth)/_auth/signup/'
-    | '/(private)/_private/more/'
-    | '/(private)/_private/notes/'
+    | '/(private)/_private/activities/'
+    | '/(private)/_private/calendar/'
+    | '/(private)/_private/history/'
     | '/(private)/_private/settings/'
-    | '/(private)/_private/tasks/'
-    | '/(public)/_public/welcome/'
+    | '/(public)/_public/landing/'
+    | '/(public)/_public/privacy-policy/'
+    | '/(public)/_public/terms-of-service/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -255,19 +282,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof privatePrivateIndexRouteImport
       parentRoute: typeof privatePrivateRoute
     }
-    '/(public)/_public/welcome/': {
-      id: '/(public)/_public/welcome/'
-      path: '/welcome'
-      fullPath: '/welcome'
-      preLoaderRoute: typeof publicPublicWelcomeIndexRouteImport
+    '/(public)/_public/terms-of-service/': {
+      id: '/(public)/_public/terms-of-service/'
+      path: '/terms-of-service'
+      fullPath: '/terms-of-service'
+      preLoaderRoute: typeof publicPublicTermsOfServiceIndexRouteImport
       parentRoute: typeof publicPublicRoute
     }
-    '/(private)/_private/tasks/': {
-      id: '/(private)/_private/tasks/'
-      path: '/tasks'
-      fullPath: '/tasks'
-      preLoaderRoute: typeof privatePrivateTasksIndexRouteImport
-      parentRoute: typeof privatePrivateRoute
+    '/(public)/_public/privacy-policy/': {
+      id: '/(public)/_public/privacy-policy/'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof publicPublicPrivacyPolicyIndexRouteImport
+      parentRoute: typeof publicPublicRoute
+    }
+    '/(public)/_public/landing/': {
+      id: '/(public)/_public/landing/'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof publicPublicLandingIndexRouteImport
+      parentRoute: typeof publicPublicRoute
     }
     '/(private)/_private/settings/': {
       id: '/(private)/_private/settings/'
@@ -276,18 +310,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof privatePrivateSettingsIndexRouteImport
       parentRoute: typeof privatePrivateRoute
     }
-    '/(private)/_private/notes/': {
-      id: '/(private)/_private/notes/'
-      path: '/notes'
-      fullPath: '/notes'
-      preLoaderRoute: typeof privatePrivateNotesIndexRouteImport
+    '/(private)/_private/history/': {
+      id: '/(private)/_private/history/'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof privatePrivateHistoryIndexRouteImport
       parentRoute: typeof privatePrivateRoute
     }
-    '/(private)/_private/more/': {
-      id: '/(private)/_private/more/'
-      path: '/more'
-      fullPath: '/more'
-      preLoaderRoute: typeof privatePrivateMoreIndexRouteImport
+    '/(private)/_private/calendar/': {
+      id: '/(private)/_private/calendar/'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof privatePrivateCalendarIndexRouteImport
+      parentRoute: typeof privatePrivateRoute
+    }
+    '/(private)/_private/activities/': {
+      id: '/(private)/_private/activities/'
+      path: '/activities'
+      fullPath: '/activities'
+      preLoaderRoute: typeof privatePrivateActivitiesIndexRouteImport
       parentRoute: typeof privatePrivateRoute
     }
     '/(auth)/_auth/signup/': {
@@ -304,18 +345,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authAuthSigninIndexRouteImport
       parentRoute: typeof authAuthRoute
     }
-    '/(private)/_private/tasks/$taskId': {
-      id: '/(private)/_private/tasks/$taskId'
-      path: '/tasks/$taskId'
-      fullPath: '/tasks/$taskId'
-      preLoaderRoute: typeof privatePrivateTasksTaskIdRouteImport
-      parentRoute: typeof privatePrivateRoute
-    }
     '/(private)/_private/settings/profile': {
       id: '/(private)/_private/settings/profile'
       path: '/settings/profile'
       fullPath: '/settings/profile'
       preLoaderRoute: typeof privatePrivateSettingsProfileRouteImport
+      parentRoute: typeof privatePrivateRoute
+    }
+    '/(private)/_private/activities/$activityId': {
+      id: '/(private)/_private/activities/$activityId'
+      path: '/activities/$activityId'
+      fullPath: '/activities/$activityId'
+      preLoaderRoute: typeof privatePrivateActivitiesActivityIdRouteImport
       parentRoute: typeof privatePrivateRoute
     }
   }
@@ -347,22 +388,23 @@ const authRouteWithChildren = authRoute._addFileChildren(authRouteChildren)
 
 interface privatePrivateRouteChildren {
   privatePrivateIndexRoute: typeof privatePrivateIndexRoute
+  privatePrivateActivitiesActivityIdRoute: typeof privatePrivateActivitiesActivityIdRoute
   privatePrivateSettingsProfileRoute: typeof privatePrivateSettingsProfileRoute
-  privatePrivateTasksTaskIdRoute: typeof privatePrivateTasksTaskIdRoute
-  privatePrivateMoreIndexRoute: typeof privatePrivateMoreIndexRoute
-  privatePrivateNotesIndexRoute: typeof privatePrivateNotesIndexRoute
+  privatePrivateActivitiesIndexRoute: typeof privatePrivateActivitiesIndexRoute
+  privatePrivateCalendarIndexRoute: typeof privatePrivateCalendarIndexRoute
+  privatePrivateHistoryIndexRoute: typeof privatePrivateHistoryIndexRoute
   privatePrivateSettingsIndexRoute: typeof privatePrivateSettingsIndexRoute
-  privatePrivateTasksIndexRoute: typeof privatePrivateTasksIndexRoute
 }
 
 const privatePrivateRouteChildren: privatePrivateRouteChildren = {
   privatePrivateIndexRoute: privatePrivateIndexRoute,
+  privatePrivateActivitiesActivityIdRoute:
+    privatePrivateActivitiesActivityIdRoute,
   privatePrivateSettingsProfileRoute: privatePrivateSettingsProfileRoute,
-  privatePrivateTasksTaskIdRoute: privatePrivateTasksTaskIdRoute,
-  privatePrivateMoreIndexRoute: privatePrivateMoreIndexRoute,
-  privatePrivateNotesIndexRoute: privatePrivateNotesIndexRoute,
+  privatePrivateActivitiesIndexRoute: privatePrivateActivitiesIndexRoute,
+  privatePrivateCalendarIndexRoute: privatePrivateCalendarIndexRoute,
+  privatePrivateHistoryIndexRoute: privatePrivateHistoryIndexRoute,
   privatePrivateSettingsIndexRoute: privatePrivateSettingsIndexRoute,
-  privatePrivateTasksIndexRoute: privatePrivateTasksIndexRoute,
 }
 
 const privatePrivateRouteWithChildren = privatePrivateRoute._addFileChildren(
@@ -381,11 +423,15 @@ const privateRouteWithChildren =
   privateRoute._addFileChildren(privateRouteChildren)
 
 interface publicPublicRouteChildren {
-  publicPublicWelcomeIndexRoute: typeof publicPublicWelcomeIndexRoute
+  publicPublicLandingIndexRoute: typeof publicPublicLandingIndexRoute
+  publicPublicPrivacyPolicyIndexRoute: typeof publicPublicPrivacyPolicyIndexRoute
+  publicPublicTermsOfServiceIndexRoute: typeof publicPublicTermsOfServiceIndexRoute
 }
 
 const publicPublicRouteChildren: publicPublicRouteChildren = {
-  publicPublicWelcomeIndexRoute: publicPublicWelcomeIndexRoute,
+  publicPublicLandingIndexRoute: publicPublicLandingIndexRoute,
+  publicPublicPrivacyPolicyIndexRoute: publicPublicPrivacyPolicyIndexRoute,
+  publicPublicTermsOfServiceIndexRoute: publicPublicTermsOfServiceIndexRoute,
 }
 
 const publicPublicRouteWithChildren = publicPublicRoute._addFileChildren(

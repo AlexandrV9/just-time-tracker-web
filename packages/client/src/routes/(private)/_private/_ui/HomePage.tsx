@@ -1,9 +1,6 @@
-import { Box } from "~/shared/ui";
-import {
-  CompletedTasksChart,
-  PriorityTasks,
-  TodayOverview,
-} from "~/widgets";
+import { Box, Flex } from "~/shared/ui";
+import { TodayActivityList } from "~/widgets";
+import { Stopwatch } from "./Stopwatch";
 
 export function HomePage() {
   return (
@@ -12,11 +9,13 @@ export function HomePage() {
       flexDirection="column"
       justifyContent="stretch"
       flexGrow={1}
-      gap="0.8rem"
+      gap="0.5rem"
+      maxWidth="100vw"
     >
-      <TodayOverview />
-      <PriorityTasks />
-      <CompletedTasksChart />
+      <Flex justifyContent="center">
+        <Stopwatch />
+      </Flex>
+      <TodayActivityList />
     </Box>
   );
 }

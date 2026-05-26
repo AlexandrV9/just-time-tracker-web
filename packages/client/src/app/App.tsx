@@ -15,15 +15,9 @@ import { chakraConfig } from "~/shared/config";
 import { TanstackProvider, RouterProvider } from "./providers";
 import { useDisableZoom } from "~/shared/ui/PageLayout/useDisableZoom";
 import { ToastContainer } from "~/shared/ui";
-import { useEffect } from "react";
-import { taskSyncManager } from "~/shared/services/SyncManager";
 
 export const App = () => {
   useDisableZoom();
-
-  useEffect(() => {
-    taskSyncManager.init();
-  }, []);
 
   return (
     <TanstackProvider>

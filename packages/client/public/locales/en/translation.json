@@ -1,62 +1,274 @@
 {
   "languages": {
     "en": "English",
-    "ru": "Русский"
+    "ru": "Русский",
+    "zh": "中文（简体）"
   },
   "pages": {
-    "welcome": {
-      "description": "We're glad to have you in our app! Here you'll find all the tools you need for productive work and easy task management.",
-      "featureList": [
-        "Create and organize tasks",
-        "Track your progress in real-time",
-        "Plan with smart reminders",
-        "Take notes",
-        "Work more effectively with your team"
+    "landing": {
+      "title": "Track every minute — without spreadsheets",
+      "subtitle": "A focused time-tracking app with a central timer, activities, analytics, calendar, and history — so you know where your day went.",
+      "featuresTitle": "What you get",
+      "features": [
+        {
+          "title": "Unified stopwatch",
+          "body": "Start, pause, and finish sessions from the main timer and activity cards — the numbers stay aligned."
+        },
+        {
+          "title": "Activities & today’s board",
+          "body": "Create reusable activities with tags, run them alongside your day plan, and keep unfinished sessions under control."
+        },
+        {
+          "title": "Calendar view",
+          "body": "See sessions on the grid and skim how time distributes across dates."
+        },
+        {
+          "title": "Histories",
+          "body": "Grouped history by day lets you revisit past intervals and reopen details without digging through spreadsheets."
+        },
+        {
+          "title": "Per-activity analytics",
+          "body": "Day timeline, session breakdown, and durations so you spot patterns and outliers."
+        },
+        {
+          "title": "Account & profile",
+          "body": "Sign in securely, tweak profile text, theme, language, and notifications from one place."
+        }
       ],
-      "featureListTitle": "All your productivity tools in a single platform:",
-      "goToSignInButton": "Start Using Now",
-      "title": "Welcome!"
+      "signInButton": "Sign in",
+      "signInPageLink": "Already registered? Sign in"
     },
-    "tasksPage": {
-      "title": "Schedule Today"
+    "home": {
+      "selectActivity": "Select activity or start timer",
+      "circularTimerStart": "Start",
+      "circularTimerPause": "Pause",
+      "circularTimerFinish": "Finish",
+      "dayPlanDialogAdd": "Add"
+    },
+    "calendar": {
+      "title": "Calendar",
+      "goToDateDialogTitle": "Go to date",
+      "dialogCancel": "Cancel",
+      "dialogApply": "Apply",
+      "mockEvents": {
+        "designSync": "Design sync",
+        "featureDevelopment": "Feature development"
+      }
+    },
+    "activities": {
+      "title": "Activities",
+      "list": {
+        "totalTracked": "Total",
+        "emptyTitle": "You don't have any activities yet",
+        "emptyDescription": "Create some under Activities."
+      },
+      "newActivityButton": "New activity",
+      "detail": {
+        "loading": "Loading…",
+        "notFound": "Activity not found",
+        "done": "Done",
+        "edit": "Edit",
+        "delete": "Delete activity",
+        "deleteDialogTitle": "Delete activity",
+        "deleteDialogCancel": "Cancel",
+        "deleteDialogConfirm": "Delete",
+        "deleteConfirm": "Delete this activity? This cannot be undone.",
+        "saveError": "Could not save changes. Try again.",
+        "historyTitle": "History",
+        "createdAtLabel": "Created",
+        "updatedAtLabel": "Last updated",
+        "sessionStart": "Start",
+        "sessionEnd": "End",
+        "duration": "Duration",
+        "currentBadge": "This session",
+        "trackingBadge": "In progress",
+        "titlePlaceholder": "Activity name",
+        "descriptionPlaceholder": "Description",
+        "saveButton": "Save",
+        "cancelEditButton": "Cancel",
+        "titleRequiredError": "Enter a name for the activity.",
+        "editDialogTitle": "Edit activity"
+      }
+    },
+    "settings": {
+      "profile": {
+        "namePlaceholder": "Name",
+        "emailPlaceholder": "Email",
+        "birthDatePlaceholder": "Date of birth"
+      }
+    },
+    "private": {
+      "pending": "Loading…"
+    },
+    "termsOfService": {
+      "backButton": "Back",
+      "title": "Terms of Service",
+      "updatedLabel": "Last updated:",
+      "updatedValue": "May 10, 2026",
+      "intro": "These Terms of Service (“Terms”) govern your use of our time-tracking application and related services. Please read them carefully.",
+      "sections": [
+        {
+          "title": "Acceptance of Terms",
+          "description": "By creating an account, signing in, or otherwise using the Service, you confirm that you are at least the age of majority in your jurisdiction and that you agree to comply with these Terms.\n\nIf you use the Service on behalf of an organization, you represent that you have authority to bind that organization to these Terms."
+        },
+        {
+          "title": "Description of the Service",
+          "description": "The Service helps you record and analyze time spent on activities. Features may change over time.\n\nWe strive to maintain availability but do not guarantee uninterrupted or error-free operation."
+        },
+        {
+          "title": "Accounts and Security",
+          "description": "You are responsible for maintaining the confidentiality of your credentials and for all activity under your account.\n\nNotify us promptly of any unauthorized access or security incident."
+        },
+        {
+          "title": "Acceptable Use",
+          "description": "You agree not to misuse the Service—for example by attempting to disrupt systems, scrape data without permission, reverse engineer beyond what the law permits, upload malware, harass others, or violate applicable laws.\n\nWe may suspend or terminate access if we reasonably believe you have breached these Terms or pose a risk to the Service or other users."
+        },
+        {
+          "title": "Intellectual Property",
+          "description": "The Service and its content (excluding your data that you submit) remain our intellectual property.\n\nYou retain ownership of the data you provide. By using the Service, you grant us a limited license to host, store, process, and display your data solely to operate and improve the Service as described in our Privacy Policy."
+        },
+        {
+          "title": "Disclaimers and Limitation of Liability",
+          "description": "The Service is provided “as is” and “as available” without warranties of any kind to the fullest extent permitted by law.\n\nTo the fullest extent permitted by law, our liability for disputes arising out of these Terms or the Service is limited to amounts you paid us in the twelve (12) months preceding the claim, or one hundred USD (USD 100), whichever is greater—or the maximum permitted in your jurisdiction if lower."
+        },
+        {
+          "title": "Changes and Termination",
+          "description": "We may modify the Service or these Terms. For material changes, we will provide notice where legally required—you should review updates periodically.\n\nYou may stop using the Service at any time. Some provisions survive termination—including limitations of liability, disclaimers where applicable, and governing law—as reasonable under law."
+        }
+      ]
+    },
+    "privacyPolicy": {
+      "backButton": "Back",
+      "title": "Privacy Policy",
+      "updatedLabel": "Last updated:",
+      "updatedValue": "May 10, 2026",
+      "intro": "This Privacy Policy describes how we collect, use, and safeguard information when you use our Service. By using the Service, you acknowledge the practices described here.",
+      "sections": [
+        {
+          "title": "Information We Collect",
+          "description": "We collect information that you voluntarily provide—for example account details (such as login or email where applicable), activity names and time entries that you generate, and support communications.\n\nWe automatically collect limited technical information needed to operate the Service (such as logs, approximate device/browser type, and timestamps) consistent with ordinary web and mobile analytics."
+        },
+        {
+          "title": "How We Use Information",
+          "description": "We use information to deliver and secure the Service, authenticate users, troubleshoot issues, analyze usage trends in aggregate form, comply with legal obligations, and communicate with you about updates or incidents.\n\nWe do not sell your personal information for money as traditionally defined; we process data solely to operate the Service unless otherwise stated or required by law."
+        },
+        {
+          "title": "Legal Bases",
+          "description": "Where applicable privacy laws apply, we rely on bases such as: performance of a contract (providing the Service), legitimate interests (security and improving the Service, balanced against your rights), consent where requested, or legal obligation.\n\nYou may withdraw consent where processing depends on consent, subject to contractual or legal exceptions."
+        },
+        {
+          "title": "Sharing & Processors",
+          "description": "We may engage service providers (“processors”) hosting infrastructure or analytics pursuant to contractual safeguards.\n\nWe may disclose information if required by law or to protect rights, safety, security, or the integrity of the Service."
+        },
+        {
+          "title": "Retention & Security",
+          "description": "We retain personal data only as long as necessary for purposes described herein, including legal, security, accounting, backup, or dispute resolution needs.\n\nWe implement commercially reasonable safeguards; no transmission or storage method is guaranteed 100% secure."
+        },
+        {
+          "title": "Your Rights",
+          "description": "Depending on your jurisdiction, you may request access, correction, deletion, restriction, portability, or object to processing, and may lodge complaints with supervisory authorities.\n\nTo exercise applicable rights or ask questions about this Policy, please contact us through the contacts provided within the Service or documentation."
+        },
+        {
+          "title": "Changes to This Policy",
+          "description": "We may update this Privacy Policy periodically. Updates will indicate a new revision date.\n\nWhere materially required under law or our practices change significantly, we will provide additional notice or obtain consent consistent with regulatory expectations."
+        }
+      ]
     }
   },
   "widgets": {
     "navbar": {
       "menuItems": {
         "Home": "Home",
-        "Tasks": "Tasks",
-        "Notes": "Notes",
-        "Settings": "Settings"
+        "Settings": "Settings",
+        "Activities": "Activities",
+        "History": "History"
+      }
+    },
+    "activityAnalytics": {
+      "title": "Analytics for",
+      "totalTime": "Total",
+      "empty": "No segments for the selected day",
+      "active": "Active",
+      "pause": "Pause",
+      "loading": "Loading analytics…",
+      "error": "Could not load analytics",
+      "deleteSessionSuccess": "Session deleted",
+      "deleteSessionError": "Could not delete session",
+      "sessionsForDay": "Sessions for the day",
+      "deleteSession": {
+        "title": "Delete session?",
+        "description": "This action cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "ariaLabel": "Delete session"
       }
     },
     "accountSettings": {
-      "title": "Account Settings"
+      "title": "Account Settings",
+      "options": {
+        "1": "Edit Profile"
+      }
     },
-    "todayOverview": {
-      "title": "Today`s Analysis",
-      "tasksForToday_one": "You have <CountWrapper>{{count}}</CountWrapper> task for today",
-      "tasksForToday_other": "You have <CountWrapper>{{count}}</CountWrapper> tasks for today"
+    "unfinishedActivities": {
+      "title": "Unfinished Activities"
     },
-    "priorityTasks": {
-      "title": "Priority Tasks",
-      "notTasks": "You don't have any priorities.",
-      "goToAllTasks": "See all tasks"
+    "activityHistory": {
+      "title": "Activity History",
+      "empty": "Activity history is empty",
+      "emptyDescription": "Here will be your activities",
+      "error": "Could not load activity history",
+      "errorDescription": "Please try again"
     },
-    "inProgressTasksCount": {
-      "title": "In Progress",
-      "count_one": "{{count}} task",
-      "count_other": "{{count}} tasks"
+    "todayActivityList": {
+      "title": "Today's Activities",
+      "newActivityButton": "Add activity",
+      "error": "Could not load activities",
+      "errorDescription": "Please try again",
+      "empty": "No activities for today",
+      "emptyDescription": "Add activities to start your day",
+      "addTodayActivitiesDialog": {
+        "title": "Add activities",
+        "empty": "You don't have any activities yet. Go to the activities section and create a new one",
+        "noActivities": "No activities to select",
+        "success": "Activities added",
+        "error": "Could not add activities",
+        "cancelButton": "Cancel",
+        "addButton": "Add"
+      }
     },
-    "completedTasksChart": {
-      "title": "Completed"
+    "activityGroup": {
+      "totalActiveTime": "Total active time",
+      "loadMoreButton": "Load more"
+    },
+    "activityCard": {
+      "dayTotal": "Today: {{time}}",
+      "crossDay": {
+        "sessionStart": "Session start: {{date}}",
+        "totalActiveTime": "Total active time"
+      }
+    },
+    "activityList": {
+      "title": "Activities",
+      "emptyTitle": "You don't have any activities yet",
+      "emptyDescription": "Create some under Activities.",
+      "newActivityButton": "New activity",
+      "error": "Could not load activities",
+      "errorDescription": "Please try again",
+      "totalTracked": "Total",
+      "createDialog": {
+        "title": "New activity",
+        "nameLabel": "Name",
+        "namePlaceholder": "Activity name",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Optional description",
+        "cancelButton": "Cancel",
+        "submitButton": "Create"
+      }
     }
   },
   "features": {
     "auth": {
-      "signOut": {
-        "textButton": "Sign Out"
-      },
+      "signOutButton": "Sign Out",
       "signInByLoginForm": {
         "firstNameInput": {
           "placeholder": "Please enter your first name"
@@ -116,51 +328,6 @@
         "submitButtonLoadingText": "Registration...",
         "subtitleText": "Do you have an account?",
         "title": "Registration"
-      }
-    },
-    "tasks": {
-      "update": {
-        "dialogTitle": "Update Task",
-        "inputTitle": {
-          "label": "Title",
-          "placeholder": "Enter task title"
-        },
-        "inputDescription": {
-          "label": "Description",
-          "placeholder": "Enter task description"
-        },
-        "startDate": {
-          "label": "Start"
-        },
-        "endDate": {
-          "label": "End"
-        },
-        "submitButtonText": "Update",
-        "cancelButtonText": "Cancel"
-      },
-      "create": {
-        "dialogTitle": "Create New Task",
-        "inputTitle": {
-          "label": "Title",
-          "placeholder": "Enter task title"
-        },
-        "inputDescription": {
-          "label": "Description",
-          "placeholder": "Enter task description"
-        },
-        "startDate": {
-          "label": "Start"
-        },
-        "endDate": {
-          "label": "End"
-        },
-        "submitButtonText": "Create",
-        "cancelButtonText": "Cancel"
-      },
-      "search": {
-        "input": {
-          "placeholder": "Enter name your task"
-        }
       }
     }
   }

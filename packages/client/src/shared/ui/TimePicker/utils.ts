@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 
 export const convertTimeStringToTimeObject = (
   timeStr: string,
-  options?: { separator?: string }
+  options?: { separator?: string },
 ): TimeObject => {
   const { separator = ":" } = options || {};
 
@@ -21,7 +21,7 @@ export const convertTimeStringToTimeObject = (
 
 export const convertTimeObjectToTimeString = (
   timeObj: TimeObject,
-  options?: { separator?: string }
+  options?: { separator?: string },
 ): string => {
   const { separator = ":" } = options || {};
 
@@ -48,7 +48,7 @@ export const isDayjs = (date: unknown): date is Dayjs => {
 
 export const applyTimeObjectToDayjsDate = (
   timeObj: TimeObject,
-  date?: Dayjs | Date
+  date?: Dayjs | Date,
 ): Dayjs => {
   const { hours, minutes, seconds } = timeObj;
 
@@ -62,4 +62,43 @@ export const applyTimeObjectToDayjsDate = (
 
 export const convertDayjsDateToDate = (dayjsDate: Dayjs): Date => {
   return dayjsDate.toDate();
+};
+
+export const convertSecondsToTimeObject = (
+  totalSeconds: number,
+): TimeObject => {
+  let current = totalSeconds;
+
+  const hours = Math.floor(current / 3600);
+  current -= hours * 3600;
+
+  const minutes = Math.floor(current / 60);
+  current -= minutes * 60;
+
+  const seconds = current;
+
+  return {
+    hours,
+    minutes,
+    seconds,
+  };
+};
+
+export const formatSecondsAsTimeString = (
+  totalSeconds: number,
+  options?: { separator?: string },
+): string => {
+  return convertTimeObjectToTimeString(
+    convertSecondsToTimeObject(totalSeconds),
+    options,
+  );
+};
+
+/**
+ * Преобразует длительность в миллисекундах в секунды
+ * @param durationMs - Время в миллисекундах
+ * @returns Время в секундах
+ */
+export const convertMillisecondsToSeconds = (durationMs: number): number => {
+  return Math.floor(durationMs / 1000);
 };

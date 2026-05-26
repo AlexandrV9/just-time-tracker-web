@@ -4,7 +4,7 @@ import {
 } from "@chakra-ui/react";
 import { PasswordInput } from "./Password";
 
-export interface InputProps extends BaseInputProps {}
+export type InputProps = BaseInputProps;
 
 export function Input(props: InputProps) {
   return <BaseInput {...props} />;

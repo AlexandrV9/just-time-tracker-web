@@ -3,6 +3,6 @@ import {
   type ScrollAreaRootProps as BaseScrollAreaRootProps,
 } from "@chakra-ui/react";
 
-export interface ScrollAreaRootProps extends BaseScrollAreaRootProps {}
+export type ScrollAreaRootProps = BaseScrollAreaRootProps;
 
 export const ScrollArea = BaseScrollArea;

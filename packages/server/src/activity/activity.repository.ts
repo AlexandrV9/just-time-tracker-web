@@ -1,0 +1,88 @@
+import type {
+  ActivityDTO,
+  CreateActivityDataDTO,
+  UpdateActivityDataDTO,
+  DeleteActivityDataDTO,
+} from "@to-do-list/shared";
+import { pgTimestampToIsoString } from "../shared/db/pgTimestamp.js";
+import { activityQueries } from "./activity.queries.js";
+
+const getActivityById = async (id: string): Promise<ActivityDTO | null> => {
+  const entry = await activityQueries.getActivityById(id);
+  if (!entry) return null;
+  return mapActivityRowToDTO(entry);
+};
+
+const createActivity = async (
+  data: CreateActivityDataDTO,
+): Promise<ActivityDTO> => {
+  const entry = await activityQueries.createActivity(data);
+  return mapActivityRowToDTO(entry);
+};
+
+const updateActivity = async (
+  data: UpdateActivityDataDTO,
+): Promise<ActivityDTO | null> => {
+  const existing = await activityQueries.getActivityById(data.id);
+  if (!existing) {
+    return null;
+  }
+
+  let payload: UpdateActivityDataDTO = { ...data };
+
+  if (data.title !== undefined) {
+    const trimmed = data.title.trim();
+
+    payload = { ...payload, title: trimmed };
+  }
+
+  const entry = await activityQueries.updateActivity(payload);
+  if (!entry) {
+    return null;
+  }
+  return mapActivityRowToDTO(entry);
+};
+
+const deleteActivity = async (
+  data: DeleteActivityDataDTO,
+): Promise<boolean> => {
+  try {
+    return await activityQueries.deleteActivity(data.id);
+  } catch {
+    return false;
+  }
+};
+
+export function mapActivityRowToDTO(
+  entry: Record<string, unknown>,
+): ActivityDTO {
+  return {
+    id: String(entry.id),
+    title: String(entry.title),
+    description:
+      entry.description === null || entry.description === undefined
+        ? undefined
+        : String(entry.description),
+    createdAt: pgTimestampToIsoString(entry.createdAt),
+    updatedAt: pgTimestampToIsoString(entry.updatedAt),
+    createdById: String(entry.createdById),
+    tags: Array.isArray(entry.tags)
+      ? (entry.tags as unknown[]).map(String)
+      : [],
+    status: entry.status as ActivityDTO["status"],
+    currentSessionId:
+      entry.currentActivitySessionId === null ||
+      entry.currentActivitySessionId === undefined
+        ? null
+        : String(entry.currentActivitySessionId),
+    activeDurationMs: Number(entry.activeDurationMs ?? 0),
+    pauseDurationMs: Number(entry.pauseDurationMs ?? 0),
+  };
+}
+
+export const activityRepository = {
+  getActivityById,
+  createActivity,
+  updateActivity,
+  deleteActivity,
+};

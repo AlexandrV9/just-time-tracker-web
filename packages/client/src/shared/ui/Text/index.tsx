@@ -3,7 +3,7 @@ import {
   type TextProps as BaseTextProps,
 } from "@chakra-ui/react";
 
-export interface TextProps extends BaseTextProps {}
+export type TextProps = BaseTextProps;
 
 export const Text = (props: TextProps) => {
   return <BaseText {...props} />;

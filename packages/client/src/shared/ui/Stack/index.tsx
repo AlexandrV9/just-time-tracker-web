@@ -5,7 +5,7 @@ import {
   type StackProps as BaseStackProps,
 } from "@chakra-ui/react";
 
-export interface StackProps extends BaseStackProps {}
+export type StackProps = BaseStackProps;
 
 export function Stack(props: StackProps) {
   return <BaseStack {...props} />;

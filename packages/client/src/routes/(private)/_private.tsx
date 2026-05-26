@@ -1,15 +1,26 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useLayoutEffect } from "react";
-import { LangSwitcher, ThemeSwitcher } from "~/features";
+import { LangSwitcher, ThemeSwitcher, useActivityEvents } from "~/features";
 import { authManager, AuthUserAvatar, useAuthStore } from "~/features/auth";
 import { NotificationButton } from "~/features/notifications";
-import { useDeviceDetect, useOrientation } from "~/shared/hooks";
-import { Box, Flex, PageLayout } from "~/shared/ui";
+import { useDeviceDetect, useOrientation, useTranslation } from "~/shared/hooks";
+import { buildLocationRedirectPath } from "~/shared/libs";
+import { Box, Flex, PageLayout, Text } from "~/shared/ui";
 import { Header, NavBar, useHeaderStore } from "~/widgets";
+
+function PrivateRoutePending() {
+  const { t } = useTranslation();
+  return (
+    <Box display="flex" justifyContent="center" alignItems="center" p={8}>
+      <Text color="fg.muted">{t("pages.private.pending")}</Text>
+    </Box>
+  );
+}
 
 export const Route = createFileRoute("/(private)/_private")({
   beforeLoad: async ({ location }) => {
     const authStatus = useAuthStore.getState().status;
+    const authRedirect = buildLocationRedirectPath(location);
 
     if (authStatus === "AUTHENTICATED") {
       return;
@@ -26,16 +37,20 @@ export const Route = createFileRoute("/(private)/_private")({
         return;
       } catch {
         throw redirect({
-          to: "/signin",
-          search: { redirect: location.href },
+          to: "/landing",
+          search: {
+            redirect: authRedirect,
+          },
         });
       }
     }
 
     if (authStatus === "UNAUTHENTICATED") {
       throw redirect({
-        to: "/signin",
-        search: { redirect: location.href },
+        to: "/landing",
+        search: {
+          redirect: authRedirect,
+        },
       });
     }
 
@@ -43,12 +58,14 @@ export const Route = createFileRoute("/(private)/_private")({
       console.log("Auth check in progress...");
     }
   },
-  loader: () => <div>ddd</div>,
+  pendingComponent: PrivateRoutePending,
   component: PrivateLayout,
 });
 
 export function PrivateLayout() {
   const { setContent } = useHeaderStore();
+
+  useActivityEvents();
 
   useLayoutEffect(() => {
     setContent("left", <AuthUserAvatar />);
@@ -58,7 +75,7 @@ export function PrivateLayout() {
         <LangSwitcher />
         <ThemeSwitcher />
         <NotificationButton />
-      </Flex>
+      </Flex>,
     );
   }, [setContent]);
 

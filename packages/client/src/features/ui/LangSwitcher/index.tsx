@@ -7,6 +7,7 @@ import { createListCollection } from "~/shared/utils";
 export const LANGUAGES = {
   en: "en",
   ru: "ru",
+  zh: "zh",
 } as const;
 
 const languageListCollection = createListCollection({

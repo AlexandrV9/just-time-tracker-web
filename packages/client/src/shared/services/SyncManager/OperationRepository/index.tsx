@@ -1,5 +1,4 @@
 import { IndexedDB } from "../../IndexedDB";
-import type { TaskOperation } from "../OperationExecutor";
 import type { BaseOperation } from "../types";
 
 export class OperationRepository<
@@ -10,4 +9,4 @@ export class OperationRepository<
   }
 }
 
-export const operationRepository = new OperationRepository<TaskOperation>();
+export const operationRepository = new OperationRepository();

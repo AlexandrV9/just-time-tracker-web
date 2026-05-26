@@ -1,19 +1,36 @@
-FROM node:18-alpine
+# syntax=docker/dockerfile:1
+
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
+ENV HUSKY=0
 
-RUN npm ci
+RUN corepack enable && corepack prepare pnpm@10.26.2 --activate
 
-COPY . .
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY packages/shared/package.json packages/shared/
+COPY packages/client/package.json packages/client/
 
-RUN npm run build
+RUN pnpm install --frozen-lockfile --ignore-scripts --filter @to-do-list/client...
+
+COPY packages/shared packages/shared
+COPY packages/client packages/client
+
+RUN pnpm --filter @to-do-list/shared build
+
+ARG VITE_API_ENDPOINT
+ARG VITE_APP_URL
+ENV VITE_API_ENDPOINT=$VITE_API_ENDPOINT
+ENV VITE_APP_URL=$VITE_APP_URL
+
+RUN pnpm --filter @to-do-list/client build
 
 FROM nginx:alpine
-COPY --from=0 /app/build /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 3000
+COPY packages/client/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/packages/client/dist /usr/share/nginx/html
+
+EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]

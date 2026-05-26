@@ -17,20 +17,9 @@ import {
 } from "~/shared/ui";
 
 import styles from "./SignUpForm.module.css";
+import { minLengthPassword, signUpFormSchema } from "./constants";
 
-const minLengthPassword = 8;
 const baseLocale = "features.auth.signUpForm";
-const signUpFormSchema = z
-  .object({
-    firstName: z.string().min(1, "firstName.error.required"),
-    login: z.string().min(1, "login.error.required"),
-    password: z.string().min(minLengthPassword, "password.error.minLength"),
-    repeatPassword: z.string().min(1, "repeatPassword.error.required"),
-  })
-  .refine((data) => data.password === data.repeatPassword, {
-    message: "passwords.mismatch",
-    path: ["repeatPassword"],
-  });
 
 export type SignUpFormSchema = z.infer<typeof signUpFormSchema>;
 
@@ -186,7 +175,7 @@ export const SignUpForm = () => {
 
 function getTranslatedError(
   t: TFunction<"translation", undefined>,
-  errorMessage: string | undefined
+  errorMessage: string | undefined,
 ) {
   if (!errorMessage) return undefined;
 

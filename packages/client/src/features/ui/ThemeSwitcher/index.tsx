@@ -14,7 +14,7 @@ const themeIconList: Record<Theme, ReactNode> = {
   system: <ChipIcon />,
 };
 
-export type ThemeSwitcherProps = {};
+export type ThemeSwitcherProps = Record<string, never>;
 
 export const ThemeSwitcher = () => {
   const { theme: currentTheme, changeTheme } = useTheme();

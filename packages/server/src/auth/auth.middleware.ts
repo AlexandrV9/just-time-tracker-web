@@ -1,9 +1,12 @@
 import type { MiddlewareHandler } from "hono";
 import { verify } from "hono/jwt";
 import type { AuthJWTPayload } from "src/shared/auth/auth.types.js";
+import type { AuthVariables } from "../shared/auth/auth.variables.js";
 import { config } from "src/shared/index.js";
 
-export const authMiddleware: MiddlewareHandler = async (c, next) => {
+export const authMiddleware: MiddlewareHandler<{
+  Variables: AuthVariables;
+}> = async (c, next) => {
   const authHeader = c.req.header("Authorization");
 
   if (!authHeader) {
@@ -23,7 +26,7 @@ export const authMiddleware: MiddlewareHandler = async (c, next) => {
     )) as AuthJWTPayload;
 
     c.set("user", {
-      id: payload.data,
+      id: String(payload.data.id),
     });
 
     await next();

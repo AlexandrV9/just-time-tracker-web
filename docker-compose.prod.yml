@@ -1,0 +1,56 @@
+# Продакшен-стек: образы из GHCR + PostgreSQL.
+# Запуск: docker compose -f docker-compose.prod.yml --env-file .env up -d
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: time-tracker-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - app
+
+  server:
+    image: ${GHCR_IMAGE_PREFIX:-ghcr.io/alexandrv9/time-tracker}/server:${IMAGE_TAG:-latest}
+    container_name: time-tracker-server
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+    ports:
+      - "${SERVER_PORT:-9000}:9000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app
+
+  client:
+    image: ${GHCR_IMAGE_PREFIX:-ghcr.io/alexandrv9/time-tracker}/client:${IMAGE_TAG:-latest}
+    container_name: time-tracker-client
+    ports:
+      - "${CLIENT_PORT:-80}:80"
+    depends_on:
+      - server
+    restart: unless-stopped
+    networks:
+      - app
+
+networks:
+  app:
+    driver: bridge
+
+volumes:
+  postgres_data:

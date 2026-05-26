@@ -1,9 +1,9 @@
-import type { GetTagDataDTO, TaskDTO } from "@to-do-list/shared";
+import type { GetTagDataDTO, TagDTO } from "@to-do-list/shared";
 import { baseApi } from "../base";
 
 export class TagService {
-  getTagById({ id: taskId }: GetTagDataDTO) {
-    return baseApi.get<TaskDTO>(`/api/tasks/${taskId}`);
+  getTagById({ id }: GetTagDataDTO) {
+    return baseApi.get<TagDTO>(`/api/tags/${id}`);
   }
 }
 

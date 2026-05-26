@@ -1,14 +1,23 @@
 import { useAuthStore } from "~/features/auth";
 import { BackButton, Box, Input, Stack } from "~/shared/ui";
 import { AuthUserInfo, useHeaderLeftContent } from "~/widgets";
+import { useTranslation } from "~/shared/hooks";
 
 export function ProfilePage() {
   useHeaderLeftContent(<BackButton />);
 
+  const { t } = useTranslation();
   const { user } = useAuthStore();
 
   return (
-    <Stack.VStack alignItems="stretch" gap="2rem">
+    <Stack.VStack
+      alignItems="stretch"
+      p={4}
+      w="full"
+      maxW="520px"
+      mx="auto"
+      gap="2rem"
+    >
       <AuthUserInfo />
       <Stack.VStack>
         <Box
@@ -18,9 +27,19 @@ export function ProfilePage() {
           flexDirection="column"
           gap="1rem"
         >
-          <Input placeholder="Имя" value={user!.name} disabled />
-          <Input placeholder="Почта" disabled />
-          <Input placeholder="Дата рождения" disabled />
+          <Input
+            placeholder={t("pages.settings.profile.namePlaceholder")}
+            value={user!.name}
+            disabled
+          />
+          <Input
+            placeholder={t("pages.settings.profile.emailPlaceholder")}
+            disabled
+          />
+          <Input
+            placeholder={t("pages.settings.profile.birthDatePlaceholder")}
+            disabled
+          />
         </Box>
       </Stack.VStack>
     </Stack.VStack>

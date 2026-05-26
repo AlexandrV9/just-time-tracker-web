@@ -1,0 +1,76 @@
+name: Publish Docker images
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm verify
+
+  docker:
+    needs: verify
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [client, server]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image prefix
+        run: echo "IMAGE_PREFIX=${REGISTRY}/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/time-tracker" >> "$GITHUB_ENV"
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push client
+        if: matrix.service == 'client'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: packages/client/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/client:latest
+            ${{ env.IMAGE_PREFIX }}/client:${{ github.sha }}
+          build-args: |
+            VITE_API_ENDPOINT=${{ vars.VITE_API_ENDPOINT }}
+            VITE_APP_URL=${{ vars.VITE_APP_URL }}
+
+      - name: Build and push server
+        if: matrix.service == 'server'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: packages/server/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/server:latest
+            ${{ env.IMAGE_PREFIX }}/server:${{ github.sha }}

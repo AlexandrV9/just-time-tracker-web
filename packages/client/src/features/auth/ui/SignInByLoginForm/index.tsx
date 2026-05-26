@@ -33,7 +33,7 @@ export const SignInByLoginForm = () => {
   const navigate = useNavigate();
   const { redirect } = useSearch({ from: "/(auth)/_auth/signin/" });
 
-  const signInMutatuin = useMutation({
+  const { isPending, mutate } = useMutation({
     mutationFn: (data: SignInFormSchema) => authManager.signInByLogin(data),
     onSuccess: (response) => {
       if (response.success) {
@@ -41,7 +41,7 @@ export const SignInByLoginForm = () => {
       }
     },
     onError: (error) => {
-      toast.error(error.message, {
+      toast.error(error.message || "Unknown error", {
         position: "top-center",
         draggable: true,
         toastId: "error_sign_in",
@@ -55,12 +55,14 @@ export const SignInByLoginForm = () => {
     formState: { errors },
   } = useForm<SignInFormSchema>({
     resolver: zodResolver(signInFormSchema),
-    disabled: signInMutatuin.isPending,
+    disabled: isPending,
+    defaultValues: {
+      login: "",
+      password: "",
+    },
   });
 
-  const submitHandler = handleSubmit(async (data) => {
-    signInMutatuin.mutate(data);
-  });
+  const submitHandler = handleSubmit((data) => mutate(data));
 
   return (
     <Box
@@ -116,7 +118,7 @@ export const SignInByLoginForm = () => {
       <Button
         mt="1rem"
         type="submit"
-        loading={signInMutatuin.isPending}
+        loading={isPending}
         loadingText={t(`${baseLocale}.submitButtonLoadingText`)}
       >
         {t(`${baseLocale}.submitButton`)}
@@ -128,7 +130,7 @@ export const SignInByLoginForm = () => {
             {t(`${baseLocale}.subtitleText`)}
           </Text>
           <Text asChild color="purple.500" fontWeight="600">
-            <Link disabled={signInMutatuin.isPending} to="/signup">
+            <Link disabled={isPending} to="/signup">
               {t(`${baseLocale}.linkText`)}
             </Link>
           </Text>

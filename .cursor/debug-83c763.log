@@ -1,0 +1,5 @@
+{"sessionId":"83c763","location":"activity.service.ts:getActivitiesGroupedByDay","message":"query done","data":{"days":["2026-04-18","2026-04-16","2026-04-12"],"totalDayCount":3,"activityCount":5},"timestamp":1776604775485}
+{"sessionId":"83c763","location":"activity.service.ts:getActivitiesGroupedByDay","message":"query done","data":{"days":["2026-04-18","2026-04-16","2026-04-12"],"totalDayCount":3,"activityCount":5},"timestamp":1776604777209}
+{"sessionId":"83c763","location":"activity.service.ts:getActivitiesGroupedByDay","message":"query done","data":{"days":["2026-04-18","2026-04-16","2026-04-12"],"totalDayCount":3,"activityCount":5},"timestamp":1776604782735}
+{"sessionId":"83c763","location":"activity.service.ts:getActivitiesGroupedByDay","message":"query done","data":{"days":["2026-04-19","2026-04-18","2026-04-16","2026-04-12"],"totalDayCount":4,"activityCount":5},"timestamp":1776604790780}
+{"sessionId":"83c763","location":"activity.service.ts:getActivitiesGroupedByDay","message":"query done","data":{"days":["2026-04-19","2026-04-18","2026-04-16","2026-04-12"],"totalDayCount":4,"activityCount":5},"timestamp":1776604791523}

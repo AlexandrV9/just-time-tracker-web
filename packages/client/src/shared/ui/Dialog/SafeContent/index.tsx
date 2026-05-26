@@ -4,7 +4,7 @@ import { Dialog } from "..";
 import { safeAreaStyles } from "../../SafeArea";
 import clsx from "clsx";
 
-export interface SafeContentProps extends DialogContentProps {}
+export type SafeContentProps = DialogContentProps;
 
 export const SafeContent = ({ className, ...props }: SafeContentProps) => {
   return (

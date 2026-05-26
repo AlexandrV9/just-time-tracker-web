@@ -6,15 +6,17 @@ export type BaseIconProps = React.SVGProps<SVGSVGElement> & {
   size?: number;
 };
 
+export type IconProps = BaseIconProps;
+
 export const withIconProps = <T,>(
-  WrappedComponent: React.ComponentType<BaseIconProps &T>
+  WrappedComponent: React.ComponentType<BaseIconProps & T>
 ) => {
   const Component = ({
     size = 24,
     style,
     className,
     ...props
-  }: BaseIconProps &T) => {
+  }: BaseIconProps & T) => {
     return (
       <WrappedComponent
         {...(props as T)}

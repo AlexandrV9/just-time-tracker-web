@@ -1,0 +1,78 @@
+# Локальный стек: сборка образов из исходников + PostgreSQL.
+# Для разработки без Docker-приложений (только БД): docker compose -f .docker/docker-compose.yaml up -d
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: time-tracker-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - .docker/postgres/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - app
+
+  server:
+    build:
+      context: .
+      dockerfile: packages/server/Dockerfile
+    container_name: time-tracker-server
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+    ports:
+      - "${SERVER_PORT:-9000}:9000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app
+
+  client:
+    build:
+      context: .
+      dockerfile: packages/client/Dockerfile
+      args:
+        VITE_API_ENDPOINT: ${VITE_API_ENDPOINT:-http://localhost:9000}
+        VITE_APP_URL: ${VITE_APP_URL:-http://localhost:9000}
+    container_name: time-tracker-client
+    ports:
+      - "${CLIENT_PORT:-3000}:80"
+    depends_on:
+      - server
+    restart: unless-stopped
+    networks:
+      - app
+
+  pgadmin:
+    profiles: [tools]
+    image: dpage/pgadmin4
+    container_name: time-tracker-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "8080:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app
+
+networks:
+  app:
+    driver: bridge

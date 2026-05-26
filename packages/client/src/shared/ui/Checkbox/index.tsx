@@ -3,6 +3,6 @@ import {
   type CheckboxRootProps,
 } from "@chakra-ui/react";
 
-export interface CheckboxProps extends CheckboxRootProps {}
+export type CheckboxProps = CheckboxRootProps;
 
 export const Checkbox = BaseCheckbox;

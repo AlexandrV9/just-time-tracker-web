@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { axiosInstance } from "~/shared/config/axios";
 import { AxiosAdapter, type HttpAdapter } from "./adapters";
+export { unwrap, noThrowRequest } from "./adapters";
 import type { RequestResponse } from "./types";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";

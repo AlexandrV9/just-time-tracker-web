@@ -23,7 +23,18 @@ export * from "./Edit";
 export * from "./Circle";
 export * from "./Calendar";
 export * from "./ShareForward";
-
+export * from "./HorizontalLine";
+export * from "./Calendar2";
+export * from "./PlayCircle";
+export * from "./Play";
+export * from "./Stop";
+export * from "./Pause";
+export * from "./PauseCircle";
+export * from "./Lightning";
+export * from "./EmptyBox";
 export * from "./CircularLinesLoader";
+export * from "./Version";
+export * from "./Book";
+export * from "./Exit";
 
 export * from "./withIconProps";

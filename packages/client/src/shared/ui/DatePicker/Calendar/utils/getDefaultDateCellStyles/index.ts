@@ -11,7 +11,8 @@ const getDefaultStyles = () => {
       border: "2px solid",
     },
     _hover: {
-      bg: "gray.50",
+      bg: "bg.muted",
+      color: "fg.default",
       cursor: "pointer",
     },
     opacity: 1,
@@ -25,7 +26,8 @@ const getDefaultNotCurrentMonthStyles = () => {
     opacity: 0.7,
     pointerEvents: "auto" as const,
     _hover: {
-      bg: "gray.100",
+      bg: "bg.muted",
+      color: "fg.muted",
       cursor: "pointer",
     },
     _selected: {

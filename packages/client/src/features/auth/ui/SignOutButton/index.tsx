@@ -17,8 +17,8 @@ export const SignOutButton = () => {
   }, [navigate]);
 
   return (
-    <Button variant="outline" size="xl" onClick={handleClick}>
-      {t("features.auth.signOut.textButton")}
+    <Button variant="outline" borderRadius="100px" px="2rem" size="md" borderColor="red.500" onClick={handleClick} color="red.500">
+      {t("features.auth.signOutButton")}
     </Button>
   );
 };
