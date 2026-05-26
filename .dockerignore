@@ -1,0 +1,16 @@
+.git
+.github
+.cursor
+node_modules
+**/node_modules
+**/dist
+**/.turbo
+.docker/postgres/data
+*.md
+docs
+.env
+.env.*
+**/*.test.ts
+**/tests
+**/vitest.config.ts
+**/eslint.config.js
