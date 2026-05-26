@@ -15,6 +15,28 @@ env:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d test_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: test_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      ACCESS_TOKEN_SECRET: ci-access-token-secret
+      REFRESH_TOKEN_SECRET: ci-refresh-token-secret
     steps:
       - uses: actions/checkout@v4
 

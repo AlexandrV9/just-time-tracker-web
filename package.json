@@ -14,7 +14,7 @@
     "build": "concurrently \"pnpm run build:shared\" \"pnpm run build:client\" \"pnpm run build:server\"",
     "lint": "pnpm --filter @to-do-list/client eslint",
     "test": "pnpm --filter @to-do-list/server test",
-    "verify": "pnpm lint && pnpm test && pnpm build",
+    "verify": "pnpm lint && pnpm build:shared && pnpm test && pnpm build",
     "prepare": "husky"
   },
   "keywords": [],
