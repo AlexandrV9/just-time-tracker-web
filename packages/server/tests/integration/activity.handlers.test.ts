@@ -1,7 +1,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { Hono } from "hono";
 import type { TestDatabase } from "../setup/test-db.js";
 import { resetActivitiesTables, startTestDatabase } from "../setup/test-db.js";
 import { activitiesRouter } from "../../src/activity/activity.routes.js";
+import { TEST_USER_ID } from "../setup/test-auth.js";
+import type { AuthVariables } from "../../src/shared/auth/auth.variables.js";
 
 const T0 = "2025-01-01T10:00:00.000Z";
 const T1 = "2025-01-01T10:05:00.000Z";
@@ -16,9 +19,16 @@ const json = async (res: Response): Promise<JsonBody> =>
 
 describe("activitiesRouter", () => {
   let testDb: TestDatabase;
+  let testRouter: Hono<{ Variables: AuthVariables }>;
 
   beforeAll(async () => {
     testDb = await startTestDatabase();
+    testRouter = new Hono<{ Variables: AuthVariables }>();
+    testRouter.use("*", async (c, next) => {
+      c.set("user", { id: TEST_USER_ID });
+      await next();
+    });
+    testRouter.route("/", activitiesRouter);
   });
 
   beforeEach(async () => {
@@ -35,7 +45,7 @@ describe("activitiesRouter", () => {
 
     return activityRepository.createActivity({
       title,
-      createdById: "user-1",
+      createdById: TEST_USER_ID,
       tags: ["work"],
     });
   };
@@ -43,7 +53,7 @@ describe("activitiesRouter", () => {
   const seedTrackedActivity = async () => {
     const activity = await seedActivity("Tracked");
 
-    await activitiesRouter.request("/start", {
+    await testRouter.request("/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -52,7 +62,7 @@ describe("activitiesRouter", () => {
       }),
     });
 
-    await activitiesRouter.request("/pause", {
+    await testRouter.request("/pause", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -61,7 +71,7 @@ describe("activitiesRouter", () => {
       }),
     });
 
-    await activitiesRouter.request("/finish", {
+    await testRouter.request("/finish", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -77,7 +87,7 @@ describe("activitiesRouter", () => {
     it("returns activity by id", async () => {
       const created = await seedActivity();
 
-      const res = await activitiesRouter.request(`/${created.id}`);
+      const res = await testRouter.request(`/${created.id}`);
       const body = await json(res);
 
       expect(res.status).toBe(200);
@@ -85,12 +95,12 @@ describe("activitiesRouter", () => {
       expect(body.data).toMatchObject({
         id: created.id,
         title: "Seed activity",
-        createdById: "user-1",
+        createdById: TEST_USER_ID,
       });
     });
 
     it("returns not found for missing id", async () => {
-      const res = await activitiesRouter.request(
+      const res = await testRouter.request(
         "/00000000-0000-0000-0000-000000000000",
       );
       const body = await json(res);
@@ -104,13 +114,11 @@ describe("activitiesRouter", () => {
   });
 
   describe("GET /", () => {
-    it("returns paginated activities filtered by createdById", async () => {
+    it("returns paginated activities for authenticated user", async () => {
       await seedActivity("Alpha");
       await seedActivity("Beta");
 
-      const res = await activitiesRouter.request(
-        "/?createdById=user-1&limit=10",
-      );
+      const res = await testRouter.request("/?limit=10");
       const body = await json(res);
 
       expect(res.status).toBe(200);
@@ -124,12 +132,11 @@ describe("activitiesRouter", () => {
 
   describe("POST /", () => {
     it("creates activity with 201", async () => {
-      const res = await activitiesRouter.request("/", {
+      const res = await testRouter.request("/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: "New via HTTP",
-          createdById: "user-1",
           tags: ["api"],
         }),
       });
@@ -139,7 +146,7 @@ describe("activitiesRouter", () => {
       expect(body.success).toBe(true);
       expect(body.data).toMatchObject({
         title: "New via HTTP",
-        createdById: "user-1",
+        createdById: TEST_USER_ID,
         tags: ["api"],
       });
     });
@@ -149,7 +156,7 @@ describe("activitiesRouter", () => {
     it("updates activity", async () => {
       const created = await seedActivity();
 
-      const res = await activitiesRouter.request(`/${created.id}`, {
+      const res = await testRouter.request(`/${created.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -172,7 +179,7 @@ describe("activitiesRouter", () => {
     it("deletes activity", async () => {
       const created = await seedActivity();
 
-      const res = await activitiesRouter.request(`/${created.id}`, {
+      const res = await testRouter.request(`/${created.id}`, {
         method: "DELETE",
       });
       const body = await json(res);
@@ -193,7 +200,7 @@ describe("activitiesRouter", () => {
       const a = await seedActivity("One");
       const b = await seedActivity("Two");
 
-      const res = await activitiesRouter.request("/by-ids", {
+      const res = await testRouter.request("/by-ids", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ activityIds: [b.id, a.id] }),
@@ -212,8 +219,8 @@ describe("activitiesRouter", () => {
     it("returns finished activity with segment time in range", async () => {
       const activity = await seedTrackedActivity();
 
-      const res = await activitiesRouter.request(
-        `/tracked?createdById=user-1&fromDate=${RANGE_FROM}&toDate=${RANGE_TO}`,
+      const res = await testRouter.request(
+        `/tracked?fromDate=${RANGE_FROM}&toDate=${RANGE_TO}`,
       );
       const body = await json(res);
 
@@ -248,7 +255,7 @@ describe("activitiesRouter", () => {
       const jan2From = "2025-01-02T00:00:00.000Z";
       const jan2To = "2025-01-03T00:00:00.000Z";
 
-      await activitiesRouter.request("/start", {
+      await testRouter.request("/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -257,7 +264,7 @@ describe("activitiesRouter", () => {
         }),
       });
 
-      await activitiesRouter.request("/pause", {
+      await testRouter.request("/pause", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -266,7 +273,7 @@ describe("activitiesRouter", () => {
         }),
       });
 
-      await activitiesRouter.request("/start", {
+      await testRouter.request("/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -275,7 +282,7 @@ describe("activitiesRouter", () => {
         }),
       });
 
-      await activitiesRouter.request("/finish", {
+      await testRouter.request("/finish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -284,8 +291,8 @@ describe("activitiesRouter", () => {
         }),
       });
 
-      const trackedRes = await activitiesRouter.request(
-        `/tracked?createdById=user-1&fromDate=${jan2From}&toDate=${jan2To}`,
+      const trackedRes = await testRouter.request(
+        `/tracked?fromDate=${jan2From}&toDate=${jan2To}`,
       );
       const trackedBody = await json(trackedRes);
 
@@ -301,8 +308,8 @@ describe("activitiesRouter", () => {
         activeDurationMs: 900_000,
       });
 
-      const currentRes = await activitiesRouter.request(
-        `/current?createdById=user-1&fromDate=${jan2From}&toDate=${jan2To}&status=active`,
+      const currentRes = await testRouter.request(
+        `/current?fromDate=${jan2From}&toDate=${jan2To}&status=active`,
       );
       const currentBody = await json(currentRes);
 
@@ -316,7 +323,7 @@ describe("activitiesRouter", () => {
     it("returns active activity in date range", async () => {
       const activity = await seedActivity("Current");
 
-      await activitiesRouter.request("/start", {
+      await testRouter.request("/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -325,8 +332,8 @@ describe("activitiesRouter", () => {
         }),
       });
 
-      const res = await activitiesRouter.request(
-        `/current?createdById=user-1&fromDate=${RANGE_FROM}&toDate=${RANGE_TO}&status=active`,
+      const res = await testRouter.request(
+        `/current?fromDate=${RANGE_FROM}&toDate=${RANGE_TO}&status=active`,
       );
       const body = await json(res);
 
@@ -348,21 +355,21 @@ describe("activitiesRouter", () => {
     it("tracks session lifecycle via HTTP", async () => {
       const activity = await seedActivity();
 
-      const startRes = await activitiesRouter.request("/start", {
+      const startRes = await testRouter.request("/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ activityId: activity.id, startedAt: T0 }),
       });
       expect((await json(startRes)).success).toBe(true);
 
-      const pauseRes = await activitiesRouter.request("/pause", {
+      const pauseRes = await testRouter.request("/pause", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ activityId: activity.id, pausedAt: T1 }),
       });
       expect((await json(pauseRes)).success).toBe(true);
 
-      const finishRes = await activitiesRouter.request("/finish", {
+      const finishRes = await testRouter.request("/finish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ activityId: activity.id, finishedAt: T2 }),
@@ -381,7 +388,7 @@ describe("activitiesRouter", () => {
     it("returns sessions for activity", async () => {
       const activity = await seedTrackedActivity();
 
-      const res = await activitiesRouter.request(
+      const res = await testRouter.request(
         `/${activity.id}/sessions?fromDate=${RANGE_FROM}&toDate=${RANGE_TO}`,
       );
       const body = await json(res);
@@ -400,7 +407,7 @@ describe("activitiesRouter", () => {
     it("returns segments for activity in range", async () => {
       const activity = await seedTrackedActivity();
 
-      const res = await activitiesRouter.request(
+      const res = await testRouter.request(
         `/${activity.id}/session-segments?fromDate=${RANGE_FROM}&toDate=${RANGE_TO}`,
       );
       const body = await json(res);
@@ -417,7 +424,7 @@ describe("activitiesRouter", () => {
     it("returns analytics for activity", async () => {
       const activity = await seedTrackedActivity();
 
-      const res = await activitiesRouter.request(
+      const res = await testRouter.request(
         `/${activity.id}/analytics?fromDate=${RANGE_FROM}&toDate=${RANGE_TO}`,
       );
       const body = await json(res);
@@ -436,7 +443,7 @@ describe("activitiesRouter", () => {
     it("returns batch analytics by activity ids", async () => {
       const activity = await seedTrackedActivity();
 
-      const res = await activitiesRouter.request(
+      const res = await testRouter.request(
         `/analytics?activityIds=${activity.id}&fromDate=${RANGE_FROM}&toDate=${RANGE_TO}`,
       );
       const body = await json(res);
@@ -457,8 +464,8 @@ describe("activitiesRouter", () => {
     it("returns grouped activities with time totals", async () => {
       await seedTrackedActivity();
 
-      const res = await activitiesRouter.request(
-        `/grouped?createdById=user-1&fromDate=${RANGE_FROM}&toDate=${RANGE_TO}&groupLimit=5&itemsLimit=8`,
+      const res = await testRouter.request(
+        `/grouped?fromDate=${RANGE_FROM}&toDate=${RANGE_TO}&groupLimit=5&itemsLimit=8`,
       );
       const body = await json(res);
 
@@ -477,8 +484,8 @@ describe("activitiesRouter", () => {
       await seedTrackedActivity();
       await seedTrackedActivity();
 
-      const groupedRes = await activitiesRouter.request(
-        `/grouped?createdById=user-1&fromDate=${RANGE_FROM}&toDate=${RANGE_TO}&groupLimit=5&itemsLimit=1`,
+      const groupedRes = await testRouter.request(
+        `/grouped?fromDate=${RANGE_FROM}&toDate=${RANGE_TO}&groupLimit=5&itemsLimit=1`,
       );
       const groupedBody = await json(groupedRes);
 
@@ -493,8 +500,8 @@ describe("activitiesRouter", () => {
       const cursor = group.itemsPagination.nextCursor;
       expect(cursor).toBeTruthy();
 
-      const itemsRes = await activitiesRouter.request(
-        `/grouped/items?createdById=user-1&cursor=${encodeURIComponent(cursor!)}&limit=8`,
+      const itemsRes = await testRouter.request(
+        `/grouped/items?cursor=${encodeURIComponent(cursor!)}&limit=8`,
       );
       const itemsBody = await json(itemsRes);
 

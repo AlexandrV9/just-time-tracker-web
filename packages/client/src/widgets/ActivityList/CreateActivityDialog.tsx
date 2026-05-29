@@ -13,7 +13,6 @@ import {
   Stack,
   TextArea,
 } from "~/shared/ui";
-import { useAuthStore } from "~/features/auth";
 
 type CreateActivityDialogProps = {
   dialog: ReturnType<typeof useDialog>;
@@ -23,9 +22,6 @@ export const CreateActivityDialog = ({ dialog }: CreateActivityDialogProps) => {
   const { t } = useTranslation();
 
   const queryClient = useQueryClient();
-
-  const { user } = useAuthStore();
-  const userId = user?.id;
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -53,7 +49,6 @@ export const CreateActivityDialog = ({ dialog }: CreateActivityDialogProps) => {
     const response = await createActivity({
       title: title.trim(),
       description: description.trim() || undefined,
-      createdById: userId!,
     });
 
     if (!response.success) return;

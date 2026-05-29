@@ -8,7 +8,6 @@ const tagListSchema = z.array(z.string()).max(10).optional();
 export const createActivitySchema = z.object({
   title: z.string().min(1, "title is required").max(255),
   description: z.string().max(1000).optional(),
-  createdById: z.string().min(1, "createdById is required"),
   tags: tagListSchema,
 });
 
@@ -36,7 +35,6 @@ export type ActivityDTO = z.infer<typeof activitySchema>;
 
 export const getActivitiesSchema = z
   .object({
-    createdById: z.string().optional(),
     tags: z.array(z.string()).optional(),
     search: z.string().optional(),
     exactTitle: z.string().min(1).max(255).optional(),
@@ -65,7 +63,6 @@ export type GetActivitiesDTO = z.infer<typeof getActivitiesSchema>;
 
 export const getCurrentActivitiesQuerySchema = z
   .object({
-    createdById: z.string().min(1, "createdById is required"),
     fromDate: z.iso.datetime().optional(),
     toDate: z.iso.datetime().optional(),
     page: z.coerce.number().int().min(0).default(0),
@@ -122,7 +119,6 @@ export type GetCurrentActivitiesResponseDTO = z.infer<
  */
 export const getTrackedActivitiesQuerySchema = z
   .object({
-    createdById: z.string().min(1, "createdById is required"),
     fromDate: z.iso.datetime().optional(),
     toDate: z.iso.datetime().optional(),
     page: z.coerce.number().int().min(0).default(0),
@@ -415,7 +411,6 @@ export type GetGroupedActivitiesResponseDTO = z.infer<
 >;
 
 export const getGroupedActivitiesQuerySchema = z.object({
-  createdById: z.string().min(1, "createdById is required"),
   groupBy: z.enum(["day", "week", "month"]).optional().default("day"),
   groupCursor: z.string().min(1).optional(),
   groupLimit: z.coerce.number().int().positive().max(100).optional().default(5),
@@ -430,7 +425,6 @@ export type GetGroupedActivitiesQueryDTO = z.infer<
 
 /** Query для `GET /activities/grouped/items` — догрузка списка активностей внутри одной группы. */
 export const getGroupedActivityItemsQuerySchema = z.object({
-  createdById: z.string().min(1, "createdById is required"),
   cursor: z.string().min(1, "cursor is required"),
   limit: z.coerce.number().int().positive().max(100).optional().default(8),
 });

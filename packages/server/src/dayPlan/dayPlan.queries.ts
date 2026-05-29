@@ -1,3 +1,4 @@
+import type { WithCreatedById } from "../shared/auth/with-created-by-id.js";
 import type {
   CreateDayPlanDataDTO,
   DayPlanDTO,
@@ -15,7 +16,7 @@ export const DAY_PLAN_RETURNING_COLUMNS = `
 `;
 
 const createDayPlan = async (
-  data: CreateDayPlanDataDTO,
+  data: WithCreatedById<CreateDayPlanDataDTO>,
 ): Promise<DayPlanDTO> => {
   const query = `
     INSERT INTO day_plans (created_by_id, date, created_at, updated_at)
@@ -38,7 +39,7 @@ const getDayPlanById = async (id: string): Promise<DayPlanDTO | null> => {
   return rows[0] ?? null;
 };
 
-const getDayPlans = async (filters: GetDayPlansDTO) => {
+const getDayPlans = async (filters: WithCreatedById<GetDayPlansDTO>) => {
   const {
     createdById,
     date,

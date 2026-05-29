@@ -41,7 +41,6 @@ export function useActivityEvents() {
 
     try {
       const result = await fetchCurrentActivityData({
-        createdById: userId,
         fromDate,
         toDate,
       });

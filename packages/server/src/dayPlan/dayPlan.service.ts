@@ -1,3 +1,4 @@
+import type { WithCreatedById } from "../shared/auth/with-created-by-id.js";
 import type {
   CreateDayPlanDataDTO,
   DayPlanDTO,
@@ -20,7 +21,7 @@ function isPgError(e: unknown): e is { code?: string } {
 type CreateDayPlanResponse = SuccessResponse<DayPlanDTO> | ErrorResponse;
 
 const createDayPlan = async (
-  data: CreateDayPlanDataDTO,
+  data: WithCreatedById<CreateDayPlanDataDTO>,
 ): Promise<CreateDayPlanResponse> => {
   try {
     const entry = await dayPlanQueries.createDayPlan(data);
@@ -59,7 +60,7 @@ type GetDayPlansResponse =
   | ErrorResponse;
 
 const getDayPlans = async (
-  filters: GetDayPlansDTO,
+  filters: WithCreatedById<GetDayPlansDTO>,
 ): Promise<GetDayPlansResponse> => {
   try {
     const result = await dayPlanQueries.getDayPlans(filters);

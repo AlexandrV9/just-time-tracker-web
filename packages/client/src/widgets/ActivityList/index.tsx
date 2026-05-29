@@ -15,7 +15,6 @@ import {
 } from "~/shared/api/services";
 import { useInView } from "react-intersection-observer";
 import { useEffect, useMemo } from "react";
-import { useAuthStore } from "~/features/auth";
 import { useDialog, VStack } from "@chakra-ui/react";
 import { useTranslation } from "~/shared/hooks";
 import { CreateActivityDialog } from "./CreateActivityDialog";
@@ -23,8 +22,6 @@ import { ActivityListView } from "~/entities";
 
 export const ActivityList = () => {
   const { t } = useTranslation();
-  const { user } = useAuthStore();
-  const userId = user?.id;
 
   const createActivityDialog = useDialog();
 
@@ -34,7 +31,6 @@ export const ActivityList = () => {
       activityApiService.getActivities({
         page: ctx.pageParam,
         limit: 20,
-        createdById: userId!,
       }),
     initialPageParam: 0,
     getNextPageParam: (lastGroup) => {

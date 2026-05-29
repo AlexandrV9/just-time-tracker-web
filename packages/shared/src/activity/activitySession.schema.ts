@@ -20,7 +20,6 @@ export const activitySessionSchema = z.object({
   status: activitySessionStatusSchema,
   activeDurationMs: z.number().int().nonnegative(),
   pauseDurationMs: z.number().int().nonnegative(),
-  lastHeartbeatAt: z.iso.datetime().optional(), // последний момент, когда мы уверены, что пользователь работал в рамках ЭТОЙ конкретной сессии
   currentSegmentId: z.string().nullable(),
 });
 
@@ -33,7 +32,6 @@ export const createActivitySessionSchema = z.object({
   status: activitySessionStatusSchema.optional(),
   activeDurationMs: z.number().int().nonnegative().optional(),
   pauseDurationMs: z.number().int().nonnegative().optional(),
-  lastHeartbeatAt: z.iso.datetime().optional(),
 });
 
 export type CreateActivitySessionDataDTO = z.infer<
@@ -48,7 +46,6 @@ export const updateActivitySessionSchema = z.object({
   status: activitySessionStatusSchema.optional(),
   activeDurationMs: z.number().int().nonnegative().optional(),
   pauseDurationMs: z.number().int().nonnegative().optional(),
-  lastHeartbeatAt: z.iso.datetime().optional(),
 });
 
 export type UpdateActivitySessionDataDTO = z.infer<

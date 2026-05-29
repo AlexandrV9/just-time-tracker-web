@@ -1,3 +1,4 @@
+import type { WithCreatedById } from "../shared/auth/with-created-by-id.js";
 import type { ActivityTrackingEventTypeDTO } from "@to-do-list/shared";
 import type {
   CreateActivityDataDTO,
@@ -14,6 +15,7 @@ import type {
   GetActivityAnalyticsResponseDTO,
   GetGroupedActivitiesQueryDTO,
   GetGroupedActivitiesResponseDTO,
+  GetGroupedActivityItemsQueryDTO,
   GetGroupedActivityItemsResponseDTO,
   GetActivitiesAnalyticsResponseDTO,
   GetActivitiesAnalyticsQueryDTO,
@@ -115,7 +117,7 @@ function addMsToUtcDayBuckets(
 type CreateActivityResponse = SuccessResponse<ActivityDTO> | ErrorResponse;
 
 const createActivity = async (
-  data: CreateActivityDataDTO,
+  data: WithCreatedById<CreateActivityDataDTO>,
 ): Promise<CreateActivityResponse> => {
   try {
     const entry = await activityRepository.createActivity(data);
@@ -254,7 +256,7 @@ type GetActivitiesResponse =
   | ErrorResponse;
 
 const getActivities = async (
-  filters: GetActivitiesDTO,
+  filters: WithCreatedById<GetActivitiesDTO>,
 ): Promise<GetActivitiesResponse> => {
   try {
     const result = await activityQueries.getActivities(filters);
@@ -296,7 +298,7 @@ type GetCurrentActivitiesResponse =
   | ErrorResponse;
 
 const getCurrentActivities = async (
-  filters: GetCurrentActivitiesQueryDTO,
+  filters: WithCreatedById<GetCurrentActivitiesQueryDTO>,
 ): Promise<GetCurrentActivitiesResponse> => {
   try {
     const result = await activityQueries.getCurrentActivities(filters);
@@ -724,7 +726,7 @@ type GetTrackedActivitiesResponse =
   | ErrorResponse;
 
 const getTrackedActivities = async (
-  filters: GetTrackedActivitiesQueryDTO,
+  filters: WithCreatedById<GetTrackedActivitiesQueryDTO>,
 ): Promise<GetTrackedActivitiesResponse> => {
   try {
     const {
@@ -806,7 +808,7 @@ const getTrackedActivities = async (
  */
 // GET /api/activities/grouped
 export const getGroupedActivities = async (
-  params: GetGroupedActivitiesQueryDTO,
+  params: WithCreatedById<GetGroupedActivitiesQueryDTO>,
 ): Promise<GetGroupedActivitiesResult> => {
   try {
     const {
@@ -952,11 +954,9 @@ type GetGroupedActivityItemsResult =
 
 /** Вторая ступень пагинации: только элементы внутри одного bucket; `cursor` — `ItemsCursorPayload` в base64. */
 // GET /api/activities/grouped/items?cursor=...&limit=8
-export const getGroupedActivityItems = async (params: {
-  createdById: string;
-  cursor: string;
-  limit: number;
-}): Promise<GetGroupedActivityItemsResult> => {
+export const getGroupedActivityItems = async (
+  params: WithCreatedById<GetGroupedActivityItemsQueryDTO>,
+): Promise<GetGroupedActivityItemsResult> => {
   try {
     const { createdById, cursor, limit } = params;
 

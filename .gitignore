@@ -1,10 +1,8 @@
 node_modules
 dist
 .env
-docs/
 .vscode/
 .DS_Store
-
 .docker/postgres/data/
-
 .cursor/
+notes/

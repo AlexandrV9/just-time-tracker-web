@@ -53,7 +53,6 @@ export function AddTodayActivitiesDialog({
       activityApiService.getActivities({
         page: 0,
         limit: 100,
-        createdById: userId!,
         sortOrder: "desc",
       }),
     enabled: !!userId,

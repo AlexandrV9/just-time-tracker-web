@@ -1,3 +1,4 @@
+import type { Context } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import {
   addDayPlanItemsSchema,
@@ -15,6 +16,7 @@ import {
 import { dayPlanItemsService } from "./dayPlanItem.service.js";
 import { dayPlansService } from "./dayPlan.service.js";
 import { validationUtils } from "../shared/index.js";
+import { withCreatedById } from "../shared/auth/with-created-by-id.js";
 
 type ValidatorType = "json" | "param" | "query";
 
@@ -23,6 +25,7 @@ const createHandler = (
   schema: any,
   serviceMethod: Function,
   successStatus = 200,
+  map?: (data: any, c: Context) => any,
 ) =>
   zValidator(type, schema, async (result, c) => {
     if (!result.success) {
@@ -37,7 +40,8 @@ const createHandler = (
     }
 
     try {
-      const responseData = await serviceMethod(result.data);
+      const input = map ? map(result.data, c) : result.data;
+      const responseData = await serviceMethod(input);
       return c.json(responseData as any, successStatus as any);
     } catch (error) {
       console.error("Handler error:", error);
@@ -57,11 +61,14 @@ export const dayPlanHandlers = {
     createDayPlanSchema,
     dayPlansService.createDayPlan,
     201,
+    (data, c) => withCreatedById(c, data),
   ),
   getDayPlans: createHandler(
     "query",
     getDayPlansSchema,
     dayPlansService.getDayPlans,
+    200,
+    (data, c) => withCreatedById(c, data),
   ),
   getDayPlanById: createHandler(
     "param",

@@ -17,7 +17,6 @@ export const useTodayPlanItems = () => {
     queryKey: [DAY_PLANS_QUERY_KEY, userId, todayCalendarDay],
     queryFn: () =>
       dayPlanApiService.getDayPlans({
-        createdById: userId!,
         date: todayCalendarDay,
         page: 0,
         limit: 1,

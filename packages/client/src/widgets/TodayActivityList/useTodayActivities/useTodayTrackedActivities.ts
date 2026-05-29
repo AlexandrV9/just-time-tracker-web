@@ -18,7 +18,6 @@ export function useTodayTrackedActivities() {
     queryKey: [ACTIVITIES_TRACKED_QUERY_KEY, "today", userId, fromDate, toDate],
     queryFn: () =>
       activityApiService.getTrackedActivities({
-        createdById: userId!,
         fromDate,
         toDate,
         limit: 100,

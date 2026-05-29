@@ -30,7 +30,6 @@ export const useAddTodayActivities = ({
 
       if (!currentPlanId) {
         const todayPlan = await dayPlanApiService.createDayPlan({
-          createdById: userId!,
           date: todayCalendarDay,
         });
 

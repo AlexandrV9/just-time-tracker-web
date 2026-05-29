@@ -4,6 +4,7 @@ import type {
   UpdateActivityDataDTO,
   DeleteActivityDataDTO,
 } from "@to-do-list/shared";
+import type { WithCreatedById } from "../shared/auth/with-created-by-id.js";
 import { pgTimestampToIsoString } from "../shared/db/pgTimestamp.js";
 import { activityQueries } from "./activity.queries.js";
 
@@ -14,7 +15,7 @@ const getActivityById = async (id: string): Promise<ActivityDTO | null> => {
 };
 
 const createActivity = async (
-  data: CreateActivityDataDTO,
+  data: WithCreatedById<CreateActivityDataDTO>,
 ): Promise<ActivityDTO> => {
   const entry = await activityQueries.createActivity(data);
   return mapActivityRowToDTO(entry);

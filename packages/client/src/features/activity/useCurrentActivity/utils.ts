@@ -6,7 +6,6 @@ import type {
 import { activityApiService } from "~/shared/api/services";
 
 export type FetchCurrentActivityDataParams = {
-  createdById: string;
   fromDate: string;
   toDate: string;
 };
@@ -18,12 +17,10 @@ export type FetchCurrentActivityDataResult = {
 };
 
 export async function fetchCurrentActivityData({
-  createdById,
   fromDate,
   toDate,
 }: FetchCurrentActivityDataParams): Promise<FetchCurrentActivityDataResult> {
   const activityResponse = await activityApiService.getCurrentActivities({
-    createdById,
     fromDate,
     toDate,
     page: 0,

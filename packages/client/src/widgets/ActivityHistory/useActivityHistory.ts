@@ -29,7 +29,7 @@ type AppendItemsVars = {
 
 export const useActivityHistory = () => {
   const { user } = useAuthStore();
-  const userId = user!.id;
+  const userId = user?.id;
 
   const { i18n } = useTranslation();
   const queryClient = useQueryClient();
@@ -44,7 +44,6 @@ export const useActivityHistory = () => {
         groupLimit: ACTIVITY_HISTORY_GROUPS_LIMIT,
         itemsLimit: ACTIVITY_HISTORY_GROUP_ITEMS_LIMIT,
         groupCursor: pageParam ?? undefined,
-        createdById: userId,
       }),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => {
@@ -61,7 +60,6 @@ export const useActivityHistory = () => {
   >({
     mutationFn: ({ cursor }) =>
       activityApiService.getGroupedActivityItems({
-        createdById: userId,
         cursor,
         limit: ACTIVITY_HISTORY_GROUP_ITEMS_LIMIT,
       }) as Promise<{

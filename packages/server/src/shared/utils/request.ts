@@ -29,7 +29,7 @@ type HandlerConfig<TParsed, TValidated, TInput> = {
   parse: (c: Context) => TParsed | Promise<TParsed>;
   schema: z.ZodType<TValidated>;
   service: (input: TInput) => Promise<unknown>;
-  map?: (data: TValidated) => TInput;
+  map?: (data: TValidated, c: Context) => TInput;
   successStatus?: SuccessStatusCode;
 };
 
@@ -73,7 +73,9 @@ export const createValidatedHandler =
       return respondValidationError(c, result.error.message);
     }
 
-    const input = map ? map(result.data) : (result.data as unknown as TInput);
+    const input = map
+      ? map(result.data, c)
+      : (result.data as unknown as TInput);
 
     try {
       const responseData = await service(input);

@@ -5,8 +5,12 @@ import type {
   UpdateActivityDataDTO,
   GetActivitiesByIdsDTO,
   GetCurrentActivitiesQueryDTO,
+  GetTrackedActivitiesQueryDTO,
+  GetGroupedActivitiesQueryDTO,
+  GetGroupedActivityItemsQueryDTO,
 } from "@to-do-list/shared";
 import { pool } from "../shared/index.js";
+import type { WithCreatedById } from "../shared/auth/with-created-by-id.js";
 
 export const ACTIVITY_RETURNING_COLUMNS = `
   id,
@@ -31,7 +35,7 @@ export const ACTIVITY_RETURNING_COLUMNS = `
 `;
 
 const createActivity = async (
-  data: CreateActivityDataDTO,
+  data: WithCreatedById<CreateActivityDataDTO>,
 ): Promise<ActivityDTO> => {
   const { title, description, createdById, tags } = data;
   const tagList = tags ?? [];
@@ -87,7 +91,7 @@ const getActivitiesByIds = async (
   return rows as ActivityDTO[];
 };
 
-const getActivities = async (filters: GetActivitiesDTO) => {
+const getActivities = async (filters: WithCreatedById<GetActivitiesDTO>) => {
   const {
     createdById,
     tags,
@@ -187,7 +191,9 @@ function splitCurrentActivityQueryRow(row: Record<string, unknown>): {
   };
 }
 
-const getCurrentActivities = async (filters: GetCurrentActivitiesQueryDTO) => {
+const getCurrentActivities = async (
+  filters: WithCreatedById<GetCurrentActivitiesQueryDTO>,
+) => {
   const {
     createdById,
     fromDate = null,

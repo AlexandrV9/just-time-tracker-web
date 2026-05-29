@@ -18,7 +18,6 @@ export function useTodayCurrentActivities() {
     queryKey: [ACTIVITIES_CURRENT_QUERY_KEY, "today", userId, fromDate, toDate],
     queryFn: () =>
       activityApiService.getCurrentActivities({
-        createdById: userId!,
         fromDate,
         toDate,
         limit: 100,

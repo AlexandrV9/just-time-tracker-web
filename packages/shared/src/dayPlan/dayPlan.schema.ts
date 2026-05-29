@@ -16,7 +16,6 @@ export const dayPlanSchema = z.object({
 export type DayPlanDTO = z.infer<typeof dayPlanSchema>;
 
 export const createDayPlanSchema = z.object({
-  createdById: z.string().min(1, "createdById is required"),
   date: ymdDateString,
 });
 
@@ -30,7 +29,6 @@ export const updateDayPlanSchema = z.object({
 export type UpdateDayPlanDataDTO = z.infer<typeof updateDayPlanSchema>;
 
 export const getDayPlansSchema = z.object({
-  createdById: z.string().optional(),
   date: ymdDateString.optional(),
   page: z.coerce.number().int().min(0).default(0),
   limit: z.coerce.number().int().min(1).max(100).default(10),

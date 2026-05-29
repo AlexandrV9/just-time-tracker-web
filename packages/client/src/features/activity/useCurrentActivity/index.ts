@@ -43,7 +43,6 @@ export function useCurrentActivity() {
     setIsLoading(true);
 
     fetchCurrentActivityData({
-      createdById: userId,
       fromDate,
       toDate,
     })

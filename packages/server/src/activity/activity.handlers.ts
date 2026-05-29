@@ -23,6 +23,7 @@ import {
   createValidatedHandler,
   getArrayQueryParam,
 } from "../shared/utils/request.js";
+import { withCreatedById } from "../shared/auth/with-created-by-id.js";
 
 export const activityHandlers = {
   getActivityById: createValidatedHandler({
@@ -34,18 +35,21 @@ export const activityHandlers = {
   getActivities: createValidatedHandler({
     parse: (c) => c.req.query(),
     schema: getActivitiesSchema,
+    map: (data, c) => withCreatedById(c, data),
     service: activitiesService.getActivities,
   }),
 
   getCurrentActivities: createValidatedHandler({
     parse: (c) => c.req.query(),
     schema: getCurrentActivitiesQuerySchema,
+    map: (data, c) => withCreatedById(c, data),
     service: activitiesService.getCurrentActivities,
   }),
 
   getTrackedActivities: createValidatedHandler({
     parse: (c) => c.req.query(),
     schema: getTrackedActivitiesQuerySchema,
+    map: (data, c) => withCreatedById(c, data),
     service: activitiesService.getTrackedActivities,
   }),
 
@@ -58,6 +62,7 @@ export const activityHandlers = {
   createActivity: createValidatedHandler({
     parse: (c) => c.req.json(),
     schema: createActivitySchema,
+    map: (data, c) => withCreatedById(c, data),
     service: activitiesService.createActivity,
     successStatus: 201,
   }),
@@ -95,12 +100,14 @@ export const activityHandlers = {
   getGroupedActivities: createValidatedHandler({
     parse: (c) => c.req.query(),
     schema: getGroupedActivitiesQuerySchema,
+    map: (data, c) => withCreatedById(c, data),
     service: activitiesService.getGroupedActivities,
   }),
 
   getGroupedActivityItems: createValidatedHandler({
     parse: (c) => c.req.query(),
     schema: getGroupedActivityItemsQuerySchema,
+    map: (data, c) => withCreatedById(c, data),
     service: activitiesService.getGroupedActivityItems,
   }),
 

@@ -116,7 +116,6 @@ export const setupActivitiesSchema = async (pool: Pool) => {
         CHECK (status IN ('active', 'paused', 'finished')),
       active_duration_ms BIGINT NOT NULL DEFAULT 0,
       pause_duration_ms BIGINT NOT NULL DEFAULT 0,
-      last_heartbeat_at TIMESTAMPTZ,
       current_segment_id UUID
     );
 
