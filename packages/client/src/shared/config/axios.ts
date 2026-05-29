@@ -1,10 +1,6 @@
 import axios from "axios";
 import { ACCESS_TOKEN_KEY } from "../constants";
 
-const apiEndpoint = import.meta.env.VITE_API_ENDPOINT;
-
-const refreshTokenURL = `${apiEndpoint}/auth/refresh`;
-
 export const axiosInstance = axios.create({
   withCredentials: true,
   baseURL: import.meta.env.VITE_APP_URL,
@@ -32,11 +28,11 @@ axiosInstance.interceptors.response.use(
       originalRequest._isRetry = true;
 
       try {
-        const response = await axios.get(refreshTokenURL, {
+        const response = await axiosInstance.get("/api/auth/refresh", {
           withCredentials: true,
         });
 
-        const newAccessToken = response.data.accessToken;
+        const newAccessToken = response.data.data?.accessToken;
 
         if (newAccessToken) {
           localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);

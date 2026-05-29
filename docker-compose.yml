@@ -13,6 +13,7 @@ services:
       - "${DB_PORT:-5432}:5432"
     volumes:
       - .docker/postgres/data:/var/lib/postgresql/data
+      - ./packages/server/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
@@ -46,8 +47,8 @@ services:
       context: .
       dockerfile: packages/client/Dockerfile
       args:
-        VITE_API_ENDPOINT: ${VITE_API_ENDPOINT:-http://localhost:9000}
-        VITE_APP_URL: ${VITE_APP_URL:-http://localhost:9000}
+        VITE_API_ENDPOINT: ${VITE_API_ENDPOINT:-http://localhost:3000}
+        VITE_APP_URL: ${VITE_APP_URL:-http://localhost:3000}
     container_name: time-tracker-client
     ports:
       - "${CLIENT_PORT:-3000}:80"

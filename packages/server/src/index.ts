@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-// import { cors } from "hono/cors";
+import { cors } from "hono/cors";
 import { authMiddleware, authRouter } from "./auth/index.js";
 import type { AuthVariables } from "./shared/auth/auth.variables.js";
 import { config } from "./shared/index.js";
@@ -14,13 +14,13 @@ import { dayPlanItemsRouter, dayPlansRouter } from "./dayPlan/index.js";
 
 const app = new Hono();
 
-// app.use(
-//   "*",
-//   cors({
-//     origin: `http://localhost:${appConfig.clientPort}`,
-//     credentials: true,
-//   })
-// );
+app.use(
+  "*",
+  cors({
+    origin: config.cors.allowedOrigins,
+    credentials: true,
+  }),
+);
 
 app.route("/auth", authRouter);
 app.route("/health", healthRouter);

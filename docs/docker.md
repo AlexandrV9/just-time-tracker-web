@@ -62,7 +62,7 @@ pnpm dev
 
 ## 2. Полный локальный стек (Docker)
 
-Client + server + postgres, всё собирается из Dockerfile'ов.
+Client + server + postgres, всё собирается из Dockerfile'ов. Браузер ходит только на client; nginx проксирует `/api/*` на server (strip `/api`).
 
 ```bash
 docker compose up -d --build
@@ -78,9 +78,11 @@ docker compose --profile tools up -d --build
 
 | Сервис | URL |
 |--------|-----|
-| Client | http://localhost:3000 (или `${CLIENT_PORT}`) |
-| Server | http://localhost:9000 (или `${SERVER_PORT}`) |
+| App (client + API через `/api`) | http://localhost:3000 (или `${CLIENT_PORT}`) |
+| API health | http://localhost:3000/api/health |
 | pgAdmin | http://localhost:8080 (profile `tools`) |
+
+PostgreSQL инициализируется автоматически при **первом** создании тома — скрипт [`packages/server/db/init.sql`](../packages/server/db/init.sql) монтируется в `docker-entrypoint-initdb.d`. Для сброса БД: `docker compose down -v` и поднять заново.
 
 Пересборка после изменений кода:
 
@@ -118,9 +120,9 @@ ACCESS_TOKEN_SECRET=change_me_access
 REFRESH_TOKEN_SECRET=change_me_refresh
 ALLOWED_ORIGINS=http://localhost:3000
 
-# Зашиваются в client-образ при сборке (Vite)
-VITE_API_ENDPOINT=http://localhost:9000
-VITE_APP_URL=http://localhost:9000
+# Same-origin: один URL для UI и API (/api проксируется nginx)
+VITE_APP_URL=http://localhost:3000
+VITE_API_ENDPOINT=http://localhost:3000
 ```
 
 **Важно:** `VITE_*` попадают в статику client при **build**. Если меняете URL API — пересоберите client:
@@ -144,10 +146,10 @@ Server внутри compose подключается к postgres по hostname `
 
 **Settings → Secrets and variables → Actions → Variables:**
 
-| Variable | Пример | Назначение |
-|----------|--------|------------|
-| `VITE_API_ENDPOINT` | `https://api.example.com` | URL API для сборки client |
-| `VITE_APP_URL` | `https://api.example.com` | axios `baseURL` |
+| Variable | Пример (один домен) | Назначение |
+|----------|---------------------|------------|
+| `VITE_APP_URL` | `https://app.example.com` | axios `baseURL`, origin приложения |
+| `VITE_API_ENDPOINT` | `https://app.example.com` | тот же URL; refresh и SSE идут через `/api` на том же origin |
 
 ### Pull и запуск на сервере
 
@@ -159,18 +161,88 @@ docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-Prod `.env` (дополнительно к секретам):
+Prod `.env` (минимум):
 
 ```env
+DB_NAME=time_tracker
+DB_USER=postgres
+DB_PASSWORD=<strong>
+ACCESS_TOKEN_SECRET=<random>
+REFRESH_TOKEN_SECRET=<random>
+ALLOWED_ORIGINS=https://app.example.com
 GHCR_IMAGE_PREFIX=ghcr.io/alexandrv9/time-tracker
 IMAGE_TAG=latest
 CLIENT_PORT=80
-SERVER_PORT=9000
 ```
+
+Server **не публикуется** наружу — API доступен только через nginx в client-контейнере (`/api/*`).
 
 Для публичного pull: в настройках package → **Change visibility → Public**.
 
-## 4. Локальная сборка образов (без compose)
+## 4. Деплой на VPS (один домен, внешний HTTPS)
+
+Схема: Caddy/nginx на хосте → TLS → `localhost:80` (client container) → nginx проксирует `/api` → server.
+
+### 1. Подготовка сервера
+
+```bash
+# Docker + Compose v2
+curl -fsSL https://get.docker.com | sh
+
+# Клонировать репо (или скопировать docker-compose.prod.yml + .env)
+git clone https://github.com/AlexandrV9/ToDoList.git time-tracker
+cd time-tracker
+cp .env.example .env   # заполнить секреты
+```
+
+### 2. Запуск стека
+
+```bash
+docker login ghcr.io -u USERNAME -p <PAT_with_read:packages>
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+```
+
+БД инициализируется автоматически при первом запуске postgres (см. `packages/server/db/init.sql`).
+
+### 3. Caddy на хосте (HTTPS)
+
+```caddy
+app.example.com {
+    reverse_proxy localhost:80
+}
+```
+
+Caddy автоматически получит Let's Encrypt сертификат. SSE (`/api/activities/events`) работает без доп. настроек.
+
+### 4. nginx на хосте (альтернатива)
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name app.example.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+Для SSE через nginx на хосте добавьте `proxy_buffering off` на location, проксирующий `/api/`.
+
+### 5. Smoke checklist (prod)
+
+| Шаг | Проверка |
+|-----|----------|
+| Health | `curl https://app.example.com/api/health` → 200 |
+| Sign-up / Sign-in | UI + cookie `refresh_token` в DevTools (Secure, HttpOnly) |
+| Token refresh | Подождать >3 мин, выполнить действие — не должно выкинуть на `/signin` |
+| Activity flow | create → start → pause → finish |
+| SSE | Вторая вкладка — события синхронизируются |
+
+## 5. Локальная сборка образов (без compose)
 
 Из корня репозитория:
 
@@ -178,8 +250,8 @@ SERVER_PORT=9000
 docker build -f packages/server/Dockerfile -t time-tracker-server .
 
 docker build -f packages/client/Dockerfile \
-  --build-arg VITE_API_ENDPOINT=http://localhost:9000 \
-  --build-arg VITE_APP_URL=http://localhost:9000 \
+  --build-arg VITE_API_ENDPOINT=http://localhost:3000 \
+  --build-arg VITE_APP_URL=http://localhost:3000 \
   -t time-tracker-client .
 ```
 
@@ -227,9 +299,10 @@ Job `verify` поднимает postgres service container для интегра
 
 ### Client не видит API
 
-1. Проверьте `VITE_API_ENDPOINT` / `VITE_APP_URL` — они задаются **при сборке** образа
+1. Проверьте `VITE_APP_URL` / `VITE_API_ENDPOINT` — они задаются **при сборке** образа (same-origin: оба = публичный URL приложения)
 2. Пересоберите: `docker compose up -d --build client`
-3. Для prod: URL должны указывать на реальный API, доступный из браузера пользователя
+3. Проверьте proxy: `curl http://localhost:3000/api/health` должен вернуть 200
+4. Для prod: оба `VITE_*` = `https://app.example.com`
 
 ### Server не подключается к БД
 

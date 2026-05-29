@@ -15,7 +15,7 @@ const getTokenExpiration = (expiresInSeconds: number) => {
 const generateToken = <TData extends Record<string, unknown>>(
   payload: TData,
   expInSec: number,
-  secret: string
+  secret: string,
 ) => {
   return sign(
     {
@@ -23,7 +23,7 @@ const generateToken = <TData extends Record<string, unknown>>(
       jti: randomUUID(),
       exp: getTokenExpiration(expInSec),
     },
-    secret
+    secret,
   );
 };
 
@@ -40,14 +40,14 @@ const extractTokenFromAuthHeader = (authHeader: string) => {
 };
 
 const generateAccessToken = <TData extends Record<string, unknown>>(
-  payload: TData
+  payload: TData,
 ) => {
   const { expInSec, secret } = config.auth.accessToken;
   return generateToken(payload, expInSec, secret);
 };
 
 const generateRefreshToken = <TData extends Record<string, unknown>>(
-  payload: TData
+  payload: TData,
 ) => {
   const { expInSec, secret } = config.auth.refreshToken;
   return generateToken(payload, expInSec, secret);
@@ -76,7 +76,7 @@ type VerifyAccessTokenResponse =
     };
 
 export const verifyAccessToken = async (
-  token?: string
+  token?: string,
 ): Promise<VerifyAccessTokenResponse> => {
   try {
     if (!token) {
@@ -85,7 +85,7 @@ export const verifyAccessToken = async (
 
     const data = (await verify(
       token,
-      config.auth.accessToken.secret
+      config.auth.accessToken.secret,
     )) as AuthJWTPayload;
 
     return {
@@ -93,8 +93,6 @@ export const verifyAccessToken = async (
       payload: data,
     };
   } catch (e) {
-    console.log("verifyAccessToken", e);
-
     return {
       success: false,
       payload: null,
@@ -113,17 +111,16 @@ type VerifyRefreshTokenResponse =
     };
 
 export const verifyRefreshToken = async (
-  token?: string
+  token?: string,
 ): Promise<VerifyRefreshTokenResponse> => {
   try {
     if (!token) {
-      console.log("111");
       throw new Error();
     }
 
     const data = (await verify(
       token,
-      config.auth.refreshToken.secret
+      config.auth.refreshToken.secret,
     )) as AuthJWTPayload;
 
     return {
@@ -131,9 +128,7 @@ export const verifyRefreshToken = async (
       payload: data,
     };
   } catch (e) {
-    console.log("222");
-    console.log("verifyRefreshToken", e);
-
+    console.warn(e);
     return {
       success: false,
       payload: null,

@@ -69,7 +69,6 @@ const init = async (c: Context<BlankEnv, "/auth", BlankInput>) => {
     }
   }
 
-  console.log("3");
   deleteCookie(c, nameRefreshTokenInCookie);
   return c.json(
     {
@@ -91,7 +90,7 @@ const signIn = zValidator("json", signInSchema, async (result, c) => {
   }
 
   setCookie(c, nameRefreshTokenInCookie, responseData.data.refreshToken, {
-    secure: true,
+    secure: config.app.isProduction,
     httpOnly: true,
     sameSite: "strict",
     maxAge: config.auth.refreshToken.expInSec,

@@ -7,4 +7,5 @@ authRouter.get("/", authHandlers.init);
 authRouter.post("/sign-in", authHandlers.signIn);
 authRouter.post("/sign-up", authHandlers.signUp);
 authRouter.post("/sign-out", authHandlers.signOut);
-authRouter.get("/check-refresh", authHandlers.checkRefresh)
+authRouter.get("/refresh", authHandlers.refresh);
+authRouter.get("/check-refresh", authHandlers.checkRefresh);

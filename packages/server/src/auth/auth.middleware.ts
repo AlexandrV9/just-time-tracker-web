@@ -1,8 +1,8 @@
 import type { MiddlewareHandler } from "hono";
 import { verify } from "hono/jwt";
-import type { AuthJWTPayload } from "src/shared/auth/auth.types.js";
+import type { AuthJWTPayload } from "../shared/auth/auth.types.js";
 import type { AuthVariables } from "../shared/auth/auth.variables.js";
-import { config } from "src/shared/index.js";
+import { config } from "../shared/index.js";
 
 export const authMiddleware: MiddlewareHandler<{
   Variables: AuthVariables;

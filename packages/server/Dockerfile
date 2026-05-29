@@ -42,4 +42,4 @@ WORKDIR /app/packages/server
 
 EXPOSE 9000
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/src/index.js"]
