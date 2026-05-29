@@ -86,7 +86,7 @@ pnpm build             # shared + client + server
 - `ghcr.io/<owner>/time-tracker/client`
 - `ghcr.io/<owner>/time-tracker/server`
 
-Подробнее: [docs/docker.md](docs/docker.md)
+Подробнее: [docs/docker.md](docs/docker.md) · [docs/deploy.md](docs/deploy.md)
 
 Продакшен через compose:
 
