@@ -116,9 +116,9 @@ apt update && apt install -y caddy
 
 ### Шаг 4. Скопировать файлы проекта
 
-Нужны только compose и env — исходники собирать на сервере не нужно.
+Образы client/server тянутся из GHCR — исходники на сервере не нужны. Но postgres при первом запуске выполняет SQL-схему из файла на **хосте** (см. volume в `docker-compose.prod.yml`), поэтому `init.sql` обязателен.
 
-**Вариант A — git clone:**
+**Вариант A — git clone (проще):**
 
 ```bash
 cd /opt
@@ -128,11 +128,27 @@ cd time-tracker
 
 **Вариант B — минимум файлов:**
 
+На VPS:
+
 ```bash
-mkdir -p /opt/time-tracker && cd /opt/time-tracker
-# скопируйте с локальной машины:
-# scp docker-compose.prod.yml .env.example user@<IP>:/opt/time-tracker/
+mkdir -p /opt/time-tracker/packages/server/db
+cd /opt/time-tracker
 ```
+
+С локальной машины (из корня репозитория):
+
+```bash
+scp docker-compose.prod.yml .env.example user@<IP>:/opt/time-tracker/
+scp packages/server/db/init.sql user@<IP>:/opt/time-tracker/packages/server/db/
+```
+
+| Файл | Зачем |
+|------|-------|
+| `docker-compose.prod.yml` | описание стека |
+| `.env.example` | шаблон для `.env` |
+| `packages/server/db/init.sql` | создание таблиц при первом запуске postgres |
+
+Без `init.sql` postgres поднимется пустой — sign-up и API упадут с `relation "users" does not exist`.
 
 ### Шаг 5. Настроить `.env`
 
@@ -246,15 +262,7 @@ ufw status
 
 ## Обновление после нового merge в main
 
-На VPS:
-
-```bash
-cd /opt/time-tracker
-docker compose -f docker-compose.prod.yml pull
-docker compose -f docker-compose.prod.yml up -d
-```
-
-Если менялись только server/postgres — client пересобирается в CI только при изменениях client. После смены `VITE_*` Variables нужен новый push в `main`, чтобы client-образ пересобрался.
+Подробная инструкция: [update-deploy.md](update-deploy.md)
 
 ---
 

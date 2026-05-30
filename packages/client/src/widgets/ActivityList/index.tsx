@@ -25,20 +25,21 @@ export const ActivityList = () => {
 
   const createActivityDialog = useDialog();
 
-  const { data, fetchNextPage, hasNextPage, isError } = useInfiniteQuery({
-    queryKey: [ACTIVITIES_QUERY_KEY],
-    queryFn: (ctx) =>
-      activityApiService.getActivities({
-        page: ctx.pageParam,
-        limit: 20,
-      }),
-    initialPageParam: 0,
-    getNextPageParam: (lastGroup) => {
-      if (lastGroup?.success && lastGroup.data.pagination.hasNext) {
-        return lastGroup.data.pagination.page + 1;
-      }
-    },
-  });
+  const { data, fetchNextPage, hasNextPage, isError, isPending } =
+    useInfiniteQuery({
+      queryKey: [ACTIVITIES_QUERY_KEY],
+      queryFn: (ctx) =>
+        activityApiService.getActivities({
+          page: ctx.pageParam,
+          limit: 20,
+        }),
+      initialPageParam: 0,
+      getNextPageParam: (lastGroup) => {
+        if (lastGroup?.success && lastGroup.data.pagination.hasNext) {
+          return lastGroup.data.pagination.page + 1;
+        }
+      },
+    });
 
   const { ref: fetchRef, inView: isLastInView } = useInView();
 
@@ -53,45 +54,62 @@ export const ActivityList = () => {
     }
   }, [isLastInView, fetchNextPage, hasNextPage]);
 
-  if (activities.length === 0) {
-    return (
-      <EmptyState.Root>
-        <EmptyState.Content>
-          <EmptyState.Indicator>
-            <VersionIcon size={60} />
-          </EmptyState.Indicator>
-          <VStack textAlign="center">
-            <EmptyState.Title>
-              {t("widgets.activityList.emptyTitle")}
-            </EmptyState.Title>
-            <EmptyState.Description>
-              {t("widgets.activityList.emptyDescription")}
-            </EmptyState.Description>
-          </VStack>
-        </EmptyState.Content>
-      </EmptyState.Root>
-    );
-  }
+  const renderContent = () => {
+    if (isPending) {
+      return null;
+    }
 
-  if (isError) {
+    if (isError) {
+      return (
+        <EmptyState.Root>
+          <EmptyState.Content>
+            <EmptyState.Indicator>
+              <VersionIcon size={60} />
+            </EmptyState.Indicator>
+            <VStack textAlign="center">
+              <EmptyState.Title>
+                {t("widgets.activityList.error")}
+              </EmptyState.Title>
+              <EmptyState.Description>
+                {t("widgets.activityList.errorDescription")}
+              </EmptyState.Description>
+            </VStack>
+          </EmptyState.Content>
+        </EmptyState.Root>
+      );
+    }
+
+    if (activities.length === 0) {
+      return (
+        <EmptyState.Root>
+          <EmptyState.Content>
+            <EmptyState.Indicator>
+              <VersionIcon size={60} />
+            </EmptyState.Indicator>
+            <VStack textAlign="center">
+              <EmptyState.Title>
+                {t("widgets.activityList.emptyTitle")}
+              </EmptyState.Title>
+              <EmptyState.Description>
+                {t("widgets.activityList.emptyDescription")}
+              </EmptyState.Description>
+            </VStack>
+          </EmptyState.Content>
+        </EmptyState.Root>
+      );
+    }
+
     return (
-      <EmptyState.Root>
-        <EmptyState.Content>
-          <EmptyState.Indicator>
-            <VersionIcon size={60} />
-          </EmptyState.Indicator>
-          <VStack textAlign="center">
-            <EmptyState.Title>
-              {t("widgets.activityList.error")}
-            </EmptyState.Title>
-            <EmptyState.Description>
-              {t("widgets.activityList.errorDescription")}
-            </EmptyState.Description>
-          </VStack>
-        </EmptyState.Content>
-      </EmptyState.Root>
+      <ActivityListView>
+        {activities.map((activity) => (
+          <ActivityListView.Item key={activity.id}>
+            <ActivityCard activity={activity} />
+          </ActivityListView.Item>
+        ))}
+        <div ref={fetchRef} style={{ height: 1, width: "100%" }} />
+      </ActivityListView>
     );
-  }
+  };
 
   return (
     <>
@@ -109,14 +127,7 @@ export const ActivityList = () => {
             <PlusIcon size={22} />
           </IconButton>
         </Flex>
-        <ActivityListView>
-          {activities.map((activity) => (
-            <ActivityListView.Item key={activity.id}>
-              <ActivityCard activity={activity} />
-            </ActivityListView.Item>
-          ))}
-          <div ref={fetchRef} style={{ height: 1, width: "100%" }} />
-        </ActivityListView>
+        {renderContent()}
       </Stack.VStack>
 
       <CreateActivityDialog dialog={createActivityDialog} />
