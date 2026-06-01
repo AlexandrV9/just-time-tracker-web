@@ -3,10 +3,16 @@ import { useLayoutEffect } from "react";
 import { LangSwitcher, ThemeSwitcher, useActivityEvents } from "~/features";
 import { authManager, AuthUserAvatar, useAuthStore } from "~/features/auth";
 import { NotificationButton } from "~/features/notifications";
-import { useDeviceDetect, useOrientation, useTranslation } from "~/shared/hooks";
+import {
+  useDeviceDetect,
+  useOrientation,
+  useTranslation,
+} from "~/shared/hooks";
 import { buildLocationRedirectPath } from "~/shared/libs";
 import { Box, Flex, PageLayout, Text } from "~/shared/ui";
 import { Header, NavBar, useHeaderStore } from "~/widgets";
+
+import shineStyles from "~/shared/styles/shineRing.module.css";
 
 function PrivateRoutePending() {
   const { t } = useTranslation();
@@ -69,6 +75,19 @@ export function PrivateLayout() {
 
   useLayoutEffect(() => {
     setContent("left", <AuthUserAvatar />);
+    setContent(
+      "center",
+      <Flex alignItems="center" gap={2}>
+        <Text
+          textStyle="xl"
+          m={0}
+          fontWeight="semibold"
+          className={shineStyles.shineText}
+        >
+          Just Time Tracker
+        </Text>
+      </Flex>,
+    );
     setContent(
       "right",
       <Flex justifyContent="end" gap={2}>
@@ -139,8 +158,7 @@ function TabletLayout() {
 
 function MobileLayout() {
   const { orientation } = useOrientation();
-
-  console.log(orientation);
+  // console.log(orientation);
 
   switch (orientation) {
     case "landscape-primary":
@@ -177,7 +195,6 @@ function MobileLayout() {
             borderColor="border.emphasized"
           >
             <NavBar
-              isVertical
               display="flex"
               justifyContent="center"
               alignItems="center"

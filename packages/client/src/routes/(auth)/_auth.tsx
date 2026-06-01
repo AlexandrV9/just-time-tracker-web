@@ -1,8 +1,12 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { useLayoutEffect } from "react";
 import z from "zod";
 import { LangSwitcher, ThemeSwitcher } from "~/features";
 import { authManager, useAuthStore } from "~/features/auth";
-import { BackButton, Box, Flex, PageLayout } from "~/shared/ui";
+import { BackButton, Box, Flex, PageLayout, Text } from "~/shared/ui";
+import { Header, useHeaderStore } from "~/widgets";
+
+import shineStyles from "~/shared/styles/shineRing.module.css";
 
 export const Route = createFileRoute("/(auth)/_auth")({
   validateSearch: z.object({
@@ -33,6 +37,32 @@ export const Route = createFileRoute("/(auth)/_auth")({
 });
 
 export function AuthLayout() {
+  const { setContent } = useHeaderStore();
+
+  useLayoutEffect(() => {
+    setContent("left", <BackButton />);
+    setContent(
+      "right",
+      <Flex justifyContent="end" gap={2}>
+        <LangSwitcher />
+        <ThemeSwitcher />
+      </Flex>,
+    );
+    setContent(
+      "center",
+      <Flex alignItems="center" gap={2}>
+        <Text
+          textStyle="xl"
+          m={0}
+          fontWeight="semibold"
+          className={shineStyles.shineText}
+        >
+          Just Time Tracker
+        </Text>
+      </Flex>,
+    );
+  }, [setContent]);
+
   return (
     <PageLayout>
       <PageLayout.TopContainer
@@ -48,17 +78,11 @@ export function AuthLayout() {
           justifyContent="space-between"
           alignItems="center"
         >
-          <BackButton />
-          <Flex justifyContent="end" gap={2}>
-            <LangSwitcher />
-            <ThemeSwitcher />
-          </Flex>
+          <Header />
         </Box>
       </PageLayout.TopContainer>
-      <PageLayout.MainContainer as="main" p="0">
-        <Box mt="3rem" width="full" display="flex" justifyContent="center">
-          <Outlet />
-        </Box>
+      <PageLayout.MainContainer p="0">
+        <Outlet />
       </PageLayout.MainContainer>
     </PageLayout>
   );

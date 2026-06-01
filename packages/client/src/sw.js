@@ -1,4 +1,4 @@
-const CACHE_NAME = "time-tracker-v1.0.0";
+const CACHE_NAME = "time-tracker-v1.0.7";
 
 const STATIC_CACHE_URLS = ["/", "https://fonts.googleapis.com/"];
 
@@ -51,7 +51,7 @@ self.addEventListener("activate", (event) => {
               console.log("🗑️ Service Worker: Deleting old cache", cacheName);
               return caches.delete(cacheName);
             }
-          })
+          }),
         );
       })
       .then(() => {
@@ -59,7 +59,7 @@ self.addEventListener("activate", (event) => {
       })
       .then(() => {
         console.log("✅ Service Worker: Ready to handle requests");
-      })
+      }),
   );
 });
 
@@ -76,7 +76,7 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     handleFetch(request).catch(() => {
       return createOfflineResponse(request);
-    })
+    }),
   );
 });
 

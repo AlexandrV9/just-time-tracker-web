@@ -1,17 +1,30 @@
 import { SignInByLoginForm } from "~/features/auth";
-import { Box } from "~/shared/ui";
+import { Box, Flex } from "~/shared/ui";
 
 export function SignInPage() {
   return (
-    <Box
-      padding="1.5rem"
-      bg="bg"
-      borderRadius="xl"
-      width="full"
-      minWidth={320}
-      maxWidth={400}
+    <Flex
+      direction="column"
+      align="center"
+      justify="flex-start"
+      gap="1rem"
+      w="full"
+      minW={0}
+      maxW="full"
+      py="1rem"
+      px="1rem"
+      overflowX="hidden"
     >
-      <SignInByLoginForm />
-    </Box>
+      <Box
+        padding="1.5rem"
+        bg="bg"
+        borderRadius="xl"
+        width="full"
+        minW={0}
+        maxW={400}
+      >
+        <SignInByLoginForm />
+      </Box>
+    </Flex>
   );
 }

@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import type { TFunction } from "i18next";
 import z from "zod";
 import { authManager } from "~/features/auth";
@@ -16,8 +17,11 @@ import {
   useForm,
 } from "~/shared/ui";
 
-import styles from "./SignUpForm.module.css";
-import { minLengthPassword, signUpFormSchema } from "./constants";
+import {
+  maxLengthPassword,
+  minLengthPassword,
+  signUpFormSchema,
+} from "./constants";
 
 const baseLocale = "features.auth.signUpForm";
 
@@ -25,24 +29,34 @@ export type SignUpFormSchema = z.infer<typeof signUpFormSchema>;
 
 export const SignUpForm = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const signUpMutatuin = useMutation({
     mutationFn: (data: SignUpFormSchema) => authManager.signUp(data),
-    onSuccess: () => {
-      toast.success("Success", {
+    onSuccess: (response) => {
+      if (!response.success) {
+        toast.error(t(`${baseLocale}.errorToast`), {
+          position: "top-center",
+          draggable: true,
+          toastId: "error_sign_up",
+        });
+        return;
+      }
+
+      toast.success(t(`${baseLocale}.successToast`), {
         position: "top-center",
         draggable: true,
-        toastId: "error_sign_up",
+        toastId: "success_sign_up",
       });
       reset();
+      navigate({ to: "/signin" });
     },
-    onError: (error) => {
-      toast.success("Success", {
+    onError: () => {
+      toast.error(t(`${baseLocale}.errorToast`), {
         position: "top-center",
         draggable: true,
         toastId: "error_sign_up",
       });
-      console.log("error", error);
     },
   });
 
@@ -74,14 +88,7 @@ export const SignUpForm = () => {
       gap="1rem"
       onSubmit={submitHandler}
     >
-      <Text
-        as="h1"
-        textStyle="4xl"
-        fontWeight="semibold"
-        // bg="linear-gradient(135deg, #7ea670ff 20%, #8307fe 40%, #07fe66ff 70%)"
-        // bgClip="text"
-        className={styles.shineText}
-      >
+      <Text as="h1" textStyle="4xl" m={0} fontWeight="semibold">
         {t(`${baseLocale}.title`)}
       </Text>
 
@@ -188,6 +195,14 @@ function getTranslatedError(
       return t(`${baseLocale}.passwordInput.errors.minLength`, {
         count: minLengthPassword,
       });
+    case "password.error.maxLength":
+      return t(`${baseLocale}.passwordInput.errors.maxLength`, {
+        count: maxLengthPassword,
+      });
+    case "password.error.noLetter":
+      return t(`${baseLocale}.passwordInput.errors.noLetter`);
+    case "password.error.noDigit":
+      return t(`${baseLocale}.passwordInput.errors.noDigit`);
     case "passwords.mismatch":
       return t(`${baseLocale}.repeatPasswordInput.errors.mismatch`, {
         count: minLengthPassword,

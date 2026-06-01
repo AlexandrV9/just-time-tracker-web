@@ -5,7 +5,6 @@ import type { TFunction } from "i18next";
 import z from "zod";
 import { authManager } from "~/features/auth";
 import { useTranslation } from "~/shared/hooks";
-import styles from "./SignInByLoginForm.module.css";
 
 import {
   Button,
@@ -41,7 +40,7 @@ export const SignInByLoginForm = () => {
       }
     },
     onError: (error) => {
-      toast.error(error.message || "Unknown error", {
+      toast.error(error.message || t(`${baseLocale}.unknownError`), {
         position: "top-center",
         draggable: true,
         toastId: "error_sign_in",
@@ -72,14 +71,7 @@ export const SignInByLoginForm = () => {
       gap="1rem"
       onSubmit={submitHandler}
     >
-      <Text
-        as="h1"
-        textStyle="4xl"
-        fontWeight="semibold"
-        // bg="linear-gradient(135deg, #7ea670ff 20%, #8307fe 40%, #07fe66ff 70%)"
-        // bgClip="text"
-        className={styles.shineText}
-      >
+      <Text as="h1" textStyle="4xl" m={0} fontWeight="semibold">
         {t(`${baseLocale}.title`)}
       </Text>
       <Field.Root invalid={!!errors.login}>
@@ -142,7 +134,7 @@ export const SignInByLoginForm = () => {
 
 function getTranslatedError(
   t: TFunction<"translation", undefined>,
-  errorMessage: string | undefined
+  errorMessage: string | undefined,
 ) {
   if (!errorMessage) return undefined;
 

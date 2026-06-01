@@ -1,6 +1,15 @@
 import { useSearch } from "@tanstack/react-router";
 import { useTranslation } from "~/shared/hooks";
-import { Box, Button, Flex, Grid, Link, Stack, Text } from "~/shared/ui";
+import {
+  Box,
+  Button,
+  Flex,
+  Grid,
+  LightningIcon,
+  Link,
+  Stack,
+  Text,
+} from "~/shared/ui";
 
 type FeatureCard = {
   title: string;
@@ -23,17 +32,21 @@ export const LandingPage = () => {
   const list = Array.isArray(features) ? features : [];
 
   return (
-    <Stack.VStack align="stretch" gap={10} p="1rem">
+    <Stack.VStack align="stretch" gap={10} p="1rem" mx="auto">
       <Stack.VStack align="stretch" gap={4} maxW="640px">
-        <Text
-          as="h1"
-          textStyle="2xl"
-          fontWeight="bold"
-          lineHeight="1.15"
-          css={{ textWrap: "pretty" }}
-        >
-          {t("pages.landing.title")}
-        </Text>
+        <Flex alignItems="center" gap={2}>
+          <LightningIcon size={32} />
+          <Text
+            as="h1"
+            textStyle="2xl"
+            fontWeight="bold"
+            lineHeight="1.15"
+            css={{ textWrap: "pretty" }}
+          >
+            {t("pages.landing.title")}
+          </Text>
+        </Flex>
+
         <Text
           color="fg.muted"
           fontSize={{ base: "md", md: "lg" }}
@@ -81,12 +94,7 @@ export const LandingPage = () => {
           ))}
         </Grid>
       </Box>
-      <Flex
-        justify="center"
-        pt={6}
-        borderTopWidth={1}
-        borderColor="border.emphasized"
-      >
+      <Flex justify="center">
         <Button asChild variant="outline" borderRadius="xl" size="md">
           <Link to="/signin" search={signInSearch}>
             {t("pages.landing.signInPageLink")}

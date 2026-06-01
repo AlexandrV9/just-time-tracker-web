@@ -1,17 +1,26 @@
-import { ActivityCardView } from "~/entities/Activity";
-import { Flex, Skeleton as BaseSkeleton } from "~/shared/ui";
+import { ActivityListView } from "~/entities/Activity";
+import { Box, Flex, Skeleton as BaseSkeleton } from "~/shared/ui";
+
+import { HistoryActivityCardSkeleton } from "./HistoryActivityCard/HistoryActivityCardSkeleton";
+
+const CARD_COUNT = 3;
 
 export const Skeleton = () => {
   return (
-    <ActivityCardView>
-      <ActivityCardView.Body>
-        <Flex flex="1" minH={0}>
-          <BaseSkeleton w="5rem" h="1.2rem" />
+    <Box display="flex" flexDirection="column" gap="0.75rem">
+      <Flex justifyContent="space-between" alignItems="center" gap="0.5rem">
+        <BaseSkeleton w="6rem" h="1.2rem" />
+        <Flex gap="0.25rem" alignItems="center">
+          <BaseSkeleton w="8rem" h="1.2rem" />
         </Flex>
-      </ActivityCardView.Body>
-      <ActivityCardView.Footer>
-        <BaseSkeleton w="4rem" h="1.2rem" />
-      </ActivityCardView.Footer>
-    </ActivityCardView>
+      </Flex>
+      <ActivityListView>
+        {Array.from({ length: CARD_COUNT }).map((_, index) => (
+          <ActivityListView.Item key={index}>
+            <HistoryActivityCardSkeleton />
+          </ActivityListView.Item>
+        ))}
+      </ActivityListView>
+    </Box>
   );
 };

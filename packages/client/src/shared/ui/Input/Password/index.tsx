@@ -18,6 +18,7 @@ import {
 } from "@chakra-ui/react";
 import * as React from "react";
 import { LuEye, LuEyeOff } from "react-icons/lu";
+import { useTranslation } from "~/shared/hooks";
 
 import styles from "./Password.module.css";
 
@@ -96,6 +97,8 @@ export const PasswordInput = React.forwardRef<
 
 const VisibilityTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
   function VisibilityTrigger(props, ref) {
+    const { t } = useTranslation();
+
     return (
       <IconButton
         tabIndex={-1}
@@ -104,11 +107,11 @@ const VisibilityTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
         size="sm"
         variant="ghost"
         height="calc(100% - {spacing.2})"
-        aria-label="Toggle password visibility"
+        aria-label={t("common.aria.togglePasswordVisibility")}
         {...props}
       />
     );
-  }
+  },
 );
 
 interface PasswordStrengthMeterProps extends StackProps {

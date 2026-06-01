@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { ActivityTrackingEventDTO } from "@to-do-list/shared";
-import { activityEventsHub } from "./activityEvents.hub.js";
+import { activityEventsHub } from "../../src/activity/activityEvents.hub.js";
 
 const sampleEvent: ActivityTrackingEventDTO = {
   type: "started",

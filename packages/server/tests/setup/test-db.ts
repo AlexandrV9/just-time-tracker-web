@@ -156,6 +156,27 @@ export const resetActivitiesTables = async (pool: Pool) => {
   `);
 };
 
+export const setupUsersSchema = async (pool: Pool) => {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      password_hash VARCHAR(255) NOT NULL,
+      first_name VARCHAR(50),
+      last_name VARCHAR(50),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      is_active BOOLEAN NOT NULL DEFAULT true,
+      login VARCHAR(255) NOT NULL UNIQUE,
+      email VARCHAR(255) UNIQUE,
+      avatar TEXT
+    );
+  `);
+};
+
+export const resetUsersTables = async (pool: Pool) => {
+  await pool.query(`TRUNCATE TABLE users RESTART IDENTITY CASCADE`);
+};
+
 const createTestDatabase = async (
   container: StartedPostgreSqlContainer | null,
 ): Promise<TestDatabase> => {
@@ -166,6 +187,7 @@ const createTestDatabase = async (
   const pool = getPool();
 
   await setupActivitiesSchema(pool);
+  await setupUsersSchema(pool);
 
   return {
     container,

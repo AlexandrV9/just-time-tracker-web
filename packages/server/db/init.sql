@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
   login VARCHAR(100) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
 
-  email VARCHAR(255),
+  email VARCHAR(255) UNIQUE,
   avatar TEXT,
   is_active BOOLEAN NOT NULL DEFAULT true,
 

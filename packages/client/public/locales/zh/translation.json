@@ -50,6 +50,8 @@
       "goToDateDialogTitle": "跳转到日期",
       "dialogCancel": "取消",
       "dialogApply": "应用",
+      "comingSoon": "活动日历即将上线",
+      "comingSoonDescription": "在此页面，您将可以查看所有活动及其在不同日期的分布，并规划未来的活动。",
       "mockEvents": {
         "designSync": "设计同步会",
         "featureDevelopment": "功能开发"
@@ -92,13 +94,35 @@
     },
     "settings": {
       "profile": {
-        "namePlaceholder": "姓名",
-        "emailPlaceholder": "邮箱",
-        "birthDatePlaceholder": "出生日期"
+        "nameInput": {
+          "label": "姓名",
+          "placeholder": "请输入姓名"
+        },
+        "emailInput": {
+          "label": "邮箱",
+          "placeholder": "请输入邮箱"
+        },
+        "editButton": "编辑资料",
+        "saveButton": "保存",
+        "cancelButton": "取消",
+        "saveSuccess": "资料已更新",
+        "saveError": "无法保存资料",
+        "errors": {
+          "nameRequired": "姓名为必填",
+          "emailInvalid": "请输入有效邮箱"
+        }
       }
     },
     "private": {
       "pending": "加载中…"
+    },
+    "signUp": {
+      "legalNotice": {
+        "prefix": "继续即表示您接受",
+        "termsLink": "用户协议",
+        "middle": "和",
+        "privacyLink": "隐私政策"
+      }
     },
     "termsOfService": {
       "backButton": "返回",
@@ -126,10 +150,6 @@
         {
           "title": "知识产权",
           "description": "服务及其内容（不包括您提交的数据）仍为我们或权利人的知识产权。\n\n您保留所提供数据的所有权。使用服务即授予我们在运营与改进服务所必需的范围内托管、存储、处理与展示您数据的有限许可，具体见我们的隐私政策。"
-        },
-        {
-          "title": "免责声明与责任限制",
-          "description": "在法律允许的最大范围内，服务按「现状」与「可用」提供，不作任何明示或默示保证。\n\n在法律允许的最大范围内，因本条款或服务引起的争议，我们的责任以您于索赔前十二（12）个月内向我们支付的金额与一百美元（USD 100）中较高者为准，或以您所在司法辖区允许的更低上限为准。"
         },
         {
           "title": "变更与终止",
@@ -291,7 +311,8 @@
         "submitButton": "进入",
         "submitButtonLoadingText": "正在登录…",
         "subtitleText": "还没有账号？",
-        "title": "登录"
+        "title": "登录",
+        "unknownError": "未知错误"
       },
       "signUpForm": {
         "firstNameInput": {
@@ -312,7 +333,10 @@
           "label": "密码",
           "placeholder": "设置强密码",
           "errors": {
-            "minLength": "密码过短，最少 {{count}} 个字符"
+            "minLength": "密码至少 {{count}} 个字符，例如：MyPass1",
+            "maxLength": "密码最多 {{count}} 个字符，例如：MyPass1",
+            "noLetter": "密码必须包含至少一个字母，例如：MyPass1",
+            "noDigit": "密码必须包含至少一个数字，例如：MyPass1"
           }
         },
         "repeatPasswordInput": {
@@ -327,8 +351,17 @@
         "submitButton": "进入",
         "submitButtonLoadingText": "正在注册…",
         "subtitleText": "已有账号？",
-        "title": "注册"
+        "title": "注册",
+        "successToast": "注册成功",
+        "errorToast": "注册失败"
       }
+    }
+  },
+  "common": {
+    "aria": {
+      "togglePasswordVisibility": "显示或隐藏密码",
+      "previousMonth": "上个月",
+      "nextMonth": "下个月"
     }
   }
 }

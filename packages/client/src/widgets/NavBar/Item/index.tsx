@@ -23,7 +23,7 @@ export const NavBarItem = memo(
       <Link to={href}>
         <Stack.VStack gap={1}>
           <Icon size={30} />
-          <Text fontSize="xs" fontWeight="semibold">
+          <Text fontSize="2s" fontWeight="semibold" lineHeight="shorter">
             {title}
           </Text>
         </Stack.VStack>
@@ -43,7 +43,7 @@ export const NavBarItem = memo(
             _hover={{
               bg: "transparent",
             }}
-            padding={2}
+            padding={1.5}
             color={isActive ? "purple.focusRing" : "gray"}
           >
             {linkContent}

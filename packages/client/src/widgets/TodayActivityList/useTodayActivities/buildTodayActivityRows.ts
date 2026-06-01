@@ -2,6 +2,8 @@ import type { ActivityDTO } from "@to-do-list/shared";
 import type { ActivityState } from "~/shared/api/services";
 
 type BuildTodayActivityRowsProps = {
+  /** Activity ids in day-plan order (server returns newest first). */
+  planItemActivityIds: string[];
   planActivities: ActivityDTO[];
   currentActivities: ActivityState[];
   trackedActivities: ActivityState[];
@@ -9,6 +11,7 @@ type BuildTodayActivityRowsProps = {
 };
 
 export function buildTodayActivityRows({
+  planItemActivityIds,
   planActivities,
   currentActivities,
   trackedActivities,
@@ -17,16 +20,22 @@ export function buildTodayActivityRows({
   const currentByActivityId = new Map(
     currentActivities.map((item) => [item.activity.id, item]),
   );
+  const planActivityById = new Map(
+    planActivities.map((activity) => [activity.id, activity]),
+  );
 
-  const plannedRows = planActivities.map((activity) => {
-    const current = currentByActivityId.get(activity.id);
+  const plannedRows = planItemActivityIds
+    .map((activityId) => planActivityById.get(activityId))
+    .filter((activity): activity is ActivityDTO => Boolean(activity))
+    .map((activity) => {
+      const current = currentByActivityId.get(activity.id);
 
-    return {
-      activity: withTodayActiveDuration(activity, analyticsItemsMap),
-      session: current?.session ?? null,
-      segment: current?.segment ?? null,
-    } satisfies ActivityState;
-  });
+      return {
+        activity: withTodayActiveDuration(activity, analyticsItemsMap),
+        session: current?.session ?? null,
+        segment: current?.segment ?? null,
+      } satisfies ActivityState;
+    });
 
   const plannedActivityIds = new Set(plannedRows.map((row) => row.activity.id));
 
@@ -48,7 +57,9 @@ export function buildTodayActivityRows({
 
   const appendedTrackedRows = trackedActivities
     .filter((row) => !mergedIds.has(row.activity.id))
-    .filter((row) => getTodayActiveDurationMs(row.activity, analyticsItemsMap) > 0)
+    .filter(
+      (row) => getTodayActiveDurationMs(row.activity, analyticsItemsMap) > 0,
+    )
     .map(
       (row) =>
         ({

@@ -1,6 +1,7 @@
 import { zValidator } from "@hono/zod-validator";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { authService } from "./auth.service.js";
+import { authQueries } from "./auth.queries.js";
 import type { Context } from "hono";
 import type { BlankEnv, BlankInput } from "hono/types";
 import { signInSchema, signUpSchema } from "./auth.schema.js";
@@ -21,17 +22,23 @@ const init = async (c: Context<BlankEnv, "/auth", BlankInput>) => {
     const accessTokenResult = await tokenService.verifyAccessToken(accessToken);
 
     if (accessTokenResult.success) {
-      const authUser = accessTokenResult.payload.data;
+      const userId = String(accessTokenResult.payload.data.id);
+      const user = await authQueries.findUserById(userId);
+
+      if (!user) {
+        return c.json({ success: false, data: { user: null }, error: null }, 401);
+      }
 
       return c.json(
         {
           success: true,
           data: {
             user: {
-              id: authUser.id,
-              login: authUser.login,
-              name: authUser.login,
-              avatar: authUser.avatar,
+              id: String(user.id),
+              login: user.login,
+              name: user.name,
+              email: user.email ?? null,
+              avatar: user.avatar ?? null,
             },
           },
         },
@@ -48,18 +55,26 @@ const init = async (c: Context<BlankEnv, "/auth", BlankInput>) => {
     );
 
     if (refreshTokenResult.success) {
-      const authUser = refreshTokenResult.payload.data;
-      const newAccessToken = await tokenService.generateAccessToken(authUser);
+      const userId = String(refreshTokenResult.payload.data.id);
+      const user = await authQueries.findUserById(userId);
+
+      if (!user) {
+        deleteCookie(c, nameRefreshTokenInCookie);
+        return c.json({ success: false, data: { user: null }, error: null }, 401);
+      }
+
+      const newAccessToken = await tokenService.generateAccessToken(user);
 
       return c.json(
         {
           success: true,
           data: {
             user: {
-              id: authUser.id,
-              login: authUser.login,
-              name: authUser.name,
-              avatar: authUser.avatar,
+              id: String(user.id),
+              login: user.login,
+              name: user.name,
+              email: user.email ?? null,
+              avatar: user.avatar ?? null,
             },
             accessToken: newAccessToken,
           },

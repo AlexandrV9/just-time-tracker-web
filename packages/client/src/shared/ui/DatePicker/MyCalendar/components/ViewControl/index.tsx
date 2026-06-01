@@ -1,18 +1,18 @@
+import { useTranslation } from "~/shared/hooks";
 import { IconButton } from "~/shared/ui/Button";
 import { ChevronLeftIcon, ChevronRightIcon } from "~/shared/ui/icons";
 import { Stack } from "~/shared/ui/Stack";
 import { Text } from "~/shared/ui/Text";
 import { useCalendar } from "../../useCalendar";
 
-const locale = "ru";
-
 export const ViewControl = () => {
+  const { t, i18n } = useTranslation();
   const { month, goToNextMonth, goToPrevMonth } = useCalendar();
 
   return (
     <Stack.HStack justify="space-between" p={4} borderBottom="1px solid">
       <IconButton
-        aria-label="Previous month"
+        aria-label={t("common.aria.previousMonth")}
         size="sm"
         variant="ghost"
         onClick={goToPrevMonth}
@@ -20,17 +20,12 @@ export const ViewControl = () => {
         <ChevronLeftIcon />
       </IconButton>
 
-      <Text
-        // fontSize={sizeStyles.fontSize}
-        fontWeight="semibold"
-        //   color={textColor}
-        textTransform="capitalize"
-      >
-        {month.locale(locale).format("MMMM YYYY")}
+      <Text fontWeight="semibold" textTransform="capitalize">
+        {month.locale(i18n.language).format("MMMM YYYY")}
       </Text>
 
       <IconButton
-        aria-label="Next month"
+        aria-label={t("common.aria.nextMonth")}
         size="sm"
         variant="ghost"
         onClick={goToNextMonth}

@@ -72,7 +72,18 @@ export const ActivityHistory = () => {
   }
 
   if (isLoading) {
-    return <HistoryActivityGroup.Skeleton />;
+    return (
+      <Flex flexDirection="column" gap="1rem" p="0.5rem">
+        <Text textStyle="2xl" fontWeight="bolder">
+          {t("widgets.activityHistory.title")}
+        </Text>
+        <Box display="flex" flexDirection="column" gap="1.5rem">
+          {Array.from({ length: 2 }).map((_, index) => (
+            <HistoryActivityGroup.Skeleton key={index} />
+          ))}
+        </Box>
+      </Flex>
+    );
   }
 
   if (isError) {

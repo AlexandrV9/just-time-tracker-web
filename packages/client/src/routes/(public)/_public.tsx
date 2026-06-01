@@ -6,7 +6,8 @@ import {
 import { useLayoutEffect, useMemo } from "react";
 import { LangSwitcher, ThemeSwitcher } from "~/features";
 import { useTranslation } from "~/shared/hooks";
-import { Button, Flex, Link, PageLayout } from "~/shared/ui";
+import shineStyles from "~/shared/styles/shineRing.module.css";
+import { Button, Flex, Link, PageLayout, Text } from "~/shared/ui";
 import { Header, useHeaderStore } from "~/widgets";
 
 export const Route = createFileRoute("/(public)/_public")({
@@ -63,6 +64,19 @@ export function PublicLayout() {
         ) : null,
       );
     }
+    setContent(
+      "center",
+      <Flex alignItems="center" gap={2}>
+        <Text
+          textStyle="xl"
+          m={0}
+          fontWeight="semibold"
+          className={shineStyles.shineText}
+        >
+          Just Time Tracker
+        </Text>
+      </Flex>,
+    );
     setContent(
       "right",
       <Flex justifyContent="end" gap={2}>

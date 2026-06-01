@@ -31,8 +31,9 @@ export const useTodayActivities = (): {
     isError: todayPlanItemsError,
   } = useTodayPlanItems();
 
-  const todayPlanItemIds = todayPlanItems.map(
-    (planItem) => planItem.activityId,
+  const todayPlanItemIds = useMemo(
+    () => todayPlanItems.map((planItem) => planItem.activityId),
+    [todayPlanItems],
   );
 
   const {
@@ -79,6 +80,7 @@ export const useTodayActivities = (): {
   const mergedActivities = useMemo(
     () =>
       buildTodayActivityRows({
+        planItemActivityIds: todayPlanItemIds,
         planActivities: todayPlanActivities,
         currentActivities,
         trackedActivities,
@@ -86,6 +88,7 @@ export const useTodayActivities = (): {
       }),
 
     [
+      todayPlanItemIds,
       todayPlanActivities,
       currentActivities,
       trackedActivities,

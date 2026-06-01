@@ -36,5 +36,7 @@ export * from "./CircularLinesLoader";
 export * from "./Version";
 export * from "./Book";
 export * from "./Exit";
+export * from "./Check";
+export * from "./Close";
 
 export * from "./withIconProps";
