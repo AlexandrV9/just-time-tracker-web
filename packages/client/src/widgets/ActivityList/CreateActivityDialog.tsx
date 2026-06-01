@@ -60,7 +60,7 @@ export const CreateActivityDialog = ({ dialog }: CreateActivityDialogProps) => {
     <Dialog.RootProvider size="full" lazyMount value={dialog}>
       <Portal>
         <Dialog.Backdrop />
-        <Dialog.Positioner zIndex={3}>
+        <Dialog.Positioner>
           <Dialog.SafeContent
             overflow="auto"
             display="flex"

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useTranslation } from "~/shared/hooks";
 
-import { Portal, Select, Text } from "~/shared/ui";
+import { Select, Text } from "~/shared/ui";
 import { createListCollection } from "~/shared/utils";
 
 export const LANGUAGES = {
@@ -32,7 +32,7 @@ export const LangSwitcher = ({ isShort = true }: LangSwitcherProps) => {
     (lng: string) => {
       i18n.changeLanguage(lng);
     },
-    [i18n]
+    [i18n],
   );
 
   return (
@@ -58,25 +58,22 @@ export const LangSwitcher = ({ isShort = true }: LangSwitcherProps) => {
           </Select.ValueText>
         </Select.Trigger>
       </Select.Control>
-
-      <Portal>
-        <Select.Positioner>
-          <Select.Content>
-            {languageListCollection.items.map(({ label, value: ln }) => (
-              <Select.Item
-                item={label}
-                key={ln}
-                color="fg"
-                _hover={{ cursor: "pointer" }}
-              >
-                <Text fontWeight="medium">
-                  {isShort ? capitalizeFirstLetter(ln) : t(`languages.${ln}`)}
-                </Text>
-              </Select.Item>
-            ))}
-          </Select.Content>
-        </Select.Positioner>
-      </Portal>
+      <Select.Positioner>
+        <Select.Content>
+          {languageListCollection.items.map(({ label, value: ln }) => (
+            <Select.Item
+              item={label}
+              key={ln}
+              color="fg"
+              _hover={{ cursor: "pointer" }}
+            >
+              <Text fontWeight="medium">
+                {isShort ? capitalizeFirstLetter(ln) : t(`languages.${ln}`)}
+              </Text>
+            </Select.Item>
+          ))}
+        </Select.Content>
+      </Select.Positioner>
     </Select.Root>
   );
 };

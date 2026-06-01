@@ -5,6 +5,7 @@
 ### Исправления
 
 - Убран лишний верхний отступ в PWA на iPhone: `safe-area-inset-top` больше не учитывается дважды в `TopContainer`
+- Backdrop модалок накрывает хедер: слои z-index вынесены в `shared/constants/zIndex` (header `10`, modal `20`), `Dialog.Backdrop` и `Dialog.Positioner` получают `zIndex: 20` централизованно
 
 ---
 

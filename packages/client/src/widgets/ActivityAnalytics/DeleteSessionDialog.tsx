@@ -30,7 +30,7 @@ export function DeleteSessionDialog({
     <Dialog.RootProvider size="sm" placement="center" lazyMount value={dialog}>
       <Portal>
         <Dialog.Backdrop />
-        <Dialog.Positioner zIndex={3}>
+        <Dialog.Positioner>
           <Dialog.Content maxW="md" w="full" mx={4} borderRadius="xl">
             <Dialog.Header>
               <Dialog.Title fontSize="lg">

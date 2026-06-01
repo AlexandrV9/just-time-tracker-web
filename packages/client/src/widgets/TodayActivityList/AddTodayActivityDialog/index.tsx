@@ -191,7 +191,7 @@ export function AddTodayActivitiesDialog({
     <Dialog.RootProvider size="md" placement="center" lazyMount value={dialog}>
       <Portal>
         <Dialog.Backdrop />
-        <Dialog.Positioner zIndex={3}>
+        <Dialog.Positioner>
           <Dialog.Content
             maxW="md"
             w="full"

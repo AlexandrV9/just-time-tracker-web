@@ -1,4 +1,4 @@
-import { ChipIcon, MoonIcon, Portal, Select, SunIcon } from "~/shared/ui";
+import { ChipIcon, MoonIcon, Select, SunIcon } from "~/shared/ui";
 
 import { THEMES, useTheme, type Theme } from "~/shared/theme";
 import { useCallback, type ReactNode } from "react";
@@ -23,7 +23,7 @@ export const ThemeSwitcher = () => {
     (theme: Theme) => {
       changeTheme(theme);
     },
-    [changeTheme]
+    [changeTheme],
   );
 
   return (
@@ -50,24 +50,22 @@ export const ThemeSwitcher = () => {
           </Select.ValueText>
         </Select.Trigger>
       </Select.Control>
-      <Portal>
-        <Select.Positioner>
-          <Select.Content>
-            {themeListCollection.items.map(({ label, value }) => (
-              <Select.Item
-                item={label}
-                key={value}
-                color="fg"
-                _hover={{ cursor: "pointer" }}
-                maxWidth="32px"
-                maxHeight="32px"
-              >
-                {themeIconList[value as Theme]}
-              </Select.Item>
-            ))}
-          </Select.Content>
-        </Select.Positioner>
-      </Portal>
+      <Select.Positioner>
+        <Select.Content>
+          {themeListCollection.items.map(({ label, value }) => (
+            <Select.Item
+              item={label}
+              key={value}
+              color="fg"
+              _hover={{ cursor: "pointer" }}
+              maxWidth="32px"
+              maxHeight="32px"
+            >
+              {themeIconList[value as Theme]}
+            </Select.Item>
+          ))}
+        </Select.Content>
+      </Select.Positioner>
     </Select.Root>
   );
 };
