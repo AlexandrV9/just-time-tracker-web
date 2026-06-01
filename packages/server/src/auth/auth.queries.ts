@@ -15,7 +15,18 @@ const db: { users: AuthUser[] } = {
 };
 
 const findUserByLogin = async (login: string) => {
-  const query = "SELECT * FROM users WHERE login = $1";
+  const query = `
+    SELECT
+      id,
+      login,
+      password_hash,
+      first_name AS name,
+      email,
+      avatar,
+      is_active
+    FROM users
+    WHERE login = $1
+  `;
   const { rows } = await pool.query(query, [login]);
   return rows[0] || null;
 };
@@ -45,16 +56,14 @@ const createUser = async (data: {
 
 const findUserById = async (userId: AuthUser["id"]) => {
   const query = `
-    SELECT 
+    SELECT
       id,
       login,
-      first_name as "firstName",
-      avatar,
+      first_name AS name,
       email,
-      created_at as "createdAt",
-      updated_at as "updatedAt",
-      is_active as "isActive"
-    FROM users 
+      avatar,
+      is_active AS "isActive"
+    FROM users
     WHERE id = $1
   `;
 

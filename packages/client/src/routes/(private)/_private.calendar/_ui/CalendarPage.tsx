@@ -17,11 +17,9 @@ export function CalendarPage() {
         <Text textStyle="2xl" fontWeight="extrabold">
           {t("pages.calendar.title")}
         </Text>
-        <Text>Тут скоро будет календарь активностей</Text>
+        <Text>{t("pages.calendar.comingSoon")}</Text>
         <Text textStyle="sm" color="fg.muted">
-          На этой странице вы сможете видеть все ваши активности и их
-          распределение по дням, а также сможете планировать свои активности на
-          будущее
+          {t("pages.calendar.comingSoonDescription")}
         </Text>
       </Flex>
       {/* <TimeGrid startHour={8} endHour={18} hourHeight={60} /> */}

@@ -1,14 +1,14 @@
 import type { AuthUserDTO, ErrorField } from "./types";
 import type { RequestResponse } from "../types";
 import { tokenManager } from "~/shared/utils";
-import type { UserDTO } from "../users";
 import { authApi, baseApi } from "../base";
+import type { UserDTO } from "../users/types";
 
 class AuthService {
   signInByLogin(data: { login: string; password: string }) {
     return authApi.post<{ user: AuthUserDTO; accessToken: string }>(
       `/api/auth/sign-in`,
-      { data }
+      { data },
     );
   }
 
@@ -26,7 +26,7 @@ class AuthService {
         headers: {
           Authorization: `Bearer ${tokenManager.getAccessToken()}`,
         },
-      }
+      },
     );
   }
 

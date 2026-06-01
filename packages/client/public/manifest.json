@@ -1,8 +1,8 @@
 {
-  "short_name": "TTracker",
-  "name": "",
+  "short_name": "Time Tracker",
+  "name": "Just Time Tracker",
   "start_url": ".",
-  "description": "Web application for tracking your tasks and taking notes",
+  "description": "A focused time-tracking app with a timer, activities, analytics, calendar, and history.",
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "display": "standalone",
@@ -12,8 +12,14 @@
     {
       "src": "/icons/logo.svg",
       "type": "image/svg+xml",
-      "sizes": "512x512",
-      "purpose": "any maskable"
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/logo-120x120.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icons/logo-192x192.png",
@@ -28,10 +34,10 @@
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/apple-touch-logo-180x180.png",
-      "sizes": "180x180",
+      "src": "/icons/logo-1024x1024.png",
+      "sizes": "1024x1024",
       "type": "image/png",
-      "purpose": "apple touch icon"
+      "purpose": "any maskable"
     }
   ]
 }

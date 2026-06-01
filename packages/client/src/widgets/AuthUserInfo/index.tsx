@@ -11,7 +11,6 @@ export const AuthUserInfo = () => {
         <UserAvatar userName={user!.name} src={user?.avatar} size="2xl" />
         <Stack.VStack>
           <Text>{user!.name}</Text>
-          {user?.email && <Text>{user?.email}</Text>}
         </Stack.VStack>
       </Stack.VStack>
     </Flex>

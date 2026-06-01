@@ -21,9 +21,9 @@ export const NavBarItem = memo(
   ({ href, isActive, icon: Icon, title }: NavBarItemProps) => {
     const linkContent = (
       <Link to={href}>
-        <Stack.VStack gap={0.5}>
-          <Icon size={24} />
-          <Text fontSize="2xs" fontWeight="semibold" lineHeight="shorter">
+        <Stack.VStack gap={1}>
+          <Icon size={30} />
+          <Text fontSize="2s" fontWeight="semibold" lineHeight="shorter">
             {title}
           </Text>
         </Stack.VStack>

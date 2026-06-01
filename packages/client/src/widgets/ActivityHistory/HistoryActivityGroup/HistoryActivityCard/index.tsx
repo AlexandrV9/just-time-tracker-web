@@ -16,15 +16,15 @@ import {
 
 import { formatDurationLabel } from "./utils";
 import { ActivityCardView } from "~/entities/Activity";
-import { Skeleton } from "./Skeleton";
+import { HistoryActivityCardSkeleton } from "./HistoryActivityCardSkeleton";
 import { getDateIntervalByCalendarDay, type CalendarDay } from "~/shared/libs";
 import { useDayDisplayedSeconds } from "~/features";
 
 const highlightFade = keyframes`
-  0%   { outline-color: var(--chakra-colors-yellow-400) }
-  70%  { outline-color: var(--chakra-colors-yellow-400) }
-  100% { outline-color: transparent }
-`;
+    0%   { outline-color: var(--chakra-colors-yellow-400) }
+    70%  { outline-color: var(--chakra-colors-yellow-400) }
+    100% { outline-color: transparent }
+  `;
 
 export type HistoryActivityCardProps = {
   activity: ActivityDTO;
@@ -149,4 +149,4 @@ export const HistoryActivityCard = ({
   );
 };
 
-HistoryActivityCard.Skeleton = Skeleton;
+HistoryActivityCard.Skeleton = HistoryActivityCardSkeleton;

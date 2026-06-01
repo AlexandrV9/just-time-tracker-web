@@ -31,7 +31,7 @@ class AuthManager {
       authActions.setStatus("AUTHENTICATED");
       return true;
     } catch (error) {
-      console.log(error);
+      console.error(error);
 
       tokenManager.removeAccessToken();
 
@@ -113,7 +113,7 @@ class AuthManager {
 
       return response;
     } catch (error) {
-      console.log(error);
+      console.error(error);
       authActions.setStatus(currentStatus);
     }
   }

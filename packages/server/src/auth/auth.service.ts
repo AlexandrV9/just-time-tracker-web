@@ -53,7 +53,7 @@ const signIn = async (data: {
         id: user.id,
         login: user.login,
         name: user.name,
-        avatar: user.name,
+        avatar: user.avatar,
         email: user.email,
       },
     },

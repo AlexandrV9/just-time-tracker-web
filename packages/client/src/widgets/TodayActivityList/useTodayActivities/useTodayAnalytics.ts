@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   ACTIVITIES_ANALYTICS_QUERY_KEY,
   activityApiService,
@@ -53,6 +53,7 @@ export function useTodayAnalytics({
       };
     },
     enabled: normalizedActivityIds.length > 0,
+    placeholderData: keepPreviousData,
   });
 
   return {

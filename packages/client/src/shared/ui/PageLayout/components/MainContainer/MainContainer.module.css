@@ -15,8 +15,10 @@
 }
 
 .content {
-  min-width: 0;
-  max-width: 100%;
+  width: 100%;
+  max-width: var(--page-content-max-width);
+  margin-inline: auto;
+  
   overflow-x: hidden;
 }
 

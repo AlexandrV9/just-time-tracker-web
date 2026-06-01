@@ -1,12 +1,25 @@
-/* Same gradient + motion as auth title (.shineText in SignInByLoginForm) */
-
-@keyframes shineRing {
+@keyframes shine {
   0% {
     background-position: 200% center;
   }
   100% {
     background-position: -200% center;
   }
+}
+
+.shineText {
+  background: linear-gradient(
+    135deg,
+    #7ea670 20%,
+    #8307fe 40%,
+    #63f18d 60%,
+    #7ea670 80%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-size: 200% auto;
+  animation: shine 6s linear infinite forwards;
 }
 
 .shineRing {
@@ -20,7 +33,7 @@
     #7ea670 80%
   );
   background-size: 200% auto;
-  animation: shineRing 6s linear infinite forwards;
+  animation: shine 6s linear infinite forwards;
 }
 
 /* Activity card shell: padding always reserved to avoid layout jump on start */
@@ -39,7 +52,7 @@
     #7ea670 80%
   );
   background-size: 200% auto;
-  animation: shineRing 6s linear infinite forwards;
+  animation: shine 6s linear infinite forwards;
 }
 
 .shineRingCardInner {

@@ -11,6 +11,7 @@ import {
   activitySessionsRouter,
 } from "./activity/index.js";
 import { dayPlanItemsRouter, dayPlansRouter } from "./dayPlan/index.js";
+import { usersRouter } from "./user/index.js";
 
 const app = new Hono();
 
@@ -35,6 +36,7 @@ protectedRouter.route(
 );
 protectedRouter.route("/day-plans", dayPlansRouter);
 protectedRouter.route("/day-plan-items", dayPlanItemsRouter);
+protectedRouter.route("/users", usersRouter);
 
 app.route("/", protectedRouter);
 

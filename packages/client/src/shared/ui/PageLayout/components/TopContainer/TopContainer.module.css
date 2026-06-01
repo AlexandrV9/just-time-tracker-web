@@ -1,8 +1,19 @@
 .container {
   --top-bar-height: 70px;
-  box-sizing: border-box;
+
+  width: 100%;
   padding-top: var(--safe-area-inset-top, 0px);
-  padding-left: calc(1rem + var(--safe-area-inset-left, 0px));
-  padding-right: calc(1rem + var(--safe-area-inset-right, 0px));
+  padding-left: var(--safe-area-inset-left, 0px);
+  padding-right: var(--safe-area-inset-right, 0px);
+}
+
+.content {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: var(--page-content-max-width);
   min-height: calc(var(--top-bar-height) + var(--safe-area-inset-top, 0px));
+  padding-left: 1rem;
+  padding-right: 1rem;
 }

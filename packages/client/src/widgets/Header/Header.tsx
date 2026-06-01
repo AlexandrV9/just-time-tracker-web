@@ -14,6 +14,7 @@ export const Header = () => {
       justifyContent="center"
       alignItems="center"
       position="relative"
+      h="var(--top-bar-height)"
     >
       <Box position="absolute" left={0} top="50%" transform="translateY(-50%)">
         {leftContent}

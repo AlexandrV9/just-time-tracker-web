@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "~/features/auth";
 import {
   DAY_PLAN_ITEMS_QUERY_KEY,
@@ -39,6 +39,7 @@ export const useTodayPlanItems = () => {
       }),
     enabled: Boolean(todayPlanId),
     select: (response) => (response.success ? response.data.data : []),
+    placeholderData: keepPreviousData,
   });
 
   return {

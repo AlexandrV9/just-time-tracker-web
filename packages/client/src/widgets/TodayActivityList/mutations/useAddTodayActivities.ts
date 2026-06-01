@@ -51,8 +51,10 @@ export const useAddTodayActivities = ({
       queryClient.invalidateQueries({
         queryKey: [DAY_PLANS_QUERY_KEY, userId, todayCalendarDay],
       });
+      // Invalidate by prefix: on the very first add the plan is created inside
+      // mutationFn, so the captured `planId` is stale (undefined).
       queryClient.invalidateQueries({
-        queryKey: [DAY_PLAN_ITEMS_QUERY_KEY, planId],
+        queryKey: [DAY_PLAN_ITEMS_QUERY_KEY],
       });
     },
     onError: () => {

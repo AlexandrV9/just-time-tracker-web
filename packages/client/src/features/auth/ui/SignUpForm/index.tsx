@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import type { TFunction } from "i18next";
 import z from "zod";
 import { authManager } from "~/features/auth";
@@ -16,8 +17,11 @@ import {
   useForm,
 } from "~/shared/ui";
 
-import styles from "./SignUpForm.module.css";
-import { minLengthPassword, signUpFormSchema } from "./constants";
+import {
+  maxLengthPassword,
+  minLengthPassword,
+  signUpFormSchema,
+} from "./constants";
 
 const baseLocale = "features.auth.signUpForm";
 
@@ -25,24 +29,34 @@ export type SignUpFormSchema = z.infer<typeof signUpFormSchema>;
 
 export const SignUpForm = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const signUpMutatuin = useMutation({
     mutationFn: (data: SignUpFormSchema) => authManager.signUp(data),
-    onSuccess: () => {
-      toast.success("Success", {
+    onSuccess: (response) => {
+      if (!response.success) {
+        toast.error(t(`${baseLocale}.errorToast`), {
+          position: "top-center",
+          draggable: true,
+          toastId: "error_sign_up",
+        });
+        return;
+      }
+
+      toast.success(t(`${baseLocale}.successToast`), {
         position: "top-center",
         draggable: true,
-        toastId: "error_sign_up",
+        toastId: "success_sign_up",
       });
       reset();
+      navigate({ to: "/signin" });
     },
-    onError: (error) => {
-      toast.success("Success", {
+    onError: () => {
+      toast.error(t(`${baseLocale}.errorToast`), {
         position: "top-center",
         draggable: true,
         toastId: "error_sign_up",
       });
-      console.log("error", error);
     },
   });
 
@@ -74,15 +88,7 @@ export const SignUpForm = () => {
       gap="1rem"
       onSubmit={submitHandler}
     >
-      <Text
-        as="h1"
-        textStyle="4xl"
-        m={0}
-        fontWeight="semibold"
-        // bg="linear-gradient(135deg, #7ea670ff 20%, #8307fe 40%, #07fe66ff 70%)"
-        // bgClip="text"
-        className={styles.shineText}
-      >
+      <Text as="h1" textStyle="4xl" m={0} fontWeight="semibold">
         {t(`${baseLocale}.title`)}
       </Text>
 
@@ -170,17 +176,6 @@ export const SignUpForm = () => {
           </Text>
         </Text>
       </Stack.HStack>
-
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias delectus omnis commodi, aperiam reprehenderit esse est maxime necessitatibus corrupti repellendus? Excepturi dolorum saepe mollitia recusandae possimus autem quis, praesentium consequatur?
-      Delectus deserunt quas eligendi possimus ad. Architecto necessitatibus quam corporis velit neque dolores minima molestias nam vero sed aperiam doloribus laborum iusto minus ipsum, pariatur adipisci porro alias delectus amet.
-      Ad, cupiditate corrupti. Repudiandae dolorum tenetur blanditiis ratione autem id porro. Laborum assumenda incidunt, quis amet saepe cupiditate repudiandae ex cum accusamus delectus aut quam modi alias! Fugit, aut nemo!
-      Ut enim harum, a iusto voluptas soluta necessitatibus id. Quaerat minus magnam ipsam. Quisquam unde quaerat sunt minima obcaecati a consequuntur nisi animi, cupiditate reprehenderit quasi aliquam ex doloribus nobis?
-      Et saepe dolore vitae deserunt dolor sapiente, repellat odio obcaecati vero odit aliquid accusamus tempore sed provident aperiam nostrum eaque, optio debitis atque accusantium dicta repellendus dolorem? Quia, deserunt ipsum.
-      Veniam repellendus placeat magnam quis nostrum, exercitationem dolorum. Alias neque voluptatibus atque cupiditate nemo est nam iusto ab sunt maxime sint voluptatum earum porro obcaecati, a nisi dolorum, at eius!
-      Totam sint debitis unde commodi architecto tempore cupiditate nam. Illo id eveniet, eos sed accusamus corrupti esse facere perspiciatis iusto repellendus mollitia saepe nulla tempora pariatur, porro eum molestiae explicabo?
-      Nesciunt magnam odio sequi, harum ratione, voluptates molestias totam officiis dolorem corporis, reprehenderit ad distinctio? Odio tenetur corporis explicabo dolorem, nihil deleniti maiores totam obcaecati in aliquid modi voluptatibus neque.
-      Ab soluta aliquam, cumque numquam rem doloremque dolor laboriosam sapiente cupiditate obcaecati libero cum similique! Harum quia placeat doloremque accusantium officia autem dolore, nobis rerum consectetur eaque nisi. Odit, neque.
-      Earum beatae sapiente inventore repudiandae id dolor pariatur aspernatur maiores, similique molestias quod ad aut corrupti omnis repellat, incidunt libero a laboriosam ipsum odio, quibusdam voluptates nostrum? Esse, laborum sequi.
     </Box>
   );
 };
@@ -200,6 +195,14 @@ function getTranslatedError(
       return t(`${baseLocale}.passwordInput.errors.minLength`, {
         count: minLengthPassword,
       });
+    case "password.error.maxLength":
+      return t(`${baseLocale}.passwordInput.errors.maxLength`, {
+        count: maxLengthPassword,
+      });
+    case "password.error.noLetter":
+      return t(`${baseLocale}.passwordInput.errors.noLetter`);
+    case "password.error.noDigit":
+      return t(`${baseLocale}.passwordInput.errors.noDigit`);
     case "passwords.mismatch":
       return t(`${baseLocale}.repeatPasswordInput.errors.mismatch`, {
         count: minLengthPassword,
