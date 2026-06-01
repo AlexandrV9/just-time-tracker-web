@@ -13,7 +13,7 @@
   justify-content: space-between;
   align-items: center;
   max-width: var(--page-content-max-width);
-  min-height: calc(var(--top-bar-height) + var(--safe-area-inset-top, 0px));
+  min-height: var(--top-bar-height);
   padding-left: 1rem;
   padding-right: 1rem;
 }
