@@ -3,10 +3,8 @@ import { useLayoutEffect } from "react";
 import z from "zod";
 import { LangSwitcher, ThemeSwitcher } from "~/features";
 import { authManager, useAuthStore } from "~/features/auth";
-import { BackButton, Box, Flex, PageLayout, Text } from "~/shared/ui";
-import { Header, useHeaderStore } from "~/widgets";
-
-import shineStyles from "~/shared/styles/shineRing.module.css";
+import { BackButton, Box, Flex, PageLayout } from "~/shared/ui";
+import { Header, HeaderAppTitle, useHeaderStore } from "~/widgets";
 
 export const Route = createFileRoute("/(auth)/_auth")({
   validateSearch: z.object({
@@ -48,19 +46,7 @@ export function AuthLayout() {
         <ThemeSwitcher />
       </Flex>,
     );
-    setContent(
-      "center",
-      <Flex alignItems="center" gap={2}>
-        <Text
-          textStyle="xl"
-          m={0}
-          fontWeight="semibold"
-          className={shineStyles.shineText}
-        >
-          Just Time Tracker
-        </Text>
-      </Flex>,
-    );
+    setContent("center", <HeaderAppTitle />);
   }, [setContent]);
 
   return (

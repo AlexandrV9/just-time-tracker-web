@@ -1,0 +1,10 @@
+.iconWrap {
+  --custom-icon-size: 24px;
+  display: flex;
+}
+
+@media (min-width: 768px) {
+  .iconWrap {
+    --custom-icon-size: 28px;
+  }
+}

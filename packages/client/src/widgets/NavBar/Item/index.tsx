@@ -9,6 +9,8 @@ import {
   type IconProps,
 } from "~/shared/ui";
 
+import styles from "./NavBarItem.module.css";
+
 export type NavBarItemProps = {
   id: string;
   title: string;
@@ -21,9 +23,15 @@ export const NavBarItem = memo(
   ({ href, isActive, icon: Icon, title }: NavBarItemProps) => {
     const linkContent = (
       <Link to={href}>
-        <Stack.VStack gap={1}>
-          <Icon size={30} />
-          <Text fontSize="2s" fontWeight="semibold" lineHeight="shorter">
+        <Stack.VStack gap={{ base: 1, md: 1.5 }}>
+          <Box className={styles.iconWrap}>
+            <Icon size={24} />
+          </Box>
+          <Text
+            fontSize={{ base: "sm", md: "md" }}
+            fontWeight="semibold"
+            lineHeight="shorter"
+          >
             {title}
           </Text>
         </Stack.VStack>

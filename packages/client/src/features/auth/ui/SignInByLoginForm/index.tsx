@@ -5,6 +5,7 @@ import type { TFunction } from "i18next";
 import z from "zod";
 import { authManager } from "~/features/auth";
 import { useTranslation } from "~/shared/hooks";
+import shineStyles from "~/shared/styles/shineRing.module.css";
 
 import {
   Button,
@@ -71,7 +72,13 @@ export const SignInByLoginForm = () => {
       gap="1rem"
       onSubmit={submitHandler}
     >
-      <Text as="h1" textStyle="4xl" m={0} fontWeight="semibold">
+      <Text
+        as="h1"
+        textStyle="4xl"
+        m={0}
+        fontWeight="semibold"
+        className={shineStyles.shineTextWhenHeaderHidden}
+      >
         {t(`${baseLocale}.title`)}
       </Text>
       <Field.Root invalid={!!errors.login}>

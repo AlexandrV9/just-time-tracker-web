@@ -10,9 +10,7 @@ import {
 } from "~/shared/hooks";
 import { buildLocationRedirectPath } from "~/shared/libs";
 import { Box, Flex, PageLayout, Text } from "~/shared/ui";
-import { Header, NavBar, useHeaderStore } from "~/widgets";
-
-import shineStyles from "~/shared/styles/shineRing.module.css";
+import { Header, HeaderAppTitle, NavBar, useHeaderStore } from "~/widgets";
 
 function PrivateRoutePending() {
   const { t } = useTranslation();
@@ -75,19 +73,7 @@ export function PrivateLayout() {
 
   useLayoutEffect(() => {
     setContent("left", <AuthUserAvatar />);
-    setContent(
-      "center",
-      <Flex alignItems="center" gap={2}>
-        <Text
-          textStyle="xl"
-          m={0}
-          fontWeight="semibold"
-          className={shineStyles.shineText}
-        >
-          Just Time Tracker
-        </Text>
-      </Flex>,
-    );
+    setContent("center", <HeaderAppTitle />);
     setContent(
       "right",
       <Flex justifyContent="end" gap={2}>

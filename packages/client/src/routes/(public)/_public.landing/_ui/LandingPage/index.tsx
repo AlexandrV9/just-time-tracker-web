@@ -35,7 +35,7 @@ export const LandingPage = () => {
     <Stack.VStack align="stretch" gap={10} p="1rem" mx="auto">
       <Stack.VStack align="stretch" gap={4} maxW="640px">
         <Flex alignItems="center" gap={2}>
-          <LightningIcon size={32} />
+          <LightningIcon size={32} style={{ flexShrink: 0 }} />
           <Text
             as="h1"
             textStyle="2xl"

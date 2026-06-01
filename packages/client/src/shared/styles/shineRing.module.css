@@ -22,6 +22,24 @@
   animation: shine 6s linear infinite forwards;
 }
 
+/* Same as .shineText, but only below md (768px) — when HeaderAppTitle is hidden */
+@media (max-width: 767px) {
+  .shineTextWhenHeaderHidden {
+    background: linear-gradient(
+      135deg,
+      #7ea670 20%,
+      #8307fe 40%,
+      #63f18d 60%,
+      #7ea670 80%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-size: 200% auto;
+    animation: shine 6s linear infinite forwards;
+  }
+}
+
 .shineRing {
   padding: 2px;
   border-radius: 12px;
