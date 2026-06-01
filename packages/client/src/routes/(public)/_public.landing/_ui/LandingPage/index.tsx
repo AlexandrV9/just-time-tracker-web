@@ -23,7 +23,7 @@ export const LandingPage = () => {
   const list = Array.isArray(features) ? features : [];
 
   return (
-    <Stack.VStack align="stretch" gap={10} p="1rem">
+    <Stack.VStack align="stretch" gap={10} p="1rem" mx="auto">
       <Stack.VStack align="stretch" gap={4} maxW="640px">
         <Text
           as="h1"

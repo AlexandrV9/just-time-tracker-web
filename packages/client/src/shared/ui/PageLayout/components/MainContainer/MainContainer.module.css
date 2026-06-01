@@ -1,0 +1,58 @@
+.root {
+  flex: 1 1 0%;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(160, 160, 160, 0.45) transparent;
+}
+
+.content {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .root::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .root::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .root::-webkit-scrollbar-thumb {
+    background-color: rgba(160, 160, 160, 0.4);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+  }
+
+  .root::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(160, 160, 160, 0.65);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .root {
+    scrollbar-color: rgba(200, 200, 200, 0.35) transparent;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .root::-webkit-scrollbar-thumb {
+      background-color: rgba(200, 200, 200, 0.3);
+    }
+
+    .root::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(200, 200, 200, 0.5);
+    }
+  }
+}

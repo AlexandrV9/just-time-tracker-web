@@ -75,6 +75,7 @@ export const SignInByLoginForm = () => {
       <Text
         as="h1"
         textStyle="4xl"
+        m={0}
         fontWeight="semibold"
         // bg="linear-gradient(135deg, #7ea670ff 20%, #8307fe 40%, #07fe66ff 70%)"
         // bgClip="text"

@@ -1,0 +1,8 @@
+.container {
+  --top-bar-height: 70px;
+  box-sizing: border-box;
+  padding-top: var(--safe-area-inset-top, 0px);
+  padding-left: calc(1rem + var(--safe-area-inset-left, 0px));
+  padding-right: calc(1rem + var(--safe-area-inset-right, 0px));
+  min-height: calc(var(--top-bar-height) + var(--safe-area-inset-top, 0px));
+}

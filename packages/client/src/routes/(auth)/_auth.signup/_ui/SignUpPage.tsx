@@ -3,14 +3,25 @@ import { Box, Flex, Link, Text } from "~/shared/ui";
 
 export function SignUpPage() {
   return (
-    <Flex direction="column" align="center" justify="center" gap="1rem">
+    <Flex
+      direction="column"
+      align="center"
+      justify="flex-start"
+      gap="1rem"
+      w="full"
+      minW={0}
+      maxW="full"
+      py="1rem"
+      px="1rem"
+      overflowX="hidden"
+    >
       <Box
         padding="1.5rem"
         bg="bg"
         borderRadius="xl"
         width="full"
-        minWidth={320}
-        maxWidth={400}
+        minW={0}
+        maxW={400}
       >
         <SignUpForm />
       </Box>

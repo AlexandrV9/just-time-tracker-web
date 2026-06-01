@@ -27,7 +27,7 @@ export function NavBar({ isVertical = false, ...props }: NavBarProps) {
               gridTemplateRows: `repeat(${navItems.length}, minmax(40px, 100px))`,
             }
           : {
-              gridTemplateColumns: `repeat(${navItems.length}, minmax(40px, 200px))`,
+              gridTemplateColumns: `repeat(${navItems.length}, 1fr)`,
             })}
         listStyleType="none"
         justifyContent="center"

@@ -1,28 +1,40 @@
 :root {
-  --safe-area-inset-top: env(safe-area-inset-top);
-  --safe-area-inset-bottom: env(safe-area-inset-bottom);
-  --safe-area-inset-left: env(safe-area-inset-left);
-  --safe-area-inset-right: env(safe-area-inset-right);
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --bottom-nav-height: 3.25rem;
 }
 
-body {
-  height: 100vh;
-  height: -webkit-fill-available;
+html {
+  height: 100%;
   overflow: hidden;
 }
 
-@media (display-mode: standalone) {
-  body {
-    padding-left: var(--safe-area-inset-left, 0);
-    padding-right: var(--safe-area-inset-right, 0);
-    padding-top: var(--safe-area-inset-top, 0);
-    padding-bottom: var(--safe-area-inset-bottom, 0);
-  }
+body {
+  height: 100%;
+  overflow: hidden;
 }
 
-@media (orientation: landscape) and (display-mode: standalone) {
-  body {
-    padding-left: 0;
-    padding-right: 0;
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+/* 
+  В standalone PWA на iOS единицы dvh и visualViewport возвращают высоту
+  экрана без учёта статус-бара, из-за чего внизу может появляться пустая область.
+  Используем 100vh вместо 100dvh, чтобы контейнер занимал всю физическую 
+  высоту экрана. Отступы safe-area сверху и снизу при этом защищают контент
+  от наложения на вырез (notch) и индикатор Home. */
+@media (display-mode: standalone) {
+  html,
+  body,
+  #root {
+    height: 100vh;
+    max-height: 100vh;
   }
 }
