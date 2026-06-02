@@ -57,14 +57,20 @@ export const CreateActivityDialog = ({ dialog }: CreateActivityDialogProps) => {
   };
 
   return (
-    <Dialog.RootProvider size="full" lazyMount value={dialog}>
+    <Dialog.RootProvider size="md" lazyMount value={dialog}>
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.SafeContent
-            overflow="auto"
+          <Dialog.Content
+            maxW="md"
+            w="full"
+            mx={4}
+            borderRadius="xl"
             display="flex"
             flexDirection="column"
+            minH="320px"
+            maxH="min(85dvh, 560px)"
+            overflow="hidden"
           >
             <Dialog.Header>
               <Dialog.Title fontSize="xl">
@@ -114,7 +120,7 @@ export const CreateActivityDialog = ({ dialog }: CreateActivityDialogProps) => {
             <Dialog.CloseTrigger asChild>
               <CloseButton size="2xl" />
             </Dialog.CloseTrigger>
-          </Dialog.SafeContent>
+          </Dialog.Content>
         </Dialog.Positioner>
       </Portal>
     </Dialog.RootProvider>

@@ -114,7 +114,7 @@ export const ActivityList = () => {
   return (
     <>
       <Stack.VStack w="full" p="0.5rem" alignItems="stretch">
-        <Flex alignItems="center" gap="1rem">
+        <Flex alignItems="center" gap="1rem" my="0.5rem">
           <Text textStyle="2xl" fontWeight="bolder">
             {t("widgets.activityList.title")}
           </Text>
@@ -129,7 +129,6 @@ export const ActivityList = () => {
         </Flex>
         {renderContent()}
       </Stack.VStack>
-
       <CreateActivityDialog dialog={createActivityDialog} />
     </>
   );

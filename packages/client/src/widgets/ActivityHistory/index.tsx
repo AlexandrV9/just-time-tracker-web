@@ -128,7 +128,7 @@ export const ActivityHistory = () => {
 
   return (
     <Flex flexDirection="column" gap="1rem" p="0.5rem">
-      <Text textStyle="2xl" fontWeight="bolder">
+      <Text textStyle="2xl" fontWeight="bolder" mt="0.5rem">
         {t("widgets.activityHistory.title")}
       </Text>
       <Box display="flex" flexDirection="column" gap="1.5rem">

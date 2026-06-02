@@ -1,11 +1,20 @@
 # Changelog
 
+## 1.0.4
+
+### Исправления
+
+- Выпадающие меню языка/темы больше не перекрываются хедером/контентом: `Select.Positioner` получает `--z-index` (Chakra v3)
+- Backdrop модалок накрывает хедер: слои z-index вынесены в `shared/constants/zIndex` (header `10`, modal `20`), `Dialog.Backdrop` и `Dialog.Positioner` получают `zIndex: 20` централизованно
+- Добавлено превью для ссылок (Telegram/Open Graph): meta-теги `og:*`/`twitter:*` и английское описание в `packages/client/index.html`
+
+---
+
 ## 1.0.3
 
 ### Исправления
 
 - Убран лишний верхний отступ в PWA на iPhone: `safe-area-inset-top` больше не учитывается дважды в `TopContainer`
-- Backdrop модалок накрывает хедер: слои z-index вынесены в `shared/constants/zIndex` (header `10`, modal `20`), `Dialog.Backdrop` и `Dialog.Positioner` получают `zIndex: 20` централизованно
 
 ---
 

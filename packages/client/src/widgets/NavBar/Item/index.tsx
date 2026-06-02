@@ -28,7 +28,7 @@ export const NavBarItem = memo(
             <Icon size={24} />
           </Box>
           <Text
-            fontSize={{ base: "sm", md: "md" }}
+            fontSize={{ base: "xs", "2xl": "md" }}
             fontWeight="semibold"
             lineHeight="shorter"
           >
