@@ -23,6 +23,7 @@ services:
 
   server:
     image: ${GHCR_IMAGE_PREFIX:-ghcr.io/alexandrv9/time-tracker}/server:${IMAGE_TAG:-latest}
+    pull_policy: always
     container_name: time-tracker-server
     env_file: .env
     environment:
@@ -38,6 +39,7 @@ services:
 
   client:
     image: ${GHCR_IMAGE_PREFIX:-ghcr.io/alexandrv9/time-tracker}/client:${IMAGE_TAG:-latest}
+    pull_policy: always
     container_name: time-tracker-client
     ports:
       - "${CLIENT_PORT:-80}:80"

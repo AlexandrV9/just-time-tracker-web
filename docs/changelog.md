@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.5
+
+### UI
+
+- `AuthUserInfo`: безопасный fallback для имени (`Unknown`), аватар с `variant="subtle"`
+
+### DevOps
+
+- GitHub Actions: job `deploy` — автодеплой на VPS после публикации Docker-образов (`docker compose pull` + `up -d`)
+- `docker-compose.prod.yml`: `pull_policy: always` для `client` и `server`
+
+---
+
 ## 1.0.4
 
 ### Исправления
