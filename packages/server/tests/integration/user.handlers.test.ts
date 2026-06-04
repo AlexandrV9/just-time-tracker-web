@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Hono } from "hono";
 import type { TestDatabase } from "../setup/test-db.js";
 import {
+  releaseTestDatabase,
   resetUsersTables,
   startTestDatabase,
 } from "../setup/test-db.js";
@@ -33,7 +34,7 @@ describe("usersRouter", () => {
        RETURNING id, login, first_name, email`,
       [login, "hashed_password", firstName, email],
     );
-    return rows[0] as { id: number; login: string; first_name: string; email: string | null };
+    return rows[0] as { id: string; login: string; first_name: string; email: string | null };
   };
 
   beforeAll(async () => {
@@ -54,7 +55,7 @@ describe("usersRouter", () => {
   });
 
   afterAll(async () => {
-    await testDb?.stop();
+    await releaseTestDatabase();
   });
 
   describe("PATCH /me", () => {
@@ -131,7 +132,7 @@ describe("usersRouter", () => {
     it("returns not found when user does not exist", async () => {
       testRouter = new Hono<{ Variables: AuthVariables }>();
       testRouter.use("*", async (c, next) => {
-        c.set("user", { id: "99999" });
+        c.set("user", { id: "00000000-0000-0000-0000-000000000000" });
         await next();
       });
       testRouter.route("/", usersRouter);

@@ -110,6 +110,16 @@
         "errors": {
           "nameRequired": "姓名为必填",
           "emailInvalid": "请输入有效邮箱"
+        },
+        "yandexProvider": {
+          "linkButton": "绑定 Yandex",
+          "linked": "Yandex 已绑定",
+          "linkSuccess": "Yandex 绑定成功！",
+          "linkError": {
+            "yandex_already_linked": "该 Yandex 账号已绑定到其他用户",
+            "provider_already_connected": "Yandex 已绑定到您的账号",
+            "default": "绑定 Yandex 失败，请重试。"
+          }
         }
       }
     },
@@ -313,6 +323,17 @@
         "subtitleText": "还没有账号？",
         "title": "登录",
         "unknownError": "未知错误"
+      },
+      "yandexLogin": {
+        "button": "通过 Yandex 登录",
+        "divider": "或",
+        "errors": {
+          "email_exists": "该邮箱已注册。请用登录名和密码登录，然后在设置中绑定 Yandex。",
+          "yandex_error": "Yandex 授权出错，请重试。",
+          "invalid_state": "安全错误，请重试。",
+          "missing_params": "Yandex 返回结果无效。",
+          "login_error": "Yandex 登录失败，请重试。"
+        }
       },
       "signUpForm": {
         "firstNameInput": {

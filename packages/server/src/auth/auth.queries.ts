@@ -71,8 +71,93 @@ const findUserById = async (userId: AuthUser["id"]) => {
   return rows[0] || null;
 };
 
+const findUserByEmail = async (email: string) => {
+  const query = `
+    SELECT
+      id,
+      login,
+      password_hash,
+      first_name AS name,
+      email,
+      avatar,
+      is_active
+    FROM users
+    WHERE email = $1
+  `;
+  const { rows } = await pool.query(query, [email]);
+  return rows[0] || null;
+};
+
+const createOAuthUser = async (data: {
+  firstName: string;
+  login: string;
+  email: string | null;
+  avatar: string | null;
+}) => {
+  const { firstName, login, email, avatar } = data;
+  const query = `
+    INSERT INTO users (first_name, login, email, avatar)
+    VALUES ($1, $2, $3, $4)
+    RETURNING id, first_name AS name, login, email, avatar
+  `;
+  const { rows } = await pool.query(query, [firstName, login, email, avatar]);
+  return rows[0] as {
+    id: string;
+    name: string;
+    login: string;
+    email: string | null;
+    avatar: string | null;
+  };
+};
+
+const findAuthProvider = async (provider: string, providerUserId: string) => {
+  const query = `
+    SELECT id, user_id AS "userId", provider, provider_user_id AS "providerUserId"
+    FROM auth_providers
+    WHERE provider = $1 AND provider_user_id = $2
+  `;
+  const { rows } = await pool.query(query, [provider, providerUserId]);
+  return rows[0] || null;
+};
+
+const findAuthProvidersByUserId = async (userId: string) => {
+  const query = `
+    SELECT id, user_id AS "userId", provider, provider_user_id AS "providerUserId", created_at AS "createdAt"
+    FROM auth_providers
+    WHERE user_id = $1
+  `;
+  const { rows } = await pool.query(query, [userId]);
+  return rows as Array<{
+    id: string;
+    userId: string;
+    provider: string;
+    providerUserId: string;
+    createdAt: string;
+  }>;
+};
+
+const createAuthProvider = async (data: {
+  userId: string;
+  provider: string;
+  providerUserId: string;
+}) => {
+  const { userId, provider, providerUserId } = data;
+  const query = `
+    INSERT INTO auth_providers (user_id, provider, provider_user_id)
+    VALUES ($1, $2, $3)
+    RETURNING id
+  `;
+  const { rows } = await pool.query(query, [userId, provider, providerUserId]);
+  return rows[0] as { id: string };
+};
+
 export const authQueries = {
   findUserByLogin,
   createUser,
   findUserById,
+  findUserByEmail,
+  createOAuthUser,
+  findAuthProvider,
+  findAuthProvidersByUserId,
+  createAuthProvider,
 };

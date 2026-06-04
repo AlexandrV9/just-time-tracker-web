@@ -110,6 +110,16 @@
         "errors": {
           "nameRequired": "Name is required",
           "emailInvalid": "Enter a valid email"
+        },
+        "yandexProvider": {
+          "linkButton": "Link Yandex",
+          "linked": "Yandex linked",
+          "linkSuccess": "Yandex successfully linked!",
+          "linkError": {
+            "yandex_already_linked": "This Yandex account is already linked to another user",
+            "provider_already_connected": "Yandex is already linked to your account",
+            "default": "Failed to link Yandex. Please try again."
+          }
         }
       }
     },
@@ -313,6 +323,17 @@
         "subtitleText": "Don't you have an account?",
         "title": "Autorization",
         "unknownError": "Unknown error"
+      },
+      "yandexLogin": {
+        "button": "Sign in with Yandex",
+        "divider": "or",
+        "errors": {
+          "email_exists": "An account with this email already exists. Sign in with login and password, then link Yandex in settings.",
+          "yandex_error": "Yandex authentication error. Please try again.",
+          "invalid_state": "Security error. Please try again.",
+          "missing_params": "Invalid response from Yandex.",
+          "login_error": "Failed to sign in with Yandex. Please try again."
+        }
       },
       "signUpForm": {
         "firstNameInput": {

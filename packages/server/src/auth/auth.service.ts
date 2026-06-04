@@ -23,7 +23,7 @@ const signIn = async (data: {
   const { login, password } = data;
 
   const user = await authRepository.getUserByLogin(login);
-  if (!user) {
+  if (!user || !user.password_hash) {
     return {
       success: false,
       message: "Login or password is not correct",

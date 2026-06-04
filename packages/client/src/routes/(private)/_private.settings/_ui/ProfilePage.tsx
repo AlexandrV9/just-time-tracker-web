@@ -1,13 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import z from "zod";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { authActions, useAuthStore } from "~/features/auth";
 import { useTranslation } from "~/shared/hooks";
 import { userApiService } from "~/shared/api/services";
 import {
   BackButton,
+  Badge,
   Box,
+  Button,
   CheckIcon,
   CloseIcon,
   EditIcon,
@@ -15,7 +18,9 @@ import {
   Flex,
   IconButton,
   Input,
+  Skeleton,
   Stack,
+  Text,
   toast,
   useForm,
 } from "~/shared/ui";
@@ -28,12 +33,61 @@ type ProfileFormValues = {
   email: string;
 };
 
+const baseProviderLocale = "pages.settings.profile.yandexProvider";
+
 export function ProfilePage() {
   useHeaderLeftContent(<BackButton />);
 
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const { linked: linkedParam, error: errorParam } = useSearch({
+    from: "/(private)/_private/settings/profile",
+  });
+
+  useEffect(() => {
+    if (!linkedParam && !errorParam) return;
+
+    if (linkedParam === "yandex") {
+      toast.success(t(`${baseProviderLocale}.linkSuccess`), {
+        toastId: "yandex_linked",
+      });
+      queryClient.invalidateQueries({ queryKey: ["auth-providers"] });
+    }
+
+    if (errorParam) {
+      const msg = t(`${baseProviderLocale}.linkError.${errorParam}`, {
+        defaultValue: t(`${baseProviderLocale}.linkError.default`),
+      });
+      toast.error(msg, { toastId: "yandex_link_error" });
+    }
+
+    navigate({
+      to: "/settings/profile",
+      search: {},
+      replace: true,
+    });
+  }, [errorParam, linkedParam, navigate, queryClient, t]);
+
+  const { data: authProviders, isLoading: isAuthProvidersLoading } = useQuery({
+    queryKey: ["auth-providers"],
+    queryFn: () => userApiService.getAuthProviders(),
+    select: (res) => (res.success ? res.data : []),
+  });
+
+  const isYandexLinked = authProviders?.some((p) => p.provider === "yandex");
+
+  const { mutate: startYandexLink, isPending: isLinkPending } = useMutation({
+    mutationFn: () => userApiService.startYandexLink(),
+    onSuccess: (res) => {
+      if (res.success) {
+        window.location.href = res.data.redirectUrl;
+      }
+    },
+  });
 
   const profileFormSchema = useMemo(
     () =>
@@ -156,6 +210,7 @@ export function ProfilePage() {
       gap="1rem"
     >
       <AuthUserInfo />
+
       <Stack.VStack alignItems="stretch" gap="1rem">
         <Box
           as="form"
@@ -231,6 +286,30 @@ export function ProfilePage() {
             </Field.ErrorText>
           </Field.Root>
         </Box>
+        <Stack.VStack alignItems="stretch" gap="0.75rem">
+          <Flex align="center" justify="space-between">
+            <Text fontSize="sm" fontWeight="medium" color="fg">
+              Yandex ID
+            </Text>
+            {isAuthProvidersLoading ? (
+              <Skeleton width="135px" height="30px" />
+            ) : isYandexLinked ? (
+              <Text fontSize="sm" color="fg.success">
+                <Badge size="lg" h="30px">{t(`${baseProviderLocale}.linked`)}</Badge>
+              </Text>
+            ) : (
+              <Button
+                size="xs"
+                variant="outline"
+                loading={isLinkPending}
+                onClick={() => startYandexLink()}
+                type="button"
+              >
+                {t(`${baseProviderLocale}.linkButton`)}
+              </Button>
+            )}
+          </Flex>
+        </Stack.VStack>
       </Stack.VStack>
     </Stack.VStack>
   );

@@ -1,6 +1,18 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
 
-dotenv.config();
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../../../../..",
+);
+
+// Root .env (Yandex, shared secrets) + packages/server/.env (local DB overrides)
+dotenv.config({ path: path.join(repoRoot, ".env") });
+dotenv.config({
+  path: path.join(repoRoot, "packages/server/.env"),
+  override: true,
+});
 
 export const config = {
   app: {
@@ -22,6 +34,14 @@ export const config = {
       secret: process.env.REFRESH_TOKEN_SECRET!,
     },
   },
+
+  yandex: {
+    clientId: process.env.YANDEX_CLIENT_ID!,
+    clientSecret: process.env.YANDEX_CLIENT_SECRET!,
+    redirectUri: process.env.YANDEX_REDIRECT_URI!,
+  },
+
+  clientUrl: process.env.CLIENT_URL || "http://localhost:3000",
 
   db: {
     host: process.env.DB_HOST,

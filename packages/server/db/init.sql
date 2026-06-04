@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
 
   first_name VARCHAR(255) NOT NULL,
   login VARCHAR(100) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
+  password_hash VARCHAR(255),
 
   email VARCHAR(255) UNIQUE,
   avatar TEXT,
@@ -21,6 +21,19 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE INDEX IF NOT EXISTS idx_users_login ON users(login);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+-- auth_providers (OAuth)
+CREATE TABLE IF NOT EXISTS auth_providers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  provider VARCHAR(50) NOT NULL,
+  provider_user_id VARCHAR(255) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (provider, provider_user_id),
+  UNIQUE (user_id, provider)
+);
+
+CREATE INDEX IF NOT EXISTS idx_auth_providers_user_id ON auth_providers(user_id);
 
 -- activities
 CREATE TABLE IF NOT EXISTS activities (

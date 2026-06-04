@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { authMiddleware, authRouter } from "./auth/index.js";
+import { authMiddleware, authRouter, yandexHandlers } from "./auth/index.js";
 import type { AuthVariables } from "./shared/auth/auth.variables.js";
 import { config } from "./shared/index.js";
 import { healthRouter } from "./health/health.routes.js";
@@ -37,6 +37,7 @@ protectedRouter.route(
 protectedRouter.route("/day-plans", dayPlansRouter);
 protectedRouter.route("/day-plan-items", dayPlanItemsRouter);
 protectedRouter.route("/users", usersRouter);
+protectedRouter.post("/auth/yandex/link", yandexHandlers.startLink);
 
 app.route("/", protectedRouter);
 

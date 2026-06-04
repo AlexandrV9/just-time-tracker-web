@@ -159,10 +159,9 @@ export const resetActivitiesTables = async (pool: Pool) => {
 export const setupUsersSchema = async (pool: Pool) => {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
-      id SERIAL PRIMARY KEY,
-      password_hash VARCHAR(255) NOT NULL,
-      first_name VARCHAR(50),
-      last_name VARCHAR(50),
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      password_hash VARCHAR(255),
+      first_name VARCHAR(255) NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       is_active BOOLEAN NOT NULL DEFAULT true,
@@ -170,11 +169,23 @@ export const setupUsersSchema = async (pool: Pool) => {
       email VARCHAR(255) UNIQUE,
       avatar TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS auth_providers (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      provider VARCHAR(50) NOT NULL,
+      provider_user_id VARCHAR(255) NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (provider, provider_user_id),
+      UNIQUE (user_id, provider)
+    );
   `);
 };
 
 export const resetUsersTables = async (pool: Pool) => {
-  await pool.query(`TRUNCATE TABLE users RESTART IDENTITY CASCADE`);
+  await pool.query(
+    `TRUNCATE TABLE auth_providers, users RESTART IDENTITY CASCADE`,
+  );
 };
 
 const createTestDatabase = async (
@@ -249,7 +260,11 @@ const startFromEnv = async (): Promise<TestDatabase | null> => {
   return createTestDatabase(null);
 };
 
-export const startTestDatabase = async (): Promise<TestDatabase> => {
+let sharedTestDb: TestDatabase | null = null;
+let sharedTestDbInit: Promise<TestDatabase> | null = null;
+let sharedTestDbRefs = 0;
+
+const bootstrapTestDatabase = async (): Promise<TestDatabase> => {
   if (process.env.TEST_DATABASE_URL) {
     configureDatabaseEnvFromUrl(process.env.TEST_DATABASE_URL);
     return createTestDatabase(null);
@@ -272,4 +287,29 @@ export const startTestDatabase = async (): Promise<TestDatabase> => {
       "Или задай TEST_DATABASE_URL / USE_TESTCONTAINERS=true",
     ].join("\n"),
   );
+};
+
+/** Shared Postgres for all integration test files (one container / one pool). */
+export const startTestDatabase = async (): Promise<TestDatabase> => {
+  if (!sharedTestDbInit) {
+    sharedTestDbInit = bootstrapTestDatabase().then((db) => {
+      sharedTestDb = db;
+      return db;
+    });
+  }
+
+  const db = await sharedTestDbInit;
+  sharedTestDbRefs++;
+  return db;
+};
+
+export const releaseTestDatabase = async (): Promise<void> => {
+  sharedTestDbRefs = Math.max(0, sharedTestDbRefs - 1);
+  if (sharedTestDbRefs > 0) return;
+
+  if (sharedTestDb) {
+    await sharedTestDb.stop();
+    sharedTestDb = null;
+    sharedTestDbInit = null;
+  }
 };

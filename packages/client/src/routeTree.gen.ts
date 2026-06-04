@@ -24,6 +24,7 @@ import { Route as privatePrivateCalendarIndexRouteImport } from './routes/(priva
 import { Route as privatePrivateActivitiesIndexRouteImport } from './routes/(private)/_private.activities/index'
 import { Route as authAuthSignupIndexRouteImport } from './routes/(auth)/_auth.signup/index'
 import { Route as authAuthSigninIndexRouteImport } from './routes/(auth)/_auth.signin/index'
+import { Route as authAuthCallbackIndexRouteImport } from './routes/(auth)/_auth.callback/index'
 import { Route as privatePrivateSettingsProfileRouteImport } from './routes/(private)/_private.settings/profile'
 import { Route as privatePrivateActivitiesActivityIdRouteImport } from './routes/(private)/_private.activities/$activityId'
 
@@ -112,6 +113,11 @@ const authAuthSigninIndexRoute = authAuthSigninIndexRouteImport.update({
   path: '/signin/',
   getParentRoute: () => authAuthRoute,
 } as any)
+const authAuthCallbackIndexRoute = authAuthCallbackIndexRouteImport.update({
+  id: '/callback/',
+  path: '/callback/',
+  getParentRoute: () => authAuthRoute,
+} as any)
 const privatePrivateSettingsProfileRoute =
   privatePrivateSettingsProfileRouteImport.update({
     id: '/settings/profile',
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/': typeof privatePrivateIndexRoute
   '/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
   '/settings/profile': typeof privatePrivateSettingsProfileRoute
+  '/callback': typeof authAuthCallbackIndexRoute
   '/signin': typeof authAuthSigninIndexRoute
   '/signup': typeof authAuthSignupIndexRoute
   '/activities': typeof privatePrivateActivitiesIndexRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/': typeof privatePrivateIndexRoute
   '/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
   '/settings/profile': typeof privatePrivateSettingsProfileRoute
+  '/callback': typeof authAuthCallbackIndexRoute
   '/signin': typeof authAuthSigninIndexRoute
   '/signup': typeof authAuthSignupIndexRoute
   '/activities': typeof privatePrivateActivitiesIndexRoute
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   '/(private)/_private/': typeof privatePrivateIndexRoute
   '/(private)/_private/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
   '/(private)/_private/settings/profile': typeof privatePrivateSettingsProfileRoute
+  '/(auth)/_auth/callback/': typeof authAuthCallbackIndexRoute
   '/(auth)/_auth/signin/': typeof authAuthSigninIndexRoute
   '/(auth)/_auth/signup/': typeof authAuthSignupIndexRoute
   '/(private)/_private/activities/': typeof privatePrivateActivitiesIndexRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activities/$activityId'
     | '/settings/profile'
+    | '/callback'
     | '/signin'
     | '/signup'
     | '/activities'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activities/$activityId'
     | '/settings/profile'
+    | '/callback'
     | '/signin'
     | '/signup'
     | '/activities'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/(private)/_private/'
     | '/(private)/_private/activities/$activityId'
     | '/(private)/_private/settings/profile'
+    | '/(auth)/_auth/callback/'
     | '/(auth)/_auth/signin/'
     | '/(auth)/_auth/signup/'
     | '/(private)/_private/activities/'
@@ -345,6 +357,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authAuthSigninIndexRouteImport
       parentRoute: typeof authAuthRoute
     }
+    '/(auth)/_auth/callback/': {
+      id: '/(auth)/_auth/callback/'
+      path: '/callback'
+      fullPath: '/callback'
+      preLoaderRoute: typeof authAuthCallbackIndexRouteImport
+      parentRoute: typeof authAuthRoute
+    }
     '/(private)/_private/settings/profile': {
       id: '/(private)/_private/settings/profile'
       path: '/settings/profile'
@@ -363,11 +382,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface authAuthRouteChildren {
+  authAuthCallbackIndexRoute: typeof authAuthCallbackIndexRoute
   authAuthSigninIndexRoute: typeof authAuthSigninIndexRoute
   authAuthSignupIndexRoute: typeof authAuthSignupIndexRoute
 }
 
 const authAuthRouteChildren: authAuthRouteChildren = {
+  authAuthCallbackIndexRoute: authAuthCallbackIndexRoute,
   authAuthSigninIndexRoute: authAuthSigninIndexRoute,
   authAuthSignupIndexRoute: authAuthSignupIndexRoute,
 }

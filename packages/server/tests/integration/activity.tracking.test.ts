@@ -1,6 +1,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { TestDatabase } from "../setup/test-db.js";
-import { resetActivitiesTables, startTestDatabase } from "../setup/test-db.js";
+import {
+  releaseTestDatabase,
+  resetActivitiesTables,
+  startTestDatabase,
+} from "../setup/test-db.js";
 
 const T0 = "2025-01-01T10:00:00.000Z";
 const T1 = "2025-01-01T10:05:00.000Z";
@@ -18,7 +22,7 @@ describe("activitiesService start / pause / finish", () => {
   });
 
   afterAll(async () => {
-    await testDb?.stop();
+    await releaseTestDatabase();
   });
 
   it("runs start → pause → finish and persists session state in database", async () => {
@@ -245,7 +249,10 @@ describe("activitiesService start / pause / finish", () => {
       toDate: "2025-01-03T00:00:00.000Z",
     });
 
-    expect(analytics.success).toBe(true);
+    expect(
+      analytics.success,
+      !analytics.success ? analytics.message : undefined,
+    ).toBe(true);
     if (!analytics.success) return;
 
     expect(analytics.data).toMatchObject({
