@@ -355,6 +355,11 @@
         "successToast": "Registration successful",
         "errorToast": "Registration failed"
       }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "empty": "No notifications",
+      "emptyDescription": "You're all caught up"
     }
   },
   "common": {

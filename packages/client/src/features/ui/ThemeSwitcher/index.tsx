@@ -36,14 +36,12 @@ export const ThemeSwitcher = () => {
       <Select.HiddenSelect />
       <Select.Control>
         <Select.Trigger
-          asChild
-          padding={0}
+          p={0}
           cursor="pointer"
           justifyContent="center"
           borderRadius={12}
           shadow="0 2px 8px rgba(0, 0, 0, 0.25)"
-          border="1px solid border.emphasized"
-          maxWidth="40px"
+          _hover={{ cursor: "pointer", bg: "bg.muted" }}
         >
           <Select.ValueText color="fg" fontWeight="semibold">
             {themeIconList[currentTheme]}

@@ -38,5 +38,8 @@ export * from "./Book";
 export * from "./Exit";
 export * from "./Check";
 export * from "./Close";
+export * from "./Warning";
+export * from "./Info";
+export * from "./CheckCircle";
 
 export * from "./withIconProps";

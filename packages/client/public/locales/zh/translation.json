@@ -355,6 +355,11 @@
         "successToast": "注册成功",
         "errorToast": "注册失败"
       }
+    },
+    "notifications": {
+      "title": "通知",
+      "empty": "暂无通知",
+      "emptyDescription": "已全部读完"
     }
   },
   "common": {
