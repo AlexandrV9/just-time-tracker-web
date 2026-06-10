@@ -1,6 +1,6 @@
 import { authService, type ErrorField } from "~/shared/api";
 import { authActions, useAuthStore } from "./useAuthStore";
-import { tokenManager } from "~/shared/utils";
+import { getJwtUserId, isUuid, tokenManager } from "~/shared/utils";
 import axios from "axios";
 import { ApiError } from "~/shared/config/error";
 
@@ -8,6 +8,16 @@ class AuthManager {
   async checkAuth(): Promise<boolean> {
     try {
       authActions.setStatus("PENDING");
+
+      const accessToken = tokenManager.getAccessToken();
+      const tokenUserId = accessToken ? getJwtUserId(accessToken) : null;
+
+      if (tokenUserId && !isUuid(tokenUserId)) {
+        tokenManager.removeAccessToken();
+        await authService.signOut().catch(() => undefined);
+        authActions.setStatus("UNAUTHENTICATED");
+        return false;
+      }
 
       const response = await authService.checkIsAuth();
 
@@ -74,7 +84,22 @@ class AuthManager {
 
   async signUp(value: { firstName: string; login: string; password: string }) {
     try {
+      authActions.setStatus("PENDING");
+
       const response = await authService.signUp(value);
+
+      if (!response.success) {
+        authActions.setStatus("UNAUTHENTICATED");
+        return response;
+      }
+
+      authActions.setUser({
+        ...response.data.user,
+        id: response.data.user.id.toString(),
+      });
+      authActions.setStatus("AUTHENTICATED");
+      tokenManager.setAccessToken(response.data.accessToken);
+
       return response;
     } catch (error) {
       if (error instanceof ApiError) {

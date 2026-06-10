@@ -108,7 +108,8 @@ const issueTokens = async (user: {
 export const loginWithYandex = async (
   profile: YandexProfile,
 ): Promise<LoginResult> => {
-  // 1. Known provider → login
+  // 1. Known provider → login. A previously disconnected link belongs to the
+  //    same account, so re-activate it instead of treating the email as taken.
   const existingProvider = await authRepository.findAuthProvider(
     "yandex",
     profile.id,
@@ -117,6 +118,9 @@ export const loginWithYandex = async (
     const user = await authRepository.getUserById(existingProvider.userId);
     if (!user) {
       return { success: false, message: "User not found" };
+    }
+    if (existingProvider.disconnectedAt) {
+      await authRepository.reconnectAuthProvider(existingProvider.id);
     }
     return { success: true, data: await issueTokens(user) };
   }
@@ -166,8 +170,20 @@ export const linkYandexToUser = async (
   );
   if (existingProvider) {
     if (existingProvider.userId === userId) {
+      if (existingProvider.disconnectedAt) {
+        await authRepository.reconnectAuthProvider(existingProvider.id);
+        return { success: true, data: { linked: true } };
+      }
       return { success: false, message: "PROVIDER_ALREADY_CONNECTED" };
     }
+
+    // Linked to another account, but disconnected → the Yandex account is free.
+    // Re-assign the single (provider, provider_user_id) row to the current user.
+    if (existingProvider.disconnectedAt) {
+      await authRepository.reassignAuthProvider(existingProvider.id, userId);
+      return { success: true, data: { linked: true } };
+    }
+
     return { success: false, message: "YANDEX_ALREADY_LINKED" };
   }
 

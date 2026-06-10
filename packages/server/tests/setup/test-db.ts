@@ -167,6 +167,7 @@ export const setupUsersSchema = async (pool: Pool) => {
       is_active BOOLEAN NOT NULL DEFAULT true,
       login VARCHAR(255) NOT NULL UNIQUE,
       email VARCHAR(255) UNIQUE,
+      email_verified_at TIMESTAMPTZ,
       avatar TEXT
     );
 
@@ -175,16 +176,54 @@ export const setupUsersSchema = async (pool: Pool) => {
       user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       provider VARCHAR(50) NOT NULL,
       provider_user_id VARCHAR(255) NOT NULL,
+      disconnected_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      UNIQUE (provider, provider_user_id),
-      UNIQUE (user_id, provider)
+      UNIQUE (provider, provider_user_id)
     );
+
+    ALTER TABLE auth_providers
+      ADD COLUMN IF NOT EXISTS disconnected_at TIMESTAMPTZ;
+
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_auth_providers_active_user_provider
+      ON auth_providers (user_id, provider)
+      WHERE disconnected_at IS NULL;
+
+    CREATE TABLE IF NOT EXISTS email_verifications (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      new_email VARCHAR(255) NOT NULL,
+      code_hash VARCHAR(255) NOT NULL,
+      attempts_count INT NOT NULL DEFAULT 0,
+      resend_count INT NOT NULL DEFAULT 0,
+      expires_at TIMESTAMPTZ NOT NULL,
+      resend_available_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_email_verifications_user_id
+      ON email_verifications(user_id);
+
+    CREATE TABLE IF NOT EXISTS password_resets (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      code_hash VARCHAR(255) NOT NULL,
+      attempts_count INT NOT NULL DEFAULT 0,
+      resend_count INT NOT NULL DEFAULT 0,
+      expires_at TIMESTAMPTZ NOT NULL,
+      resend_available_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_password_resets_user_id
+      ON password_resets(user_id);
   `);
 };
 
 export const resetUsersTables = async (pool: Pool) => {
   await pool.query(
-    `TRUNCATE TABLE auth_providers, users RESTART IDENTITY CASCADE`,
+    `TRUNCATE TABLE password_resets, email_verifications, auth_providers, users RESTART IDENTITY CASCADE`,
   );
 };
 

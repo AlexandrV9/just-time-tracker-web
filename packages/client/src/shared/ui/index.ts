@@ -33,6 +33,10 @@ export * from "./ButtonGroup";
 export * from "./Tabs";
 export * from "./EmptyState";
 export * from "./Grid";
+export * from "./PinInput";
+export * from "./Group";
+export * from "./Span";
+export * from "./Clipboard";
 
 export * from "./icons";
 export * from "./controls";

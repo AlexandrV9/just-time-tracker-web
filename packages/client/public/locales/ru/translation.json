@@ -100,8 +100,20 @@
         },
         "emailInput": {
           "label": "Почта",
-          "placeholder": "Введите email"
+          "placeholder": "Введите email",
+          "emptyPlaceholder": "Email не добавлен"
         },
+        "loginInput": {
+          "label": "Логин",
+          "placeholder": "Введите логин",
+          "errors": {
+            "minLength": "Логин должен содержать минимум 3 символа",
+            "maxLength": "Логин должен содержать не более 30 символов",
+            "invalidFormat": "Логин может содержать только буквы, цифры, точки, дефисы и подчёркивания",
+            "isEmail": "Логин не должен быть email"
+          }
+        },
+        "emailRecoveryWarning": "Добавьте email, чтобы восстановить доступ к аккаунту",
         "editButton": "Редактировать профиль",
         "saveButton": "Сохранить",
         "cancelButton": "Отмена",
@@ -110,16 +122,42 @@
         "errors": {
           "nameRequired": "Имя обязательно",
           "emailInvalid": "Введите корректный email"
+        }
+      },
+      "security": {
+        "loginMethods": {
+          "title": "Способы входа",
+          "status": {
+            "connected": "Подключён",
+            "notConnected": "Не подключён"
+          },
+          "connectButton": "Подключить",
+          "disconnectButton": "Отключить",
+          "comingSoon": "Скоро"
         },
-        "yandexProvider": {
-          "linkButton": "Привязать Яндекс",
-          "linked": "Яндекс привязан",
-          "linkSuccess": "Яндекс успешно привязан!",
-          "linkError": {
-            "yandex_already_linked": "Этот Яндекс-аккаунт уже привязан к другому пользователю",
-            "provider_already_connected": "Яндекс уже привязан к вашему аккаунту",
-            "default": "Не удалось привязать Яндекс. Попробуйте снова."
+        "providers": {
+          "yandex": {
+            "linkSuccess": "Яндекс-аккаунт подключён",
+            "unlinkSuccess": "Яндекс-аккаунт отключён",
+            "unlinkError": "Не удалось отвязать Яндекс. Попробуйте снова.",
+            "linkError": {
+              "yandex_already_linked": "Этот Яндекс-аккаунт уже связан с другим аккаунтом.",
+              "provider_already_connected": "Яндекс уже привязан к вашему аккаунту",
+              "default": "Не удалось привязать Яндекс. Попробуйте снова."
+            }
           }
+        },
+        "setPasswordDialog": {
+          "title": "Задайте пароль",
+          "description": "Чтобы отвязать этот способ входа, сначала задайте пароль для аккаунта, чтобы вы могли продолжить вход.",
+          "submitButton": "Сохранить пароль",
+          "cancelButton": "Отмена",
+          "success": "Пароль установлен",
+          "error": "Не удалось установить пароль"
+        },
+        "errorDialog": {
+          "title": "Не удалось выполнить",
+          "okButton": "Понятно"
         }
       }
     },
@@ -236,7 +274,8 @@
     "accountSettings": {
       "title": "Настройки аккаунта",
       "options": {
-        "1": "Редактировать профиль"
+        "profile": "Профиль",
+        "security": "Безопасность и вход"
       }
     },
     "unfinishedActivities": {
@@ -258,12 +297,14 @@
       "emptyDescription": "Добавьте активности, чтобы начать день",
       "addTodayActivitiesDialog": {
         "title": "Добавить активности",
+        "emptyTitle": "Активностей нет",
         "empty": "У вас еще нету активностей. Перейдите в раздел активности и создайте новую",
         "noActivities": "Нет активностей для выбора",
         "success": "Активности добавлены",
         "error": "Не удалось добавить активности",
         "cancelButton": "Отмена",
-        "addButton": "Добавить"
+        "addButton": "Добавить",
+        "goToActivitiesButton": "Перейти"
       }
     },
     "activityGroup": {
@@ -322,7 +363,11 @@
         "submitButtonLoadingText": "Авторизация...",
         "subtitleText": "У вас еще нет аккаунта?",
         "title": "Авторизация",
-        "unknownError": "Неизвестная ошибка"
+        "forgotPasswordLink": "Забыли пароль?",
+        "errors": {
+          "invalidCredentials": "Неверный логин или пароль",
+          "unknown": "Неизвестная ошибка"
+        }
       },
       "yandexLogin": {
         "button": "Войти через Яндекс",
@@ -347,7 +392,11 @@
           "label": "Логин",
           "placeholder": "Придумайте логин",
           "errors": {
-            "required": "Логин обязателен"
+            "required": "Логин обязателен",
+            "minLength": "Логин должен содержать минимум 3 символа",
+            "maxLength": "Логин должен содержать не более 30 символов",
+            "invalidFormat": "Логин может содержать только буквы, цифры, точки, дефисы и подчёркивания",
+            "isEmail": "Логин не должен быть email"
           }
         },
         "passwordInput": {
@@ -375,6 +424,67 @@
         "title": "Регистрация",
         "successToast": "Регистрация прошла успешно",
         "errorToast": "Не удалось зарегистрироваться"
+      }
+    },
+    "emailVerification": {
+      "dialogTitle": "Подтверждение email",
+      "backButton": "Назад",
+      "dialogDescription": "Введите email, который хотите привязать к аккаунту. Мы отправим 6-значный код.",
+      "registrationTitle": "Добавьте email для восстановления",
+      "registrationDescription": "Добавьте email для восстановления доступа к аккаунту. Этот шаг можно пропустить и выполнить позже в настройках аккаунта.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Введите email",
+      "sendCodeButton": "Отправить код",
+      "cancelButton": "Отмена",
+      "verifyButton": "Подтвердить",
+      "skipButton": "Пропустить",
+      "resendButton": "Отправить код снова",
+      "resendIn": "Повторная отправка через {{seconds}} с",
+      "enterCodeDescription": "Введите 6-значный код, отправленный на {{email}}",
+      "expiredDescription": "Срок действия кода истёк. Запросите новый.",
+      "verified": "Email подтверждён",
+      "errors": {
+        "emailInvalid": "Введите корректный email",
+        "emailAlreadyExists": "Этот email уже используется",
+        "requestFailed": "Не удалось отправить код",
+        "invalidCode": "Неверный код",
+        "codeExpired": "Срок действия кода истёк. Запросите новый",
+        "tooManyAttempts": "Слишком много попыток. Запросите новый код",
+        "verifyFailed": "Не удалось подтвердить email",
+        "resendTooEarly": "Подождите перед повторной отправкой",
+        "codeNotFound": "Нет активной заявки. Начните заново"
+      }
+    },
+    "passwordReset": {
+      "title": "Восстановление аккаунта",
+      "emailDescription": "Введите email, привязанный к аккаунту. Мы отправим 6-значный код.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Введите email",
+      "sendCodeButton": "Отправить код",
+      "backButton": "Назад",
+      "verifyButton": "Подтвердить",
+      "resendButton": "Отправить код снова",
+      "resendIn": "Повторная отправка через {{seconds}} с",
+      "enterCodeDescription": "Введите 6-значный код, отправленный на {{email}}",
+      "expiredDescription": "Срок действия кода истёк. Запросите новый.",
+      "newPasswordDescription": "Придумайте новый пароль для аккаунта.",
+      "newPasswordLabel": "Новый пароль",
+      "newPasswordPlaceholder": "Придумайте надёжный пароль",
+      "repeatPasswordLabel": "Повторите пароль",
+      "repeatPasswordPlaceholder": "Введите пароль ещё раз",
+      "submitButton": "Сохранить пароль",
+      "success": "Пароль изменён. Войдите с новым паролем.",
+      "errors": {
+        "emailInvalid": "Введите корректный email",
+        "requestFailed": "Не удалось отправить код",
+        "invalidCode": "Неверный код",
+        "codeExpired": "Срок действия кода истёк. Запросите новый",
+        "tooManyAttempts": "Слишком много попыток. Запросите новый код",
+        "verifyFailed": "Не удалось проверить код",
+        "resendTooEarly": "Подождите перед повторным запросом кода",
+        "samePassword": "Выберите другой пароль",
+        "sessionExpired": "Сессия восстановления истекла. Начните заново",
+        "confirmFailed": "Не удалось изменить пароль"
       }
     }
   },

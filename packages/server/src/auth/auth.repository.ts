@@ -45,6 +45,26 @@ const createAuthProvider = async (data: {
   return authQueries.createAuthProvider(data);
 };
 
+const disconnectAuthProvider = async (userId: string, provider: string) => {
+  return authQueries.disconnectAuthProvider(userId, provider);
+};
+
+const reconnectAuthProvider = async (id: string) => {
+  return authQueries.reconnectAuthProvider(id);
+};
+
+const reassignAuthProvider = async (id: string, userId: string) => {
+  return authQueries.reassignAuthProvider(id, userId);
+};
+
+const getUserPasswordHash = async (userId: string) => {
+  return authQueries.getUserPasswordHash(userId);
+};
+
+const setUserPassword = async (userId: string, passwordHash: string) => {
+  return authQueries.setUserPassword(userId, passwordHash);
+};
+
 export const authRepository = {
   getUserById,
   getUserByLogin,
@@ -54,4 +74,9 @@ export const authRepository = {
   findAuthProvider,
   findAuthProvidersByUserId,
   createAuthProvider,
+  disconnectAuthProvider,
+  reconnectAuthProvider,
+  reassignAuthProvider,
+  getUserPasswordHash,
+  setUserPassword,
 };

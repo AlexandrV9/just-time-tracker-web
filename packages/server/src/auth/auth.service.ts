@@ -2,19 +2,19 @@ import { tokenService } from "../shared/index.js";
 import type { ErrorResponse, SuccessResponse } from "../shared/types.js";
 import { authRepository } from "./auth.repository.js";
 
-type SignInResponse =
-  | SuccessResponse<{
-      accessToken: string;
-      refreshToken: string;
-      user: {
-        id: string;
-        login: string;
-        name: string;
-        avatar: string;
-        email: string | null;
-      };
-    }>
-  | ErrorResponse;
+type AuthUserResponse = {
+  accessToken: string;
+  refreshToken: string;
+  user: {
+    id: string;
+    login: string;
+    name: string;
+    avatar: string | null;
+    email: string | null;
+  };
+};
+
+type SignInResponse = SuccessResponse<AuthUserResponse> | ErrorResponse;
 
 const signIn = async (data: {
   login: string;
@@ -32,7 +32,7 @@ const signIn = async (data: {
 
   const isValidPassword = tokenService.comparePassword(
     password,
-    user.password_hash
+    user.password_hash,
   );
   if (!isValidPassword) {
     return {
@@ -60,14 +60,7 @@ const signIn = async (data: {
   };
 };
 
-type SignUpResponse =
-  | SuccessResponse<{
-      id: string;
-      firstName: string;
-      login: string;
-      createdAt: string;
-    }>
-  | ErrorResponse;
+type SignUpResponse = SuccessResponse<AuthUserResponse> | ErrorResponse;
 
 const signUp = async (data: {
   firstName: string;
@@ -84,19 +77,37 @@ const signUp = async (data: {
       passwordHash,
     });
 
+    const user = await authRepository.getUserById(newUser.id);
+
+    if (!user) {
+      return { success: false, message: "Internal server error" };
+    }
+
+    const accessToken = await tokenService.generateAccessToken(user);
+    const refreshToken = await tokenService.generateRefreshToken(user);
+
     return {
       success: true,
       data: {
-        id: newUser.id,
-        firstName: newUser.first_name,
-        login: newUser.login,
-        createdAt: newUser.created_at,
+        accessToken,
+        refreshToken,
+        user: {
+          id: user.id,
+          login: user.login,
+          name: user.name,
+          avatar: user.avatar,
+          email: user.email,
+        },
       },
       message: "User registered successfully",
     };
-  } catch (error: any) {
-    // Код ошибки уникальности в PostgreSQL
-    if (error.code === "23505") {
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "23505"
+    ) {
       return {
         success: false,
         data: null,

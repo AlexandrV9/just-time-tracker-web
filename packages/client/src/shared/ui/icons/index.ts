@@ -39,5 +39,6 @@ export * from "./Exit";
 export * from "./Check";
 export * from "./Close";
 export * from "./YandexLogo";
+export * from "./Copy";
 
 export * from "./withIconProps";

@@ -1,4 +1,5 @@
 import { pool } from "src/shared/index.js";
+import { isMainModule } from "./isMainModule.js";
 
 export const createUsersTable = async () => {
   const query = `
@@ -7,9 +8,10 @@ export const createUsersTable = async () => {
 
       first_name VARCHAR(255) NOT NULL,
       login VARCHAR(100) UNIQUE NOT NULL,
-      password_hash VARCHAR(255) NOT NULL,
+      password_hash VARCHAR(255),
 
-      email VARCHAR(255),
+      email VARCHAR(255) UNIQUE,
+      email_verified_at TIMESTAMPTZ,
       avatar TEXT,
       is_active BOOLEAN NOT NULL DEFAULT true,
 
@@ -34,14 +36,16 @@ export const createUsersTable = async () => {
   }
 };
 
-createUsersTable()
-  .then(() => {
-    console.log("✅ Скрипт завершен успешно");
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error("❌ Скрипт завершен с ошибкой:", error);
-    process.exit(1);
-  });
+if (isMainModule(import.meta.url)) {
+  createUsersTable()
+    .then(() => {
+      console.log("✅ Скрипт завершен успешно");
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error("❌ Скрипт завершен с ошибкой:", error);
+      process.exit(1);
+    });
+}
 
 // npx tsx ./scripts/createUsersTable.ts

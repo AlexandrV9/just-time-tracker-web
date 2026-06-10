@@ -6,7 +6,8 @@
     "build": "tsc",
     "start": "node dist/src/index.js",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:create-tables": "tsx ./scripts/createAllTables.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.3",
@@ -15,6 +16,7 @@
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.2",
     "hono": "^4.9.7",
+    "nodemailer": "^8.0.10",
     "pg": "^8.16.3",
     "zod": "^4.1.12"
   },
@@ -22,6 +24,7 @@
     "@testcontainers/postgresql": "^11.14.0",
     "@types/bcrypt": "^6.0.0",
     "@types/node": "^20.11.17",
+    "@types/nodemailer": "^8.0.0",
     "@types/pg": "^8.15.5",
     "testcontainers": "^11.14.0",
     "tsx": "^4.7.1",

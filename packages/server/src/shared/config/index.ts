@@ -57,4 +57,21 @@ export const config = {
       "http://localhost:5173",
     ],
   },
+
+  email: {
+    transport: process.env.EMAIL_TRANSPORT || "console",
+    from: process.env.EMAIL_FROM || "noreply@localhost",
+    smtp: {
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT ?? 587),
+      user: process.env.SMTP_USER,
+      password: process.env.SMTP_PASSWORD,
+      secure: process.env.SMTP_SECURE === "true",
+    },
+    verification: {
+      codeTtlSec: Number(process.env.EMAIL_CODE_TTL_SEC ?? 600),
+      maxAttempts: Number(process.env.EMAIL_CODE_MAX_ATTEMPTS ?? 5),
+      resendCooldownSec: Number(process.env.EMAIL_CODE_RESEND_COOLDOWN_SEC ?? 60),
+    },
+  },
 } as const;

@@ -18,13 +18,16 @@ import { Route as privatePrivateIndexRouteImport } from './routes/(private)/_pri
 import { Route as publicPublicTermsOfServiceIndexRouteImport } from './routes/(public)/_public.terms-of-service/index'
 import { Route as publicPublicPrivacyPolicyIndexRouteImport } from './routes/(public)/_public.privacy-policy/index'
 import { Route as publicPublicLandingIndexRouteImport } from './routes/(public)/_public.landing/index'
+import { Route as privatePrivateSignupEmailIndexRouteImport } from './routes/(private)/_private.signup-email/index'
 import { Route as privatePrivateSettingsIndexRouteImport } from './routes/(private)/_private.settings/index'
 import { Route as privatePrivateHistoryIndexRouteImport } from './routes/(private)/_private.history/index'
 import { Route as privatePrivateCalendarIndexRouteImport } from './routes/(private)/_private.calendar/index'
 import { Route as privatePrivateActivitiesIndexRouteImport } from './routes/(private)/_private.activities/index'
 import { Route as authAuthSignupIndexRouteImport } from './routes/(auth)/_auth.signup/index'
 import { Route as authAuthSigninIndexRouteImport } from './routes/(auth)/_auth.signin/index'
+import { Route as authAuthRecoverAccountIndexRouteImport } from './routes/(auth)/_auth.recover-account/index'
 import { Route as authAuthCallbackIndexRouteImport } from './routes/(auth)/_auth.callback/index'
+import { Route as privatePrivateSettingsSecurityRouteImport } from './routes/(private)/_private.settings/security'
 import { Route as privatePrivateSettingsProfileRouteImport } from './routes/(private)/_private.settings/profile'
 import { Route as privatePrivateActivitiesActivityIdRouteImport } from './routes/(private)/_private.activities/$activityId'
 
@@ -79,6 +82,12 @@ const publicPublicLandingIndexRoute =
     path: '/landing/',
     getParentRoute: () => publicPublicRoute,
   } as any)
+const privatePrivateSignupEmailIndexRoute =
+  privatePrivateSignupEmailIndexRouteImport.update({
+    id: '/signup-email/',
+    path: '/signup-email/',
+    getParentRoute: () => privatePrivateRoute,
+  } as any)
 const privatePrivateSettingsIndexRoute =
   privatePrivateSettingsIndexRouteImport.update({
     id: '/settings/',
@@ -113,11 +122,23 @@ const authAuthSigninIndexRoute = authAuthSigninIndexRouteImport.update({
   path: '/signin/',
   getParentRoute: () => authAuthRoute,
 } as any)
+const authAuthRecoverAccountIndexRoute =
+  authAuthRecoverAccountIndexRouteImport.update({
+    id: '/recover-account/',
+    path: '/recover-account/',
+    getParentRoute: () => authAuthRoute,
+  } as any)
 const authAuthCallbackIndexRoute = authAuthCallbackIndexRouteImport.update({
   id: '/callback/',
   path: '/callback/',
   getParentRoute: () => authAuthRoute,
 } as any)
+const privatePrivateSettingsSecurityRoute =
+  privatePrivateSettingsSecurityRouteImport.update({
+    id: '/settings/security',
+    path: '/settings/security',
+    getParentRoute: () => privatePrivateRoute,
+  } as any)
 const privatePrivateSettingsProfileRoute =
   privatePrivateSettingsProfileRouteImport.update({
     id: '/settings/profile',
@@ -135,13 +156,16 @@ export interface FileRoutesByFullPath {
   '/': typeof privatePrivateIndexRoute
   '/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
   '/settings/profile': typeof privatePrivateSettingsProfileRoute
+  '/settings/security': typeof privatePrivateSettingsSecurityRoute
   '/callback': typeof authAuthCallbackIndexRoute
+  '/recover-account': typeof authAuthRecoverAccountIndexRoute
   '/signin': typeof authAuthSigninIndexRoute
   '/signup': typeof authAuthSignupIndexRoute
   '/activities': typeof privatePrivateActivitiesIndexRoute
   '/calendar': typeof privatePrivateCalendarIndexRoute
   '/history': typeof privatePrivateHistoryIndexRoute
   '/settings': typeof privatePrivateSettingsIndexRoute
+  '/signup-email': typeof privatePrivateSignupEmailIndexRoute
   '/landing': typeof publicPublicLandingIndexRoute
   '/privacy-policy': typeof publicPublicPrivacyPolicyIndexRoute
   '/terms-of-service': typeof publicPublicTermsOfServiceIndexRoute
@@ -150,13 +174,16 @@ export interface FileRoutesByTo {
   '/': typeof privatePrivateIndexRoute
   '/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
   '/settings/profile': typeof privatePrivateSettingsProfileRoute
+  '/settings/security': typeof privatePrivateSettingsSecurityRoute
   '/callback': typeof authAuthCallbackIndexRoute
+  '/recover-account': typeof authAuthRecoverAccountIndexRoute
   '/signin': typeof authAuthSigninIndexRoute
   '/signup': typeof authAuthSignupIndexRoute
   '/activities': typeof privatePrivateActivitiesIndexRoute
   '/calendar': typeof privatePrivateCalendarIndexRoute
   '/history': typeof privatePrivateHistoryIndexRoute
   '/settings': typeof privatePrivateSettingsIndexRoute
+  '/signup-email': typeof privatePrivateSignupEmailIndexRoute
   '/landing': typeof publicPublicLandingIndexRoute
   '/privacy-policy': typeof publicPublicPrivacyPolicyIndexRoute
   '/terms-of-service': typeof publicPublicTermsOfServiceIndexRoute
@@ -172,13 +199,16 @@ export interface FileRoutesById {
   '/(private)/_private/': typeof privatePrivateIndexRoute
   '/(private)/_private/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
   '/(private)/_private/settings/profile': typeof privatePrivateSettingsProfileRoute
+  '/(private)/_private/settings/security': typeof privatePrivateSettingsSecurityRoute
   '/(auth)/_auth/callback/': typeof authAuthCallbackIndexRoute
+  '/(auth)/_auth/recover-account/': typeof authAuthRecoverAccountIndexRoute
   '/(auth)/_auth/signin/': typeof authAuthSigninIndexRoute
   '/(auth)/_auth/signup/': typeof authAuthSignupIndexRoute
   '/(private)/_private/activities/': typeof privatePrivateActivitiesIndexRoute
   '/(private)/_private/calendar/': typeof privatePrivateCalendarIndexRoute
   '/(private)/_private/history/': typeof privatePrivateHistoryIndexRoute
   '/(private)/_private/settings/': typeof privatePrivateSettingsIndexRoute
+  '/(private)/_private/signup-email/': typeof privatePrivateSignupEmailIndexRoute
   '/(public)/_public/landing/': typeof publicPublicLandingIndexRoute
   '/(public)/_public/privacy-policy/': typeof publicPublicPrivacyPolicyIndexRoute
   '/(public)/_public/terms-of-service/': typeof publicPublicTermsOfServiceIndexRoute
@@ -189,13 +219,16 @@ export interface FileRouteTypes {
     | '/'
     | '/activities/$activityId'
     | '/settings/profile'
+    | '/settings/security'
     | '/callback'
+    | '/recover-account'
     | '/signin'
     | '/signup'
     | '/activities'
     | '/calendar'
     | '/history'
     | '/settings'
+    | '/signup-email'
     | '/landing'
     | '/privacy-policy'
     | '/terms-of-service'
@@ -204,13 +237,16 @@ export interface FileRouteTypes {
     | '/'
     | '/activities/$activityId'
     | '/settings/profile'
+    | '/settings/security'
     | '/callback'
+    | '/recover-account'
     | '/signin'
     | '/signup'
     | '/activities'
     | '/calendar'
     | '/history'
     | '/settings'
+    | '/signup-email'
     | '/landing'
     | '/privacy-policy'
     | '/terms-of-service'
@@ -225,13 +261,16 @@ export interface FileRouteTypes {
     | '/(private)/_private/'
     | '/(private)/_private/activities/$activityId'
     | '/(private)/_private/settings/profile'
+    | '/(private)/_private/settings/security'
     | '/(auth)/_auth/callback/'
+    | '/(auth)/_auth/recover-account/'
     | '/(auth)/_auth/signin/'
     | '/(auth)/_auth/signup/'
     | '/(private)/_private/activities/'
     | '/(private)/_private/calendar/'
     | '/(private)/_private/history/'
     | '/(private)/_private/settings/'
+    | '/(private)/_private/signup-email/'
     | '/(public)/_public/landing/'
     | '/(public)/_public/privacy-policy/'
     | '/(public)/_public/terms-of-service/'
@@ -315,6 +354,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof publicPublicLandingIndexRouteImport
       parentRoute: typeof publicPublicRoute
     }
+    '/(private)/_private/signup-email/': {
+      id: '/(private)/_private/signup-email/'
+      path: '/signup-email'
+      fullPath: '/signup-email'
+      preLoaderRoute: typeof privatePrivateSignupEmailIndexRouteImport
+      parentRoute: typeof privatePrivateRoute
+    }
     '/(private)/_private/settings/': {
       id: '/(private)/_private/settings/'
       path: '/settings'
@@ -357,12 +403,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authAuthSigninIndexRouteImport
       parentRoute: typeof authAuthRoute
     }
+    '/(auth)/_auth/recover-account/': {
+      id: '/(auth)/_auth/recover-account/'
+      path: '/recover-account'
+      fullPath: '/recover-account'
+      preLoaderRoute: typeof authAuthRecoverAccountIndexRouteImport
+      parentRoute: typeof authAuthRoute
+    }
     '/(auth)/_auth/callback/': {
       id: '/(auth)/_auth/callback/'
       path: '/callback'
       fullPath: '/callback'
       preLoaderRoute: typeof authAuthCallbackIndexRouteImport
       parentRoute: typeof authAuthRoute
+    }
+    '/(private)/_private/settings/security': {
+      id: '/(private)/_private/settings/security'
+      path: '/settings/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof privatePrivateSettingsSecurityRouteImport
+      parentRoute: typeof privatePrivateRoute
     }
     '/(private)/_private/settings/profile': {
       id: '/(private)/_private/settings/profile'
@@ -383,12 +443,14 @@ declare module '@tanstack/react-router' {
 
 interface authAuthRouteChildren {
   authAuthCallbackIndexRoute: typeof authAuthCallbackIndexRoute
+  authAuthRecoverAccountIndexRoute: typeof authAuthRecoverAccountIndexRoute
   authAuthSigninIndexRoute: typeof authAuthSigninIndexRoute
   authAuthSignupIndexRoute: typeof authAuthSignupIndexRoute
 }
 
 const authAuthRouteChildren: authAuthRouteChildren = {
   authAuthCallbackIndexRoute: authAuthCallbackIndexRoute,
+  authAuthRecoverAccountIndexRoute: authAuthRecoverAccountIndexRoute,
   authAuthSigninIndexRoute: authAuthSigninIndexRoute,
   authAuthSignupIndexRoute: authAuthSignupIndexRoute,
 }
@@ -411,10 +473,12 @@ interface privatePrivateRouteChildren {
   privatePrivateIndexRoute: typeof privatePrivateIndexRoute
   privatePrivateActivitiesActivityIdRoute: typeof privatePrivateActivitiesActivityIdRoute
   privatePrivateSettingsProfileRoute: typeof privatePrivateSettingsProfileRoute
+  privatePrivateSettingsSecurityRoute: typeof privatePrivateSettingsSecurityRoute
   privatePrivateActivitiesIndexRoute: typeof privatePrivateActivitiesIndexRoute
   privatePrivateCalendarIndexRoute: typeof privatePrivateCalendarIndexRoute
   privatePrivateHistoryIndexRoute: typeof privatePrivateHistoryIndexRoute
   privatePrivateSettingsIndexRoute: typeof privatePrivateSettingsIndexRoute
+  privatePrivateSignupEmailIndexRoute: typeof privatePrivateSignupEmailIndexRoute
 }
 
 const privatePrivateRouteChildren: privatePrivateRouteChildren = {
@@ -422,10 +486,12 @@ const privatePrivateRouteChildren: privatePrivateRouteChildren = {
   privatePrivateActivitiesActivityIdRoute:
     privatePrivateActivitiesActivityIdRoute,
   privatePrivateSettingsProfileRoute: privatePrivateSettingsProfileRoute,
+  privatePrivateSettingsSecurityRoute: privatePrivateSettingsSecurityRoute,
   privatePrivateActivitiesIndexRoute: privatePrivateActivitiesIndexRoute,
   privatePrivateCalendarIndexRoute: privatePrivateCalendarIndexRoute,
   privatePrivateHistoryIndexRoute: privatePrivateHistoryIndexRoute,
   privatePrivateSettingsIndexRoute: privatePrivateSettingsIndexRoute,
+  privatePrivateSignupEmailIndexRoute: privatePrivateSignupEmailIndexRoute,
 }
 
 const privatePrivateRouteWithChildren = privatePrivateRoute._addFileChildren(

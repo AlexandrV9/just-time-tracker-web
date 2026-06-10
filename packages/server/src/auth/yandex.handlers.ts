@@ -162,9 +162,9 @@ const callback = async (
           : result.message === "PROVIDER_ALREADY_CONNECTED"
             ? "provider_already_connected"
             : "link_error";
-      return c.redirect(`${clientUrl}/settings/profile?error=${errCode}`);
+      return c.redirect(`${clientUrl}/settings/security?error=${errCode}`);
     }
-    return c.redirect(`${clientUrl}/settings/profile?linked=yandex`);
+    return c.redirect(`${clientUrl}/settings/security?linked=yandex`);
   }
 
   // ── Login flow ─────────────────────────────────────────────────────────────

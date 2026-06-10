@@ -100,8 +100,20 @@
         },
         "emailInput": {
           "label": "Email",
-          "placeholder": "Enter your email"
+          "placeholder": "Enter your email",
+          "emptyPlaceholder": "No email added"
         },
+        "loginInput": {
+          "label": "Login",
+          "placeholder": "Enter your login",
+          "errors": {
+            "minLength": "Login must be at least 3 characters",
+            "maxLength": "Login must be at most 30 characters",
+            "invalidFormat": "Login may contain only letters, numbers, dots, dashes and underscores",
+            "isEmail": "Login must not be an email address"
+          }
+        },
+        "emailRecoveryWarning": "Add an email to recover access to your account",
         "editButton": "Edit profile",
         "saveButton": "Save",
         "cancelButton": "Cancel",
@@ -110,16 +122,42 @@
         "errors": {
           "nameRequired": "Name is required",
           "emailInvalid": "Enter a valid email"
+        }
+      },
+      "security": {
+        "loginMethods": {
+          "title": "Sign-in methods",
+          "status": {
+            "connected": "Connected",
+            "notConnected": "Not connected"
+          },
+          "connectButton": "Connect",
+          "disconnectButton": "Disconnect",
+          "comingSoon": "Coming soon"
         },
-        "yandexProvider": {
-          "linkButton": "Link Yandex",
-          "linked": "Yandex linked",
-          "linkSuccess": "Yandex successfully linked!",
-          "linkError": {
-            "yandex_already_linked": "This Yandex account is already linked to another user",
-            "provider_already_connected": "Yandex is already linked to your account",
-            "default": "Failed to link Yandex. Please try again."
+        "providers": {
+          "yandex": {
+            "linkSuccess": "Yandex account connected",
+            "unlinkSuccess": "Yandex account disconnected",
+            "unlinkError": "Failed to unlink Yandex. Please try again.",
+            "linkError": {
+              "yandex_already_linked": "This Yandex account is already linked to another account.",
+              "provider_already_connected": "Yandex is already linked to your account",
+              "default": "Failed to link Yandex. Please try again."
+            }
           }
+        },
+        "setPasswordDialog": {
+          "title": "Set a password",
+          "description": "To unlink this login method, first set a password for your account so you can still sign in.",
+          "submitButton": "Save password",
+          "cancelButton": "Cancel",
+          "success": "Password set",
+          "error": "Could not set password"
+        },
+        "errorDialog": {
+          "title": "Something went wrong",
+          "okButton": "Got it"
         }
       }
     },
@@ -236,7 +274,8 @@
     "accountSettings": {
       "title": "Account Settings",
       "options": {
-        "1": "Edit Profile"
+        "profile": "Profile",
+        "security": "Security & sign-in"
       }
     },
     "unfinishedActivities": {
@@ -258,12 +297,14 @@
       "emptyDescription": "Add activities to start your day",
       "addTodayActivitiesDialog": {
         "title": "Add activities",
+        "emptyTitle": "No activities yet",
         "empty": "You don't have any activities yet. Go to the activities section and create a new one",
         "noActivities": "No activities to select",
         "success": "Activities added",
         "error": "Could not add activities",
         "cancelButton": "Cancel",
-        "addButton": "Add"
+        "addButton": "Add",
+        "goToActivitiesButton": "Go to activities"
       }
     },
     "activityGroup": {
@@ -322,7 +363,11 @@
         "submitButtonLoadingText": "Authorization...",
         "subtitleText": "Don't you have an account?",
         "title": "Autorization",
-        "unknownError": "Unknown error"
+        "forgotPasswordLink": "Forgot password?",
+        "errors": {
+          "invalidCredentials": "Incorrect login or password",
+          "unknown": "Unknown error"
+        }
       },
       "yandexLogin": {
         "button": "Sign in with Yandex",
@@ -347,7 +392,11 @@
           "label": "Login",
           "placeholder": "Create a login",
           "errors": {
-            "required": "Login is required"
+            "required": "Login is required",
+            "minLength": "Login must be at least 3 characters",
+            "maxLength": "Login must be at most 30 characters",
+            "invalidFormat": "Login may contain only letters, numbers, dots, dashes and underscores",
+            "isEmail": "Login must not be an email address"
           }
         },
         "passwordInput": {
@@ -375,6 +424,67 @@
         "title": "Registration",
         "successToast": "Registration successful",
         "errorToast": "Registration failed"
+      }
+    },
+    "emailVerification": {
+      "dialogTitle": "Confirm email",
+      "backButton": "Back",
+      "dialogDescription": "Enter the email address you want to link to your account. We will send a 6-digit code.",
+      "registrationTitle": "Add a recovery email",
+      "registrationDescription": "Add an email to recover access to your account. You can skip this step and complete it later in account settings.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "sendCodeButton": "Send code",
+      "cancelButton": "Cancel",
+      "verifyButton": "Confirm",
+      "skipButton": "Skip",
+      "resendButton": "Resend code",
+      "resendIn": "Resend in {{seconds}}s",
+      "enterCodeDescription": "Enter the 6-digit code sent to {{email}}",
+      "expiredDescription": "The code has expired. Request a new one.",
+      "verified": "Email confirmed",
+      "errors": {
+        "emailInvalid": "Enter a valid email",
+        "emailAlreadyExists": "This email is already in use",
+        "requestFailed": "Could not send verification code",
+        "invalidCode": "Invalid verification code",
+        "codeExpired": "Verification code expired. Request a new one",
+        "tooManyAttempts": "Too many attempts. Request a new code",
+        "verifyFailed": "Could not verify email",
+        "resendTooEarly": "Please wait before requesting a new code",
+        "codeNotFound": "No active verification request. Start again"
+      }
+    },
+    "passwordReset": {
+      "title": "Account recovery",
+      "emailDescription": "Enter the email linked to your account. We will send a 6-digit code.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "sendCodeButton": "Send code",
+      "backButton": "Back",
+      "verifyButton": "Confirm",
+      "resendButton": "Resend code",
+      "resendIn": "Resend in {{seconds}}s",
+      "enterCodeDescription": "Enter the 6-digit code sent to {{email}}",
+      "expiredDescription": "The code has expired. Request a new one.",
+      "newPasswordDescription": "Create a new password for your account.",
+      "newPasswordLabel": "New password",
+      "newPasswordPlaceholder": "Create a strong password",
+      "repeatPasswordLabel": "Repeat password",
+      "repeatPasswordPlaceholder": "Please enter password again",
+      "submitButton": "Save password",
+      "success": "Password changed. Sign in with your new password.",
+      "errors": {
+        "emailInvalid": "Enter a valid email",
+        "requestFailed": "Could not send the code",
+        "invalidCode": "Invalid code",
+        "codeExpired": "The code has expired. Request a new one",
+        "tooManyAttempts": "Too many attempts. Request a new code",
+        "verifyFailed": "Could not verify the code",
+        "resendTooEarly": "Please wait before requesting a new code",
+        "samePassword": "Please choose a different password",
+        "sessionExpired": "Your recovery session has expired. Start again",
+        "confirmFailed": "Could not change the password"
       }
     }
   },

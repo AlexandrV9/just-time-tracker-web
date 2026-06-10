@@ -1,4 +1,5 @@
 import { pool } from "src/shared/index.js";
+import { isMainModule } from "./isMainModule.js";
 
 export const createActivitySessionSegmentsTable = async () => {
   const query = `
@@ -37,14 +38,16 @@ export const createActivitySessionSegmentsTable = async () => {
   }
 };
 
-createActivitySessionSegmentsTable()
-  .then(() => {
-    console.log("✅ Скрипт завершен успешно");
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error("❌ Скрипт завершен с ошибкой:", error);
-    process.exit(1);
-  });
+if (isMainModule(import.meta.url)) {
+  createActivitySessionSegmentsTable()
+    .then(() => {
+      console.log("✅ Скрипт завершен успешно");
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error("❌ Скрипт завершен с ошибкой:", error);
+      process.exit(1);
+    });
+}
 
 // npx tsx ./scripts/createActivitySessionSegmentsTable.ts

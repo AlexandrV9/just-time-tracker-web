@@ -99,6 +99,32 @@ describe("yandex OAuth service", () => {
       if (!result.success) return;
       expect(result.data.user.email).toBeNull();
     });
+
+    it("re-activates a disconnected provider and logs the same user back in", async () => {
+      const first = await loginWithYandex(makeProfile());
+      expect(first.success).toBe(true);
+      if (!first.success) return;
+      const userId = first.data.user.id;
+
+      await testDb.pool.query(
+        `UPDATE auth_providers SET disconnected_at = NOW()
+         WHERE user_id = $1 AND provider = 'yandex'`,
+        [userId],
+      );
+
+      const again = await loginWithYandex(makeProfile());
+      expect(again.success).toBe(true);
+      if (!again.success) return;
+      expect(again.data.user.id).toBe(userId);
+
+      const { rows } = await testDb.pool.query(
+        `SELECT disconnected_at FROM auth_providers
+         WHERE user_id = $1 AND provider = 'yandex'`,
+        [userId],
+      );
+      expect(rows).toHaveLength(1);
+      expect(rows[0].disconnected_at).toBeNull();
+    });
   });
 
   describe("linkYandexToUser", () => {
@@ -160,6 +186,53 @@ describe("yandex OAuth service", () => {
       expect(result.success).toBe(false);
       if (result.success) return;
       expect(result.message).toBe("PROVIDER_ALREADY_CONNECTED");
+    });
+
+    it("re-links a disconnected Yandex account that belonged to another user", async () => {
+      const { rows } = await testDb.pool.query(
+        `INSERT INTO users (login, first_name, password_hash)
+       VALUES ('former', 'Former', 'hash')
+       RETURNING id`,
+      );
+      const formerUserId = rows[0].id;
+
+      await testDb.pool.query(
+        `INSERT INTO auth_providers (user_id, provider, provider_user_id, disconnected_at)
+       VALUES ($1, 'yandex', 'yandex-123', NOW())`,
+        [formerUserId],
+      );
+
+      const result = await linkYandexToUser(userId, makeProfile());
+
+      expect(result.success).toBe(true);
+
+      const { rows: providers } = await testDb.pool.query(
+        `SELECT user_id, disconnected_at FROM auth_providers
+         WHERE provider = 'yandex' AND provider_user_id = 'yandex-123'`,
+      );
+      expect(providers).toHaveLength(1);
+      expect(providers[0].user_id).toBe(userId);
+      expect(providers[0].disconnected_at).toBeNull();
+    });
+
+    it("re-activates a disconnected link for the same user", async () => {
+      await testDb.pool.query(
+        `INSERT INTO auth_providers (user_id, provider, provider_user_id, disconnected_at)
+       VALUES ($1, 'yandex', 'yandex-123', NOW())`,
+        [userId],
+      );
+
+      const result = await linkYandexToUser(userId, makeProfile());
+
+      expect(result.success).toBe(true);
+
+      const { rows } = await testDb.pool.query(
+        `SELECT disconnected_at FROM auth_providers
+         WHERE user_id = $1 AND provider = 'yandex'`,
+        [userId],
+      );
+      expect(rows).toHaveLength(1);
+      expect(rows[0].disconnected_at).toBeNull();
     });
   });
 });

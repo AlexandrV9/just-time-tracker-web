@@ -3,17 +3,17 @@ import { pool } from "../shared/index.js";
 type UpdateUserProfileInput = {
   userId: string;
   name: string;
-  email: string | null;
+  login: string;
 };
 
 const updateUserProfile = async ({
   userId,
   name,
-  email,
+  login,
 }: UpdateUserProfileInput) => {
   const query = `
     UPDATE users
-    SET first_name = $1, email = $2, updated_at = NOW()
+    SET first_name = $1, login = $2, updated_at = NOW()
     WHERE id = $3 AND is_active = true
     RETURNING
       id,
@@ -23,7 +23,7 @@ const updateUserProfile = async ({
       avatar
   `;
 
-  const { rows } = await pool.query(query, [name, email, userId]);
+  const { rows } = await pool.query(query, [name, login, userId]);
   return rows[0] ?? null;
 };
 
