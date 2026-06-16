@@ -1,4 +1,4 @@
--- Migration 002: OAuth providers, email verification, password resets
+-- Migration 002: OAuth providers, email verification, password resets, email daily limit
 -- Run once after 001_add_users_email_avatar.sql on existing deployments.
 -- Fresh Docker installs already get this schema from db/init.sql.
 
@@ -75,3 +75,12 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_password_resets_user_id
 
 CREATE INDEX IF NOT EXISTS idx_password_resets_expires_at
   ON password_resets(expires_at);
+
+-- Daily per-user email send counter (verification + password reset)
+CREATE TABLE IF NOT EXISTS user_email_daily_sends (
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day DATE NOT NULL,
+  send_count INT NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, day),
+  CONSTRAINT user_email_daily_sends_count_positive CHECK (send_count >= 0)
+);
