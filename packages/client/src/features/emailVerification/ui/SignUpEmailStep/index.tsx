@@ -76,10 +76,16 @@ export function SignUpEmailStep() {
     emailVerification.confirm(parsed.data.code);
   }, [code, emailVerification]);
 
-  const handleCancel = useCallback(() => {
-    reset({ email: emailVerification.pendingEmail });
-    emailVerification.cancel();
-  }, [emailVerification, reset]);
+  const handleBackToEmail = useCallback(() => {
+    reset({ email: emailVerification.pendingEmail || getValues("email") });
+    emailVerification.backToEmail();
+  }, [emailVerification, getValues, reset]);
+
+  useEffect(() => {
+    if (emailVerification.step === "email" && emailVerification.pendingEmail) {
+      reset({ email: emailVerification.pendingEmail });
+    }
+  }, [emailVerification.step, emailVerification.pendingEmail, reset]);
 
   const handleSkip = useCallback(() => {
     if (emailVerification.step === "code") {
@@ -178,7 +184,7 @@ export function SignUpEmailStep() {
         <ButtonGroup justify="space-between">
           <Button
             variant="outline"
-            onClick={handleCancel}
+            onClick={handleBackToEmail}
             loading={emailVerification.isCancelPending}
             disabled={emailVerification.isCancelPending}
           >

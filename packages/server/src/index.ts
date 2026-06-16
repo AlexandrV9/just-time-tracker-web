@@ -11,7 +11,8 @@ import {
   activitySessionsRouter,
 } from "./activity/index.js";
 import { dayPlanItemsRouter, dayPlansRouter } from "./dayPlan/index.js";
-import { emailVerificationRouter, usersRouter } from "./user/index.js";
+import { emailVerificationRouter } from "./emailVerification/index.js";
+import { usersRouter } from "./user/index.js";
 
 const app = new Hono();
 

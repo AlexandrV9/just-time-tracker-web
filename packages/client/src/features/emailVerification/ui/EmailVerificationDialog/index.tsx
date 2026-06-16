@@ -75,9 +75,28 @@ export function EmailVerificationDialog({
   });
 
   useEffect(() => {
-    if (!dialog.open) return;
+    if (!dialog.open) {
+      reset({ email: initialEmail });
+      setCode([]);
+      return;
+    }
+
+    if (emailVerification.isStatusLoading) return;
+
+    if (emailVerification.step === "email" && emailVerification.pendingEmail) {
+      reset({ email: emailVerification.pendingEmail });
+      return;
+    }
+
     reset({ email: initialEmail });
-  }, [dialog.open, initialEmail, reset]);
+  }, [
+    dialog.open,
+    emailVerification.isStatusLoading,
+    emailVerification.pendingEmail,
+    emailVerification.step,
+    initialEmail,
+    reset,
+  ]);
 
   useEffect(() => {
     if (emailVerification.step === "email") {
@@ -110,11 +129,40 @@ export function EmailVerificationDialog({
     emailVerification.confirm(parsed.data.code);
   }, [code, emailVerification]);
 
-  const handleCancel = useCallback(() => {
-    reset({ email: emailVerification.pendingEmail });
+  const handleBackToEmail = useCallback(() => {
+    reset({ email: emailVerification.pendingEmail || getValues("email") });
+    emailVerification.backToEmail();
+  }, [emailVerification, getValues, reset]);
 
-    emailVerification.cancel();
-  }, [emailVerification, reset]);
+  const isCloseLocked =
+    !emailVerification.isDailyLimitReached &&
+    (emailVerification.step === "code" || emailVerification.isStartPending);
+
+  const resetForm = useCallback(() => {
+    reset({ email: initialEmail });
+    setCode([]);
+  }, [initialEmail, reset]);
+
+  const handleCloseFromEmailStep = useCallback(() => {
+    emailVerification.cancel(() => {
+      resetForm();
+      dialog.setOpen(false);
+    });
+  }, [dialog, emailVerification, resetForm]);
+
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open && isCloseLocked) return;
+
+      if (!open && emailVerification.step === "email") {
+        handleCloseFromEmailStep();
+        return;
+      }
+
+      dialog.setOpen(open);
+    },
+    [dialog, emailVerification.step, handleCloseFromEmailStep, isCloseLocked],
+  );
 
   const getEmailErrorMessage = (message?: string) => {
     if (!message) return undefined;
@@ -200,9 +248,6 @@ export function EmailVerificationDialog({
     );
   };
 
-  const isCloseLocked =
-    emailVerification.step === "code" || emailVerification.isStartPending;
-
   const renderFooter = () => {
     if (emailVerification.isStatusLoading) return null;
 
@@ -211,8 +256,12 @@ export function EmailVerificationDialog({
         <ButtonGroup>
           <Button
             variant="outline"
-            onClick={() => dialog.setOpen(false)}
-            disabled={emailVerification.isStartPending}
+            onClick={handleCloseFromEmailStep}
+            disabled={
+              emailVerification.isStartPending ||
+              emailVerification.isCancelPending
+            }
+            loading={emailVerification.isCancelPending}
           >
             {t(`${baseLocale}.cancelButton`)}
           </Button>
@@ -231,7 +280,7 @@ export function EmailVerificationDialog({
       <ButtonGroup>
         <Button
           variant="outline"
-          onClick={handleCancel}
+          onClick={handleBackToEmail}
           loading={emailVerification.isCancelPending}
           disabled={emailVerification.isCancelPending}
         >
@@ -253,10 +302,7 @@ export function EmailVerificationDialog({
       size="md"
       lazyMount
       open={dialog.open}
-      onOpenChange={(details) => {
-        if (!details.open && isCloseLocked) return;
-        dialog.setOpen(details.open);
-      }}
+      onOpenChange={(details) => handleOpenChange(details.open)}
       closeOnEscape={!isCloseLocked}
       closeOnInteractOutside={!isCloseLocked}
     >

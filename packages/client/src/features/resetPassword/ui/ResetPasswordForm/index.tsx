@@ -76,6 +76,12 @@ export function ResetPasswordForm({
     }
   }, [recoveryEmail, emailForm]);
 
+  useEffect(() => {
+    if (resetPassword.step === "email" && resetPassword.email) {
+      emailForm.reset({ email: resetPassword.email });
+    }
+  }, [resetPassword.step, resetPassword.email, emailForm]);
+
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),
     mode: "onBlur",
@@ -198,7 +204,7 @@ export function ResetPasswordForm({
       </Stack.VStack>
 
       <ButtonGroup justify="space-between">
-        <Button variant="outline" disabled>
+        <Button variant="outline" onClick={resetPassword.backToEmail}>
           {t(`${baseLocale}.backButton`)}
         </Button>
         <Button

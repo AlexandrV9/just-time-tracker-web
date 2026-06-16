@@ -10,6 +10,17 @@ const baseLocale = "features.resetPassword";
 
 export type ResetPasswordStep = "email" | "code" | "password";
 
+const normalizeEmail = (email: string) => email.trim().toLowerCase();
+
+const canResumePendingSession = (
+  serverState: PasswordResetStatusDTO | null,
+  email: string,
+  isExpired: boolean,
+) =>
+  !isExpired &&
+  serverState?.status === "pending" &&
+  normalizeEmail(serverState.email ?? "") === normalizeEmail(email);
+
 type UseResetPasswordOptions = {
   recoveryEmail?: string;
   onRecoveryEmailChange: (email: string | undefined) => void;
@@ -25,8 +36,10 @@ export function useResetPassword({
 
   const [serverState, setServerState] =
     useState<PasswordResetStatusDTO | null>(null);
+  const [viewStep, setViewStep] = useState<ResetPasswordStep | null>(null);
   const [resetToken, setResetToken] = useState<string | null>(null);
   const [codeResetKey, setCodeResetKey] = useState(0);
+  const [isDailyLimitReached, setIsDailyLimitReached] = useState(false);
 
   const resetCodeInput = useCallback(() => {
     setCodeResetKey((key) => key + 1);
@@ -46,12 +59,6 @@ export function useResetPassword({
       setServerState(statusQuery.data.data);
     }
   }, [statusQuery.data]);
-
-  useEffect(() => {
-    if (!recoveryEmail?.trim()) {
-      setServerState(null);
-    }
-  }, [recoveryEmail]);
 
   const status = serverState?.status ?? "none";
   const email = serverState?.email ?? recoveryEmail?.trim() ?? "";
@@ -78,29 +85,54 @@ export function useResetPassword({
     statusQuery.isLoading &&
     serverState === null;
 
+  useEffect(() => {
+    if (isStatusLoading || resetToken !== null || viewStep !== null) return;
+    setViewStep(status === "none" ? "email" : "code");
+  }, [isStatusLoading, resetToken, status, viewStep]);
+
+  useEffect(() => {
+    if (status === "none" && viewStep === "code") {
+      setViewStep("email");
+    }
+  }, [status, viewStep]);
+
   const step: ResetPasswordStep | null = resetToken
     ? "password"
     : isStatusLoading
       ? null
-      : status === "none"
-        ? "email"
-        : "code";
+      : (viewStep ?? (status === "none" ? "email" : "code"));
 
   const applyPendingState = useCallback(
     (data: PasswordResetStatusDTO & { status: "pending" }) => {
       setServerState(data);
       onRecoveryEmailChange(data.email);
+      setViewStep("code");
     },
     [onRecoveryEmailChange],
+  );
+
+  const resumePendingSession = useCallback(
+    (value: string) => {
+      setIsDailyLimitReached(false);
+      setViewStep("code");
+      if (!recoveryEmail?.trim()) {
+        onRecoveryEmailChange(value.trim());
+      }
+    },
+    [onRecoveryEmailChange, recoveryEmail],
   );
 
   const startMutation = useMutation({
     mutationFn: authService.startPasswordReset,
     onSuccess: (response) => {
       if (!response.success) {
+        if (response.message === "EMAIL_DAILY_LIMIT") {
+          setIsDailyLimitReached(true);
+        }
         toast.error(t(`${baseLocale}.${mapStartErrorKey(response.message)}`));
         return;
       }
+      setIsDailyLimitReached(false);
       applyPendingState(response.data);
       setResetToken(null);
       resetCodeInput();
@@ -117,7 +149,11 @@ export function useResetPassword({
       if (!response.success) {
         if (response.message === "USER_NOT_FOUND") {
           setServerState({ status: "none" });
+          setViewStep("email");
           onRecoveryEmailChange(undefined);
+        }
+        if (response.message === "EMAIL_DAILY_LIMIT") {
+          setIsDailyLimitReached(true);
         }
         const key =
           response.message === "RESEND_TOO_EARLY"
@@ -126,6 +162,7 @@ export function useResetPassword({
         toast.error(t(`${baseLocale}.${key}`));
         return;
       }
+      setIsDailyLimitReached(false);
       applyPendingState(response.data);
       resetCodeInput();
       logDevCode(response.data.devCode);
@@ -161,12 +198,14 @@ export function useResetPassword({
 
       if (response.data.status === "expired") {
         setServerState({ status: "expired", email });
+        setViewStep("code");
         resetCodeInput();
         toast.error(t(`${baseLocale}.errors.codeExpired`));
         return;
       }
 
       setResetToken(response.data.resetToken);
+      setViewStep("password");
     },
     onError: () => {
       resetCodeInput();
@@ -193,6 +232,7 @@ export function useResetPassword({
           toast.error(t(`${baseLocale}.errors.sessionExpired`));
           setResetToken(null);
           setServerState({ status: "none" });
+          setViewStep("email");
           onRecoveryEmailChange(undefined);
           return;
         }
@@ -204,6 +244,7 @@ export function useResetPassword({
         toast.error(t(`${baseLocale}.errors.sessionExpired`));
         setResetToken(null);
         setServerState({ status: "expired", email });
+        setViewStep("code");
         return;
       }
 
@@ -217,8 +258,15 @@ export function useResetPassword({
   });
 
   const start = useCallback(
-    (value: string) => startMutation.mutate({ email: value }),
-    [startMutation],
+    (value: string) => {
+      const trimmed = value.trim();
+      if (canResumePendingSession(serverState, trimmed, isExpired)) {
+        resumePendingSession(trimmed);
+        return;
+      }
+      startMutation.mutate({ email: trimmed });
+    },
+    [isExpired, resumePendingSession, serverState, startMutation],
   );
 
   const verify = useCallback(
@@ -238,10 +286,10 @@ export function useResetPassword({
 
   const backToEmail = useCallback(() => {
     setResetToken(null);
-    setServerState({ status: "none" });
-    onRecoveryEmailChange(undefined);
+    setIsDailyLimitReached(false);
+    setViewStep("email");
     resetCodeInput();
-  }, [onRecoveryEmailChange, resetCodeInput]);
+  }, [resetCodeInput]);
 
   return {
     step,
@@ -255,6 +303,7 @@ export function useResetPassword({
     isVerifyPending: verifyMutation.isPending,
     isResendPending: resendMutation.isPending,
     isConfirmPending: confirmMutation.isPending,
+    isDailyLimitReached,
     start,
     verify,
     resend,

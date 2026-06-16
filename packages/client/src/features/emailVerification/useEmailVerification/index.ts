@@ -11,6 +11,17 @@ const baseLocale = "features.emailVerification";
 
 export type EmailVerificationStep = "email" | "code";
 
+const normalizeEmail = (email: string) => email.trim().toLowerCase();
+
+const canResumePendingSession = (
+  serverState: EmailVerificationStateDTO | null,
+  email: string,
+  isExpired: boolean,
+) =>
+  !isExpired &&
+  serverState?.status === "pending" &&
+  normalizeEmail(serverState.email ?? "") === normalizeEmail(email);
+
 const logDevCode = (devCode?: string) => {
   if (devCode) {
     console.info("[dev] email verification code:", devCode);
@@ -30,11 +41,13 @@ export function useEmailVerification({
 
   const [serverState, setServerState] =
     useState<EmailVerificationStateDTO | null>(null);
+  const [viewStep, setViewStep] = useState<EmailVerificationStep | null>(null);
 
   const nowMs = useNowMs(enabled, serverState?.resendAvailableAt);
   const nowTs = nowMs ?? Date.now();
 
   const [codeResetKey, setCodeResetKey] = useState(0);
+  const [isDailyLimitReached, setIsDailyLimitReached] = useState(false);
 
   const resetCodeInput = useCallback(() => {
     setCodeResetKey((key) => key + 1);
@@ -57,6 +70,8 @@ export function useEmailVerification({
   useEffect(() => {
     if (!enabled) {
       setServerState(null);
+      setViewStep(null);
+      setIsDailyLimitReached(false);
     }
   }, [enabled]);
 
@@ -76,20 +91,39 @@ export function useEmailVerification({
   const isStatusLoading =
     enabled && statusQuery.isLoading && serverState === null;
 
+  useEffect(() => {
+    if (isStatusLoading || viewStep !== null) return;
+    setViewStep(status === "none" ? "email" : "code");
+  }, [isStatusLoading, status, viewStep]);
+
+  useEffect(() => {
+    if (status === "none" && viewStep === "code") {
+      setViewStep("email");
+    }
+  }, [status, viewStep]);
+
   const step: EmailVerificationStep | null = isStatusLoading
     ? null
-    : status === "none"
-      ? "email"
-      : "code";
+    : (viewStep ?? (status === "none" ? "email" : "code"));
+
+  const resumePendingSession = useCallback(() => {
+    setIsDailyLimitReached(false);
+    setViewStep("code");
+  }, []);
 
   const startMutation = useMutation({
     mutationFn: emailVerificationApiService.start,
     onSuccess: (response) => {
       if (!response.success) {
+        if (response.message === "EMAIL_DAILY_LIMIT") {
+          setIsDailyLimitReached(true);
+        }
         toast.error(t(`${baseLocale}.${mapRequestErrorKey(response.message)}`));
         return;
       }
+      setIsDailyLimitReached(false);
       setServerState(response.data);
+      setViewStep("code");
       resetCodeInput();
       logDevCode(response.data.devCode);
     },
@@ -102,10 +136,15 @@ export function useEmailVerification({
     mutationFn: () => emailVerificationApiService.resend(),
     onSuccess: (response) => {
       if (!response.success) {
+        if (response.message === "EMAIL_DAILY_LIMIT") {
+          setIsDailyLimitReached(true);
+        }
         toast.error(t(`${baseLocale}.${mapRequestErrorKey(response.message)}`));
         return;
       }
+      setIsDailyLimitReached(false);
       setServerState(response.data);
+      setViewStep("code");
       resetCodeInput();
       logDevCode(response.data.devCode);
     },
@@ -137,6 +176,7 @@ export function useEmailVerification({
 
       if (response.data.status === "expired") {
         setServerState({ status: "expired", email: pendingEmail });
+        setViewStep("code");
         resetCodeInput();
         toast.error(t(`${baseLocale}.errors.codeExpired`));
         return;
@@ -161,6 +201,8 @@ export function useEmailVerification({
         return;
       }
       setServerState(response.data);
+      setViewStep("email");
+      setIsDailyLimitReached(false);
       resetCodeInput();
     },
     onError: () => {
@@ -169,8 +211,15 @@ export function useEmailVerification({
   });
 
   const start = useCallback(
-    (email: string) => startMutation.mutate({ email }),
-    [startMutation],
+    (email: string) => {
+      const trimmed = email.trim();
+      if (canResumePendingSession(serverState, trimmed, isExpired)) {
+        resumePendingSession();
+        return;
+      }
+      startMutation.mutate({ email: trimmed });
+    },
+    [isExpired, resumePendingSession, serverState, startMutation],
   );
 
   const confirm = useCallback(
@@ -182,6 +231,12 @@ export function useEmailVerification({
     if (resendSecondsLeft > 0) return;
     resendMutation.mutate();
   }, [resendMutation, resendSecondsLeft]);
+
+  const backToEmail = useCallback(() => {
+    setViewStep("email");
+    setIsDailyLimitReached(false);
+    resetCodeInput();
+  }, [resetCodeInput]);
 
   const cancel = useCallback(
     (afterCancel?: () => void) => {
@@ -206,10 +261,12 @@ export function useEmailVerification({
     isConfirmPending: confirmMutation.isPending,
     isResendPending: resendMutation.isPending,
     isCancelPending: cancelMutation.isPending,
+    isDailyLimitReached,
     codeResetKey,
     start,
     confirm,
     resend,
+    backToEmail,
     cancel,
   };
 }

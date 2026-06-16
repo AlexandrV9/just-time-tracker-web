@@ -7,7 +7,7 @@ import {
   startTestDatabase,
 } from "../setup/test-db.js";
 import { usersRouter } from "../../src/user/user.routes.js";
-import { emailVerificationRouter } from "../../src/user/emailVerification.routes.js";
+import { emailVerificationRouter } from "../../src/emailVerification/index.js";
 import type { AuthVariables } from "../../src/shared/auth/auth.variables.js";
 
 type JsonBody = Record<string, unknown>;
