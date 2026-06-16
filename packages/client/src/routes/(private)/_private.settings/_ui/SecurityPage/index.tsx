@@ -1,6 +1,6 @@
 import { BackButton, Stack } from "~/shared/ui";
 import { useHeaderLeftContent } from "~/widgets";
-import { LoginMethods } from "./LoginMethods";
+// import { LoginMethods } from "./LoginMethods";
 
 export function SecurityPage() {
   useHeaderLeftContent(<BackButton to="/settings" />);
@@ -14,7 +14,7 @@ export function SecurityPage() {
       mx="auto"
       gap="1rem"
     >
-      <LoginMethods />
+      {/* <LoginMethods /> */}
     </Stack.VStack>
   );
 }

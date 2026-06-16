@@ -103,6 +103,10 @@
           "placeholder": "Enter your email",
           "emptyPlaceholder": "No email added"
         },
+        "passwordInput": {
+          "label": "Password",
+          "placeholder": "••••••••••••••••"
+        },
         "loginInput": {
           "label": "Login",
           "placeholder": "Enter your login",
@@ -146,14 +150,6 @@
               "default": "Failed to link Yandex. Please try again."
             }
           }
-        },
-        "setPasswordDialog": {
-          "title": "Set a password",
-          "description": "To unlink this login method, first set a password for your account so you can still sign in.",
-          "submitButton": "Save password",
-          "cancelButton": "Cancel",
-          "success": "Password set",
-          "error": "Could not set password"
         },
         "errorDialog": {
           "title": "Something went wrong",
@@ -445,6 +441,7 @@
       "verified": "Email confirmed",
       "errors": {
         "emailInvalid": "Enter a valid email",
+        "sameEmail": "Enter a different email from the current one",
         "emailAlreadyExists": "This email is already in use",
         "requestFailed": "Could not send verification code",
         "invalidCode": "Invalid verification code",
@@ -452,10 +449,56 @@
         "tooManyAttempts": "Too many attempts. Request a new code",
         "verifyFailed": "Could not verify email",
         "resendTooEarly": "Please wait before requesting a new code",
-        "codeNotFound": "No active verification request. Start again"
+        "codeNotFound": "No active verification request. Start again",
+        "dailyLimit": "Daily email limit reached. Try again tomorrow"
       }
     },
-    "passwordReset": {
+    "updatePassword": {
+      "dialog": {
+        "title": "Set a password",
+        "description": "Create a password to sign in with your login.",
+        "changeTitle": "Change password",
+        "changeDescription": "Enter your current password and choose a new one.",
+        "unlinkDescription": "To unlink this login method, first set a password for your account so you can still sign in.",
+        "submitButton": "Save password",
+        "cancelButton": "Cancel",
+        "success": "Password set",
+        "error": "Could not set password",
+        "changeSuccess": "Password changed",
+        "changeError": "Could not change password",
+        "errors": {
+          "invalidCurrentPassword": "Current password is incorrect",
+          "samePassword": "Please choose a different password",
+          "passwordNotSet": "Password is not set yet"
+        },
+        "currentPasswordInput": {
+          "label": "Current password",
+          "placeholder": "Enter your current password",
+          "errors": {
+            "required": "Field is required"
+          }
+        },
+        "passwordInput": {
+          "label": "Password",
+          "placeholder": "Create a strong password",
+          "errors": {
+            "minLength": "Password must be at least {{count}} characters. Example: MyPass1",
+            "maxLength": "Password must be at most {{count}} characters. Example: MyPass1",
+            "noLetter": "Password must contain at least one letter. Example: MyPass1",
+            "noDigit": "Password must contain at least one digit. Example: MyPass1"
+          }
+        },
+        "repeatPasswordInput": {
+          "label": "Repeat password",
+          "placeholder": "Please enter password again",
+          "errors": {
+            "mismatch": "Passwords don't match",
+            "required": "Field is required"
+          }
+        }
+      }
+    },
+    "resetPassword": {
       "title": "Account recovery",
       "emailDescription": "Enter the email linked to your account. We will send a 6-digit code.",
       "emailLabel": "Email",
@@ -476,6 +519,8 @@
       "success": "Password changed. Sign in with your new password.",
       "errors": {
         "emailInvalid": "Enter a valid email",
+        "userNotFound": "No account with this email",
+        "dailyLimit": "Daily email limit reached. Try again tomorrow",
         "requestFailed": "Could not send the code",
         "invalidCode": "Invalid code",
         "codeExpired": "The code has expired. Request a new one",

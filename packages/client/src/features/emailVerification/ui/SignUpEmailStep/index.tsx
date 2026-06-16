@@ -21,7 +21,7 @@ import {
   useForm,
 } from "~/shared/ui";
 import { useEmailVerification } from "../../useEmailVerification";
-import { EmailVerificationResendSlot } from "../EmailVerificationResendSlot";
+import { EmailVerificationResendButton } from "../EmailVerificationResendButton";
 
 const baseLocale = "features.emailVerification";
 
@@ -31,9 +31,12 @@ export function SignUpEmailStep() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const goHome = useCallback(() => navigate({ to: "/" }), [navigate]);
+  const goToMainPage = useCallback(() => navigate({ to: "/" }), [navigate]);
 
-  const ev = useEmailVerification({ enabled: true, onVerified: goHome });
+  const emailVerification = useEmailVerification({
+    enabled: true,
+    onVerified: goToMainPage,
+  });
 
   const [code, setCode] = useState<string[]>([]);
 
@@ -50,41 +53,41 @@ export function SignUpEmailStep() {
   });
 
   useEffect(() => {
-    if (ev.step === "email") {
+    if (emailVerification.step === "email") {
       setCode([]);
     }
-  }, [ev.step]);
+  }, [emailVerification.step]);
 
   useEffect(() => {
     setCode([]);
-  }, [ev.codeResetKey]);
+  }, [emailVerification.codeResetKey]);
 
   const handleStart = useCallback(async () => {
     const valid = await trigger("email");
     if (!valid) return;
-    ev.start(getValues("email").trim());
-  }, [ev, getValues, trigger]);
+    emailVerification.start(getValues("email").trim());
+  }, [emailVerification, getValues, trigger]);
 
   const handleConfirm = useCallback(() => {
     const parsed = confirmEmailVerificationSchema.safeParse({
       code: code.join(""),
     });
     if (!parsed.success) return;
-    ev.confirm(parsed.data.code);
-  }, [code, ev]);
+    emailVerification.confirm(parsed.data.code);
+  }, [code, emailVerification]);
 
   const handleCancel = useCallback(() => {
-    reset({ email: ev.pendingEmail });
-    ev.cancel();
-  }, [ev, reset]);
+    reset({ email: emailVerification.pendingEmail });
+    emailVerification.cancel();
+  }, [emailVerification, reset]);
 
   const handleSkip = useCallback(() => {
-    if (ev.step === "code") {
-      ev.cancel(goHome);
+    if (emailVerification.step === "code") {
+      emailVerification.cancel(goToMainPage);
       return;
     }
-    goHome();
-  }, [ev, goHome]);
+    goToMainPage();
+  }, [emailVerification, goToMainPage]);
 
   const getEmailErrorMessage = (message?: string) => {
     if (!message) return undefined;
@@ -95,7 +98,7 @@ export function SignUpEmailStep() {
   };
 
   const renderContent = () => {
-    if (ev.isStatusLoading) {
+    if (emailVerification.isStatusLoading) {
       return (
         <Stack.VStack align="stretch" gap={4}>
           <Skeleton height="5" />
@@ -104,7 +107,7 @@ export function SignUpEmailStep() {
       );
     }
 
-    if (ev.step === "email") {
+    if (emailVerification.step === "email") {
       return (
         <>
           <Field.Root invalid={!!errors.email}>
@@ -123,7 +126,10 @@ export function SignUpEmailStep() {
             <Button variant="outline" onClick={handleSkip}>
               {t(`${baseLocale}.skipButton`)}
             </Button>
-            <Button onClick={handleStart} loading={ev.isStartPending}>
+            <Button
+              onClick={handleStart}
+              loading={emailVerification.isStartPending}
+            >
               {t(`${baseLocale}.sendCodeButton`)}
             </Button>
           </ButtonGroup>
@@ -134,10 +140,10 @@ export function SignUpEmailStep() {
     return (
       <>
         <Text color="fg.muted" textStyle="sm">
-          {ev.isExpired
+          {emailVerification.isExpired
             ? t(`${baseLocale}.expiredDescription`)
             : t(`${baseLocale}.enterCodeDescription`, {
-                email: ev.pendingEmail,
+                email: emailVerification.pendingEmail,
               })}
         </Text>
 
@@ -145,7 +151,7 @@ export function SignUpEmailStep() {
           <PinInput.Root
             count={6}
             size="md"
-            disabled={ev.isExpired}
+            disabled={emailVerification.isExpired}
             value={Array.from({ length: 6 }, (_, i) => code[i] ?? "")}
             onValueChange={(details) => setCode(details.value)}
             otp
@@ -166,22 +172,22 @@ export function SignUpEmailStep() {
             </PinInput.Control>
           </PinInput.Root>
 
-          <EmailVerificationResendSlot ev={ev} t={t} />
+          <EmailVerificationResendButton {...emailVerification} />
         </Stack.VStack>
 
         <ButtonGroup justify="space-between">
           <Button
             variant="outline"
             onClick={handleCancel}
-            loading={ev.isCancelPending}
-            disabled={ev.isCancelPending}
+            loading={emailVerification.isCancelPending}
+            disabled={emailVerification.isCancelPending}
           >
             {t(`${baseLocale}.cancelButton`)}
           </Button>
           <Button
             onClick={handleConfirm}
-            loading={ev.isConfirmPending}
-            disabled={ev.isExpired || code.join("").length !== 6}
+            loading={emailVerification.isConfirmPending}
+            disabled={emailVerification.isExpired || code.join("").length !== 6}
           >
             {t(`${baseLocale}.verifyButton`)}
           </Button>

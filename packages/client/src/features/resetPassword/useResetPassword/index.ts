@@ -1,79 +1,109 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { PasswordResetStatusDTO } from "@to-do-list/shared";
 import { useCallback, useEffect, useState } from "react";
 import { authService } from "~/shared/api/services/auth";
-import { useTranslation } from "~/shared/hooks";
+import { useNowMs, useTranslation } from "~/shared/hooks";
 import { toast } from "~/shared/ui";
+import { logDevCode, mapCodeErrorKey, mapStartErrorKey } from "./utils";
 
-const baseLocale = "features.passwordReset";
+const baseLocale = "features.resetPassword";
 
-export type PasswordResetStep = "email" | "code" | "password";
+export type ResetPasswordStep = "email" | "code" | "password";
 
-const mapCodeErrorKey = (message?: string) => {
-  switch (message) {
-    case "INVALID_CODE":
-      return "errors.invalidCode";
-    case "TOO_MANY_ATTEMPTS":
-      return "errors.tooManyAttempts";
-    default:
-      return "errors.verifyFailed";
-  }
-};
-
-const logDevCode = (devCode?: string) => {
-  if (devCode) {
-    console.info("[dev] password reset code:", devCode);
-  }
-};
-
-type UsePasswordResetOptions = {
+type UseResetPasswordOptions = {
+  recoveryEmail?: string;
+  onRecoveryEmailChange: (email: string | undefined) => void;
   onDone: () => void;
 };
 
-export function usePasswordReset({ onDone }: UsePasswordResetOptions) {
+export function useResetPassword({
+  recoveryEmail,
+  onRecoveryEmailChange,
+  onDone,
+}: UseResetPasswordOptions) {
   const { t } = useTranslation();
 
-  const [step, setStep] = useState<PasswordResetStep>("email");
-  const [email, setEmail] = useState("");
+  const [serverState, setServerState] =
+    useState<PasswordResetStatusDTO | null>(null);
   const [resetToken, setResetToken] = useState<string | null>(null);
-  const [expiresAt, setExpiresAt] = useState<string | undefined>();
-  const [resendAvailableAt, setResendAvailableAt] = useState<
-    string | undefined
-  >();
-  const [nowTs, setNowTs] = useState(() => Date.now());
   const [codeResetKey, setCodeResetKey] = useState(0);
 
   const resetCodeInput = useCallback(() => {
     setCodeResetKey((key) => key + 1);
   }, []);
 
-  useEffect(() => {
-    const timerId = setInterval(() => setNowTs(Date.now()), 1000);
-    return () => clearInterval(timerId);
-  }, []);
+  const statusQuery = useQuery({
+    queryKey: ["password-reset-status", recoveryEmail],
+    queryFn: () =>
+      authService.getPasswordResetStatus({ email: recoveryEmail!.trim() }),
+    enabled: !!recoveryEmail?.trim() && resetToken === null,
+    refetchOnWindowFocus: false,
+    gcTime: 0,
+  });
 
   useEffect(() => {
-    if (resendAvailableAt) setNowTs(Date.now());
-  }, [resendAvailableAt]);
+    if (statusQuery.data?.success) {
+      setServerState(statusQuery.data.data);
+    }
+  }, [statusQuery.data]);
 
-  const isExpired = !!expiresAt && Date.parse(expiresAt) <= nowTs;
+  useEffect(() => {
+    if (!recoveryEmail?.trim()) {
+      setServerState(null);
+    }
+  }, [recoveryEmail]);
+
+  const status = serverState?.status ?? "none";
+  const email = serverState?.email ?? recoveryEmail?.trim() ?? "";
+  const expiresAt = serverState?.expiresAt;
+  const resendAvailableAt = serverState?.resendAvailableAt;
+
+  const nowMs = useNowMs(
+    status === "pending" || status === "expired",
+    resendAvailableAt,
+  );
+  const nowTs = nowMs ?? Date.now();
+
+  const isExpired =
+    status === "expired" ||
+    (status === "pending" && !!expiresAt && Date.parse(expiresAt) <= nowTs);
 
   const resendSecondsLeft = resendAvailableAt
     ? Math.max(0, Math.floor((Date.parse(resendAvailableAt) - nowTs) / 1000))
     : 0;
 
+  const isStatusLoading =
+    !!recoveryEmail?.trim() &&
+    resetToken === null &&
+    statusQuery.isLoading &&
+    serverState === null;
+
+  const step: ResetPasswordStep | null = resetToken
+    ? "password"
+    : isStatusLoading
+      ? null
+      : status === "none"
+        ? "email"
+        : "code";
+
+  const applyPendingState = useCallback(
+    (data: PasswordResetStatusDTO & { status: "pending" }) => {
+      setServerState(data);
+      onRecoveryEmailChange(data.email);
+    },
+    [onRecoveryEmailChange],
+  );
+
   const startMutation = useMutation({
     mutationFn: authService.startPasswordReset,
     onSuccess: (response) => {
       if (!response.success) {
-        toast.error(t(`${baseLocale}.errors.requestFailed`));
+        toast.error(t(`${baseLocale}.${mapStartErrorKey(response.message)}`));
         return;
       }
-      setEmail(response.data.email);
-      setExpiresAt(response.data.expiresAt);
-      setResendAvailableAt(response.data.resendAvailableAt);
+      applyPendingState(response.data);
       setResetToken(null);
       resetCodeInput();
-      setStep("code");
       logDevCode(response.data.devCode);
     },
     onError: () => {
@@ -85,15 +115,18 @@ export function usePasswordReset({ onDone }: UsePasswordResetOptions) {
     mutationFn: () => authService.resendPasswordReset({ email }),
     onSuccess: (response) => {
       if (!response.success) {
+        if (response.message === "USER_NOT_FOUND") {
+          setServerState({ status: "none" });
+          onRecoveryEmailChange(undefined);
+        }
         const key =
           response.message === "RESEND_TOO_EARLY"
             ? "errors.resendTooEarly"
-            : "errors.requestFailed";
+            : mapStartErrorKey(response.message);
         toast.error(t(`${baseLocale}.${key}`));
         return;
       }
-      setExpiresAt(response.data.expiresAt);
-      setResendAvailableAt(response.data.resendAvailableAt);
+      applyPendingState(response.data);
       resetCodeInput();
       logDevCode(response.data.devCode);
     },
@@ -115,20 +148,25 @@ export function usePasswordReset({ onDone }: UsePasswordResetOptions) {
           const next = (
             response.data as { resendAvailableAt?: string } | undefined
           )?.resendAvailableAt;
-          if (next) setResendAvailableAt(next);
+          if (next) {
+            setServerState((prev) =>
+              prev && prev.status !== "none"
+                ? { ...prev, resendAvailableAt: next }
+                : prev,
+            );
+          }
         }
         return;
       }
 
       if (response.data.status === "expired") {
-        setExpiresAt(new Date(0).toISOString());
+        setServerState({ status: "expired", email });
         resetCodeInput();
         toast.error(t(`${baseLocale}.errors.codeExpired`));
         return;
       }
 
       setResetToken(response.data.resetToken);
-      setStep("password");
     },
     onError: () => {
       resetCodeInput();
@@ -153,7 +191,9 @@ export function usePasswordReset({ onDone }: UsePasswordResetOptions) {
           response.message === "CODE_NOT_FOUND"
         ) {
           toast.error(t(`${baseLocale}.errors.sessionExpired`));
-          setStep("email");
+          setResetToken(null);
+          setServerState({ status: "none" });
+          onRecoveryEmailChange(undefined);
           return;
         }
         toast.error(t(`${baseLocale}.errors.confirmFailed`));
@@ -162,11 +202,13 @@ export function usePasswordReset({ onDone }: UsePasswordResetOptions) {
 
       if (response.data.status === "expired") {
         toast.error(t(`${baseLocale}.errors.sessionExpired`));
-        setStep("email");
+        setResetToken(null);
+        setServerState({ status: "expired", email });
         return;
       }
 
       toast.success(t(`${baseLocale}.success`));
+      onRecoveryEmailChange(undefined);
       onDone();
     },
     onError: () => {
@@ -195,10 +237,11 @@ export function usePasswordReset({ onDone }: UsePasswordResetOptions) {
   );
 
   const backToEmail = useCallback(() => {
-    setStep("email");
     setResetToken(null);
+    setServerState({ status: "none" });
+    onRecoveryEmailChange(undefined);
     resetCodeInput();
-  }, [resetCodeInput]);
+  }, [onRecoveryEmailChange, resetCodeInput]);
 
   return {
     step,
@@ -206,6 +249,7 @@ export function usePasswordReset({ onDone }: UsePasswordResetOptions) {
     isExpired,
     resendSecondsLeft,
     canResend: resendSecondsLeft <= 0,
+    isStatusLoading,
     codeResetKey,
     isStartPending: startMutation.isPending,
     isVerifyPending: verifyMutation.isPending,

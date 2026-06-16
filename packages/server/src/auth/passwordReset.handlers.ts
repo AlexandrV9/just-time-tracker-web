@@ -3,12 +3,24 @@ import {
   startPasswordResetSchema,
   verifyPasswordResetSchema,
 } from "@to-do-list/shared";
+import { resolveEmailLang } from "../shared/index.js";
 import { createValidatedHandler } from "../shared/utils/request.js";
 import { passwordResetService } from "./passwordReset.service.js";
+
+const getStatus = createValidatedHandler({
+  parse: (c) => c.req.json(),
+  schema: startPasswordResetSchema,
+  map: (data) => ({ email: data.email }),
+  service: passwordResetService.getStatus,
+});
 
 const start = createValidatedHandler({
   parse: (c) => c.req.json(),
   schema: startPasswordResetSchema,
+  map: (data, c) => ({
+    email: data.email,
+    lang: resolveEmailLang(c.req.header("accept-language")),
+  }),
   service: passwordResetService.start,
 });
 
@@ -21,6 +33,10 @@ const verify = createValidatedHandler({
 const resend = createValidatedHandler({
   parse: (c) => c.req.json(),
   schema: startPasswordResetSchema,
+  map: (data, c) => ({
+    email: data.email,
+    lang: resolveEmailLang(c.req.header("accept-language")),
+  }),
   service: passwordResetService.resend,
 });
 
@@ -31,6 +47,7 @@ const confirm = createValidatedHandler({
 });
 
 export const passwordResetHandlers = {
+  getStatus,
   start,
   verify,
   resend,

@@ -48,6 +48,14 @@ serve(
     port: Number(config.app.serverPort),
   },
   (info) => {
-    console.log(`Server is running on http://localhost:${info.port}`);
+    console.log(
+      `Server is running on http://localhost:${info.port} (NODE_ENV=${config.app.nodeEnv})`,
+    );
+    console.log(`Email transport: ${config.email.transport}`);
+    if (config.email.transport === "console") {
+      console.log(
+        "Verification codes → server log [EmailService:console] + browser DevTools [dev] ...",
+      );
+    }
   },
 );

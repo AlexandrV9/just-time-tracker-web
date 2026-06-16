@@ -1,4 +1,4 @@
-import { setPasswordSchema, updateProfileSchema } from "@to-do-list/shared";
+import { setPasswordSchema, updatePasswordSchema, updateProfileSchema } from "@to-do-list/shared";
 import type { Context } from "hono";
 import type { AuthVariables } from "../shared/auth/auth.variables.js";
 import { getAuthenticatedUserId } from "../shared/auth/with-created-by-id.js";
@@ -50,6 +50,16 @@ export const userHandlers = {
       newPassword: data.newPassword,
     }),
     service: userService.setPassword,
+  }),
+  updatePassword: createValidatedHandler({
+    parse: (c) => c.req.json(),
+    schema: updatePasswordSchema,
+    map: (data, c) => ({
+      userId: getAuthenticatedUserId(c),
+      currentPassword: data.currentPassword,
+      newPassword: data.newPassword,
+    }),
+    service: userService.updatePassword,
   }),
   getAuthProviders,
   unlinkProvider,

@@ -218,12 +218,20 @@ export const setupUsersSchema = async (pool: Pool) => {
 
     CREATE UNIQUE INDEX IF NOT EXISTS idx_password_resets_user_id
       ON password_resets(user_id);
+
+    CREATE TABLE IF NOT EXISTS user_email_daily_sends (
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      day DATE NOT NULL,
+      send_count INT NOT NULL DEFAULT 0,
+      PRIMARY KEY (user_id, day),
+      CONSTRAINT user_email_daily_sends_count_positive CHECK (send_count >= 0)
+    );
   `);
 };
 
 export const resetUsersTables = async (pool: Pool) => {
   await pool.query(
-    `TRUNCATE TABLE password_resets, email_verifications, auth_providers, users RESTART IDENTITY CASCADE`,
+    `TRUNCATE TABLE user_email_daily_sends, password_resets, email_verifications, auth_providers, users RESTART IDENTITY CASCADE`,
   );
 };
 

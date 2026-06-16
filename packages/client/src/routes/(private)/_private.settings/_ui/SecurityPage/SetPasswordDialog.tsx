@@ -1,13 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import {
-  maxLengthPassword,
-  minLengthPassword,
-  passwordSchema,
-} from "@to-do-list/shared";
-import type { TFunction } from "i18next";
 import { useEffect } from "react";
 import z from "zod";
+import {
+  setPasswordFormSchema,
+  updatePasswordDialogLocale,
+} from "~/features/updatePassword/UpdatePasswordDialog/constants";
+import { getTranslatedError } from "~/features/updatePassword/UpdatePasswordDialog/utils";
 import { userApiService } from "~/shared/api/services";
 import { useTranslation } from "~/shared/hooks";
 import {
@@ -22,19 +21,6 @@ import {
   toast,
   useForm,
 } from "~/shared/ui";
-
-const baseLocale = "pages.settings.security.setPasswordDialog";
-const signUpLocale = "features.auth.signUpForm";
-
-const setPasswordFormSchema = z
-  .object({
-    newPassword: passwordSchema,
-    repeatPassword: z.string().min(1, "repeatPassword.error.required"),
-  })
-  .refine((data) => data.newPassword === data.repeatPassword, {
-    message: "passwords.mismatch",
-    path: ["repeatPassword"],
-  });
 
 type SetPasswordFormValues = z.infer<typeof setPasswordFormSchema>;
 
@@ -75,15 +61,15 @@ export function SetPasswordDialog({
     mutationFn: userApiService.setPassword,
     onSuccess: (response) => {
       if (!response.success) {
-        toast.error(t(`${baseLocale}.error`));
+        toast.error(t(`${updatePasswordDialogLocale}.error`));
         return;
       }
-      toast.success(t(`${baseLocale}.success`));
+      toast.success(t(`${updatePasswordDialogLocale}.success`));
       onOpenChange(false);
       onSuccess?.();
     },
     onError: () => {
-      toast.error(t(`${baseLocale}.error`));
+      toast.error(t(`${updatePasswordDialogLocale}.error`));
     },
   });
 
@@ -110,24 +96,28 @@ export function SetPasswordDialog({
             onSubmit={submitHandler}
           >
             <Dialog.Header>
-              <Dialog.Title fontSize="xl">{t(`${baseLocale}.title`)}</Dialog.Title>
+              <Dialog.Title fontSize="xl">
+                {t(`${updatePasswordDialogLocale}.title`)}
+              </Dialog.Title>
             </Dialog.Header>
             <Dialog.Body>
               <Stack.VStack gap={4} align="stretch">
                 <Text fontSize="sm" color="fg.muted">
-                  {t(`${baseLocale}.description`)}
+                  {t(`${updatePasswordDialogLocale}.unlinkDescription`)}
                 </Text>
 
                 <Field.Root invalid={!!errors.newPassword}>
                   <Field.Label color="fg">
-                    {t(`${signUpLocale}.passwordInput.label`)}
+                    {t(`${updatePasswordDialogLocale}.passwordInput.label`)}
                   </Field.Label>
                   <Input.Password
                     color="fg"
                     truncate
                     autoComplete="new-password"
                     paddingRight="52px !important"
-                    placeholder={t(`${signUpLocale}.passwordInput.placeholder`)}
+                    placeholder={t(
+                      `${updatePasswordDialogLocale}.passwordInput.placeholder`,
+                    )}
                     {...register("newPassword")}
                   />
                   <Field.ErrorText color="fg.error">
@@ -137,15 +127,17 @@ export function SetPasswordDialog({
 
                 <Field.Root invalid={!!errors.repeatPassword}>
                   <Field.Label color="fg">
-                    {t(`${signUpLocale}.repeatPasswordInput.label`)}
+                    {t(
+                      `${updatePasswordDialogLocale}.repeatPasswordInput.label`,
+                    )}
                   </Field.Label>
                   <Input.Password
                     color="fg"
                     truncate
+                    showVisibilityButton={false}
                     autoComplete="new-password"
-                    paddingRight="52px !important"
                     placeholder={t(
-                      `${signUpLocale}.repeatPasswordInput.placeholder`,
+                      `${updatePasswordDialogLocale}.repeatPasswordInput.placeholder`,
                     )}
                     {...register("repeatPassword")}
                   />
@@ -166,10 +158,10 @@ export function SetPasswordDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isPending}
               >
-                {t(`${baseLocale}.cancelButton`)}
+                {t(`${updatePasswordDialogLocale}.cancelButton`)}
               </Button>
               <Button type="submit" loading={isPending}>
-                {t(`${baseLocale}.submitButton`)}
+                {t(`${updatePasswordDialogLocale}.submitButton`)}
               </Button>
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild>
@@ -180,32 +172,4 @@ export function SetPasswordDialog({
       </Portal>
     </Dialog.Root>
   );
-}
-
-function getTranslatedError(
-  t: TFunction<"translation", undefined>,
-  errorMessage: string | undefined,
-) {
-  if (!errorMessage) return undefined;
-
-  switch (errorMessage) {
-    case "password.error.minLength":
-      return t(`${signUpLocale}.passwordInput.errors.minLength`, {
-        count: minLengthPassword,
-      });
-    case "password.error.maxLength":
-      return t(`${signUpLocale}.passwordInput.errors.maxLength`, {
-        count: maxLengthPassword,
-      });
-    case "password.error.noLetter":
-      return t(`${signUpLocale}.passwordInput.errors.noLetter`);
-    case "password.error.noDigit":
-      return t(`${signUpLocale}.passwordInput.errors.noDigit`);
-    case "passwords.mismatch":
-      return t(`${signUpLocale}.repeatPasswordInput.errors.mismatch`);
-    case "repeatPassword.error.required":
-      return t(`${signUpLocale}.repeatPasswordInput.errors.required`);
-    default:
-      return undefined;
-  }
 }

@@ -79,6 +79,15 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_password_resets_user_id
 CREATE INDEX IF NOT EXISTS idx_password_resets_expires_at
   ON password_resets(expires_at);
 
+-- Daily per-user email send counter (verification + password reset)
+CREATE TABLE IF NOT EXISTS user_email_daily_sends (
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day DATE NOT NULL,
+  send_count INT NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, day),
+  CONSTRAINT user_email_daily_sends_count_positive CHECK (send_count >= 0)
+);
+
 -- activities
 CREATE TABLE IF NOT EXISTS activities (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

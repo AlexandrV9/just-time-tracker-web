@@ -17,14 +17,15 @@ import {
   Group,
   Input,
   PinInput,
+  Skeleton,
   Span,
   Stack,
   Text,
   useForm,
 } from "~/shared/ui";
-import { usePasswordReset } from "../../usePasswordReset";
+import { useResetPassword } from "../../useResetPassword";
 
-const baseLocale = "features.passwordReset";
+const baseLocale = "features.resetPassword";
 const signUpLocale = "features.auth.signUpForm";
 
 type EmailFormValues = { email: string };
@@ -41,21 +42,39 @@ const passwordFormSchema = z
 
 type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
-export function RecoverAccountForm() {
+type ResetPasswordFormProps = {
+  recoveryEmail?: string;
+  onRecoveryEmailChange: (email: string | undefined) => void;
+};
+
+export function ResetPasswordForm({
+  recoveryEmail,
+  onRecoveryEmailChange,
+}: ResetPasswordFormProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const goToSignIn = useCallback(() => navigate({ to: "/signin" }), [navigate]);
 
-  const pr = usePasswordReset({ onDone: goToSignIn });
+  const resetPassword = useResetPassword({
+    recoveryEmail,
+    onRecoveryEmailChange,
+    onDone: goToSignIn,
+  });
 
   const [code, setCode] = useState<string[]>([]);
 
   const emailForm = useForm<EmailFormValues>({
     resolver: zodResolver(startPasswordResetSchema),
     mode: "onBlur",
-    defaultValues: { email: "" },
+    defaultValues: { email: recoveryEmail ?? "" },
   });
+
+  useEffect(() => {
+    if (recoveryEmail) {
+      emailForm.reset({ email: recoveryEmail });
+    }
+  }, [recoveryEmail, emailForm]);
 
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),
@@ -65,25 +84,25 @@ export function RecoverAccountForm() {
 
   useEffect(() => {
     setCode([]);
-  }, [pr.codeResetKey]);
+  }, [resetPassword.codeResetKey]);
 
   const handleStart = useCallback(async () => {
     const valid = await emailForm.trigger("email");
     if (!valid) return;
-    pr.start(emailForm.getValues("email").trim());
-  }, [emailForm, pr]);
+    resetPassword.start(emailForm.getValues("email").trim());
+  }, [emailForm, resetPassword]);
 
   const handleVerify = useCallback(() => {
     const parsed = verifyPasswordResetSchema.safeParse({
-      email: pr.email,
+      email: resetPassword.email,
       code: code.join(""),
     });
     if (!parsed.success) return;
-    pr.verify(parsed.data.code);
-  }, [code, pr]);
+    resetPassword.verify(parsed.data.code);
+  }, [code, resetPassword]);
 
   const handleConfirm = passwordForm.handleSubmit((data) => {
-    pr.confirm(data.newPassword);
+    resetPassword.confirm(data.newPassword);
   });
 
   const getEmailErrorMessage = (message?: string) => {
@@ -115,7 +134,7 @@ export function RecoverAccountForm() {
         <Button variant="outline" onClick={goToSignIn}>
           {t(`${baseLocale}.backButton`)}
         </Button>
-        <Button onClick={handleStart} loading={pr.isStartPending}>
+        <Button onClick={handleStart} loading={resetPassword.isStartPending}>
           {t(`${baseLocale}.sendCodeButton`)}
         </Button>
       </ButtonGroup>
@@ -125,16 +144,18 @@ export function RecoverAccountForm() {
   const renderCodeStep = () => (
     <>
       <Text color="fg.muted" textStyle="sm">
-        {pr.isExpired
+        {resetPassword.isExpired
           ? t(`${baseLocale}.expiredDescription`)
-          : t(`${baseLocale}.enterCodeDescription`, { email: pr.email })}
+          : t(`${baseLocale}.enterCodeDescription`, {
+              email: resetPassword.email,
+            })}
       </Text>
 
       <Stack.VStack gap="1rem">
         <PinInput.Root
           count={6}
           size="md"
-          disabled={pr.isExpired}
+          disabled={resetPassword.isExpired}
           value={Array.from({ length: 6 }, (_, i) => code[i] ?? "")}
           onValueChange={(details) => setCode(details.value)}
           otp
@@ -155,17 +176,21 @@ export function RecoverAccountForm() {
           </PinInput.Control>
         </PinInput.Root>
 
-        {!pr.isExpired && pr.resendSecondsLeft > 0 ? (
+        {!resetPassword.isExpired && resetPassword.resendSecondsLeft > 0 ? (
           <Text color="fg.muted" textStyle="sm">
-            {t(`${baseLocale}.resendIn`, { seconds: pr.resendSecondsLeft })}
+            {t(`${baseLocale}.resendIn`, {
+              seconds: resetPassword.resendSecondsLeft,
+            })}
           </Text>
         ) : (
           <Button
             variant="ghost"
             size="sm"
-            onClick={pr.resend}
-            disabled={!pr.canResend || pr.isResendPending}
-            loading={pr.isResendPending}
+            onClick={resetPassword.resend}
+            disabled={
+              !resetPassword.canResend || resetPassword.isResendPending
+            }
+            loading={resetPassword.isResendPending}
           >
             {t(`${baseLocale}.resendButton`)}
           </Button>
@@ -173,13 +198,15 @@ export function RecoverAccountForm() {
       </Stack.VStack>
 
       <ButtonGroup justify="space-between">
-        <Button variant="outline" onClick={pr.backToEmail}>
+        <Button variant="outline" disabled>
           {t(`${baseLocale}.backButton`)}
         </Button>
         <Button
           onClick={handleVerify}
-          loading={pr.isVerifyPending}
-          disabled={pr.isExpired || code.join("").length !== 6}
+          loading={resetPassword.isVerifyPending}
+          disabled={
+            resetPassword.isExpired || code.join("").length !== 6
+          }
         >
           {t(`${baseLocale}.verifyButton`)}
         </Button>
@@ -203,7 +230,10 @@ export function RecoverAccountForm() {
             {...passwordForm.register("newPassword")}
           />
           <Field.ErrorText>
-            {getPasswordError(t, passwordForm.formState.errors.newPassword?.message)}
+            {getPasswordError(
+              t,
+              passwordForm.formState.errors.newPassword?.message,
+            )}
           </Field.ErrorText>
         </Field.Root>
 
@@ -211,7 +241,7 @@ export function RecoverAccountForm() {
           <Field.Label>{t(`${baseLocale}.repeatPasswordLabel`)}</Field.Label>
           <Input.Password
             autoComplete="new-password"
-            paddingRight="52px !important"
+            showVisibilityButton={false}
             placeholder={t(`${baseLocale}.repeatPasswordPlaceholder`)}
             {...passwordForm.register("repeatPassword")}
           />
@@ -223,7 +253,7 @@ export function RecoverAccountForm() {
           </Field.ErrorText>
         </Field.Root>
 
-        <Button type="submit" loading={pr.isConfirmPending}>
+        <Button type="submit" loading={resetPassword.isConfirmPending}>
           {t(`${baseLocale}.submitButton`)}
         </Button>
       </Stack.VStack>
@@ -243,9 +273,18 @@ export function RecoverAccountForm() {
         <Text as="h1" textStyle="2xl" fontWeight="semibold">
           {t(`${baseLocale}.title`)}
         </Text>
-        {pr.step === "email" && renderEmailStep()}
-        {pr.step === "code" && renderCodeStep()}
-        {pr.step === "password" && renderPasswordStep()}
+        {resetPassword.isStatusLoading ? (
+          <Stack.VStack align="stretch" gap={4}>
+            <Skeleton height="5" />
+            <Skeleton height="10" />
+          </Stack.VStack>
+        ) : (
+          <>
+            {resetPassword.step === "email" && renderEmailStep()}
+            {resetPassword.step === "code" && renderCodeStep()}
+            {resetPassword.step === "password" && renderPasswordStep()}
+          </>
+        )}
       </Stack.VStack>
     </Box>
   );

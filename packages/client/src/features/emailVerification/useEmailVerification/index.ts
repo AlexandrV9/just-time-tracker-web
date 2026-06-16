@@ -2,41 +2,14 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import type { EmailVerificationStateDTO } from "@to-do-list/shared";
 import { useCallback, useEffect, useState } from "react";
 import { authActions } from "~/features/auth";
-import { userApiService } from "~/shared/api/services";
-import { useTranslation } from "~/shared/hooks";
+import { emailVerificationApiService } from "~/shared/api/services";
+import { useNowMs, useTranslation } from "~/shared/hooks";
 import { toast } from "~/shared/ui";
+import { mapConfirmErrorKey, mapRequestErrorKey } from "./constants";
 
 const baseLocale = "features.emailVerification";
 
 export type EmailVerificationStep = "email" | "code";
-
-const mapRequestErrorKey = (message?: string) => {
-  switch (message) {
-    case "EMAIL_ALREADY_EXISTS":
-      return "errors.emailAlreadyExists";
-    case "RESEND_TOO_EARLY":
-      return "errors.resendTooEarly";
-    case "CODE_NOT_FOUND":
-      return "errors.codeNotFound";
-    default:
-      return "errors.requestFailed";
-  }
-};
-
-const mapConfirmErrorKey = (message?: string) => {
-  switch (message) {
-    case "INVALID_CODE":
-      return "errors.invalidCode";
-    case "TOO_MANY_ATTEMPTS":
-      return "errors.tooManyAttempts";
-    case "CODE_NOT_FOUND":
-      return "errors.codeNotFound";
-    case "EMAIL_ALREADY_EXISTS":
-      return "errors.emailAlreadyExists";
-    default:
-      return "errors.verifyFailed";
-  }
-};
 
 const logDevCode = (devCode?: string) => {
   if (devCode) {
@@ -57,7 +30,10 @@ export function useEmailVerification({
 
   const [serverState, setServerState] =
     useState<EmailVerificationStateDTO | null>(null);
-  const [nowTs, setNowTs] = useState(() => Date.now());
+
+  const nowMs = useNowMs(enabled, serverState?.resendAvailableAt);
+  const nowTs = nowMs ?? Date.now();
+
   const [codeResetKey, setCodeResetKey] = useState(0);
 
   const resetCodeInput = useCallback(() => {
@@ -66,7 +42,7 @@ export function useEmailVerification({
 
   const statusQuery = useQuery({
     queryKey: ["email-verification-status"],
-    queryFn: () => userApiService.getEmailVerificationStatus(),
+    queryFn: () => emailVerificationApiService.getStatus(),
     enabled,
     refetchOnWindowFocus: false,
     gcTime: 0,
@@ -84,23 +60,6 @@ export function useEmailVerification({
     }
   }, [enabled]);
 
-  useEffect(() => {
-    if (!enabled) return;
-
-    // Re-sync immediately so a reopened dialog doesn't show a stale frozen
-    // countdown for one tick before the interval catches up.
-    setNowTs(Date.now());
-
-    const timerId = setInterval(() => setNowTs(Date.now()), 1000);
-    return () => clearInterval(timerId);
-  }, [enabled]);
-
-  useEffect(() => {
-    if (serverState?.resendAvailableAt) {
-      setNowTs(Date.now());
-    }
-  }, [serverState?.resendAvailableAt]);
-
   const status = serverState?.status ?? "none";
   const pendingEmail = serverState?.email ?? "";
   const expiresAt = serverState?.expiresAt;
@@ -114,7 +73,8 @@ export function useEmailVerification({
     ? Math.max(0, Math.floor((Date.parse(resendAvailableAt) - nowTs) / 1000))
     : 0;
 
-  const isStatusLoading = enabled && statusQuery.isLoading && serverState === null;
+  const isStatusLoading =
+    enabled && statusQuery.isLoading && serverState === null;
 
   const step: EmailVerificationStep | null = isStatusLoading
     ? null
@@ -123,7 +83,7 @@ export function useEmailVerification({
       : "code";
 
   const startMutation = useMutation({
-    mutationFn: userApiService.startEmailVerification,
+    mutationFn: emailVerificationApiService.start,
     onSuccess: (response) => {
       if (!response.success) {
         toast.error(t(`${baseLocale}.${mapRequestErrorKey(response.message)}`));
@@ -139,7 +99,7 @@ export function useEmailVerification({
   });
 
   const resendMutation = useMutation({
-    mutationFn: () => userApiService.resendEmailVerification(),
+    mutationFn: () => emailVerificationApiService.resend(),
     onSuccess: (response) => {
       if (!response.success) {
         toast.error(t(`${baseLocale}.${mapRequestErrorKey(response.message)}`));
@@ -155,7 +115,7 @@ export function useEmailVerification({
   });
 
   const confirmMutation = useMutation({
-    mutationFn: userApiService.confirmEmailVerification,
+    mutationFn: emailVerificationApiService.confirm,
     onSuccess: (response) => {
       if (!response.success) {
         toast.error(t(`${baseLocale}.${mapConfirmErrorKey(response.message)}`));
@@ -193,6 +153,21 @@ export function useEmailVerification({
     },
   });
 
+  const cancelMutation = useMutation({
+    mutationFn: () => emailVerificationApiService.cancel(),
+    onSuccess: (response) => {
+      if (!response.success) {
+        toast.error(t(`${baseLocale}.errors.requestFailed`));
+        return;
+      }
+      setServerState(response.data);
+      resetCodeInput();
+    },
+    onError: () => {
+      toast.error(t(`${baseLocale}.errors.requestFailed`));
+    },
+  });
+
   const start = useCallback(
     (email: string) => startMutation.mutate({ email }),
     [startMutation],
@@ -207,21 +182,6 @@ export function useEmailVerification({
     if (resendSecondsLeft > 0) return;
     resendMutation.mutate();
   }, [resendMutation, resendSecondsLeft]);
-
-  const cancelMutation = useMutation({
-    mutationFn: () => userApiService.cancelEmailVerification(),
-    onSuccess: (response) => {
-      if (!response.success) {
-        toast.error(t(`${baseLocale}.errors.requestFailed`));
-        return;
-      }
-      setServerState(response.data);
-      resetCodeInput();
-    },
-    onError: () => {
-      toast.error(t(`${baseLocale}.errors.requestFailed`));
-    },
-  });
 
   const cancel = useCallback(
     (afterCancel?: () => void) => {

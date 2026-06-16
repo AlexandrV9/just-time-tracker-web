@@ -1,12 +1,11 @@
-import { useSearch } from "@tanstack/react-router";
-import { SignInByLoginForm, YandexLoginButton } from "~/features/auth";
-import { useTranslation } from "~/shared/hooks";
-import { Box, Flex, Stack, Text } from "~/shared/ui";
-
+// import { useSearch } from "@tanstack/react-router";
+import { SignInByLoginForm } from "~/features/auth";
+// import { useTranslation } from "~/shared/hooks";
+import { Box, Flex, Stack } from "~/shared/ui";
 
 export function SignInPage() {
-  const { t } = useTranslation();
-  const { redirect } = useSearch({ from: "/(auth)/_auth/signin/" });
+  // const { t } = useTranslation();
+  // const { redirect } = useSearch({ from: "/(auth)/_auth/signin/" });
 
   return (
     <Flex
@@ -31,14 +30,14 @@ export function SignInPage() {
       >
         <Stack.VStack gap="1rem">
           <SignInByLoginForm />
-          <Flex align="center" gap="0.75rem">
+          {/* <Flex align="center" gap="0.75rem">
             <Box flex="1" height="1px" bg="border.emphasized" />
             <Text fontSize="sm" color="fg.muted" flexShrink={0}>
               {t("features.auth.yandexLogin.divider")}
             </Text>
             <Box flex="1" height="1px" bg="border.emphasized" />
-          </Flex>
-          <YandexLoginButton redirect={redirect ?? "/"} />
+          </Flex> */}
+          {/* <YandexLoginButton redirect={redirect ?? "/"} /> */}
         </Stack.VStack>
       </Box>
     </Flex>

@@ -1,5 +1,11 @@
 import { randomInt } from "node:crypto";
-import { config, getEmailService, tokenService } from "../shared/index.js";
+import {
+  config,
+  deliverVerificationEmail,
+  shouldExposeDevCode,
+  tokenService,
+  type EmailLang,
+} from "../shared/index.js";
 import type { ErrorResponse, SuccessResponse } from "../shared/types.js";
 import {
   emailVerificationQueries,
@@ -29,20 +35,37 @@ const toPendingState = (row: EmailVerificationRow): PendingState => ({
 });
 
 const withDevCode = (state: PendingState, code: string): PendingState => {
-  if (config.email.transport === "console" && !config.app.isProduction) {
+  if (shouldExposeDevCode()) {
     return { ...state, devCode: code };
   }
   return state;
 };
 
-const sendCode = async (email: string) => {
+const sendCode = async (
+  userId: string,
+  email: string,
+  lang?: EmailLang,
+): Promise<
+  | {
+      code: string;
+      codeHash: string;
+      expiresAt: Date;
+      resendAvailableAt: Date;
+    }
+  | ErrorResponse
+> => {
   const { codeTtlSec, resendCooldownSec } = config.email.verification;
   const code = generateVerificationCode();
   const codeHash = await tokenService.generatePasswordHash(code);
   const expiresAt = new Date(Date.now() + codeTtlSec * 1000);
   const resendAvailableAt = new Date(Date.now() + resendCooldownSec * 1000);
 
-  await getEmailService().sendVerificationCode({ to: email, code });
+  const deliveryError = await deliverVerificationEmail(userId, {
+    to: email,
+    code,
+    lang,
+  });
+  if (deliveryError) return deliveryError;
 
   return { code, codeHash, expiresAt, resendAvailableAt };
 };
@@ -68,19 +91,30 @@ const getStatus = async (input: {
   return { success: true, data: toPendingState(row) };
 };
 
-type StartInput = { userId: string; email: string };
+type StartInput = { userId: string; email: string; lang?: EmailLang };
 
 const start = async (
   input: StartInput,
 ): Promise<SuccessResponse<PendingState> | ErrorResponse> => {
-  const { userId } = input;
+  const { userId, lang } = input;
   const email = normalizeEmail(input.email);
 
   if (await emailVerificationQueries.isEmailTakenByAnotherUser(email, userId)) {
     return { success: false, message: "EMAIL_ALREADY_EXISTS" };
   }
 
-  const { code, codeHash, expiresAt, resendAvailableAt } = await sendCode(email);
+  const existing = await emailVerificationQueries.findByUserId(userId);
+  if (
+    existing &&
+    !isExpired(existing) &&
+    normalizeEmail(existing.newEmail) === email
+  ) {
+    return { success: true, data: toPendingState(existing) };
+  }
+
+  const sent = await sendCode(userId, email, lang);
+  if (!("code" in sent)) return sent;
+  const { code, codeHash, expiresAt, resendAvailableAt } = sent;
 
   const row = await emailVerificationQueries.upsertVerification({
     userId,
@@ -184,10 +218,11 @@ const confirm = async (
 
 const resend = async (input: {
   userId: string;
+  lang?: EmailLang;
 }): Promise<
-  SuccessResponse<PendingState> | ErrorResponse<{ resendAvailableAt: string }>
+  SuccessResponse<PendingState> | ErrorResponse<{ resendAvailableAt: string } | null>
 > => {
-  const { userId } = input;
+  const { userId, lang } = input;
 
   const row = await emailVerificationQueries.findByUserId(userId);
 
@@ -203,9 +238,9 @@ const resend = async (input: {
     };
   }
 
-  const { code, codeHash, expiresAt, resendAvailableAt } = await sendCode(
-    row.newEmail,
-  );
+  const sent = await sendCode(userId, row.newEmail, lang);
+  if (!("code" in sent)) return sent;
+  const { code, codeHash, expiresAt, resendAvailableAt } = sent;
 
   const updated = await emailVerificationQueries.refreshForResend({
     userId,

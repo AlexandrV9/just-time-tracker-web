@@ -3,6 +3,7 @@ import {
   startEmailVerificationSchema,
 } from "@to-do-list/shared";
 import type { Context } from "hono";
+import { resolveEmailLang } from "../shared/index.js";
 import type { AuthVariables } from "../shared/auth/auth.variables.js";
 import { getAuthenticatedUserId } from "../shared/auth/with-created-by-id.js";
 import { createValidatedHandler } from "../shared/utils/request.js";
@@ -16,7 +17,8 @@ const getStatus = async (c: Context<{ Variables: AuthVariables }>) => {
 
 const resend = async (c: Context<{ Variables: AuthVariables }>) => {
   const userId = getAuthenticatedUserId(c);
-  const result = await emailVerificationService.resend({ userId });
+  const lang = resolveEmailLang(c.req.header("accept-language"));
+  const result = await emailVerificationService.resend({ userId, lang });
   return c.json(result);
 };
 
@@ -32,6 +34,7 @@ const start = createValidatedHandler({
   map: (data, c) => ({
     userId: getAuthenticatedUserId(c),
     email: data.email,
+    lang: resolveEmailLang(c.req.header("accept-language")),
   }),
   service: emailVerificationService.start,
 });

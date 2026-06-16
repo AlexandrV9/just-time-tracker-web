@@ -127,8 +127,55 @@ const setPassword = async (
   }
 };
 
+type UpdatePasswordInput = {
+  userId: string;
+  currentPassword: string;
+  newPassword: string;
+};
+
+type UpdatePasswordResponse = SuccessResponse<null> | ErrorResponse;
+
+const updatePassword = async (
+  input: UpdatePasswordInput,
+): Promise<UpdatePasswordResponse> => {
+  const { userId, currentPassword, newPassword } = input;
+
+  try {
+    const existingHash = await authRepository.getUserPasswordHash(userId);
+
+    if (!existingHash) {
+      return { success: false, message: "PASSWORD_NOT_SET" };
+    }
+
+    const isValidCurrent = tokenService.comparePassword(
+      currentPassword,
+      existingHash,
+    );
+    if (!isValidCurrent) {
+      return { success: false, message: "INVALID_CURRENT_PASSWORD" };
+    }
+
+    if (tokenService.comparePassword(newPassword, existingHash)) {
+      return { success: false, message: "SAME_PASSWORD" };
+    }
+
+    const passwordHash = await tokenService.generatePasswordHash(newPassword);
+    const updated = await authRepository.setUserPassword(userId, passwordHash);
+
+    if (!updated) {
+      return { success: false, message: "User not found" };
+    }
+
+    return { success: true, data: null };
+  } catch (error) {
+    console.error("Update password error:", error);
+    return { success: false, message: "Internal server error" };
+  }
+};
+
 export const userService = {
   updateProfile,
   unlinkProvider,
   setPassword,
+  updatePassword,
 };

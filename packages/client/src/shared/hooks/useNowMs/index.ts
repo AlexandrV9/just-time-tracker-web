@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export function useNowMs(enabled: boolean): number | null {
+export function useNowMs(enabled: boolean, syncKey?: unknown): number | null {
   const [nowMs, setNowMs] = useState<number | null>(null);
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export function useNowMs(enabled: boolean): number | null {
     const intervalId = setInterval(() => setNowMs(Date.now()), 1000);
 
     return () => clearInterval(intervalId);
-  }, [enabled]);
+  }, [enabled, syncKey]);
 
   return enabled ? nowMs : null;
 }

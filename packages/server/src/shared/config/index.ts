@@ -61,17 +61,19 @@ export const config = {
   email: {
     transport: process.env.EMAIL_TRANSPORT || "console",
     from: process.env.EMAIL_FROM || "noreply@localhost",
+    fromName: process.env.EMAIL_FROM_NAME || "Just Time Tracker",
     smtp: {
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT ?? 587),
       user: process.env.SMTP_USER,
       password: process.env.SMTP_PASSWORD,
-      secure: process.env.SMTP_SECURE === "true",
     },
     verification: {
       codeTtlSec: Number(process.env.EMAIL_CODE_TTL_SEC ?? 600),
       maxAttempts: Number(process.env.EMAIL_CODE_MAX_ATTEMPTS ?? 5),
       resendCooldownSec: Number(process.env.EMAIL_CODE_RESEND_COOLDOWN_SEC ?? 60),
     },
+    /** Max verification/reset emails per user per UTC day. 0 = unlimited. */
+    dailyLimitPerUser: Number(process.env.EMAIL_DAILY_LIMIT_PER_USER ?? 4),
   },
 } as const;

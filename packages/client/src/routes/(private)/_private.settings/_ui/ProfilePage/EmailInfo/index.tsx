@@ -67,6 +67,7 @@ export const EmailInfo = () => {
       <EmailVerificationDialog
         dialog={updateUserEmailDialog}
         initialEmail={user?.email ?? ""}
+        currentEmail={user?.email ?? ""}
       />
     </>
   );

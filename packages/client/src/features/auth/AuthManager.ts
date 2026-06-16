@@ -12,6 +12,10 @@ class AuthManager {
       const accessToken = tokenManager.getAccessToken();
       const tokenUserId = accessToken ? getJwtUserId(accessToken) : null;
 
+      // Временный migration guard:
+      // старые токены содержат numeric id,
+      // новые токены должны содержать UUID.
+      // TODO: удалить после migration.
       if (tokenUserId && !isUuid(tokenUserId)) {
         tokenManager.removeAccessToken();
         await authService.signOut().catch(() => undefined);

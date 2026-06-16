@@ -7,7 +7,7 @@ import {
   Flex,
   Link,
   List,
-  SafeLockIcon,
+  // SafeLockIcon,
   Text,
   UserCircleIcon,
 } from "~/shared/ui";
@@ -62,11 +62,11 @@ export const AccountSettings = () => {
           icon={<UserCircleIcon />}
           label={t("widgets.accountSettings.options.profile")}
         />
-        <SettingsLink
+        {/* <SettingsLink
           to="/settings/security"
           icon={<SafeLockIcon />}
           label={t("widgets.accountSettings.options.security")}
-        />
+        /> */}
       </List.Root>
     </Box>
   );

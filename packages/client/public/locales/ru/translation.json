@@ -103,6 +103,10 @@
           "placeholder": "Введите email",
           "emptyPlaceholder": "Email не добавлен"
         },
+        "passwordInput": {
+          "label": "Пароль",
+          "placeholder": "••••••••••••••••"
+        },
         "loginInput": {
           "label": "Логин",
           "placeholder": "Введите логин",
@@ -146,14 +150,6 @@
               "default": "Не удалось привязать Яндекс. Попробуйте снова."
             }
           }
-        },
-        "setPasswordDialog": {
-          "title": "Задайте пароль",
-          "description": "Чтобы отвязать этот способ входа, сначала задайте пароль для аккаунта, чтобы вы могли продолжить вход.",
-          "submitButton": "Сохранить пароль",
-          "cancelButton": "Отмена",
-          "success": "Пароль установлен",
-          "error": "Не удалось установить пароль"
         },
         "errorDialog": {
           "title": "Не удалось выполнить",
@@ -445,6 +441,7 @@
       "verified": "Email подтверждён",
       "errors": {
         "emailInvalid": "Введите корректный email",
+        "sameEmail": "Укажите email, отличный от текущего",
         "emailAlreadyExists": "Этот email уже используется",
         "requestFailed": "Не удалось отправить код",
         "invalidCode": "Неверный код",
@@ -452,10 +449,56 @@
         "tooManyAttempts": "Слишком много попыток. Запросите новый код",
         "verifyFailed": "Не удалось подтвердить email",
         "resendTooEarly": "Подождите перед повторной отправкой",
-        "codeNotFound": "Нет активной заявки. Начните заново"
+        "codeNotFound": "Нет активной заявки. Начните заново",
+        "dailyLimit": "Достигнут дневной лимит писем. Попробуйте завтра"
       }
     },
-    "passwordReset": {
+    "updatePassword": {
+      "dialog": {
+        "title": "Задайте пароль",
+        "description": "Задайте пароль для входа по логину.",
+        "changeTitle": "Сменить пароль",
+        "changeDescription": "Введите текущий пароль и придумайте новый.",
+        "unlinkDescription": "Чтобы отвязать этот способ входа, сначала задайте пароль для аккаунта, чтобы вы могли продолжить вход.",
+        "submitButton": "Сохранить пароль",
+        "cancelButton": "Отмена",
+        "success": "Пароль установлен",
+        "error": "Не удалось установить пароль",
+        "changeSuccess": "Пароль изменён",
+        "changeError": "Не удалось изменить пароль",
+        "errors": {
+          "invalidCurrentPassword": "Неверный текущий пароль",
+          "samePassword": "Выберите другой пароль",
+          "passwordNotSet": "Пароль ещё не установлен"
+        },
+        "currentPasswordInput": {
+          "label": "Текущий пароль",
+          "placeholder": "Введите текущий пароль",
+          "errors": {
+            "required": "Поле обязательно"
+          }
+        },
+        "passwordInput": {
+          "label": "Пароль",
+          "placeholder": "Придумайте надежный пароль",
+          "errors": {
+            "minLength": "Минимум {{count}} символов. Например: MyPass1",
+            "maxLength": "Максимум {{count}} символов. Например: MyPass1",
+            "noLetter": "Пароль должен содержать хотя бы одну букву. Например: MyPass1",
+            "noDigit": "Пароль должен содержать хотя бы одну цифру. Например: MyPass1"
+          }
+        },
+        "repeatPasswordInput": {
+          "label": "Повторите пароль",
+          "placeholder": "Повторите новый пароль",
+          "errors": {
+            "mismatch": "Пароли не совпадают",
+            "required": "Поле обязательно"
+          }
+        }
+      }
+    },
+    "resetPassword": {
       "title": "Восстановление аккаунта",
       "emailDescription": "Введите email, привязанный к аккаунту. Мы отправим 6-значный код.",
       "emailLabel": "Email",
@@ -476,6 +519,8 @@
       "success": "Пароль изменён. Войдите с новым паролем.",
       "errors": {
         "emailInvalid": "Введите корректный email",
+        "userNotFound": "Пользователя с такой почтой не существует",
+        "dailyLimit": "Достигнут дневной лимит писем. Попробуйте завтра",
         "requestFailed": "Не удалось отправить код",
         "invalidCode": "Неверный код",
         "codeExpired": "Срок действия кода истёк. Запросите новый",

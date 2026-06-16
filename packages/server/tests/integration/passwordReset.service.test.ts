@@ -46,6 +46,29 @@ describe("password reset service", () => {
     return result.data.devCode as string;
   };
 
+  describe("getStatus", () => {
+    it("returns none when there is no active reset request", async () => {
+      const result = await passwordResetService.getStatus({ email: EMAIL });
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.status).toBe("none");
+    });
+
+    it("returns pending state with server timestamps after start", async () => {
+      const started = await passwordResetService.start({ email: EMAIL });
+      expect(started.success).toBe(true);
+      if (!started.success) return;
+
+      const result = await passwordResetService.getStatus({ email: EMAIL });
+      expect(result.success).toBe(true);
+      if (!result.success || result.data.status !== "pending") return;
+
+      expect(result.data.email).toBe(EMAIL);
+      expect(result.data.expiresAt).toBe(started.data.expiresAt);
+      expect(result.data.resendAvailableAt).toBe(started.data.resendAvailableAt);
+    });
+  });
+
   describe("start", () => {
     it("creates a reset request and returns a dev code for an existing email", async () => {
       await startAndGetCode();
@@ -57,15 +80,14 @@ describe("password reset service", () => {
       expect(rows).toHaveLength(1);
     });
 
-    it("responds success without creating a row for an unknown email", async () => {
+    it("returns USER_NOT_FOUND for an unknown email", async () => {
       const result = await passwordResetService.start({
         email: "ghost@example.com",
       });
 
-      expect(result.success).toBe(true);
-      if (!result.success) return;
-      expect(result.data.status).toBe("pending");
-      expect(result.data.devCode).toBeUndefined();
+      expect(result.success).toBe(false);
+      if (result.success) return;
+      expect(result.message).toBe("USER_NOT_FOUND");
 
       const { rows } = await testDb.pool.query(
         `SELECT COUNT(*) FROM password_resets`,
@@ -237,5 +259,101 @@ describe("password reset service", () => {
       [userId],
     );
     expect(await bcrypt.compare(NEW_PASSWORD, rows[0].password_hash)).toBe(true);
+  });
+
+  it("returns EMAIL_DAILY_LIMIT after exceeding the daily send cap", async () => {
+    const { config } = await import("../../src/shared/config/index.js");
+    const limit = config.email.dailyLimitPerUser;
+    if (limit <= 0) return;
+
+    const day = new Date().toISOString().slice(0, 10);
+    await testDb.pool.query(
+      `INSERT INTO user_email_daily_sends (user_id, day, send_count)
+       VALUES ($1, $2::date, $3)`,
+      [userId, day, limit],
+    );
+
+    const result = await passwordResetService.start({ email: EMAIL });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.message).toBe("EMAIL_DAILY_LIMIT");
+  });
+
+  it("returns pending on start without sending when active reset already exists", async () => {
+    await startAndGetCode();
+
+    const { rows: before } = await testDb.pool.query(
+      `SELECT send_count FROM user_email_daily_sends WHERE user_id = $1`,
+      [userId],
+    );
+
+    const result = await passwordResetService.start({ email: EMAIL });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.status).toBe("pending");
+
+    const { rows: after } = await testDb.pool.query(
+      `SELECT send_count FROM user_email_daily_sends WHERE user_id = $1`,
+      [userId],
+    );
+    expect(after[0]?.send_count).toBe(before[0]?.send_count);
+  });
+
+  it("returns pending on start when daily cap is reached but reset is still active", async () => {
+    await startAndGetCode();
+
+    const { config } = await import("../../src/shared/config/index.js");
+    const limit = config.email.dailyLimitPerUser;
+    if (limit <= 0) return;
+
+    const day = new Date().toISOString().slice(0, 10);
+    await testDb.pool.query(
+      `UPDATE user_email_daily_sends
+       SET send_count = $3
+       WHERE user_id = $1 AND day = $2::date`,
+      [userId, day, limit],
+    );
+
+    const result = await passwordResetService.start({ email: EMAIL });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.status).toBe("pending");
+    expect(result.data.email).toBe(EMAIL);
+  });
+
+  it("allows exactly dailyLimitPerUser email sends per day", async () => {
+    const { config } = await import("../../src/shared/config/index.js");
+    const limit = config.email.dailyLimitPerUser;
+    if (limit <= 0) return;
+
+    for (let i = 0; i < limit; i += 1) {
+      if (i === 0) {
+        const result = await passwordResetService.start({ email: EMAIL });
+        expect(result.success).toBe(true);
+        continue;
+      }
+
+      await testDb.pool.query(
+        `UPDATE password_resets
+         SET resend_available_at = NOW() - INTERVAL '1 second'
+         WHERE user_id = $1`,
+        [userId],
+      );
+
+      const result = await passwordResetService.resend({ email: EMAIL });
+      expect(result.success).toBe(true);
+    }
+
+    await testDb.pool.query(
+      `UPDATE password_resets
+       SET resend_available_at = NOW() - INTERVAL '1 second'
+       WHERE user_id = $1`,
+      [userId],
+    );
+
+    const limited = await passwordResetService.resend({ email: EMAIL });
+    expect(limited.success).toBe(false);
+    if (limited.success) return;
+    expect(limited.message).toBe("EMAIL_DAILY_LIMIT");
   });
 });

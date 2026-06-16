@@ -1,5 +1,11 @@
 import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
-import { config, getEmailService, tokenService } from "../shared/index.js";
+import {
+  config,
+  deliverVerificationEmail,
+  shouldExposeDevCode,
+  tokenService,
+  type EmailLang,
+} from "../shared/index.js";
 import type { ErrorResponse, SuccessResponse } from "../shared/types.js";
 import { authRepository } from "./auth.repository.js";
 import {
@@ -80,21 +86,38 @@ const buildPendingState = (
     resendAvailableAt: resendAvailableAt.toISOString(),
   };
 
-  if (code && config.email.transport === "console" && !config.app.isProduction) {
+  if (code && shouldExposeDevCode()) {
     state.devCode = code;
   }
 
   return state;
 };
 
-const sendCode = async (email: string) => {
+const sendCode = async (
+  userId: string,
+  email: string,
+  lang?: EmailLang,
+): Promise<
+  | {
+      code: string;
+      codeHash: string;
+      expiresAt: Date;
+      resendAvailableAt: Date;
+    }
+  | ErrorResponse
+> => {
   const { codeTtlSec, resendCooldownSec } = config.email.verification;
   const code = generateCode();
   const codeHash = await tokenService.generatePasswordHash(code);
   const expiresAt = new Date(Date.now() + codeTtlSec * 1000);
   const resendAvailableAt = new Date(Date.now() + resendCooldownSec * 1000);
 
-  await getEmailService().sendVerificationCode({ to: email, code });
+  const deliveryError = await deliverVerificationEmail(userId, {
+    to: email,
+    code,
+    lang,
+  });
+  if (deliveryError) return deliveryError;
 
   return { code, codeHash, expiresAt, resendAvailableAt };
 };
@@ -105,29 +128,68 @@ const getActiveUserByEmail = async (email: string) => {
   return user as { id: string; password_hash: string | null };
 };
 
+type StatusState =
+  | { status: "none" }
+  | { status: "expired"; email: string }
+  | PendingState;
+
+const getStatus = async (input: {
+  email: string;
+}): Promise<SuccessResponse<StatusState>> => {
+  const email = normalizeEmail(input.email);
+  const user = await getActiveUserByEmail(email);
+
+  if (!user) {
+    return { success: true, data: { status: "none" } };
+  }
+
+  const row = await passwordResetQueries.findByUserId(user.id);
+  if (!row) {
+    return { success: true, data: { status: "none" } };
+  }
+
+  if (isExpired(row)) {
+    return { success: true, data: { status: "expired", email } };
+  }
+
+  return {
+    success: true,
+    data: buildPendingState(
+      email,
+      new Date(row.expiresAt),
+      new Date(row.resendAvailableAt),
+    ),
+  };
+};
+
 // ── start ──────────────────────────────────────────────────────────────────
 
 const start = async (input: {
   email: string;
-}): Promise<SuccessResponse<PendingState>> => {
+  lang?: EmailLang;
+}): Promise<SuccessResponse<PendingState> | ErrorResponse> => {
   const email = normalizeEmail(input.email);
   const user = await getActiveUserByEmail(email);
 
-  // Respond identically whether or not the email belongs to an account, so the
-  // endpoint can't be used to enumerate registered emails.
   if (!user) {
-    const { codeTtlSec, resendCooldownSec } = config.email.verification;
+    return { success: false, message: "USER_NOT_FOUND" };
+  }
+
+  const existing = await passwordResetQueries.findByUserId(user.id);
+  if (existing && !isExpired(existing)) {
     return {
       success: true,
       data: buildPendingState(
         email,
-        new Date(Date.now() + codeTtlSec * 1000),
-        new Date(Date.now() + resendCooldownSec * 1000),
+        new Date(existing.expiresAt),
+        new Date(existing.resendAvailableAt),
       ),
     };
   }
 
-  const { code, codeHash, expiresAt, resendAvailableAt } = await sendCode(email);
+  const sent = await sendCode(user.id, email, input.lang);
+  if (!("code" in sent)) return sent;
+  const { code, codeHash, expiresAt, resendAvailableAt } = sent;
 
   const row = await passwordResetQueries.upsert({
     userId: user.id,
@@ -219,22 +281,15 @@ const verify = async (input: {
 
 const resend = async (input: {
   email: string;
+  lang?: EmailLang;
 }): Promise<
-  SuccessResponse<PendingState> | ErrorResponse<{ resendAvailableAt: string }>
+  SuccessResponse<PendingState> | ErrorResponse<{ resendAvailableAt: string } | null>
 > => {
   const email = normalizeEmail(input.email);
   const user = await getActiveUserByEmail(email);
 
   if (!user) {
-    const { codeTtlSec, resendCooldownSec } = config.email.verification;
-    return {
-      success: true,
-      data: buildPendingState(
-        email,
-        new Date(Date.now() + codeTtlSec * 1000),
-        new Date(Date.now() + resendCooldownSec * 1000),
-      ),
-    };
+    return { success: false, message: "USER_NOT_FOUND" };
   }
 
   const existing = await passwordResetQueries.findByUserId(user.id);
@@ -246,7 +301,9 @@ const resend = async (input: {
     };
   }
 
-  const { code, codeHash, expiresAt, resendAvailableAt } = await sendCode(email);
+  const sent = await sendCode(user.id, email, input.lang);
+  if (!("code" in sent)) return sent;
+  const { code, codeHash, expiresAt, resendAvailableAt } = sent;
 
   const row = existing
     ? await passwordResetQueries.refreshForResend({
@@ -319,6 +376,7 @@ const confirm = async (input: {
 };
 
 export const passwordResetService = {
+  getStatus,
   start,
   verify,
   resend,

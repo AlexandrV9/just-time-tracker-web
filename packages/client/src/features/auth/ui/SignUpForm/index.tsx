@@ -154,8 +154,8 @@ export const SignUpForm = () => {
         <Input.Password
           color="fg"
           truncate
+          showVisibilityButton={false}
           autoComplete="off"
-          paddingRight="52px !important" // TODO: убрать это и сделать иначе
           placeholder={t(`${baseLocale}.repeatPasswordInput.placeholder`)}
           {...register("repeatPassword")}
         />

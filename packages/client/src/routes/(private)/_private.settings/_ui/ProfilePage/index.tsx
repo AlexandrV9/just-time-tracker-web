@@ -2,6 +2,7 @@ import { BackButton, Stack } from "~/shared/ui";
 import { AuthUserInfo, useHeaderLeftContent } from "~/widgets";
 import { EmailInfo } from "./EmailInfo";
 import { MainInfo } from "./MainInfo";
+import { PasswordInfo } from "./PasswordInfo";
 
 export function ProfilePage() {
   useHeaderLeftContent(<BackButton to="/settings" />);
@@ -18,6 +19,7 @@ export function ProfilePage() {
       <AuthUserInfo />
       <MainInfo />
       <EmailInfo />
+      <PasswordInfo />
     </Stack.VStack>
   );
 }

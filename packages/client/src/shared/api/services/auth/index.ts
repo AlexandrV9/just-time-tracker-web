@@ -2,6 +2,7 @@ import type {
   ConfirmPasswordResetDataDTO,
   ConfirmPasswordResetResultDTO,
   PasswordResetStateDTO,
+  PasswordResetStatusDTO,
   StartPasswordResetDataDTO,
   VerifyPasswordResetDataDTO,
   VerifyPasswordResetResultDTO,
@@ -60,6 +61,13 @@ class AuthService {
     return baseApi.get<{ accessToken: string }>(`/api/auth/refresh`, {
       withCredentials: true,
     });
+  }
+
+  getPasswordResetStatus(data: StartPasswordResetDataDTO) {
+    return authApi.post<PasswordResetStatusDTO>(
+      `/api/auth/password-reset/status`,
+      { data },
+    );
   }
 
   startPasswordReset(data: StartPasswordResetDataDTO) {

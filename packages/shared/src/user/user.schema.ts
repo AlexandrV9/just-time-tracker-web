@@ -84,6 +84,13 @@ export const setPasswordSchema = z.object({
 
 export type SetPasswordDataDTO = z.infer<typeof setPasswordSchema>;
 
+export const updatePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "currentPassword.error.required"),
+  newPassword: passwordSchema,
+});
+
+export type UpdatePasswordDataDTO = z.infer<typeof updatePasswordSchema>;
+
 const emailField = z
   .string()
   .trim()
@@ -123,12 +130,21 @@ export type ConfirmPasswordResetDataDTO = z.infer<
   typeof confirmPasswordResetSchema
 >;
 
+export type PasswordResetStatus = "none" | "pending" | "expired";
+
 export type PasswordResetStateDTO = {
   status: "pending";
   email: string;
   expiresAt: string;
   resendAvailableAt: string;
   devCode?: string;
+};
+
+export type PasswordResetStatusDTO = {
+  status: PasswordResetStatus;
+  email?: string;
+  expiresAt?: string;
+  resendAvailableAt?: string;
 };
 
 export type VerifyPasswordResetResultDTO =

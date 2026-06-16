@@ -2,7 +2,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { userApiService } from "~/shared/api/services";
+import {
+  AUTH_PROVIDERS_QUERY_KEY,
+  userApiService,
+} from "~/shared/api/services";
 import { useTranslation } from "~/shared/hooks";
 import {
   Box,
@@ -74,7 +77,7 @@ export const LoginMethods = () => {
   }, [errorParam, linkedParam, navigate, queryClient, t]);
 
   const { data: authProviders, isLoading } = useQuery({
-    queryKey: ["auth-providers"],
+    queryKey: [AUTH_PROVIDERS_QUERY_KEY],
     queryFn: () => userApiService.getAuthProviders(),
     select: (res) => (res.success ? res.data : []),
   });
