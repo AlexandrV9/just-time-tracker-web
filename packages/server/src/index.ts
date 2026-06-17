@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { authMiddleware, authRouter } from "./auth/index.js";
+import { authMiddleware, authRouter, yandexHandlers } from "./auth/index.js";
 import type { AuthVariables } from "./shared/auth/auth.variables.js";
 import { config } from "./shared/index.js";
 import { healthRouter } from "./health/health.routes.js";
@@ -11,6 +11,7 @@ import {
   activitySessionsRouter,
 } from "./activity/index.js";
 import { dayPlanItemsRouter, dayPlansRouter } from "./dayPlan/index.js";
+import { emailVerificationRouter } from "./emailVerification/index.js";
 import { usersRouter } from "./user/index.js";
 
 const app = new Hono();
@@ -37,6 +38,8 @@ protectedRouter.route(
 protectedRouter.route("/day-plans", dayPlansRouter);
 protectedRouter.route("/day-plan-items", dayPlanItemsRouter);
 protectedRouter.route("/users", usersRouter);
+protectedRouter.route("/email-verification", emailVerificationRouter);
+// protectedRouter.post("/auth/yandex/link", yandexHandlers.startLink);
 
 app.route("/", protectedRouter);
 
@@ -46,6 +49,14 @@ serve(
     port: Number(config.app.serverPort),
   },
   (info) => {
-    console.log(`Server is running on http://localhost:${info.port}`);
+    console.log(
+      `Server is running on http://localhost:${info.port} (NODE_ENV=${config.app.nodeEnv})`,
+    );
+    console.log(`Email transport: ${config.email.transport}`);
+    if (config.email.transport === "console") {
+      console.log(
+        "Verification codes → server log [EmailService:console] + browser DevTools [dev] ...",
+      );
+    }
   },
 );

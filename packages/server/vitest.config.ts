@@ -7,5 +7,7 @@ export default defineConfig({
     include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
     testTimeout: 30_000,
     hookTimeout: 30_000,
+    // Integration tests share one DB; parallel files caused truncate/pool races.
+    fileParallelism: false,
   },
 });

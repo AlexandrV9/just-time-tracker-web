@@ -40,6 +40,7 @@ export * from "./Check";
 export * from "./Close";
 export * from "./Warning";
 export * from "./Info";
-export * from "./CheckCircle";
+export * from "./YandexLogo";
+export * from "./Copy";
 
 export * from "./withIconProps";

@@ -1,5 +1,42 @@
 # Changelog
 
+## 1.0.6
+
+### Авторизация
+
+- **Yandex OAuth**: вход и регистрация через Яндекс, привязка/отвязка провайдера в настройках → Безопасность
+- Аккаунт без пароля (только OAuth): можно задать пароль в настройках
+- Страница **Восстановление доступа** (`/recover-account`): сброс пароля по коду из письма
+
+### Email
+
+- **Подтверждение email** при смене почты в профиле и на шаге регистрации (`/signup-email`)
+- Письма с кодом: SMTP (prod) или console (dev), шаблон с логотипом, локализация en / ru / zh (`Accept-Language`)
+- **Дневной лимит писем** на пользователя (`EMAIL_DAILY_LIMIT_PER_USER`, по умолчанию 4) — verification + password reset
+
+### Настройки
+
+- Профиль и безопасность разделены: имя / email / пароль / способы входа
+- Смена пароля (текущий + новый) и первичная установка пароля для OAuth-аккаунтов
+
+### UX
+
+- Восстановление шага «код» после refresh (recover-account): статус с сервера, таймер resend продолжает идти
+- «Назад» на email без повторной отправки письма, пока сессия активна
+- Отмена смены email на первом шаге модалки — сброс pending на сервере и чистая форма
+
+### Backend
+
+- Модули: `emailVerification/`, password reset, Yandex OAuth, email daily limit
+- API: `/email-verification/*`, `/auth/password-reset/*`, `/auth/yandex/*`, `/users/me/password`
+- Миграция **`002_email_auth_verification.sql`**: OAuth-провайдеры, email verification, password resets, счётчик писем
+
+### DevOps
+
+- Новые переменные в `.env.example`: Yandex OAuth, SMTP, `CLIENT_URL`, email limits
+
+---
+
 ## 1.0.5
 
 ### UI
@@ -78,41 +115,7 @@
 - Схема `users`: колонки `email`, `avatar`, unique constraint на `email`
 - Интеграционные тесты для `PATCH /users/me`
 
----
+### Миграция БД (1.0.1)
 
-### Миграция БД (обязательно перед деплоем)
-
-На существующих базах нужно один раз выполнить:
-
-`packages/server/db/migrations/001_add_users_email_avatar.sql`
-
-**1. Скопировать файл миграции на сервер** (с локальной машины):
-
-```bash
-scp packages/server/db/migrations/001_add_users_email_avatar.sql \
-  <USER>@<SERVER>:~/001_add_users_email_avatar.sql
-```
-
-**2. Запустить миграцию**
-
-**Через Docker:**
-
-```bash
-docker exec -i <CONTAINER_NAME> psql -U <DB_USER> -d <DB_NAME> \
-  < ~/001_add_users_email_avatar.sql
-```
-
-**Напрямую через psql** (на сервере):
-
-```bash
-psql -h <DB_HOST> -p <DB_PORT> -U <DB_USER> -d <DB_NAME> \
-  -f ~/001_add_users_email_avatar.sql
-```
-
-**3. Удалить файл миграции с сервера** (на сервере):
-
-```bash
-rm ~/001_add_users_email_avatar.sql
-```
-
-Миграция идемпотентна (`IF NOT EXISTS`) — повторный запуск безопасен.
+На существующих базах нужно один раз выполнить `001_add_users_email_avatar.sql`.  
+Инструкция: [update-deploy.md](update-deploy.md#миграции-на-существующей-бд).

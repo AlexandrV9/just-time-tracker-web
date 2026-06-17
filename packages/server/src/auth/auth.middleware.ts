@@ -2,7 +2,7 @@ import type { MiddlewareHandler } from "hono";
 import { verify } from "hono/jwt";
 import type { AuthJWTPayload } from "../shared/auth/auth.types.js";
 import type { AuthVariables } from "../shared/auth/auth.variables.js";
-import { config } from "../shared/index.js";
+import { config, isUuid } from "../shared/index.js";
 
 export const authMiddleware: MiddlewareHandler<{
   Variables: AuthVariables;
@@ -25,8 +25,14 @@ export const authMiddleware: MiddlewareHandler<{
       config.auth.accessToken.secret
     )) as AuthJWTPayload;
 
+    const userId = String(payload.data.id);
+
+    if (!isUuid(userId)) {
+      return c.json({ message: "Invalid token" }, 401);
+    }
+
     c.set("user", {
-      id: String(payload.data.id),
+      id: userId,
     });
 
     await next();

@@ -1,7 +1,11 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Hono } from "hono";
 import type { TestDatabase } from "../setup/test-db.js";
-import { resetActivitiesTables, startTestDatabase } from "../setup/test-db.js";
+import {
+  releaseTestDatabase,
+  resetActivitiesTables,
+  startTestDatabase,
+} from "../setup/test-db.js";
 import { activitiesRouter } from "../../src/activity/activity.routes.js";
 import { TEST_USER_ID } from "../setup/test-auth.js";
 import type { AuthVariables } from "../../src/shared/auth/auth.variables.js";
@@ -36,7 +40,7 @@ describe("activitiesRouter", () => {
   });
 
   afterAll(async () => {
-    await testDb?.stop();
+    await releaseTestDatabase();
   });
 
   const seedActivity = async (title = "Seed activity") => {

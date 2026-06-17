@@ -2,14 +2,23 @@ import { useCallback } from "react";
 import { ArrowLeftIcon, IconButton } from "../..";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import type { IconButtonProps } from "@chakra-ui/react";
+import type { FileRouteTypes } from "~/routeTree.gen";
 
-export type BackButtonProps = Omit<IconButtonProps, "onClick">;
+export type BackButtonProps = Omit<IconButtonProps, "onClick"> & {
+  /** Explicit back target — use when browser history may contain external OAuth redirects. */
+  to?: FileRouteTypes["to"];
+};
 
-export const BackButton = ({ ...props }: BackButtonProps) => {
+export const BackButton = ({ to, ...props }: BackButtonProps) => {
   const router = useRouter();
   const navigate = useNavigate();
 
   const handleGoBackPage = useCallback(() => {
+    if (to) {
+      navigate({ to });
+      return;
+    }
+
     if (router.history.length > 1) {
       router.history.back();
       return;
@@ -19,7 +28,7 @@ export const BackButton = ({ ...props }: BackButtonProps) => {
       to: "/",
       replace: true,
     });
-  }, [navigate, router.history]);
+  }, [navigate, router.history, to]);
 
   return (
     <IconButton

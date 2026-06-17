@@ -24,7 +24,7 @@ export const App = () => {
       <ThemeProvider>
         <ChakraProvider value={chakraConfig}>
           <RouterProvider />
-          <ToastContainer limit={1} />
+          <ToastContainer limit={3} />
         </ChakraProvider>
       </ThemeProvider>
     </TanstackProvider>

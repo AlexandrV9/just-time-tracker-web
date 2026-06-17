@@ -50,7 +50,7 @@ export const SignUpForm = () => {
         toastId: "success_sign_up",
       });
       reset();
-      navigate({ to: "/signin" });
+      navigate({ to: "/signup-email" });
     },
     onError: () => {
       toast.error(t(`${baseLocale}.errorToast`), {
@@ -154,8 +154,8 @@ export const SignUpForm = () => {
         <Input.Password
           color="fg"
           truncate
+          showVisibilityButton={false}
           autoComplete="off"
-          paddingRight="52px !important" // TODO: убрать это и сделать иначе
           placeholder={t(`${baseLocale}.repeatPasswordInput.placeholder`)}
           {...register("repeatPassword")}
         />
@@ -178,7 +178,7 @@ export const SignUpForm = () => {
           <Text as="span" mr="5px">
             {t(`${baseLocale}.subtitleText`)}
           </Text>
-          <Text asChild color="purple.500" fontWeight="600">
+          <Text asChild color="fg.info" fontWeight="600">
             <Link to="/signin">{t(`${baseLocale}.linkText`)}</Link>
           </Text>
         </Text>
@@ -198,6 +198,14 @@ function getTranslatedError(
       return t(`${baseLocale}.firstNameInput.errors.required`);
     case "login.error.required":
       return t(`${baseLocale}.loginInput.errors.required`);
+    case "login.error.minLength":
+      return t(`${baseLocale}.loginInput.errors.minLength`);
+    case "login.error.maxLength":
+      return t(`${baseLocale}.loginInput.errors.maxLength`);
+    case "login.error.invalidFormat":
+      return t(`${baseLocale}.loginInput.errors.invalidFormat`);
+    case "login.error.isEmail":
+      return t(`${baseLocale}.loginInput.errors.isEmail`);
     case "password.error.minLength":
       return t(`${baseLocale}.passwordInput.errors.minLength`, {
         count: minLengthPassword,

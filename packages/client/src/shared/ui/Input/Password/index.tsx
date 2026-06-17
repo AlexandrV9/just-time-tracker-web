@@ -39,11 +39,14 @@ export interface PasswordVisibilityProps {
    * Custom icons for the visibility toggle button.
    */
   visibilityIcon?: { on: React.ReactNode; off: React.ReactNode };
+  /**
+   * Whether to show the visibility toggle button.
+   */
+  showVisibilityButton?: boolean;
 }
 
 export interface PasswordInputProps
-  extends InputProps,
-    PasswordVisibilityProps {
+  extends InputProps, PasswordVisibilityProps {
   rootProps?: GroupProps;
 }
 
@@ -56,6 +59,7 @@ export const PasswordInput = React.forwardRef<
     defaultVisible,
     visible: visibleProp,
     onVisibleChange,
+    showVisibilityButton = true,
     visibilityIcon = { on: <LuEye />, off: <LuEyeOff /> },
     ...rest
   } = props;
@@ -72,17 +76,19 @@ export const PasswordInput = React.forwardRef<
     <InputGroup
       endElementProps={{ className: styles.endElement }}
       endElement={
-        <VisibilityTrigger
-          disabled={rest.disabled}
-          onPointerDown={(e) => {
-            if (rest.disabled) return;
-            if (e.button !== 0) return;
-            e.preventDefault();
-            setVisible(!visible);
-          }}
-        >
-          {visible ? visibilityIcon.off : visibilityIcon.on}
-        </VisibilityTrigger>
+        showVisibilityButton && (
+          <VisibilityTrigger
+            disabled={rest.disabled}
+            onPointerDown={(e) => {
+              if (rest.disabled) return;
+              if (e.button !== 0) return;
+              e.preventDefault();
+              setVisible(!visible);
+            }}
+          >
+            {visible ? visibilityIcon.off : visibilityIcon.on}
+          </VisibilityTrigger>
+        )
       }
       {...rootProps}
     >

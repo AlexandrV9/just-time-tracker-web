@@ -1,6 +1,18 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
 
-dotenv.config();
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../../../../..",
+);
+
+// Root .env (Yandex, shared secrets) + packages/server/.env (local DB overrides)
+dotenv.config({ path: path.join(repoRoot, ".env") });
+dotenv.config({
+  path: path.join(repoRoot, "packages/server/.env"),
+  override: true,
+});
 
 export const config = {
   app: {
@@ -23,6 +35,14 @@ export const config = {
     },
   },
 
+  yandex: {
+    clientId: process.env.YANDEX_CLIENT_ID!,
+    clientSecret: process.env.YANDEX_CLIENT_SECRET!,
+    redirectUri: process.env.YANDEX_REDIRECT_URI!,
+  },
+
+  clientUrl: process.env.CLIENT_URL || "http://localhost:3000",
+
   db: {
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT),
@@ -36,5 +56,24 @@ export const config = {
       "http://localhost:3000",
       "http://localhost:5173",
     ],
+  },
+
+  email: {
+    transport: process.env.EMAIL_TRANSPORT || "console",
+    from: process.env.EMAIL_FROM || "noreply@localhost",
+    fromName: process.env.EMAIL_FROM_NAME || "Just Time Tracker",
+    smtp: {
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT ?? 587),
+      user: process.env.SMTP_USER,
+      password: process.env.SMTP_PASSWORD,
+    },
+    verification: {
+      codeTtlSec: Number(process.env.EMAIL_CODE_TTL_SEC ?? 600),
+      maxAttempts: Number(process.env.EMAIL_CODE_MAX_ATTEMPTS ?? 5),
+      resendCooldownSec: Number(process.env.EMAIL_CODE_RESEND_COOLDOWN_SEC ?? 60),
+    },
+    /** Max verification/reset emails per user per UTC day. 0 = unlimited. */
+    dailyLimitPerUser: Number(process.env.EMAIL_DAILY_LIMIT_PER_USER ?? 4),
   },
 } as const;

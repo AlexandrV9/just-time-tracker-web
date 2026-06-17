@@ -5,7 +5,7 @@ import type {
   ActivitySessionSegmentDTO,
   StartActivityDataDTO,
 } from "@to-do-list/shared";
-import { useCurrentActivity } from "~/features";
+import { useCurrentActivityStore } from "~/features";
 
 import {
   activityApiService,
@@ -18,7 +18,7 @@ import { getOrCreateClientId } from "~/shared/libs";
 
 export const useStartActivity = () => {
   const queryClient = useQueryClient();
-  const { updateData } = useCurrentActivity();
+  const updateData = useCurrentActivityStore((state) => state.updateData);
 
   return useMutation({
     mutationFn: async (

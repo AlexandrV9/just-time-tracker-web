@@ -1,6 +1,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { TestDatabase } from "../setup/test-db.js";
-import { resetActivitiesTables, startTestDatabase } from "../setup/test-db.js";
+import {
+  releaseTestDatabase,
+  resetActivitiesTables,
+  startTestDatabase,
+} from "../setup/test-db.js";
 
 describe("activityRepository", () => {
   let testDb: TestDatabase;
@@ -14,7 +18,7 @@ describe("activityRepository", () => {
   });
 
   afterAll(async () => {
-    await testDb?.stop();
+    await releaseTestDatabase();
   });
 
   describe("createActivity", () => {
