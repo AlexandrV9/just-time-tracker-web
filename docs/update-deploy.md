@@ -1,14 +1,151 @@
 # Обновление деплоя
 
-Краткая инструкция: как подтянуть новые образы из GHCR после merge в `main`.
+Как подтянуть новую версию после merge в `main`.
 
-Первичный деплой: [deploy.md](deploy.md).
+Первичный деплой с нуля: [deploy.md](deploy.md).
 
 ---
 
-## Когда обновлять
+## Деплой 1.0.6 (Yandex OAuth + email)
 
-После push в `main` GitHub Actions собирает и публикует образы в GHCR:
+Краткий чеклист для обновления **существующего** prod с 1.0.5.
+
+### 1. GitHub — до деплоя
+
+1. Смержить ветку в `main`.
+2. Дождаться зелёного CI (сборка `client` + `server` в GHCR).
+3. В **Settings → Actions → Variables** убедиться, что заданы:
+   - `VITE_APP_URL=https://<ваш-домен>`
+   - `VITE_API_ENDPOINT=https://<ваш-домен>`
+
+### 2. Yandex OAuth (oauth.yandex.ru)
+
+Создать приложение или обновить существующее:
+
+| Поле | Значение |
+|------|----------|
+| Redirect URI | `https://<ваш-домен>/api/auth/yandex/callback` |
+| Права | login:email, login:info |
+
+Сохранить **Client ID** и **Client Secret** — понадобятся в `.env`.
+
+### 3. SMTP (письма с кодами)
+
+Без SMTP коды не уйдут на почту (в prod `EMAIL_TRANSPORT` должен быть `smtp`).
+
+Пример для Yandex:
+
+```env
+EMAIL_TRANSPORT=smtp
+EMAIL_FROM=Имя <noreply@yourdomain.com>
+SMTP_HOST=smtp.yandex.ru
+SMTP_PORT=465
+SMTP_USER=noreply@yourdomain.com
+SMTP_PASSWORD=<пароль-приложения>
+EMAIL_DAILY_LIMIT_PER_USER=4
+```
+
+Опционально:
+
+```env
+EMAIL_CODE_TTL_SEC=600
+EMAIL_CODE_MAX_ATTEMPTS=5
+EMAIL_CODE_RESEND_COOLDOWN_SEC=60
+```
+
+### 4. Обновить `.env` на VPS
+
+SSH на сервер:
+
+```bash
+cd /opt/time-tracker
+nano .env
+```
+
+**Добавить / обновить** (остальное не трогать):
+
+```env
+CLIENT_URL=https://<ваш-домен>
+
+YANDEX_CLIENT_ID=<из oauth.yandex.ru>
+YANDEX_CLIENT_SECRET=<из oauth.yandex.ru>
+YANDEX_REDIRECT_URI=https://<ваш-домен>/api/auth/yandex/callback
+
+EMAIL_TRANSPORT=smtp
+EMAIL_FROM=...
+SMTP_HOST=...
+SMTP_PORT=465
+SMTP_USER=...
+SMTP_PASSWORD=...
+EMAIL_DAILY_LIMIT_PER_USER=4
+```
+
+`ALLOWED_ORIGINS` должен содержать ваш prod-домен (уже должен быть с 1.0.5).
+
+### 5. Миграция БД (обязательно)
+
+На **существующей** базе (не на свежем postgres с пустым volume) один раз:
+
+**С локальной машины** — скопировать файл:
+
+```bash
+scp packages/server/db/migrations/002_email_auth_verification.sql \
+  <USER>@<SERVER>:~/002_email_auth_verification.sql
+```
+
+**На сервере** — выполнить:
+
+```bash
+docker exec -i time-tracker-postgres psql -U postgres -d time_tracker \
+  < ~/002_email_auth_verification.sql
+
+rm ~/002_email_auth_verification.sql
+```
+
+Если контейнер postgres называется иначе — подставьте имя из `docker ps`.
+
+Миграция идемпотентна (`IF NOT EXISTS`) — повторный запуск безопасен.
+
+> Если вы уже накатывали старый `003_user_email_daily_sends.sql` — не страшно, `002` содержит ту же таблицу.
+
+### 6. Подтянуть образы и перезапустить
+
+```bash
+cd /opt/time-tracker
+
+docker compose -f docker-compose.prod.yml --env-file .env pull
+docker compose -f docker-compose.prod.yml --env-file .env up -d
+```
+
+Проверка:
+
+```bash
+docker compose -f docker-compose.prod.yml ps
+curl -s http://localhost/api/health | jq .
+```
+
+### 7. Smoke-тест после 1.0.6
+
+| # | Действие | Ожидание |
+|---|----------|----------|
+| 1 | `curl https://<домен>/api/health` | `status: OK` |
+| 2 | Вход через Yandex | Редирект обратно, пользователь в приложении |
+| 3 | Настройки → Безопасность → Yandex | Привязка / отвязка |
+| 4 | Настройки → смена email | Письмо с кодом, подтверждение |
+| 5 | Sign out → «Забыли пароль?» | Код на почту, новый пароль |
+| 6 | OAuth-аккаунт без пароля → задать пароль | Пароль сохраняется |
+
+Логи при проблемах с почтой:
+
+```bash
+docker compose -f docker-compose.prod.yml logs -f server | grep -i email
+```
+
+---
+
+## Когда обновлять (любая версия)
+
+После push в `main` GitHub Actions публикует образы:
 
 - `ghcr.io/alexandrv9/time-tracker/client:latest`
 - `ghcr.io/alexandrv9/time-tracker/server:latest`
@@ -18,8 +155,6 @@
 ---
 
 ## Обновить всё
-
-SSH на VPS:
 
 ```bash
 cd /opt/time-tracker
@@ -39,8 +174,6 @@ curl http://localhost/api/health
 
 ## Обновить только client
 
-Если менялся только frontend:
-
 ```bash
 cd /opt/time-tracker
 
@@ -51,8 +184,6 @@ docker compose -f docker-compose.prod.yml --env-file .env up -d client
 ---
 
 ## Обновить только server
-
-Если менялся только backend:
 
 ```bash
 cd /opt/time-tracker
@@ -67,24 +198,17 @@ docker compose -f docker-compose.prod.yml --env-file .env up -d server
 
 `VITE_APP_URL` и `VITE_API_ENDPOINT` зашиваются в client **при сборке в CI**.
 
-Если вы меняли эти Variables в GitHub:
-
-1. Убедитесь, что после изменения был новый push в `main`
-2. Обновите **client** на VPS (см. выше)
-
-Без пересборки client в CI старые URL останутся в статике.
+Если меняли Variables в GitHub — нужен новый push в `main` и `pull client` на VPS.
 
 ---
 
 ## Конкретная версия (по SHA)
 
-В `.env` на VPS:
+В `.env`:
 
 ```env
 IMAGE_TAG=<commit-sha>
 ```
-
-Затем:
 
 ```bash
 cd /opt/time-tracker
@@ -92,19 +216,43 @@ docker compose -f docker-compose.prod.yml --env-file .env pull
 docker compose -f docker-compose.prod.yml --env-file .env up -d
 ```
 
-Чтобы вернуться на `latest`, снова поставьте `IMAGE_TAG=latest`.
+Вернуться на `latest`: `IMAGE_TAG=latest`.
+
+---
+
+## Миграции на существующей БД
+
+`init.sql` выполняется **только при первом** создании volume postgres.  
+При обновлении версии миграции накатываются вручную.
+
+| Версия | Файл | Когда нужен |
+|--------|------|-------------|
+| 1.0.1 | `001_add_users_email_avatar.sql` | email + avatar в users |
+| 1.0.6 | `002_email_auth_verification.sql` | OAuth, verification, password reset, лимит писем |
+
+**Через Docker:**
+
+```bash
+docker exec -i <CONTAINER_NAME> psql -U <DB_USER> -d <DB_NAME> \
+  < ~/migration.sql
+```
+
+**Напрямую:**
+
+```bash
+PGPASSWORD=<DB_PASSWORD> psql -h localhost -U <DB_USER> -d <DB_NAME> \
+  -f ~/migration.sql
+```
 
 ---
 
 ## Если что-то пошло не так
-
-Логи:
 
 ```bash
 docker compose -f docker-compose.prod.yml logs -f server
 docker compose -f docker-compose.prod.yml logs -f client
 ```
 
-Откат на предыдущий SHA — через `IMAGE_TAG` (см. выше).
+Откат — через `IMAGE_TAG` на предыдущий SHA.
 
 Полный troubleshooting: [deploy.md](deploy.md#troubleshooting).

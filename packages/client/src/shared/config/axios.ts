@@ -1,4 +1,5 @@
 import axios from "axios";
+import i18n from "i18next";
 import { ACCESS_TOKEN_KEY } from "../constants";
 
 export const axiosInstance = axios.create({
@@ -10,6 +11,9 @@ axiosInstance.interceptors.request.use((config) => {
   config.headers.Authorization = `Bearer ${localStorage.getItem(
     ACCESS_TOKEN_KEY
   )}`;
+  if (i18n.language) {
+    config.headers["Accept-Language"] = i18n.language;
+  }
   return config;
 });
 

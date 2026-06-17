@@ -13,7 +13,7 @@ const operationTableColumns: (keyof BaseOperation)[] = [
 ];
 
 export const DB_CONFIG = {
-  name: "task_tracker",
+  name: "time_tracker",
   version: 2,
   stores: {
     tasks: [

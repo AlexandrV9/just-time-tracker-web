@@ -5,9 +5,17 @@ import { authQueries } from "./auth.queries.js";
 import type { Context } from "hono";
 import type { BlankEnv, BlankInput } from "hono/types";
 import { signInSchema, signUpSchema } from "./auth.schema.js";
-import { config, tokenService, validationUtils } from "../shared/index.js";
+import { config, isUuid, tokenService, validationUtils } from "../shared/index.js";
 
 const nameRefreshTokenInCookie = config.auth.refreshToken.cookie;
+
+const findUserByTokenId = async (userId: string) => {
+  if (!isUuid(userId)) {
+    return null;
+  }
+
+  return authQueries.findUserById(userId);
+};
 
 const init = async (c: Context<BlankEnv, "/auth", BlankInput>) => {
   const authHeader = c.req.header("Authorization");
@@ -23,7 +31,7 @@ const init = async (c: Context<BlankEnv, "/auth", BlankInput>) => {
 
     if (accessTokenResult.success) {
       const userId = String(accessTokenResult.payload.data.id);
-      const user = await authQueries.findUserById(userId);
+      const user = await findUserByTokenId(userId);
 
       if (!user) {
         return c.json({ success: false, data: { user: null }, error: null }, 401);
@@ -56,7 +64,7 @@ const init = async (c: Context<BlankEnv, "/auth", BlankInput>) => {
 
     if (refreshTokenResult.success) {
       const userId = String(refreshTokenResult.payload.data.id);
-      const user = await authQueries.findUserById(userId);
+      const user = await findUserByTokenId(userId);
 
       if (!user) {
         deleteCookie(c, nameRefreshTokenInCookie);
@@ -131,7 +139,21 @@ const signUp = zValidator("json", signUpSchema, async (result, c) => {
     return c.json(responseData, 401);
   }
 
-  return c.json(responseData);
+  setCookie(c, nameRefreshTokenInCookie, responseData.data.refreshToken, {
+    secure: config.app.isProduction,
+    httpOnly: true,
+    sameSite: "strict",
+    maxAge: config.auth.refreshToken.expInSec,
+  });
+
+  return c.json({
+    success: true,
+    data: {
+      accessToken: responseData.data.accessToken,
+      user: responseData.data.user,
+    },
+    message: responseData.message,
+  });
 });
 
 const signOut = (c: Context<BlankEnv, "/sign-out", BlankInput>) => {
@@ -150,6 +172,11 @@ const refresh = async (c: Context<BlankEnv, "/refresh", BlankInput>) => {
   }
 
   const authUser = refreshTokenResult.payload.data;
+
+  if (!isUuid(String(authUser.id))) {
+    deleteCookie(c, nameRefreshTokenInCookie);
+    return c.json({ success: false, message: "Invalid token" }, 401);
+  }
 
   try {
     const accessToken = await tokenService.generateAccessToken(authUser);

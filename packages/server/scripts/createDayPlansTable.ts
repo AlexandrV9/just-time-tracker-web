@@ -1,4 +1,5 @@
 import { pool } from "src/shared/index.js";
+import { isMainModule } from "./isMainModule.js";
 
 export const createDayPlansTable = async () => {
   const query = `
@@ -34,14 +35,16 @@ export const createDayPlansTable = async () => {
   }
 };
 
-createDayPlansTable()
-  .then(() => {
-    console.log("✅ Скрипт завершен успешно");
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error("❌ Скрипт завершен с ошибкой:", error);
-    process.exit(1);
-  });
+if (isMainModule(import.meta.url)) {
+  createDayPlansTable()
+    .then(() => {
+      console.log("✅ Скрипт завершен успешно");
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error("❌ Скрипт завершен с ошибкой:", error);
+      process.exit(1);
+    });
+}
 
 // npx tsx ./scripts/createDayPlansTable.ts

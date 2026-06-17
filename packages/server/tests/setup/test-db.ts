@@ -159,22 +159,80 @@ export const resetActivitiesTables = async (pool: Pool) => {
 export const setupUsersSchema = async (pool: Pool) => {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
-      id SERIAL PRIMARY KEY,
-      password_hash VARCHAR(255) NOT NULL,
-      first_name VARCHAR(50),
-      last_name VARCHAR(50),
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      password_hash VARCHAR(255),
+      first_name VARCHAR(255) NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       is_active BOOLEAN NOT NULL DEFAULT true,
       login VARCHAR(255) NOT NULL UNIQUE,
       email VARCHAR(255) UNIQUE,
+      email_verified_at TIMESTAMPTZ,
       avatar TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS auth_providers (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      provider VARCHAR(50) NOT NULL,
+      provider_user_id VARCHAR(255) NOT NULL,
+      disconnected_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (provider, provider_user_id)
+    );
+
+    ALTER TABLE auth_providers
+      ADD COLUMN IF NOT EXISTS disconnected_at TIMESTAMPTZ;
+
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_auth_providers_active_user_provider
+      ON auth_providers (user_id, provider)
+      WHERE disconnected_at IS NULL;
+
+    CREATE TABLE IF NOT EXISTS email_verifications (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      new_email VARCHAR(255) NOT NULL,
+      code_hash VARCHAR(255) NOT NULL,
+      attempts_count INT NOT NULL DEFAULT 0,
+      resend_count INT NOT NULL DEFAULT 0,
+      expires_at TIMESTAMPTZ NOT NULL,
+      resend_available_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_email_verifications_user_id
+      ON email_verifications(user_id);
+
+    CREATE TABLE IF NOT EXISTS password_resets (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      code_hash VARCHAR(255) NOT NULL,
+      attempts_count INT NOT NULL DEFAULT 0,
+      resend_count INT NOT NULL DEFAULT 0,
+      expires_at TIMESTAMPTZ NOT NULL,
+      resend_available_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_password_resets_user_id
+      ON password_resets(user_id);
+
+    CREATE TABLE IF NOT EXISTS user_email_daily_sends (
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      day DATE NOT NULL,
+      send_count INT NOT NULL DEFAULT 0,
+      PRIMARY KEY (user_id, day),
+      CONSTRAINT user_email_daily_sends_count_positive CHECK (send_count >= 0)
     );
   `);
 };
 
 export const resetUsersTables = async (pool: Pool) => {
-  await pool.query(`TRUNCATE TABLE users RESTART IDENTITY CASCADE`);
+  await pool.query(
+    `TRUNCATE TABLE user_email_daily_sends, password_resets, email_verifications, auth_providers, users RESTART IDENTITY CASCADE`,
+  );
 };
 
 const createTestDatabase = async (
@@ -249,7 +307,11 @@ const startFromEnv = async (): Promise<TestDatabase | null> => {
   return createTestDatabase(null);
 };
 
-export const startTestDatabase = async (): Promise<TestDatabase> => {
+let sharedTestDb: TestDatabase | null = null;
+let sharedTestDbInit: Promise<TestDatabase> | null = null;
+let sharedTestDbRefs = 0;
+
+const bootstrapTestDatabase = async (): Promise<TestDatabase> => {
   if (process.env.TEST_DATABASE_URL) {
     configureDatabaseEnvFromUrl(process.env.TEST_DATABASE_URL);
     return createTestDatabase(null);
@@ -272,4 +334,29 @@ export const startTestDatabase = async (): Promise<TestDatabase> => {
       "Или задай TEST_DATABASE_URL / USE_TESTCONTAINERS=true",
     ].join("\n"),
   );
+};
+
+/** Shared Postgres for all integration test files (one container / one pool). */
+export const startTestDatabase = async (): Promise<TestDatabase> => {
+  if (!sharedTestDbInit) {
+    sharedTestDbInit = bootstrapTestDatabase().then((db) => {
+      sharedTestDb = db;
+      return db;
+    });
+  }
+
+  const db = await sharedTestDbInit;
+  sharedTestDbRefs++;
+  return db;
+};
+
+export const releaseTestDatabase = async (): Promise<void> => {
+  sharedTestDbRefs = Math.max(0, sharedTestDbRefs - 1);
+  if (sharedTestDbRefs > 0) return;
+
+  if (sharedTestDb) {
+    await sharedTestDb.stop();
+    sharedTestDb = null;
+    sharedTestDbInit = null;
+  }
 };

@@ -1,6 +1,14 @@
 import { type UseDialogReturn } from "@ark-ui/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useId, useMemo, useState, type FormEvent } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+  type FormEvent,
+} from "react";
 import { useInView } from "react-intersection-observer";
 import { useAuthStore } from "~/features/auth";
 import { useTranslation } from "~/shared/hooks";
@@ -14,6 +22,8 @@ import {
   Checkbox,
   CloseButton,
   Dialog,
+  EmptyBox,
+  EmptyState,
   Flex,
   Portal,
   ScrollArea,
@@ -36,8 +46,9 @@ export function AddTodayActivitiesDialog({
   onSubmit,
 }: AddTodayActivitiesDialogProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
   const userId = user?.id;
 
   const formId = useId();
@@ -107,6 +118,11 @@ export function AddTodayActivitiesDialog({
     dialog.setOpen(false);
   }, [dialog]);
 
+  const handleGoToActivities = useCallback(() => {
+    dialog.setOpen(false);
+    navigate({ to: "/activities" });
+  }, [dialog, navigate]);
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setIsPending(true);
@@ -141,9 +157,23 @@ export function AddTodayActivitiesDialog({
 
     if (activities.length === 0) {
       return (
-        <Text color="fg.muted" textAlign="center">
-          {t("widgets.todayActivityList.addTodayActivitiesDialog.empty")}
-        </Text>
+        <EmptyState.Root p={0}>
+          <EmptyState.Content>
+            <EmptyState.Indicator>
+              <EmptyBox size={60} />
+            </EmptyState.Indicator>
+            <Stack.VStack textAlign="center">
+              <EmptyState.Title>
+                {t(
+                  "widgets.todayActivityList.addTodayActivitiesDialog.emptyTitle",
+                )}
+              </EmptyState.Title>
+              <EmptyState.Description>
+                {t("widgets.todayActivityList.addTodayActivitiesDialog.empty")}
+              </EmptyState.Description>
+            </Stack.VStack>
+          </EmptyState.Content>
+        </EmptyState.Root>
       );
     }
 
@@ -239,15 +269,24 @@ export function AddTodayActivitiesDialog({
                   "widgets.todayActivityList.addTodayActivitiesDialog.cancelButton",
                 )}
               </Button>
-              <Button
-                disabled={isDisableSubmitButton}
-                form={formId}
-                type="submit"
-              >
-                {t(
-                  "widgets.todayActivityList.addTodayActivitiesDialog.addButton",
-                )}
-              </Button>
+
+              {activities.length === 0 ? (
+                <Button onClick={handleGoToActivities}>
+                  {t(
+                    "widgets.todayActivityList.addTodayActivitiesDialog.goToActivitiesButton",
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  disabled={isDisableSubmitButton}
+                  form={formId}
+                  type="submit"
+                >
+                  {t(
+                    "widgets.todayActivityList.addTodayActivitiesDialog.addButton",
+                  )}
+                </Button>
+              )}
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild>
               <CloseButton size="2xl" />

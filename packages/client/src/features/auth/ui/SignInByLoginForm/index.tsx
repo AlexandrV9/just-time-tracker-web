@@ -38,14 +38,14 @@ export const SignInByLoginForm = () => {
     onSuccess: (response) => {
       if (response.success) {
         navigate({ to: redirect || "/" });
+        return;
       }
+
+      showSignInErrorToast(t, response.message);
     },
     onError: (error) => {
-      toast.error(error.message || t(`${baseLocale}.unknownError`), {
-        position: "top-center",
-        draggable: true,
-        toastId: "error_sign_in",
-      });
+      const message = error instanceof Error ? error.message : undefined;
+      showSignInErrorToast(t, message);
     },
   });
 
@@ -70,6 +70,7 @@ export const SignInByLoginForm = () => {
       display="flex"
       flexDirection="column"
       gap="1rem"
+      width="full"
       onSubmit={submitHandler}
     >
       <Text
@@ -114,8 +115,14 @@ export const SignInByLoginForm = () => {
         </Field.ErrorText>
       </Field.Root>
 
+      <Text asChild color="fg.info" fontWeight="600" textStyle="sm">
+        <Link disabled={isPending} to="/recover-account">
+          {t(`${baseLocale}.forgotPasswordLink`)}
+        </Link>
+      </Text>
+
       <Button
-        mt="1rem"
+        mt="0.5rem"
         type="submit"
         loading={isPending}
         loadingText={t(`${baseLocale}.submitButtonLoadingText`)}
@@ -128,7 +135,7 @@ export const SignInByLoginForm = () => {
           <Text as="span" mr="5px">
             {t(`${baseLocale}.subtitleText`)}
           </Text>
-          <Text asChild color="purple.500" fontWeight="600">
+          <Text asChild color="fg.info" fontWeight="600">
             <Link disabled={isPending} to="/signup">
               {t(`${baseLocale}.linkText`)}
             </Link>
@@ -138,6 +145,29 @@ export const SignInByLoginForm = () => {
     </Box>
   );
 };
+
+function getSignInErrorMessage(
+  t: TFunction<"translation", undefined>,
+  message?: string,
+) {
+  switch (message) {
+    case "Login or password is not correct":
+      return t(`${baseLocale}.errors.invalidCredentials`);
+    default:
+      return t(`${baseLocale}.errors.unknown`);
+  }
+}
+
+function showSignInErrorToast(
+  t: TFunction<"translation", undefined>,
+  message?: string,
+) {
+  toast.error(getSignInErrorMessage(t, message), {
+    position: "top-center",
+    draggable: true,
+    toastId: "error_sign_in",
+  });
+}
 
 function getTranslatedError(
   t: TFunction<"translation", undefined>,

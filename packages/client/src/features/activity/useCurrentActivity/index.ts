@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getCalendarDay, getDateIntervalByCalendarDay } from "~/shared/libs";
+import { ACTIVITIES_CURRENT_QUERY_KEY } from "~/shared/api/services";
 
 import { useAuthStore } from "../../auth/useAuthStore";
 import { useShallow } from "zustand/react/shallow";
@@ -7,8 +9,7 @@ import { useCurrentActivityStore } from "./useCurrentActivityStore";
 import { fetchCurrentActivityData } from "./utils";
 
 export function useCurrentActivity() {
-  const { user } = useAuthStore();
-  const userId = user?.id;
+  const userId = useAuthStore((state) => state.user?.id);
 
   const {
     updateData,
@@ -30,41 +31,30 @@ export function useCurrentActivity() {
     })),
   );
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-
   const calendarDay = getCalendarDay();
   const { fromDate, toDate } = getDateIntervalByCalendarDay(calendarDay);
 
+  // Один общий ключ → react-query делает дедупликацию всех маунтов этого хука в один запрос
+  // (а инвалидация ACTIVITIES_CURRENT_QUERY_KEY в мутациях обновляет и его).
+  const query = useQuery({
+    queryKey: [ACTIVITIES_CURRENT_QUERY_KEY, "stopwatch", userId, fromDate, toDate],
+    queryFn: () => fetchCurrentActivityData({ fromDate, toDate }),
+    enabled: Boolean(userId),
+  });
+
   useEffect(() => {
-    if (!userId) return;
+    if (!query.data) return;
 
-    setIsError(false);
-    setIsLoading(true);
-
-    fetchCurrentActivityData({
-      fromDate,
-      toDate,
-    })
-      .then((result) => {
-        updateData({
-          currentActivity: result.activity,
-          currentSession: result.session,
-          currentSegment: result.segment,
-        });
-      })
-      .catch((error) => {
-        setIsError(true);
-        console.error(error);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [fromDate, toDate, userId, updateData]);
+    updateData({
+      currentActivity: query.data.activity,
+      currentSession: query.data.session,
+      currentSegment: query.data.segment,
+    });
+  }, [query.data, updateData]);
 
   return {
-    isLoading,
-    isError,
+    isLoading: query.isLoading,
+    isError: query.isError,
     updateData,
     currentActivity,
     setCurrentActivity,

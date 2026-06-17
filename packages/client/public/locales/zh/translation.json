@@ -100,8 +100,24 @@
         },
         "emailInput": {
           "label": "邮箱",
-          "placeholder": "请输入邮箱"
+          "placeholder": "请输入邮箱",
+          "emptyPlaceholder": "未添加邮箱"
         },
+        "passwordInput": {
+          "label": "密码",
+          "placeholder": "••••••••••••••••"
+        },
+        "loginInput": {
+          "label": "登录名",
+          "placeholder": "请输入登录名",
+          "errors": {
+            "minLength": "登录名至少 3 个字符",
+            "maxLength": "登录名最多 30 个字符",
+            "invalidFormat": "登录名只能包含字母、数字、点、连字符和下划线",
+            "isEmail": "登录名不能是邮箱地址"
+          }
+        },
+        "emailRecoveryWarning": "添加邮箱以便恢复账户访问",
         "editButton": "编辑资料",
         "saveButton": "保存",
         "cancelButton": "取消",
@@ -110,6 +126,34 @@
         "errors": {
           "nameRequired": "姓名为必填",
           "emailInvalid": "请输入有效邮箱"
+        }
+      },
+      "security": {
+        "loginMethods": {
+          "title": "登录方式",
+          "status": {
+            "connected": "已连接",
+            "notConnected": "未连接"
+          },
+          "connectButton": "连接",
+          "disconnectButton": "断开",
+          "comingSoon": "即将推出"
+        },
+        "providers": {
+          "yandex": {
+            "linkSuccess": "Yandex 账号已连接",
+            "unlinkSuccess": "Yandex 账号已断开",
+            "unlinkError": "解绑 Yandex 失败，请重试。",
+            "linkError": {
+              "yandex_already_linked": "该 Yandex 账号已关联到其他账户。",
+              "provider_already_connected": "Yandex 已绑定到您的账号",
+              "default": "绑定 Yandex 失败，请重试。"
+            }
+          }
+        },
+        "errorDialog": {
+          "title": "操作失败",
+          "okButton": "知道了"
         }
       }
     },
@@ -226,7 +270,8 @@
     "accountSettings": {
       "title": "账户设置",
       "options": {
-        "1": "编辑资料"
+        "profile": "个人资料",
+        "security": "安全与登录"
       }
     },
     "unfinishedActivities": {
@@ -248,12 +293,14 @@
       "emptyDescription": "添加活动以开始新的一天",
       "addTodayActivitiesDialog": {
         "title": "添加活动",
+        "emptyTitle": "暂无活动",
         "empty": "你还没有任何活动。请前往活动分区并新建一个",
         "noActivities": "没有可选活动",
         "success": "活动已添加",
         "error": "无法添加活动",
         "cancelButton": "取消",
-        "addButton": "添加"
+        "addButton": "添加",
+        "goToActivitiesButton": "前往活动"
       }
     },
     "activityGroup": {
@@ -312,7 +359,22 @@
         "submitButtonLoadingText": "正在登录…",
         "subtitleText": "还没有账号？",
         "title": "登录",
-        "unknownError": "未知错误"
+        "forgotPasswordLink": "忘记密码？",
+        "errors": {
+          "invalidCredentials": "登录名或密码错误",
+          "unknown": "未知错误"
+        }
+      },
+      "yandexLogin": {
+        "button": "通过 Yandex 登录",
+        "divider": "或",
+        "errors": {
+          "email_exists": "该邮箱已注册。请用登录名和密码登录，然后在设置中绑定 Yandex。",
+          "yandex_error": "Yandex 授权出错，请重试。",
+          "invalid_state": "安全错误，请重试。",
+          "missing_params": "Yandex 返回结果无效。",
+          "login_error": "Yandex 登录失败，请重试。"
+        }
       },
       "signUpForm": {
         "firstNameInput": {
@@ -326,7 +388,11 @@
           "label": "登录名",
           "placeholder": "创建登录名",
           "errors": {
-            "required": "登录名为必填"
+            "required": "登录名为必填",
+            "minLength": "登录名至少 3 个字符",
+            "maxLength": "登录名最多 30 个字符",
+            "invalidFormat": "登录名只能包含字母、数字、点、连字符和下划线",
+            "isEmail": "登录名不能是邮箱地址"
           }
         },
         "passwordInput": {
@@ -354,6 +420,116 @@
         "title": "注册",
         "successToast": "注册成功",
         "errorToast": "注册失败"
+      }
+    },
+    "emailVerification": {
+      "dialogTitle": "确认邮箱",
+      "backButton": "返回",
+      "dialogDescription": "输入要绑定的邮箱，我们将发送 6 位验证码。",
+      "registrationTitle": "添加恢复邮箱",
+      "registrationDescription": "添加邮箱以便恢复账户访问。您可以跳过此步骤，稍后在账户设置中完成。",
+      "emailLabel": "邮箱",
+      "emailPlaceholder": "请输入邮箱",
+      "sendCodeButton": "发送验证码",
+      "cancelButton": "取消",
+      "verifyButton": "确认",
+      "skipButton": "跳过",
+      "resendButton": "重新发送",
+      "resendIn": "{{seconds}} 秒后可重新发送",
+      "enterCodeDescription": "请输入发送到 {{email}} 的 6 位验证码",
+      "expiredDescription": "验证码已过期，请重新获取。",
+      "verified": "邮箱已确认",
+      "errors": {
+        "emailInvalid": "请输入有效邮箱",
+        "sameEmail": "请输入与当前邮箱不同的地址",
+        "emailAlreadyExists": "该邮箱已被使用",
+        "requestFailed": "无法发送验证码",
+        "invalidCode": "验证码无效",
+        "codeExpired": "验证码已过期，请重新获取",
+        "tooManyAttempts": "尝试次数过多，请重新获取验证码",
+        "verifyFailed": "无法确认邮箱",
+        "resendTooEarly": "请稍后再试",
+        "codeNotFound": "没有进行中的验证请求，请重新开始",
+        "dailyLimit": "已达到每日邮件发送上限，请明天再试"
+      }
+    },
+    "updatePassword": {
+      "dialog": {
+        "title": "设置密码",
+        "description": "设置密码以便使用登录名登录。",
+        "changeTitle": "修改密码",
+        "changeDescription": "输入当前密码并设置新密码。",
+        "unlinkDescription": "要解绑此登录方式，请先为您的账号设置密码，以便您仍可登录。",
+        "submitButton": "保存密码",
+        "cancelButton": "取消",
+        "success": "密码已设置",
+        "error": "无法设置密码",
+        "changeSuccess": "密码已修改",
+        "changeError": "无法修改密码",
+        "errors": {
+          "invalidCurrentPassword": "当前密码不正确",
+          "samePassword": "请选择其他密码",
+          "passwordNotSet": "尚未设置密码"
+        },
+        "currentPasswordInput": {
+          "label": "当前密码",
+          "placeholder": "请输入当前密码",
+          "errors": {
+            "required": "此项为必填"
+          }
+        },
+        "passwordInput": {
+          "label": "密码",
+          "placeholder": "创建强密码",
+          "errors": {
+            "minLength": "密码至少 {{count}} 个字符。例如：MyPass1",
+            "maxLength": "密码最多 {{count}} 个字符。例如：MyPass1",
+            "noLetter": "密码须包含至少一个字母。例如：MyPass1",
+            "noDigit": "密码须包含至少一个数字。例如：MyPass1"
+          }
+        },
+        "repeatPasswordInput": {
+          "label": "重复密码",
+          "placeholder": "请再次输入密码",
+          "errors": {
+            "mismatch": "两次密码不一致",
+            "required": "此项为必填"
+          }
+        }
+      }
+    },
+    "resetPassword": {
+      "title": "账户恢复",
+      "emailDescription": "输入与账户绑定的邮箱，我们将发送 6 位验证码。",
+      "emailLabel": "邮箱",
+      "emailPlaceholder": "请输入邮箱",
+      "sendCodeButton": "发送验证码",
+      "backButton": "返回",
+      "verifyButton": "确认",
+      "resendButton": "重新发送",
+      "resendIn": "{{seconds}} 秒后可重新发送",
+      "enterCodeDescription": "请输入发送到 {{email}} 的 6 位验证码",
+      "expiredDescription": "验证码已过期，请重新获取。",
+      "newPasswordDescription": "为账户设置新密码。",
+      "newPasswordLabel": "新密码",
+      "newPasswordPlaceholder": "设置强密码",
+      "repeatPasswordLabel": "确认密码",
+      "repeatPasswordPlaceholder": "请再次输入密码",
+      "submitButton": "保存密码",
+      "success": "密码已更改，请使用新密码登录。",
+      "errors": {
+        "emailInvalid": "请输入有效邮箱",
+        "userNotFound": "不存在使用该邮箱的账户",
+        "dailyLimit": "已达到每日邮件发送上限，请明天再试",
+        "requestFailed": "无法发送验证码",
+        "invalidCode": "验证码无效",
+        "codeExpired": "验证码已过期，请重新获取",
+        "tooManyAttempts": "尝试次数过多，请重新获取验证码",
+        "verifyFailed": "无法验证验证码",
+        "resendTooEarly": "请稍后再请求新验证码",
+        "samePassword": "请选择其他密码",
+        "sessionExpired": "恢复会话已过期，请重新开始",
+        "confirmFailed": "无法更改密码"
       }
     }
   },

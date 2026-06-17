@@ -4,7 +4,7 @@ import type {
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
 } from "@to-do-list/shared";
-import { useCurrentActivity } from "~/features";
+import { useCurrentActivityStore } from "~/features";
 import {
   activityApiService,
   ACTIVITY_ANALYTICS_QUERY_KEY,
@@ -22,7 +22,7 @@ type PauseActivityData = {
 
 export const usePauseActivity = () => {
   const queryClient = useQueryClient();
-  const { updateData } = useCurrentActivity();
+  const updateData = useCurrentActivityStore((state) => state.updateData);
 
   return useMutation({
     mutationFn: async (data: PauseActivityData) => {

@@ -42,7 +42,7 @@ function ToastContent({
 }: ToastContentProps & { children: React.ReactNode }) {
   return (
     <div className={styles.toast}>
-      <Text fontSize="md" className={styles.message}>
+      <Text fontSize={{ base: "sm", md: "md" }} className={styles.message}>
         {children}
       </Text>
       <CloseButton

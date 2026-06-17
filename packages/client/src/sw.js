@@ -1,4 +1,4 @@
-const CACHE_NAME = "time-tracker-v1.0.7";
+const CACHE_NAME = "time-tracker-v1.0.8";
 
 const STATIC_CACHE_URLS = ["/", "https://fonts.googleapis.com/"];
 
@@ -63,13 +63,22 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+function isEventStream(request) {
+  return (
+    request.headers.get("accept") === "text/event-stream" ||
+    request.url.includes("/activities/events")
+  );
+}
+
 self.addEventListener("fetch", (event) => {
   const request = event.request;
 
-  if (
-    request.method !== "GET" ||
-    request.url.startsWith("chrome-extension://")
-  ) {
+  if (request.method !== "GET" || !/^https?:/.test(request.url)) {
+    return;
+  }
+
+  // Стримы (SSE) воркер не трогает — иначе ломается соединение и падает cache.put.
+  if (isEventStream(request)) {
     return;
   }
 
@@ -81,25 +90,41 @@ self.addEventListener("fetch", (event) => {
 });
 
 async function handleFetch(request) {
-  if (request.url.includes("/api/")) {
+  // HTML-навигации и API всегда тянем из сети, чтобы после релиза подхватывался свежий index.html.
+  if (request.mode === "navigate" || request.url.includes("/api/")) {
     return networkFirstStrategy(request);
   }
 
   return cacheFirstStrategy(request);
 }
 
+// Кэширование best-effort: не кэшируем стримы и глушим возможные ошибки записи.
+async function putInCache(request, response) {
+  if (!response || response.status !== 200) {
+    return;
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("text/event-stream")) {
+    return;
+  }
+
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.put(request, response);
+  } catch {
+    // тело могло оказаться стримом/непригодным для кэша — игнорируем
+  }
+}
+
 async function networkFirstStrategy(request) {
   try {
     const networkResponse = await fetch(request);
 
-    if (networkResponse.status === 200) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, networkResponse.clone());
-    }
+    putInCache(request, networkResponse.clone());
 
     return networkResponse;
   } catch (error) {
-    console.log("🌐 Network failed, trying cache...", request.url);
     const cachedResponse = await caches.match(request);
 
     if (cachedResponse) {
@@ -119,10 +144,7 @@ async function cacheFirstStrategy(request) {
 
   const networkResponse = await fetch(request);
 
-  if (networkResponse.status === 200) {
-    const cache = await caches.open(CACHE_NAME);
-    cache.put(request, networkResponse.clone());
-  }
+  putInCache(request, networkResponse.clone());
 
   return networkResponse;
 }
