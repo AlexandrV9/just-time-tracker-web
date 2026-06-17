@@ -16,5 +16,5 @@ authRouter.get("/check-refresh", authHandlers.checkRefresh);
 authRouter.route("/password-reset", passwordResetRouter);
 
 // Yandex OAuth
-authRouter.get("/yandex", yandexHandlers.startLogin);
-authRouter.get("/yandex/callback", yandexHandlers.callback);
+// authRouter.get("/yandex", yandexHandlers.startLogin);
+// authRouter.get("/yandex/callback", yandexHandlers.callback);

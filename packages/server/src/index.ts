@@ -39,7 +39,7 @@ protectedRouter.route("/day-plans", dayPlansRouter);
 protectedRouter.route("/day-plan-items", dayPlanItemsRouter);
 protectedRouter.route("/users", usersRouter);
 protectedRouter.route("/email-verification", emailVerificationRouter);
-protectedRouter.post("/auth/yandex/link", yandexHandlers.startLink);
+// protectedRouter.post("/auth/yandex/link", yandexHandlers.startLink);
 
 app.route("/", protectedRouter);
 
