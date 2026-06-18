@@ -9,4 +9,4 @@ export const Button = (props: ButtonProps) => {
   return <BaseButton {...props} />;
 };
 
-export { IconButton } from "./IconButton";
+export { IconButton, type IconButtonProps } from "./IconButton";

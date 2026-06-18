@@ -39,7 +39,7 @@
       "signInPageLink": "Already registered? Sign in"
     },
     "home": {
-      "selectActivity": "Select activity or start timer",
+      "selectActivity": "Select activity",
       "circularTimerStart": "Start",
       "circularTimerPause": "Pause",
       "circularTimerFinish": "Finish",
@@ -421,6 +421,11 @@
         "successToast": "Registration successful",
         "errorToast": "Registration failed"
       }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "empty": "No notifications",
+      "emptyDescription": "You're all caught up"
     },
     "emailVerification": {
       "dialogTitle": "Confirm email",

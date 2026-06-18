@@ -39,7 +39,7 @@
       "signInPageLink": "Уже есть аккаунт? Войти"
     },
     "home": {
-      "selectActivity": "Выберите активность или запустите таймер",
+      "selectActivity": "Выберите активность",
       "circularTimerStart": "Старт",
       "circularTimerPause": "Пауза",
       "circularTimerFinish": "Завершить",
@@ -421,6 +421,11 @@
         "successToast": "Регистрация прошла успешно",
         "errorToast": "Не удалось зарегистрироваться"
       }
+    },
+    "notifications": {
+      "title": "Уведомления",
+      "empty": "Нет уведомлений",
+      "emptyDescription": "Вы всё просмотрели"
     },
     "emailVerification": {
       "dialogTitle": "Подтверждение email",

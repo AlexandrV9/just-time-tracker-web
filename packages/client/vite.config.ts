@@ -18,12 +18,17 @@ export default defineConfig(({ mode }) => {
       react(),
       VitePWA({
         registerType: "autoUpdate",
+        injectRegister: "auto",
+        strategies: "injectManifest",
+        srcDir: "src",
+        filename: "sw.js",
+        injectManifest: {
+          globPatterns: [
+            "**/*.{js,css,html,ico,png,svg,woff2,json,webmanifest}",
+          ],
+          maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        },
 
-        strategies: "injectManifest", // для кастомного сервис-воркера
-        srcDir: "src", // это папка в которой находится сервис-воркера
-        filename: "sw.js", // это название файла сервис-воркера
-
-        // Говорим, чтобы sw работал и в dev режиме
         devOptions: {
           enabled: false,
           type: "module",
