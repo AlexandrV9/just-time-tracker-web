@@ -21,10 +21,12 @@ export const useDeviceDetect = (): DeviceInfo => {
     const userAgent = navigator.userAgent.toLowerCase();
 
     const isMobile = /iphone|ipod|android|blackberry|windows phone/g.test(
-      userAgent
+      userAgent,
     );
+
     const isTablet =
       /ipad|android|tablet|playbook|silk/g.test(userAgent) && !isMobile;
+
     const isDesktop = !isMobile && !isTablet;
 
     setDeviceInfo({
@@ -35,10 +37,10 @@ export const useDeviceDetect = (): DeviceInfo => {
       type: isDesktop
         ? "desktop"
         : isTablet
-        ? "tablet"
-        : isMobile
-        ? "mobile"
-        : "unknown",
+          ? "tablet"
+          : isMobile
+            ? "mobile"
+            : "unknown",
     });
   }, []);
 

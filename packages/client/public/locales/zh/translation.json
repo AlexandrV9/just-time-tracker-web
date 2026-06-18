@@ -39,7 +39,7 @@
       "signInPageLink": "已有账号？去登录"
     },
     "home": {
-      "selectActivity": "选择活动或启动计时器",
+      "selectActivity": "选择活动",
       "circularTimerStart": "开始",
       "circularTimerPause": "暂停",
       "circularTimerFinish": "结束",

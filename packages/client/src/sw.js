@@ -1,169 +1,240 @@
-const CACHE_NAME = "time-tracker-v1.0.8";
+/// <reference lib="webworker" />
 
-const STATIC_CACHE_URLS = ["/", "https://fonts.googleapis.com/"];
+import { clientsClaim } from "workbox-core";
+import {
+  cleanupOutdatedCaches,
+  matchPrecache,
+  precacheAndRoute,
+} from "workbox-precaching";
+import { registerRoute } from "workbox-routing";
+import {
+  CacheFirst,
+  NetworkOnly,
+  StaleWhileRevalidate,
+} from "workbox-strategies";
+import { CacheableResponsePlugin } from "workbox-cacheable-response";
+import { ExpirationPlugin } from "workbox-expiration";
+
+/** @type {ServiceWorkerGlobalScope} */
+const sw = self;
+
+const DEFAULT_NOTIFICATION_ICON = "/icons/logo-192x192.png";
+const DEFAULT_NOTIFICATION_BADGE = "/icons/logo-120x120.png";
+
+const CACHE_NAMES = {
+  googleFonts: "google-fonts",
+  publicAssets: "public-assets",
+};
 
 /** Injected at build time by vite-plugin-pwa (injectManifest). */
-const PRECACHE_MANIFEST = self.__WB_MANIFEST;
+precacheAndRoute(self.__WB_MANIFEST);
+cleanupOutdatedCaches();
 
-self.addEventListener("install", (event) => {
-  console.log("🛠️ Service Worker: Installing...");
-
-  self.skipWaiting();
-
-  event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then(async (cache) => {
-        console.log("📦 Service Worker: Caching static assets", cache);
-        await cache.addAll(STATIC_CACHE_URLS);
-
-        const precacheUrls = PRECACHE_MANIFEST.map((entry) =>
-          typeof entry === "string" ? entry : entry.url,
-        );
-
-        await Promise.all(
-          precacheUrls.map((url) =>
-            cache.add(url).catch((error) => {
-              console.warn("Service Worker: precache skipped", url, error);
-            }),
-          ),
-        );
-      })
-      .then(() => {
-        console.log("✅ Service Worker: Installation completed");
-      })
-      .catch((error) => {
-        console.error("❌ Service Worker: Installation failed", error);
-      }),
-  );
+sw.addEventListener("install", () => {
+  sw.skipWaiting();
 });
 
-self.addEventListener("activate", (event) => {
-  console.log("🎉 Service Worker: Activated");
-
-  event.waitUntil(
-    caches
-      .keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
-              console.log("🗑️ Service Worker: Deleting old cache", cacheName);
-              return caches.delete(cacheName);
-            }
-          }),
-        );
-      })
-      .then(() => {
-        return self.clients.claim();
-      })
-      .then(() => {
-        console.log("✅ Service Worker: Ready to handle requests");
-      }),
-  );
+sw.addEventListener("activate", (event) => {
+  event.waitUntil(clientsClaim());
 });
 
-function isEventStream(request) {
+function isApiRequest(url) {
+  return url.pathname.startsWith("/api/");
+}
+
+function isEventStreamRequest(request, url) {
   return (
     request.headers.get("accept") === "text/event-stream" ||
-    request.url.includes("/activities/events")
+    url.pathname.includes("/activities/events")
   );
 }
 
-self.addEventListener("fetch", (event) => {
-  const request = event.request;
+// API и SSE — только сеть, без кэша.
+registerRoute(
+  ({ request, url }) => isApiRequest(url) || isEventStreamRequest(request, url),
+  new NetworkOnly(),
+);
 
-  if (request.method !== "GET" || !/^https?:/.test(request.url)) {
-    return;
-  }
-
-  // Стримы (SSE) воркер не трогает — иначе ломается соединение и падает cache.put.
-  if (isEventStream(request)) {
-    return;
-  }
-
-  event.respondWith(
-    handleFetch(request).catch(() => {
-      return createOfflineResponse(request);
-    }),
-  );
-});
-
-async function handleFetch(request) {
-  // HTML-навигации и API всегда тянем из сети, чтобы после релиза подхватывался свежий index.html.
-  if (request.mode === "navigate" || request.url.includes("/api/")) {
-    return networkFirstStrategy(request);
-  }
-
-  return cacheFirstStrategy(request);
-}
-
-// Кэширование best-effort: не кэшируем стримы и глушим возможные ошибки записи.
-async function putInCache(request, response) {
-  if (!response || response.status !== 200) {
-    return;
-  }
-
-  const contentType = response.headers.get("content-type") || "";
-  if (contentType.includes("text/event-stream")) {
-    return;
-  }
-
-  try {
-    const cache = await caches.open(CACHE_NAME);
-    await cache.put(request, response);
-  } catch {
-    // тело могло оказаться стримом/непригодным для кэша — игнорируем
-  }
-}
-
-async function networkFirstStrategy(request) {
-  try {
-    const networkResponse = await fetch(request);
-
-    putInCache(request, networkResponse.clone());
-
-    return networkResponse;
-  } catch (error) {
-    const cachedResponse = await caches.match(request);
-
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
-    throw error;
-  }
-}
-
-async function cacheFirstStrategy(request) {
-  const cachedResponse = await caches.match(request);
-
-  if (cachedResponse) {
-    return cachedResponse;
-  }
-
-  const networkResponse = await fetch(request);
-
-  putInCache(request, networkResponse.clone());
-
-  return networkResponse;
-}
-
-function createOfflineResponse(request) {
-  if (request.mode === "navigate") {
-    return caches.match("/").then((cachedIndex) => {
+// SPA-навигация: свежий HTML из сети, офлайн — precached index.html.
+registerRoute(
+  ({ request }) => request.mode === "navigate",
+  async ({ request }) => {
+    try {
+      return await fetch(request);
+    } catch {
+      const cachedIndex = await matchPrecache("/index.html");
       return (
         cachedIndex ||
         new Response("Offline", {
-          status: 200,
-          headers: { "Content-Type": "text/html" },
+          status: 503,
+          headers: { "Content-Type": "text/plain; charset=utf-8" },
         })
       );
-    });
+    }
+  },
+);
+
+// Локали и публичные ассеты (не попали в precache).
+registerRoute(
+  ({ url, request }) =>
+    request.method === "GET" &&
+    url.origin === sw.location.origin &&
+    (url.pathname.startsWith("/locales/") || url.pathname.startsWith("/icons/")),
+  new StaleWhileRevalidate({
+    cacheName: CACHE_NAMES.publicAssets,
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [200] }),
+      new ExpirationPlugin({
+        maxEntries: 64,
+        maxAgeSeconds: 60 * 60 * 24 * 30,
+      }),
+    ],
+  }),
+);
+
+// Google Fonts.
+registerRoute(
+  ({ url }) =>
+    url.origin === "https://fonts.googleapis.com" ||
+    url.origin === "https://fonts.gstatic.com",
+  new CacheFirst({
+    cacheName: CACHE_NAMES.googleFonts,
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({
+        maxEntries: 24,
+        maxAgeSeconds: 60 * 60 * 24 * 365,
+      }),
+    ],
+  }),
+);
+
+/**
+ * @param {unknown} value
+ * @returns {value is Record<string, unknown>}
+ */
+function isRecord(value) {
+  return typeof value === "object" && value !== null;
+}
+
+/**
+ * @param {PushEvent} event
+ * @returns {Promise<void>}
+ */
+async function handlePush(event) {
+  const fallback = {
+    title: "Time Tracker",
+    options: {
+      body: "",
+      icon: DEFAULT_NOTIFICATION_ICON,
+      badge: DEFAULT_NOTIFICATION_BADGE,
+      data: { url: "/" },
+    },
+  };
+
+  if (!event.data) {
+    await sw.registration.showNotification(
+      fallback.title,
+      fallback.options,
+    );
+    return;
   }
 
-  return new Response("Network error", {
-    status: 408,
-    headers: { "Content-Type": "text/plain" },
-  });
+  let payload = fallback;
+
+  try {
+    const parsed = event.data.json();
+
+    if (isRecord(parsed)) {
+      payload = {
+        title:
+          typeof parsed.title === "string" ? parsed.title : fallback.title,
+        options: {
+          body: typeof parsed.body === "string" ? parsed.body : "",
+          icon:
+            typeof parsed.icon === "string"
+              ? parsed.icon
+              : DEFAULT_NOTIFICATION_ICON,
+          badge:
+            typeof parsed.badge === "string"
+              ? parsed.badge
+              : DEFAULT_NOTIFICATION_BADGE,
+          tag: typeof parsed.tag === "string" ? parsed.tag : undefined,
+          renotify:
+            typeof parsed.renotify === "boolean" ? parsed.renotify : undefined,
+          data: {
+            url:
+              typeof parsed.url === "string"
+                ? parsed.url
+                : isRecord(parsed.data) && typeof parsed.data.url === "string"
+                  ? parsed.data.url
+                  : "/",
+            ...(isRecord(parsed.data) ? parsed.data : {}),
+          },
+        },
+      };
+    }
+  } catch {
+    const text = event.data.text().trim();
+    if (text) {
+      payload = {
+        title: fallback.title,
+        options: {
+          ...fallback.options,
+          body: text,
+        },
+      };
+    }
+  }
+
+  await sw.registration.showNotification(payload.title, payload.options);
 }
+
+sw.addEventListener("push", (event) => {
+  event.waitUntil(handlePush(event));
+});
+
+/**
+ * @param {NotificationEvent} event
+ * @returns {Promise<void>}
+ */
+async function handleNotificationClick(event) {
+  event.notification.close();
+
+  const data = isRecord(event.notification.data)
+    ? event.notification.data
+    : {};
+  const targetUrl = typeof data.url === "string" ? data.url : "/";
+  const absoluteUrl = new URL(targetUrl, sw.location.origin).href;
+
+  const windowClients = await sw.clients.matchAll({
+    type: "window",
+    includeUncontrolled: true,
+  });
+
+  for (const client of windowClients) {
+    if (!("focus" in client)) continue;
+
+    if (new URL(client.url).origin !== sw.location.origin) continue;
+
+    await client.focus();
+
+    if ("navigate" in client) {
+      await client.navigate(absoluteUrl);
+    }
+
+    return;
+  }
+
+  await sw.clients.openWindow(absoluteUrl);
+}
+
+sw.addEventListener("notificationclick", (event) => {
+  event.waitUntil(handleNotificationClick(event));
+});
+
+sw.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    sw.skipWaiting();
+  }
+});

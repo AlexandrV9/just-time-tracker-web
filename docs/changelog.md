@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.0.7
+
+### UI
+
+- Модальные окна открываются по центру экрана (дефолт `placement="center"` в `Dialog`)
+- NavBar: нижняя навигация снова растягивается на всю ширину (исправлен grid после refactor)
+- Главный таймер: placeholder «Select activity» вместо «Select activity or start timer» (en / ru / zh)
+
+### PWA и Service Worker
+
+- SW переписан на **Workbox**: корректный precache с revision, автоочистка старых кэшей
+- API и SSE (`/activities/events`) — только сеть, без кэширования
+- Офлайн-навигация: fallback на precached `index.html`
+- Кэш `/locales/` и `/icons/` (StaleWhileRevalidate), Google Fonts (CacheFirst)
+- Подготовка к **Web Push**: обработчики `push` и `notificationclick` в SW
+- Клиентский scaffold `pushNotifications/` (`subscribeToPush`, `unsubscribeFromPush`)
+- Precache расширен: locales, icons, json (47 entries)
+- nginx: `no-cache` для `/sw.js` и `/registerSW.js`
+
+### DevOps
+
+- `VITE_VAPID_PUBLIC_KEY` в `.env.example` (для будущего push API)
+- workbox-пакеты в devDependencies клиента
+
+---
+
 ## 1.0.6
 
 ### Авторизация

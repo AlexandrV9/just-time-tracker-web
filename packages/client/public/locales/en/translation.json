@@ -39,7 +39,7 @@
       "signInPageLink": "Already registered? Sign in"
     },
     "home": {
-      "selectActivity": "Select activity or start timer",
+      "selectActivity": "Select activity",
       "circularTimerStart": "Start",
       "circularTimerPause": "Pause",
       "circularTimerFinish": "Finish",

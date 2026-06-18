@@ -39,7 +39,7 @@
       "signInPageLink": "Уже есть аккаунт? Войти"
     },
     "home": {
-      "selectActivity": "Выберите активность или запустите таймер",
+      "selectActivity": "Выберите активность",
       "circularTimerStart": "Старт",
       "circularTimerPause": "Пауза",
       "circularTimerFinish": "Завершить",
