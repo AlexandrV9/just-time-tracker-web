@@ -11,7 +11,7 @@ import {
   getDayPlansSchema,
   updateDayPlanItemSchema,
   updateDayPlanSchema,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 
 import { dayPlanItemsService } from "./dayPlanItem.service.js";
 import { dayPlansService } from "./dayPlan.service.js";

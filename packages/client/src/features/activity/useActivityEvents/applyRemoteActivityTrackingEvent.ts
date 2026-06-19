@@ -1,4 +1,4 @@
-import type { ActivityTrackingEventDTO } from "@to-do-list/shared";
+import type { ActivityTrackingEventDTO } from "@time-tracker/shared";
 import type { CurrentActivityStore } from "../useCurrentActivity/useCurrentActivityStore";
 
 export function applyRemoteActivityTrackingEvent(

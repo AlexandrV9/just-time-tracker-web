@@ -1,5 +1,5 @@
 import type { WithCreatedById } from "../shared/auth/with-created-by-id.js";
-import type { ActivityTrackingEventTypeDTO } from "@to-do-list/shared";
+import type { ActivityTrackingEventTypeDTO } from "@time-tracker/shared";
 import type {
   CreateActivityDataDTO,
   UpdateActivityDataDTO,
@@ -29,7 +29,7 @@ import type {
   StartActivityDataDTO,
   PauseActivityDataDTO,
   FinishActivityDataDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 
 import {
   activityRepository,

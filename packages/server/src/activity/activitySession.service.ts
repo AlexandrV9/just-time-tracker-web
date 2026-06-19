@@ -1,4 +1,4 @@
-import type { GetActivityDTO } from "@to-do-list/shared";
+import type { GetActivityDTO } from "@time-tracker/shared";
 import { activitySessionQueries } from "./activitySession.queries.js";
 import {
   handlerJson,

@@ -17,7 +17,7 @@ import {
   startActivitySchema,
   pauseActivitySchema,
   finishActivitySchema,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 
 import {
   createValidatedHandler,

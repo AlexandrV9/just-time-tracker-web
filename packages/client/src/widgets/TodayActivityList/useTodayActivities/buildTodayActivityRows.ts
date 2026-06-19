@@ -1,4 +1,4 @@
-import type { ActivityDTO } from "@to-do-list/shared";
+import type { ActivityDTO } from "@time-tracker/shared";
 import type { ActivityState } from "~/shared/api/services";
 
 type BuildTodayActivityRowsProps = {

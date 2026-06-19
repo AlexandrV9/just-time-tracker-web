@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { loginSchema, updateProfileSchema } from "@to-do-list/shared";
+import { loginSchema, updateProfileSchema } from "@time-tracker/shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import z from "zod";
 import { authActions, useAuthStore } from "~/features/auth";

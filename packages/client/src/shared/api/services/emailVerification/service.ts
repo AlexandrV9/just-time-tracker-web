@@ -3,7 +3,7 @@ import type {
   ConfirmEmailVerificationResultDTO,
   EmailVerificationStateDTO,
   StartEmailVerificationDataDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { baseApi } from "../base";
 
 class EmailVerificationService {

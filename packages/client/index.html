@@ -1,28 +1,32 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>Just Time Tracker</title>
     <meta charset="UTF-8" />
-    <meta
-      name="description"
-      content="Just Time Tracker — a time tracker for daily activities."
-    />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
+    <title>Just Time Tracker</title>
+    <meta
+      name="description"
+      content="Just Time Tracker is a focused time-tracking app with a central timer, activities, analytics, calendar, and history — know where your day went."
+    />
+    <meta
+      name="keywords"
+      content="Just Time Tracker, time tracker, time tracking, productivity, timer, activities, analytics"
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="%VITE_APP_URL%/landing" />
+
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="Time Tracker" />
+    <meta name="apple-mobile-web-app-title" content="Just Time Tracker" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
     <meta name="theme-color" content="#ffffff" />
     <meta name="msapplication-TileColor" content="#ffffff" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
+
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap"
       rel="stylesheet"
@@ -30,12 +34,15 @@
 
     <!-- Open Graph / Telegram -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Just Time Tracker" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="%VITE_APP_URL%/landing" />
     <meta property="og:title" content="Just Time Tracker" />
     <meta
       property="og:description"
-      content="A time tracker for daily activities."
+      content="Just Time Tracker is a focused time-tracking app with a central timer, activities, analytics, calendar, and history — know where your day went."
     />
-    <meta property="og:image" content="/icons/logo-512x512.png" />
+    <meta property="og:image" content="%VITE_APP_URL%/icons/logo-512x512.png" />
     <meta property="og:image:width" content="512" />
     <meta property="og:image:height" content="512" />
 
@@ -44,9 +51,12 @@
     <meta name="twitter:title" content="Just Time Tracker" />
     <meta
       name="twitter:description"
-      content="A time tracker for daily activities."
+      content="Just Time Tracker is a focused time-tracking app with a central timer, activities, analytics, calendar, and history — know where your day went."
     />
-    <meta name="twitter:image" content="/icons/logo-512x512.png" />
+    <meta
+      name="twitter:image"
+      content="%VITE_APP_URL%/icons/logo-512x512.png"
+    />
 
     <link rel="icon" href="/icons/logo.ico" sizes="48x48" />
     <link
@@ -61,10 +71,42 @@
       href="/icons/logo-180x180.png"
     />
     <link rel="manifest" href="/manifest.json" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Just Time Tracker",
+        "url": "%VITE_APP_URL%/landing",
+        "description": "Just Time Tracker is a focused time-tracking app with a central timer, activities, analytics, calendar, and history — know where your day went.",
+        "applicationCategory": "ProductivityApplication",
+        "operatingSystem": "Web",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <noscript>
+        <main
+          style="max-width: 40rem; margin: 2rem auto; padding: 0 1rem; font-family: Inter, system-ui, sans-serif;"
+        >
+          <h1>Just Time Tracker</h1>
+          <p>
+            A focused time-tracking app with a central timer, activities,
+            analytics, calendar, and history.
+          </p>
+          <p>
+            <a href="/landing">Learn more</a>
+            ·
+            <a href="/signin">Sign in</a>
+            ·
+            <a href="/signup">Sign up</a>
+          </p>
+        </main>
+      </noscript>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

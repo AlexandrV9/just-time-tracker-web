@@ -3,7 +3,7 @@ import type {
   CreateActivityDataDTO,
   UpdateActivityDataDTO,
   DeleteActivityDataDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import type { WithCreatedById } from "../shared/auth/with-created-by-id.js";
 import { pgTimestampToIsoString } from "../shared/db/pgTimestamp.js";
 import { activityQueries } from "./activity.queries.js";

@@ -1,4 +1,4 @@
-import { baseIdSchema } from "@to-do-list/shared";
+import { baseIdSchema } from "@time-tracker/shared";
 import { createValidatedHandler } from "../shared/utils/request.js";
 import { activitySessionService } from "./activitySession.service.js";
 

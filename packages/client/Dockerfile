@@ -12,19 +12,19 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/shared/package.json packages/shared/
 COPY packages/client/package.json packages/client/
 
-RUN pnpm install --frozen-lockfile --ignore-scripts --filter @to-do-list/client...
+RUN pnpm install --frozen-lockfile --ignore-scripts --filter @time-tracker/client...
 
 COPY packages/shared packages/shared
 COPY packages/client packages/client
 
-RUN pnpm --filter @to-do-list/shared build
+RUN pnpm --filter @time-tracker/shared build
 
 ARG VITE_API_ENDPOINT
 ARG VITE_APP_URL
 ENV VITE_API_ENDPOINT=$VITE_API_ENDPOINT
 ENV VITE_APP_URL=$VITE_APP_URL
 
-RUN pnpm --filter @to-do-list/client build
+RUN pnpm --filter @time-tracker/client build
 
 FROM nginx:alpine
 

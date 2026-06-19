@@ -1,5 +1,5 @@
 {
-  "name": "@to-do-list/server",
+  "name": "@time-tracker/server",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -12,7 +12,7 @@
   "dependencies": {
     "@hono/node-server": "^1.19.3",
     "@hono/zod-validator": "^0.7.3",
-    "@to-do-list/shared": "workspace:*",
+    "@time-tracker/shared": "workspace:*",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.2",
     "hono": "^4.9.7",

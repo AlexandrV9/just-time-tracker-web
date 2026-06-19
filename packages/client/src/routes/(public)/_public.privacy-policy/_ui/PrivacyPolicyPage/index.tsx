@@ -1,11 +1,17 @@
 import { BackButton, Box, Heading, Stack, Text } from "~/shared/ui";
 import { useTranslation } from "~/shared/hooks";
+import { useSeo } from "~/shared/seo";
 import { useLayoutEffect } from "react";
 import { useHeaderStore } from "~/widgets";
 
 export function PrivacyPolicyPage() {
   const { t } = useTranslation();
   const { setContent } = useHeaderStore();
+
+  useSeo({
+    description: t("pages.privacyPolicy.intro"),
+    path: "/privacy-policy",
+  });
 
   const sections = t(`pages.privacyPolicy.sections`, {
     returnObjects: true,

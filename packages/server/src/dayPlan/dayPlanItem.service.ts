@@ -7,7 +7,7 @@ import type {
   GetDayPlanItemsDTO,
   GetDayPlanItemsResponseDTO,
   UpdateDayPlanItemDataDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 
 import { dayPlanItemQueries } from "./dayPlanItem.queries.js";
 import type { ErrorResponse, SuccessResponse } from "../shared/types.js";

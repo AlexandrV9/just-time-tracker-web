@@ -277,7 +277,7 @@ docker run --rm -p 3000:80 time-tracker-client
 | Server | `packages/server/Dockerfile` | Node 22, порт 9000 |
 | Client | `packages/client/Dockerfile` | nginx, порт 80 |
 
-Оба собираются с **контекстом корня репозитория** (monorepo + `@to-do-list/shared`).
+Оба собираются с **контекстом корня репозитория** (monorepo + `@time-tracker/shared`).
 
 Секреты (`ACCESS_TOKEN_SECRET`, `DB_PASSWORD` и т.д.) **не зашиваются** в образ — передаются через `.env` / `environment` при запуске.
 

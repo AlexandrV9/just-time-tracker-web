@@ -1,4 +1,4 @@
-import type { ActivityTrackingEventDTO } from "@to-do-list/shared";
+import type { ActivityTrackingEventDTO } from "@time-tracker/shared";
 
 type ActivityEventListener = (event: ActivityTrackingEventDTO) => void;
 

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import type {
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { useTranslation } from "~/shared/hooks";
 
 type ChartSegment = {

@@ -1,4 +1,4 @@
-import type { ActivitySessionSegmentDTO } from "@to-do-list/shared";
+import type { ActivitySessionSegmentDTO } from "@time-tracker/shared";
 import {
   pgTimestampToIsoString,
   pgTimestampToIsoStringOrNull,

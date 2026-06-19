@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
-import type { ActivityDTO } from "@to-do-list/shared";
+import type { ActivityDTO } from "@time-tracker/shared";
 import { useTranslation } from "~/shared/hooks";
 import {
   Button,

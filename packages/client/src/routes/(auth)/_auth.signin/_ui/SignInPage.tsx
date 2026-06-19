@@ -1,11 +1,13 @@
-// import { useSearch } from "@tanstack/react-router";
 import { SignInByLoginForm } from "~/features/auth";
-// import { useTranslation } from "~/shared/hooks";
+import { useSeo } from "~/shared/seo";
 import { Box, Flex, Stack } from "~/shared/ui";
 
 export function SignInPage() {
-  // const { t } = useTranslation();
-  // const { redirect } = useSearch({ from: "/(auth)/_auth/signin/" });
+  useSeo({
+    description:
+      "Sign in to Just Time Tracker — track time, manage activities, and review your day.",
+    path: "/signin",
+  });
 
   return (
     <Flex

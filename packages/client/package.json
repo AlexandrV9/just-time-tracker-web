@@ -1,5 +1,5 @@
 {
-  "name": "@to-do-list/client",
+  "name": "@time-tracker/client",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -24,7 +24,7 @@
     "@tanstack/react-router": "^1.131.35",
     "@tanstack/react-router-devtools": "^1.131.35",
     "@tanstack/zod-adapter": "^1.144.0",
-    "@to-do-list/shared": "workspace:*",
+    "@time-tracker/shared": "workspace:*",
     "axios": "^1.12.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

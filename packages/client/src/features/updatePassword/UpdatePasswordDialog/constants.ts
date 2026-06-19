@@ -1,4 +1,4 @@
-import { passwordSchema } from "@to-do-list/shared";
+import { passwordSchema } from "@time-tracker/shared";
 import z from "zod";
 
 export const setPasswordFormSchema = z

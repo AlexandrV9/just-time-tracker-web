@@ -4,7 +4,7 @@ import type {
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
   StartActivityDataDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { useCurrentActivityStore } from "~/features";
 
 import {

@@ -2,7 +2,7 @@ import {
   confirmPasswordResetSchema,
   startPasswordResetSchema,
   verifyPasswordResetSchema,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { resolveEmailLang } from "../shared/index.js";
 import { createValidatedHandler } from "../shared/utils/request.js";
 import { passwordResetService } from "./passwordReset.service.js";

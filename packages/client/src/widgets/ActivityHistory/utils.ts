@@ -1,4 +1,4 @@
-import type { ActivityDTO, ActivityGroupDTO } from "@to-do-list/shared";
+import type { ActivityDTO, ActivityGroupDTO } from "@time-tracker/shared";
 import { parseISO } from "date-fns";
 import type {
   ActivityState,

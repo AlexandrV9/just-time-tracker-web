@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   confirmEmailVerificationSchema,
   startEmailVerificationSchema,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "~/shared/hooks";
 import {

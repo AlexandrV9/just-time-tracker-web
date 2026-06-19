@@ -8,7 +8,7 @@ import type {
   GetDayPlanItemsResponseDTO,
   GetDayPlansResponseDTO,
   AddDayPlanItemsDataDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 
 import { baseApi } from "../base";
 import type { RequestResponse } from "../types";

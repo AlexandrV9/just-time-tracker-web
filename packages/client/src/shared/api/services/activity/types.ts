@@ -2,7 +2,7 @@ import type {
   ActivityDTO,
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 
 import type { CalendarDay } from "~/shared/libs";
 

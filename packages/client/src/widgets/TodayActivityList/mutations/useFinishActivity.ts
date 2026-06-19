@@ -3,7 +3,7 @@ import type {
   ActivityDTO,
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { useCurrentActivityStore } from "~/features";
 import {
   activityApiService,

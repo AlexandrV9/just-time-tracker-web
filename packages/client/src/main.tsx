@@ -8,11 +8,8 @@ if (!rootElement) {
   throw new Error("Root element not found");
 }
 
-if (!rootElement.innerHTML) {
-  const root = createRoot(rootElement);
-  root.render(
-    // <StrictMode>
-    <App />,
-    // </StrictMode>,
-  );
-}
+createRoot(rootElement).render(
+  // <StrictMode>
+  <App />,
+  // </StrictMode>,
+);
