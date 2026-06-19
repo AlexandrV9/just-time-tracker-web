@@ -3,7 +3,7 @@ import type {
   SetPasswordDataDTO,
   UpdatePasswordDataDTO,
   UpdateProfileDataDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { baseApi } from "../base";
 
 export type AuthProviderDTO = {

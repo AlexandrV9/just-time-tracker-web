@@ -1,11 +1,17 @@
 import { BackButton, Box, Heading, Stack, Text } from "~/shared/ui";
 import { useTranslation } from "~/shared/hooks";
+import { useSeo } from "~/shared/seo";
 import { useLayoutEffect } from "react";
 import { useHeaderStore } from "~/widgets";
 
 export function TermsOfServicePage() {
   const { t } = useTranslation();
   const { setContent } = useHeaderStore();
+
+  useSeo({
+    description: t("pages.termsOfService.intro"),
+    path: "/terms-of-service",
+  });
 
   const sections = t(`pages.termsOfService.sections`, {
     returnObjects: true,

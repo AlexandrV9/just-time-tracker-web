@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import z from "zod";
 import { ResetPasswordForm } from "~/features/resetPassword";
+import { useSeo } from "~/shared/seo";
 import { Flex } from "~/shared/ui";
 import { useHeaderLeftContent } from "~/widgets";
 
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/(auth)/_auth/recover-account/")({
 
 function RecoverAccountPage() {
   useHeaderLeftContent(null);
+  useSeo({ noIndex: true, path: "/recover-account" });
 
   const { email: recoveryEmail } = Route.useSearch();
   const navigate = useNavigate();

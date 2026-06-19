@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import type { ActivityDTO } from "@to-do-list/shared";
+import type { ActivityDTO } from "@time-tracker/shared";
 import { useMemo } from "react";
 import {
   Box,

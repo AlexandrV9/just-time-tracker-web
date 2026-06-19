@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { PasswordResetStatusDTO } from "@to-do-list/shared";
+import type { PasswordResetStatusDTO } from "@time-tracker/shared";
 import { useCallback, useEffect, useState } from "react";
 import { authService } from "~/shared/api/services/auth";
 import { useNowMs, useTranslation } from "~/shared/hooks";

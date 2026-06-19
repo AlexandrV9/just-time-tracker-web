@@ -2,7 +2,7 @@ import type {
   ActivityDTO,
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { useMemo } from "react";
 import { keyframes } from "@emotion/react";
 import {

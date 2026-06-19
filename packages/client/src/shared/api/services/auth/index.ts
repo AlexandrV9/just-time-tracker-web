@@ -6,7 +6,7 @@ import type {
   StartPasswordResetDataDTO,
   VerifyPasswordResetDataDTO,
   VerifyPasswordResetResultDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import type { AuthUserDTO, ErrorField } from "./types";
 import type { RequestResponse } from "../types";
 import { tokenManager } from "~/shared/utils";

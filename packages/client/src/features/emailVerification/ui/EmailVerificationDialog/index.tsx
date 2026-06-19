@@ -2,7 +2,7 @@ import type { UseDialogReturn } from "@ark-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   confirmEmailVerificationSchema,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "~/shared/hooks";
 import {

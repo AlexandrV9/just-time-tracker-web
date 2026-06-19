@@ -1,11 +1,18 @@
 import { SignUpForm } from "~/features/auth";
 import { useTranslation } from "~/shared/hooks";
+import { useSeo } from "~/shared/seo";
 import { Box, Flex, Link, Text } from "~/shared/ui";
 
 const baseLocale = "pages.signUp.legalNotice";
 
 export function SignUpPage() {
   const { t } = useTranslation();
+
+  useSeo({
+    description:
+      "Create a Just Time Tracker account and start tracking your daily activities.",
+    path: "/signup",
+  });
 
   return (
     <Flex

@@ -1,7 +1,7 @@
 import type {
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { convertMillisecondsToSeconds } from "~/shared/ui";
 import { useMemo } from "react";
 import { useNowMs } from "~/shared/hooks";

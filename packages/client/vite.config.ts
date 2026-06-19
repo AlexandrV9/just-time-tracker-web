@@ -3,10 +3,11 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { getSiteUrl, sitemapPlugin } from "./scripts/sitemap";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "VITE_API_ENDPOINT");
+  const env = loadEnv(mode, process.cwd(), "");
   const apiEndpoint = env.VITE_API_ENDPOINT;
 
   return {
@@ -16,6 +17,7 @@ export default defineConfig(({ mode }) => {
         autoCodeSplitting: true,
       }),
       react(),
+      sitemapPlugin(getSiteUrl(env)),
       VitePWA({
         registerType: "autoUpdate",
         injectRegister: "auto",

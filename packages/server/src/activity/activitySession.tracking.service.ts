@@ -2,7 +2,7 @@ import type {
   ActivityDTO,
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import type { PoolClient } from "pg";
 import { pool } from "../shared/index.js";
 import { activityRepository } from "./activity.repository.js";

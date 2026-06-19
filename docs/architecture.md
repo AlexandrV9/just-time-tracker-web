@@ -14,9 +14,9 @@
 ```
 time-tracker/
 ├── packages/
-│   ├── client/    @to-do-list/client   — React SPA
-│   ├── server/    @to-do-list/server   — Hono API
-│   └── shared/    @to-do-list/shared   — Zod-схемы и DTO
+│   ├── client/    @time-tracker/client   — React SPA
+│   ├── server/    @time-tracker/server   — Hono API
+│   └── shared/    @time-tracker/shared   — Zod-схемы и DTO
 ├── .docker/       postgres + pgadmin для локальной разработки
 ├── docker-compose.yml          — полный локальный стек
 ├── docker-compose.prod.yml     — prod через GHCR-образы
@@ -90,7 +90,7 @@ time-tracker/
 **Handlers** — `createValidatedHandler()` (`shared/utils/request.ts`):
 
 1. parse request (query / body / params)
-2. Zod-валидация через схемы из `@to-do-list/shared`
+2. Zod-валидация через схемы из `@time-tracker/shared`
 3. optional `withCreatedById(c, data)` — для user-scoped операций
 4. вызов service → JSON-ответ
 

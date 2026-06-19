@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import type { ActivityTrackingEventDTO } from "@to-do-list/shared";
+import type { ActivityTrackingEventDTO } from "@time-tracker/shared";
 import { activityEventsHub } from "../../src/activity/activityEvents.hub.js";
 
 const sampleEvent: ActivityTrackingEventDTO = {

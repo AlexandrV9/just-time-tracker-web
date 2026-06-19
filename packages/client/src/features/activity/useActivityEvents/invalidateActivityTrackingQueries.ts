@@ -1,5 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query";
-import type { ActivityTrackingEventTypeDTO } from "@to-do-list/shared";
+import type { ActivityTrackingEventTypeDTO } from "@time-tracker/shared";
 import {
   ACTIVITIES_ANALYTICS_QUERY_KEY,
   ACTIVITIES_CURRENT_QUERY_KEY,

@@ -41,9 +41,9 @@ pnpm verify   # lint + build:shared + test + build
 
 ```bash
 pnpm test                                          # все тесты server
-pnpm --filter @to-do-list/server test:watch        # watch-режим
-pnpm --filter @to-do-list/server vitest run src      # только unit (без integration)
-pnpm --filter @to-do-list/server vitest run tests/integration/activity.handlers.test.ts
+pnpm --filter @time-tracker/server test:watch        # watch-режим
+pnpm --filter @time-tracker/server vitest run src      # только unit (без integration)
+pnpm --filter @time-tracker/server vitest run tests/integration/activity.handlers.test.ts
 ```
 
 Из `packages/server`:
@@ -186,7 +186,7 @@ Vitest setup загружает env из:
 Последовательность (как в CI):
 
 1. `**pnpm lint`** — ESLint клиента (`packages/client`)
-2. `**pnpm build:shared**` — сборка `@to-do-list/shared` (нужна для импортов в тестах)
+2. `**pnpm build:shared**` — сборка `@time-tracker/shared` (нужна для импортов в тестах)
 3. `**pnpm test**` — Vitest server
 4. `**pnpm build**` — сборка shared + client + server
 
@@ -222,7 +222,7 @@ docker build -f packages/client/Dockerfile \
 
 ## Troubleshooting
 
-### `Cannot find module '@to-do-list/shared'`
+### `Cannot find module '@time-tracker/shared'`
 
 ```bash
 pnpm build:shared
@@ -240,7 +240,7 @@ Docker daemon должен быть запущен. При проблемах с
 
 ### CI падает на `build:client`
 
-Частая причина — TypeScript ошибки в client. Локально: `pnpm --filter @to-do-list/client build`.
+Частая причина — TypeScript ошибки в client. Локально: `pnpm --filter @time-tracker/client build`.
 
 ## Добавление новых тестов
 

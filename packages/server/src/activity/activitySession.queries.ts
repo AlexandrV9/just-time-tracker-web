@@ -2,7 +2,7 @@ import type {
   ActivitySessionDTO,
   CreateActivitySessionDataDTO,
   UpdateActivitySessionDataDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import {
   pgTimestampToIsoString,
   pgTimestampToIsoStringOrNull,

@@ -47,7 +47,7 @@ importers:
       '@tanstack/zod-adapter':
         specifier: ^1.144.0
         version: 1.144.0(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(zod@4.1.12)
-      '@to-do-list/shared':
+      '@time-tracker/shared':
         specifier: workspace:*
         version: link:../shared
       axios:
@@ -180,7 +180,7 @@ importers:
       '@hono/zod-validator':
         specifier: ^0.7.3
         version: 0.7.3(hono@4.9.7)(zod@4.1.12)
-      '@to-do-list/shared':
+      '@time-tracker/shared':
         specifier: workspace:*
         version: link:../shared
       bcrypt:

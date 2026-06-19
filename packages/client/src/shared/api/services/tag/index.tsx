@@ -1,4 +1,4 @@
-import type { GetTagDataDTO, TagDTO } from "@to-do-list/shared";
+import type { GetTagDataDTO, TagDTO } from "@time-tracker/shared";
 import { baseApi } from "../base";
 
 export class TagService {

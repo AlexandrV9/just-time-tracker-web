@@ -3,7 +3,7 @@ import type {
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
   ActivityStatusDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { useMemo } from "react";
 import { keyframes } from "@emotion/react";
 import { Box, Flex, Text, convertMillisecondsToSeconds } from "~/shared/ui";

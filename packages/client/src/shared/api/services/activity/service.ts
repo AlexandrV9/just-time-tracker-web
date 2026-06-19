@@ -30,7 +30,7 @@ import type {
   StartActivityDataDTO,
   FinishActivityDataDTO,
   PauseActivityDataDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { baseApi } from "../base";
 import type { RequestResponse } from "../types";
 

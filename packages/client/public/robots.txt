@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+Disallow: /api/
+Disallow: /settings
+Disallow: /history
+Disallow: /calendar
+Disallow: /activities
+Disallow: /callback
+Disallow: /recover-account
+Disallow: /signup-email
+
+Sitemap: https://just-time-tracker.ru/sitemap.xml

@@ -1,4 +1,4 @@
-import { loginSchema, passwordSchema } from "@to-do-list/shared";
+import { loginSchema, passwordSchema } from "@time-tracker/shared";
 import z from "zod";
 
 export const signInSchema = z.object({

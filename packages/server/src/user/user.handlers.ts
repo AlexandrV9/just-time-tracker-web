@@ -1,4 +1,4 @@
-import { setPasswordSchema, updatePasswordSchema, updateProfileSchema } from "@to-do-list/shared";
+import { setPasswordSchema, updatePasswordSchema, updateProfileSchema } from "@time-tracker/shared";
 import type { Context } from "hono";
 import type { AuthVariables } from "../shared/auth/auth.variables.js";
 import { getAuthenticatedUserId } from "../shared/auth/with-created-by-id.js";

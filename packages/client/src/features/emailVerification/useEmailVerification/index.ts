@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { EmailVerificationStateDTO } from "@to-do-list/shared";
+import type { EmailVerificationStateDTO } from "@time-tracker/shared";
 import { useCallback, useEffect, useState } from "react";
 import { authActions } from "~/features/auth";
 import { emailVerificationApiService } from "~/shared/api/services";

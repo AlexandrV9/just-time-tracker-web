@@ -4,7 +4,7 @@ import {
   passwordSchema,
   startPasswordResetSchema,
   verifyPasswordResetSchema,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import type { TFunction } from "i18next";
 import { useCallback, useEffect, useState } from "react";
 import z from "zod";

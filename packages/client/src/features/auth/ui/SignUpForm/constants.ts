@@ -3,7 +3,7 @@ import {
   maxLengthPassword,
   minLengthPassword,
   passwordSchema,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import z from "zod";
 
 export { maxLengthPassword, minLengthPassword };

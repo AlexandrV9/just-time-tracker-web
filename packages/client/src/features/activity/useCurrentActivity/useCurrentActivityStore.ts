@@ -2,7 +2,7 @@ import type {
   ActivityDTO,
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { devtools } from "zustand/middleware";
 import { create } from "zustand";
 import type { Updater } from "~/shared/types";

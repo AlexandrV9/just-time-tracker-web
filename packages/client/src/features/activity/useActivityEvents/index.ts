@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { activityTrackingEventSchema } from "@to-do-list/shared";
+import { activityTrackingEventSchema } from "@time-tracker/shared";
 import { useCallback, useEffect, useRef } from "react";
 import { useAuthStore } from "~/features/auth";
 import { ACCESS_TOKEN_KEY } from "~/shared/constants";

@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import z from "zod";
 import { authManager } from "~/features/auth";
 import { useTranslation } from "~/shared/hooks";
+import { useSeo } from "~/shared/seo";
 import { toast } from "~/shared/ui";
 import { Flex, Text } from "~/shared/ui";
 
@@ -21,6 +22,8 @@ function OAuthCallbackPage() {
   const { t } = useTranslation();
   const { redirect: redirectTo, error } = Route.useSearch();
   const navigate = useNavigate();
+
+  useSeo({ noIndex: true, path: "/callback" });
 
   useEffect(() => {
     if (error) {

@@ -6,7 +6,7 @@ import {
 import type {
   GetGroupedActivitiesResponseDTO,
   GetGroupedActivityItemsResponseDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { useTranslation } from "~/shared/hooks";
 import { activityApiService } from "~/shared/api/services";
 import {

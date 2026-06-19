@@ -25,7 +25,7 @@
 
     "paths": {
       "~/*": ["./src/*"],
-      "@to-do-list/shared": ["../shared/src"]
+      "@time-tracker/shared": ["../shared/src"]
     },
   },
   "include": ["src"]

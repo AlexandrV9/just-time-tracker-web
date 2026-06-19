@@ -4,7 +4,7 @@ import type {
   DayPlanItemDTO,
   GetDayPlanItemsDTO,
   UpdateDayPlanItemDataDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { pool } from "../shared/index.js";
 
 export const DAY_PLAN_ITEM_RETURNING_COLUMNS = `

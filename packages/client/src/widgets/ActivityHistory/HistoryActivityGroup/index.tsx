@@ -2,7 +2,7 @@ import type {
   ActivityDTO,
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { Box, Button, Flex, Text } from "~/shared/ui";
 import {
   convertSecondsToTimeObject,

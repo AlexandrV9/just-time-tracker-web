@@ -1,4 +1,4 @@
-import { startEmailVerificationSchema } from "@to-do-list/shared";
+import { startEmailVerificationSchema } from "@time-tracker/shared";
 import z from "zod";
 
 export const normalizeEmail = (email: string) => email.trim().toLowerCase();

@@ -1,5 +1,6 @@
 import { useSearch } from "@tanstack/react-router";
 import { useTranslation } from "~/shared/hooks";
+import { useSeo } from "~/shared/seo";
 import {
   Box,
   Button,
@@ -20,6 +21,11 @@ export const LandingPage = () => {
   const { t } = useTranslation();
   const { redirect } = useSearch({ from: "/(public)/_public/landing/" });
   const redirectPath = redirect?.trim();
+
+  useSeo({
+    description: t("pages.landing.subtitle"),
+    path: "/landing",
+  });
 
   const signInSearch = {
     redirect: redirectPath && redirectPath.length > 0 ? redirectPath : "/",

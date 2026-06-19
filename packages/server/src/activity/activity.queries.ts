@@ -8,7 +8,7 @@ import type {
   GetTrackedActivitiesQueryDTO,
   GetGroupedActivitiesQueryDTO,
   GetGroupedActivityItemsQueryDTO,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import { pool } from "../shared/index.js";
 import type { WithCreatedById } from "../shared/auth/with-created-by-id.js";
 

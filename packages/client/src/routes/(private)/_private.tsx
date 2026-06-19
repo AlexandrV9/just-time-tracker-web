@@ -9,6 +9,7 @@ import {
   useTranslation,
 } from "~/shared/hooks";
 import { buildLocationRedirectPath } from "~/shared/libs";
+import { useSeo } from "~/shared/seo";
 import { Box, Flex, PageLayout, Text } from "~/shared/ui";
 import { Header, HeaderAppTitle, NavBar, useHeaderStore } from "~/widgets";
 
@@ -68,6 +69,8 @@ export const Route = createFileRoute("/(private)/_private")({
 
 export function PrivateLayout() {
   const { setContent } = useHeaderStore();
+
+  useSeo({ noIndex: true });
 
   useActivityEvents();
 

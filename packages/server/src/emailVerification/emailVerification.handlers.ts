@@ -1,7 +1,7 @@
 import {
   confirmEmailVerificationSchema,
   startEmailVerificationSchema,
-} from "@to-do-list/shared";
+} from "@time-tracker/shared";
 import type { Context } from "hono";
 import { resolveEmailLang } from "../shared/index.js";
 import type { AuthVariables } from "../shared/auth/auth.variables.js";

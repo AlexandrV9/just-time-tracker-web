@@ -1,7 +1,7 @@
 import type { TFunction } from "i18next";
 import { updatePasswordDialogLocale } from "./constants";
 
-import { maxLengthPassword, minLengthPassword } from "@to-do-list/shared";
+import { maxLengthPassword, minLengthPassword } from "@time-tracker/shared";
 
 export function getTranslatedError(
   t: TFunction<"translation", undefined>,

@@ -1,4 +1,4 @@
-import type { ActivityDTO, ActivityStatusDTO } from "@to-do-list/shared";
+import type { ActivityDTO, ActivityStatusDTO } from "@time-tracker/shared";
 import type { MouseEvent } from "react";
 import { Flex, PauseCircleIcon, PlayCircleIcon, StopIcon } from "~/shared/ui";
 import { IconButton } from "@chakra-ui/react";
