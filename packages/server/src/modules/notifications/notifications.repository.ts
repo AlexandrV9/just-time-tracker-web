@@ -167,6 +167,25 @@ const findNextPendingSendAt = async (): Promise<string | null> => {
   return row?.sendAt ?? null;
 };
 
+const hasSentGoalNotificationSince = async (
+  activityId: string,
+  since: string,
+): Promise<boolean> => {
+  const query = `
+    SELECT EXISTS (
+      SELECT 1
+      FROM notification_jobs
+      WHERE activity_id = $1::uuid
+        AND type = 'activity_goal_reached'
+        AND status = 'sent'
+        AND sent_at >= $2::timestamptz
+    ) AS "exists"
+  `;
+
+  const { rows } = await pool.query(query, [activityId, since]);
+  return Boolean((rows[0] as { exists: boolean } | undefined)?.exists);
+};
+
 export const notificationsRepository = {
   createJob,
   findDuePendingJobs,
@@ -176,4 +195,5 @@ export const notificationsRepository = {
   markAsCanceled,
   findById,
   cancelPendingJobs,
+  hasSentGoalNotificationSince,
 };

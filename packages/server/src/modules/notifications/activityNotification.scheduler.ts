@@ -3,7 +3,9 @@ import type {
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
 } from "@time-tracker/shared";
+import { activitySessionSegmentQueries } from "../../activity/activitySessionSegment.queries.js";
 import { activitySettingsQueries } from "../../activity/activitySettings.queries.js";
+import { notificationsRepository } from "./notifications.repository.js";
 import { notificationsService } from "./notifications.service.js";
 import {
   NOTIFICATION_JOB_TYPES,
@@ -11,6 +13,84 @@ import {
 } from "./notifications.types.js";
 
 const msFromSeconds = (seconds: number) => seconds * 1000;
+
+const getUtcDayInterval = (): { fromDate: string; toDate: string } => {
+  const now = new Date();
+  const fromMs = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
+  );
+
+  return {
+    fromDate: new Date(fromMs).toISOString(),
+    toDate: new Date(fromMs + 86_400_000).toISOString(),
+  };
+};
+
+const sumActiveDurationMsInRange = (
+  segments: Array<{
+    type: ActivitySessionSegmentDTO["type"];
+    startedAt: string;
+    endedAt: string | null;
+  }>,
+  fromMs: number,
+  toMs: number,
+): number => {
+  const nowMs = Date.now();
+  let total = 0;
+
+  for (const segment of segments) {
+    if (segment.type !== "active") continue;
+
+    const startMs = Date.parse(segment.startedAt);
+    const endMs = segment.endedAt ? Date.parse(segment.endedAt) : nowMs;
+    if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) continue;
+
+    const clipStart = Math.max(startMs, fromMs);
+    const clipEnd = Math.min(endMs, toMs);
+    if (clipEnd > clipStart) {
+      total += clipEnd - clipStart;
+    }
+  }
+
+  return Math.max(0, Math.floor(total));
+};
+
+const getTodayActiveDurationSeconds = async (
+  activityId: string,
+): Promise<number> => {
+  const { fromDate, toDate } = getUtcDayInterval();
+  const fromMs = Date.parse(fromDate);
+  const toMs = Date.parse(toDate);
+
+  const segments =
+    await activitySessionSegmentQueries.listSegmentIntervalsForActivityInRange(
+      activityId,
+      fromDate,
+      toDate,
+    );
+
+  return Math.floor(
+    sumActiveDurationMsInRange(segments, fromMs, toMs) / 1000,
+  );
+};
+
+const isDailyGoalReached = async (
+  activityId: string,
+  goalSeconds: number,
+): Promise<boolean> => {
+  const todayActiveSeconds = await getTodayActiveDurationSeconds(activityId);
+  if (todayActiveSeconds >= goalSeconds) {
+    return true;
+  }
+
+  const { fromDate } = getUtcDayInterval();
+  return notificationsRepository.hasSentGoalNotificationSince(
+    activityId,
+    fromDate,
+  );
+};
 
 const getCurrentSegmentElapsedSeconds = (
   segment: ActivitySessionSegmentDTO | null | undefined,
@@ -82,7 +162,7 @@ export const activityNotificationScheduler = {
       activity.id,
     );
 
-    const activeSeconds = Math.floor(session.activeDurationMs / 1000);
+    const todayActiveSeconds = await getTodayActiveDurationSeconds(activity.id);
     const now = Date.now();
     const base = {
       userId: activity.createdById,
@@ -92,16 +172,23 @@ export const activityNotificationScheduler = {
     };
 
     if (settings.notifyOnGoalReached) {
-      const delaySeconds = Math.max(
-        0,
-        settings.sessionGoalSeconds - activeSeconds,
+      const dailyGoalReached = await isDailyGoalReached(
+        activity.id,
+        settings.sessionGoalSeconds,
       );
 
-      await scheduleJob({
-        ...base,
-        type: NOTIFICATION_JOB_TYPES.ACTIVITY_GOAL_REACHED,
-        sendAt: new Date(now + msFromSeconds(delaySeconds)),
-      });
+      if (!dailyGoalReached) {
+        const delaySeconds = Math.max(
+          0,
+          settings.sessionGoalSeconds - todayActiveSeconds,
+        );
+
+        await scheduleJob({
+          ...base,
+          type: NOTIFICATION_JOB_TYPES.ACTIVITY_GOAL_REACHED,
+          sendAt: new Date(now + msFromSeconds(delaySeconds)),
+        });
+      }
     }
 
     if (settings.notifyOnLongActivity) {
