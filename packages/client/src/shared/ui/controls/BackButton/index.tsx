@@ -7,15 +7,22 @@ import type { FileRouteTypes } from "~/routeTree.gen";
 export type BackButtonProps = Omit<IconButtonProps, "onClick"> & {
   /** Explicit back target — use when browser history may contain external OAuth redirects. */
   to?: FileRouteTypes["to"];
+  params?: Record<string, string>;
+  onBack?: () => void;
 };
 
-export const BackButton = ({ to, ...props }: BackButtonProps) => {
+export const BackButton = ({ to, params, onBack, ...props }: BackButtonProps) => {
   const router = useRouter();
   const navigate = useNavigate();
 
   const handleGoBackPage = useCallback(() => {
+    if (onBack) {
+      onBack();
+      return;
+    }
+
     if (to) {
-      navigate({ to });
+      navigate({ to, params });
       return;
     }
 
@@ -28,7 +35,7 @@ export const BackButton = ({ to, ...props }: BackButtonProps) => {
       to: "/",
       replace: true,
     });
-  }, [navigate, router.history, to]);
+  }, [navigate, onBack, params, router.history, to]);
 
   return (
     <IconButton

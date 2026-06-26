@@ -1,9 +1,14 @@
 import path from "path";
+import { readFileSync } from "fs";
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { getSiteUrl, sitemapPlugin } from "./scripts/sitemap";
+
+const appVersion = JSON.parse(
+  readFileSync(path.resolve(__dirname, "../../package.json"), "utf-8"),
+).version as string;
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -11,6 +16,9 @@ export default defineConfig(({ mode }) => {
   const apiEndpoint = env.VITE_API_ENDPOINT;
 
   return {
+    define: {
+      "import.meta.env.VITE_APP_VERSION": JSON.stringify(appVersion),
+    },
     plugins: [
       tanstackRouter({
         target: "react",

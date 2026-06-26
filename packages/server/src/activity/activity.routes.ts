@@ -24,6 +24,8 @@ activitiesRouter.get(
   "/:id/session-segments",
   activityHandlers.getSessionSegmentsByActivityId,
 );
+activitiesRouter.get("/:id/settings", activityHandlers.getActivitySettings);
+activitiesRouter.patch("/:id/settings", activityHandlers.updateActivitySettings);
 activitiesRouter.get("/:id", activityHandlers.getActivityById);
 activitiesRouter.patch("/:id", activityHandlers.updateActivity);
 activitiesRouter.delete("/:id", activityHandlers.deleteActivity);

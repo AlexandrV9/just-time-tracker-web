@@ -6,6 +6,87 @@
 
 ---
 
+## Деплой 1.1.7 (уведомления + настройки активности)
+
+Краткий чеклист для обновления **существующего** prod с 1.0.7.
+
+### 1. GitHub — до деплоя
+
+1. Смержить ветку в `main`.
+2. Дождаться зелёного CI (сборка `client` + `server` в GHCR).
+3. В **Settings → Actions → Variables** убедиться, что заданы:
+   - `VITE_APP_URL=https://<ваш-домен>`
+   - `VITE_API_ENDPOINT=https://<ваш-домен>`
+
+Новых обязательных переменных в `.env` на VPS нет. Web Push (`VITE_VAPID_PUBLIC_KEY`) — опционально, для будущего.
+
+### 2. Миграция БД (обязательно)
+
+На **существующей** базе (не на свежем postgres с пустым volume) один раз:
+
+**С локальной машины** — скопировать файл:
+
+```bash
+scp packages/server/db/migrations/003_notifications_and_activity_settings.sql \
+  <USER>@<SERVER>:~/003_notifications_and_activity_settings.sql
+```
+
+**На сервере** — выполнить:
+
+```bash
+docker exec -i time-tracker-postgres psql -U postgres -d time_tracker \
+  < ~/003_notifications_and_activity_settings.sql
+
+rm ~/003_notifications_and_activity_settings.sql
+```
+
+Если контейнер postgres называется иначе — подставьте имя из `docker ps`.
+
+Миграция идемпотентна (`IF NOT EXISTS`) — повторный запуск безопасен.
+
+> Если вы уже накатывали черновые `003_notification_jobs_*` или `004_activity_settings.sql` из dev-ветки — не страшно, эта `003` содержит тот же финальный schema.
+
+### 3. Подтянуть образы и перезапустить
+
+```bash
+cd /opt/time-tracker
+
+docker compose -f docker-compose.prod.yml --env-file .env pull
+docker compose -f docker-compose.prod.yml --env-file .env up -d
+```
+
+Проверка:
+
+```bash
+docker compose -f docker-compose.prod.yml ps
+curl -s http://localhost/api/health | jq .
+```
+
+### 4. Smoke-тест после 1.1.7
+
+| # | Действие | Ожидание |
+|---|----------|----------|
+| 1 | `curl https://<домен>/api/health` | `status: OK` |
+| 2 | Hard refresh / переустановка PWA | Новая версия client, свежие locales |
+| 3 | Активность → Настройки | Цель сессии и блок уведомлений сохраняются |
+| 4 | Запустить таймер, включить «долгая активность» с коротким порогом | In-app напоминание (SSE toast) |
+| 5 | Скролл на `/activities` → переход в Историю | Скролл сброшен вверх |
+| 6 | Активность → Аналитика | Страница открывается без ошибок |
+
+Логи worker уведомлений:
+
+```bash
+docker compose -f docker-compose.prod.yml logs -f server | grep -i notification
+```
+
+### 5. Кэш client после деплоя
+
+В **1.1.7** runtime-кэши Service Worker (`locales`, `icons`, fonts) привязаны к версии приложения. После `pull client` пользователям достаточно обычного обновления страницы; SW подтянет новый precache автоматически (`autoUpdate`).
+
+Если видите старые переводы — DevTools → Application → Service Workers → Unregister, затем hard refresh.
+
+---
+
 ## Деплой 1.0.6 (Yandex OAuth + email)
 
 Краткий чеклист для обновления **существующего** prod с 1.0.5.
@@ -229,6 +310,7 @@ docker compose -f docker-compose.prod.yml --env-file .env up -d
 |--------|------|-------------|
 | 1.0.1 | `001_add_users_email_avatar.sql` | email + avatar в users |
 | 1.0.6 | `002_email_auth_verification.sql` | OAuth, verification, password reset, лимит писем |
+| 1.1.7 | `003_notifications_and_activity_settings.sql` | notification jobs, push subscriptions, activity settings |
 
 **Через Docker:**
 

@@ -1,6 +1,6 @@
-import type { ActivityTrackingEventDTO } from "@time-tracker/shared";
+import type { ActivityStreamEventDTO } from "@time-tracker/shared";
 
-type ActivityEventListener = (event: ActivityTrackingEventDTO) => void;
+type ActivityEventListener = (event: ActivityStreamEventDTO) => void;
 
 const normalizeUserId = (userId: string | number) => String(userId);
 
@@ -32,7 +32,7 @@ class ActivityEventsHub {
     };
   }
 
-  publish(userId: string | number, event: ActivityTrackingEventDTO): void {
+  publish(userId: string | number, event: ActivityStreamEventDTO): void {
     const listeners = this.subscribers.get(normalizeUserId(userId));
     if (!listeners) return;
 

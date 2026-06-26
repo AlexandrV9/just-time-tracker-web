@@ -6,7 +6,7 @@ import { ACTIVITIES_CURRENT_QUERY_KEY } from "~/shared/api/services";
 import { useAuthStore } from "../../auth/useAuthStore";
 import { useShallow } from "zustand/react/shallow";
 import { useCurrentActivityStore } from "./useCurrentActivityStore";
-import { fetchCurrentActivityData } from "./utils";
+import { fetchCurrentActivityData, mergeCurrentActivityFromServer } from "./utils";
 
 export function useCurrentActivity() {
   const userId = useAuthStore((state) => state.user?.id);
@@ -45,10 +45,21 @@ export function useCurrentActivity() {
   useEffect(() => {
     if (!query.data) return;
 
-    updateData({
-      currentActivity: query.data.activity,
-      currentSession: query.data.session,
-      currentSegment: query.data.segment,
+    updateData((prev) => {
+      const merged = mergeCurrentActivityFromServer(
+        {
+          activity: prev.currentActivity ?? null,
+          session: prev.currentSession ?? null,
+          segment: prev.currentSegment ?? null,
+        },
+        query.data,
+      );
+
+      return {
+        currentActivity: merged.activity,
+        currentSession: merged.session,
+        currentSegment: merged.segment,
+      };
     });
   }, [query.data, updateData]);
 

@@ -30,6 +30,9 @@ import { Route as authAuthCallbackIndexRouteImport } from './routes/(auth)/_auth
 import { Route as privatePrivateSettingsSecurityRouteImport } from './routes/(private)/_private.settings/security'
 import { Route as privatePrivateSettingsProfileRouteImport } from './routes/(private)/_private.settings/profile'
 import { Route as privatePrivateActivitiesActivityIdRouteImport } from './routes/(private)/_private.activities/$activityId'
+import { Route as privatePrivateActivitiesActivityIdIndexRouteImport } from './routes/(private)/_private.activities/$activityId/index'
+import { Route as privatePrivateActivitiesActivityIdSettingsRouteImport } from './routes/(private)/_private.activities/$activityId.settings'
+import { Route as privatePrivateActivitiesActivityIdAnalyticsRouteImport } from './routes/(private)/_private.activities/$activityId.analytics'
 
 const publicRouteImport = createFileRoute('/(public)')()
 const privateRouteImport = createFileRoute('/(private)')()
@@ -151,10 +154,28 @@ const privatePrivateActivitiesActivityIdRoute =
     path: '/activities/$activityId',
     getParentRoute: () => privatePrivateRoute,
   } as any)
+const privatePrivateActivitiesActivityIdIndexRoute =
+  privatePrivateActivitiesActivityIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => privatePrivateActivitiesActivityIdRoute,
+  } as any)
+const privatePrivateActivitiesActivityIdSettingsRoute =
+  privatePrivateActivitiesActivityIdSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => privatePrivateActivitiesActivityIdRoute,
+  } as any)
+const privatePrivateActivitiesActivityIdAnalyticsRoute =
+  privatePrivateActivitiesActivityIdAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => privatePrivateActivitiesActivityIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof privatePrivateIndexRoute
-  '/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
+  '/activities/$activityId': typeof privatePrivateActivitiesActivityIdRouteWithChildren
   '/settings/profile': typeof privatePrivateSettingsProfileRoute
   '/settings/security': typeof privatePrivateSettingsSecurityRoute
   '/callback': typeof authAuthCallbackIndexRoute
@@ -169,10 +190,12 @@ export interface FileRoutesByFullPath {
   '/landing': typeof publicPublicLandingIndexRoute
   '/privacy-policy': typeof publicPublicPrivacyPolicyIndexRoute
   '/terms-of-service': typeof publicPublicTermsOfServiceIndexRoute
+  '/activities/$activityId/analytics': typeof privatePrivateActivitiesActivityIdAnalyticsRoute
+  '/activities/$activityId/settings': typeof privatePrivateActivitiesActivityIdSettingsRoute
+  '/activities/$activityId/': typeof privatePrivateActivitiesActivityIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof privatePrivateIndexRoute
-  '/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
   '/settings/profile': typeof privatePrivateSettingsProfileRoute
   '/settings/security': typeof privatePrivateSettingsSecurityRoute
   '/callback': typeof authAuthCallbackIndexRoute
@@ -187,6 +210,9 @@ export interface FileRoutesByTo {
   '/landing': typeof publicPublicLandingIndexRoute
   '/privacy-policy': typeof publicPublicPrivacyPolicyIndexRoute
   '/terms-of-service': typeof publicPublicTermsOfServiceIndexRoute
+  '/activities/$activityId/analytics': typeof privatePrivateActivitiesActivityIdAnalyticsRoute
+  '/activities/$activityId/settings': typeof privatePrivateActivitiesActivityIdSettingsRoute
+  '/activities/$activityId': typeof privatePrivateActivitiesActivityIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -197,7 +223,7 @@ export interface FileRoutesById {
   '/(public)': typeof publicRouteWithChildren
   '/(public)/_public': typeof publicPublicRouteWithChildren
   '/(private)/_private/': typeof privatePrivateIndexRoute
-  '/(private)/_private/activities/$activityId': typeof privatePrivateActivitiesActivityIdRoute
+  '/(private)/_private/activities/$activityId': typeof privatePrivateActivitiesActivityIdRouteWithChildren
   '/(private)/_private/settings/profile': typeof privatePrivateSettingsProfileRoute
   '/(private)/_private/settings/security': typeof privatePrivateSettingsSecurityRoute
   '/(auth)/_auth/callback/': typeof authAuthCallbackIndexRoute
@@ -212,6 +238,9 @@ export interface FileRoutesById {
   '/(public)/_public/landing/': typeof publicPublicLandingIndexRoute
   '/(public)/_public/privacy-policy/': typeof publicPublicPrivacyPolicyIndexRoute
   '/(public)/_public/terms-of-service/': typeof publicPublicTermsOfServiceIndexRoute
+  '/(private)/_private/activities/$activityId/analytics': typeof privatePrivateActivitiesActivityIdAnalyticsRoute
+  '/(private)/_private/activities/$activityId/settings': typeof privatePrivateActivitiesActivityIdSettingsRoute
+  '/(private)/_private/activities/$activityId/': typeof privatePrivateActivitiesActivityIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -232,10 +261,12 @@ export interface FileRouteTypes {
     | '/landing'
     | '/privacy-policy'
     | '/terms-of-service'
+    | '/activities/$activityId/analytics'
+    | '/activities/$activityId/settings'
+    | '/activities/$activityId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/activities/$activityId'
     | '/settings/profile'
     | '/settings/security'
     | '/callback'
@@ -250,6 +281,9 @@ export interface FileRouteTypes {
     | '/landing'
     | '/privacy-policy'
     | '/terms-of-service'
+    | '/activities/$activityId/analytics'
+    | '/activities/$activityId/settings'
+    | '/activities/$activityId'
   id:
     | '__root__'
     | '/(auth)'
@@ -274,6 +308,9 @@ export interface FileRouteTypes {
     | '/(public)/_public/landing/'
     | '/(public)/_public/privacy-policy/'
     | '/(public)/_public/terms-of-service/'
+    | '/(private)/_private/activities/$activityId/analytics'
+    | '/(private)/_private/activities/$activityId/settings'
+    | '/(private)/_private/activities/$activityId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -438,6 +475,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof privatePrivateActivitiesActivityIdRouteImport
       parentRoute: typeof privatePrivateRoute
     }
+    '/(private)/_private/activities/$activityId/': {
+      id: '/(private)/_private/activities/$activityId/'
+      path: '/'
+      fullPath: '/activities/$activityId/'
+      preLoaderRoute: typeof privatePrivateActivitiesActivityIdIndexRouteImport
+      parentRoute: typeof privatePrivateActivitiesActivityIdRoute
+    }
+    '/(private)/_private/activities/$activityId/settings': {
+      id: '/(private)/_private/activities/$activityId/settings'
+      path: '/settings'
+      fullPath: '/activities/$activityId/settings'
+      preLoaderRoute: typeof privatePrivateActivitiesActivityIdSettingsRouteImport
+      parentRoute: typeof privatePrivateActivitiesActivityIdRoute
+    }
+    '/(private)/_private/activities/$activityId/analytics': {
+      id: '/(private)/_private/activities/$activityId/analytics'
+      path: '/analytics'
+      fullPath: '/activities/$activityId/analytics'
+      preLoaderRoute: typeof privatePrivateActivitiesActivityIdAnalyticsRouteImport
+      parentRoute: typeof privatePrivateActivitiesActivityIdRoute
+    }
   }
 }
 
@@ -469,9 +527,30 @@ const authRouteChildren: authRouteChildren = {
 
 const authRouteWithChildren = authRoute._addFileChildren(authRouteChildren)
 
+interface privatePrivateActivitiesActivityIdRouteChildren {
+  privatePrivateActivitiesActivityIdAnalyticsRoute: typeof privatePrivateActivitiesActivityIdAnalyticsRoute
+  privatePrivateActivitiesActivityIdSettingsRoute: typeof privatePrivateActivitiesActivityIdSettingsRoute
+  privatePrivateActivitiesActivityIdIndexRoute: typeof privatePrivateActivitiesActivityIdIndexRoute
+}
+
+const privatePrivateActivitiesActivityIdRouteChildren: privatePrivateActivitiesActivityIdRouteChildren =
+  {
+    privatePrivateActivitiesActivityIdAnalyticsRoute:
+      privatePrivateActivitiesActivityIdAnalyticsRoute,
+    privatePrivateActivitiesActivityIdSettingsRoute:
+      privatePrivateActivitiesActivityIdSettingsRoute,
+    privatePrivateActivitiesActivityIdIndexRoute:
+      privatePrivateActivitiesActivityIdIndexRoute,
+  }
+
+const privatePrivateActivitiesActivityIdRouteWithChildren =
+  privatePrivateActivitiesActivityIdRoute._addFileChildren(
+    privatePrivateActivitiesActivityIdRouteChildren,
+  )
+
 interface privatePrivateRouteChildren {
   privatePrivateIndexRoute: typeof privatePrivateIndexRoute
-  privatePrivateActivitiesActivityIdRoute: typeof privatePrivateActivitiesActivityIdRoute
+  privatePrivateActivitiesActivityIdRoute: typeof privatePrivateActivitiesActivityIdRouteWithChildren
   privatePrivateSettingsProfileRoute: typeof privatePrivateSettingsProfileRoute
   privatePrivateSettingsSecurityRoute: typeof privatePrivateSettingsSecurityRoute
   privatePrivateActivitiesIndexRoute: typeof privatePrivateActivitiesIndexRoute
@@ -484,7 +563,7 @@ interface privatePrivateRouteChildren {
 const privatePrivateRouteChildren: privatePrivateRouteChildren = {
   privatePrivateIndexRoute: privatePrivateIndexRoute,
   privatePrivateActivitiesActivityIdRoute:
-    privatePrivateActivitiesActivityIdRoute,
+    privatePrivateActivitiesActivityIdRouteWithChildren,
   privatePrivateSettingsProfileRoute: privatePrivateSettingsProfileRoute,
   privatePrivateSettingsSecurityRoute: privatePrivateSettingsSecurityRoute,
   privatePrivateActivitiesIndexRoute: privatePrivateActivitiesIndexRoute,

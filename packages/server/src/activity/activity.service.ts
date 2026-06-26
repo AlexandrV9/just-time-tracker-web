@@ -30,6 +30,10 @@ import type {
   PauseActivityDataDTO,
   FinishActivityDataDTO,
 } from "@time-tracker/shared";
+import type {
+  ActivitySettingsDTO,
+  UpdateActivitySettingsDTO,
+} from "@time-tracker/shared";
 
 import {
   activityRepository,
@@ -50,6 +54,8 @@ import {
   mapSegmentRow,
 } from "./activitySessionSegment.queries.js";
 import { activityEventsHub } from "./activityEvents.hub.js";
+import { activitySettingsQueries } from "./activitySettings.queries.js";
+import { activityNotificationScheduler } from "../modules/notifications/activityNotification.scheduler.js";
 import type { ErrorResponse, SuccessResponse } from "../shared/types.js";
 
 type DayTotalsAgg = {
@@ -121,6 +127,7 @@ const createActivity = async (
 ): Promise<CreateActivityResponse> => {
   try {
     const entry = await activityRepository.createActivity(data);
+    await activitySettingsQueries.insertDefaults(entry.id);
 
     return {
       success: true,
@@ -344,12 +351,45 @@ const publishTrackingEvent = (
   });
 };
 
+const syncSessionNotifications = async (
+  result: Extract<SessionTrackingResponse, { success: true }>,
+  phase: "active" | "paused" | "finished",
+) => {
+  try {
+    if (phase === "active") {
+      await activityNotificationScheduler.onSessionActive({
+        activity: result.data.activity,
+        session: result.data.session,
+        segment: result.data.segment,
+      });
+      return;
+    }
+
+    if (phase === "paused") {
+      await activityNotificationScheduler.onSessionPaused({
+        activity: result.data.activity,
+        session: result.data.session,
+        segment: result.data.segment,
+      });
+      return;
+    }
+
+    await activityNotificationScheduler.onSessionFinished({
+      activity: result.data.activity,
+      session: result.data.session,
+    });
+  } catch (error) {
+    console.error("Failed to sync session notifications:", error);
+  }
+};
+
 const startActivity = async (
   data: StartActivityDataDTO,
 ): Promise<SessionTrackingResponse> => {
   const result = await startActivitySession(data.activityId, data.startedAt);
   if (result.success) {
     publishTrackingEvent("started", data.clientId, result);
+    await syncSessionNotifications(result, "active");
   }
   return result;
 };
@@ -360,6 +400,7 @@ const pauseActivity = async (
   const result = await pauseActivitySession(data.activityId, data.pausedAt);
   if (result.success) {
     publishTrackingEvent("paused", data.clientId, result);
+    await syncSessionNotifications(result, "paused");
   }
   return result;
 };
@@ -370,8 +411,73 @@ const finishActivity = async (
   const result = await finishActivitySession(data.activityId, data.finishedAt);
   if (result.success) {
     publishTrackingEvent("finished", data.clientId, result);
+    await syncSessionNotifications(result, "finished");
   }
   return result;
+};
+
+type GetActivitySettingsResponse =
+  | SuccessResponse<ActivitySettingsDTO>
+  | ErrorResponse;
+
+const getActivitySettings = async (data: {
+  id: string;
+  userId: string;
+}): Promise<GetActivitySettingsResponse> => {
+  try {
+    const activity = await activityRepository.getActivityById(data.id);
+
+    if (!activity) {
+      return { success: false, message: "Activity not found" };
+    }
+
+    if (activity.createdById !== data.userId) {
+      return { success: false, message: "Activity not found" };
+    }
+
+    const settings = await activitySettingsQueries.getByActivityIdOrDefault(
+      data.id,
+    );
+
+    return { success: true, data: settings };
+  } catch (error) {
+    console.error("Get activity settings error:", error);
+    return { success: false, message: "Failed to fetch activity settings" };
+  }
+};
+
+type UpdateActivitySettingsResponse =
+  | SuccessResponse<ActivitySettingsDTO>
+  | ErrorResponse;
+
+const updateActivitySettings = async (
+  data: UpdateActivitySettingsDTO & { userId: string },
+): Promise<UpdateActivitySettingsResponse> => {
+  try {
+    const activity = await activityRepository.getActivityById(data.id);
+
+    if (!activity) {
+      return { success: false, message: "Activity not found" };
+    }
+
+    if (activity.createdById !== data.userId) {
+      return { success: false, message: "Activity not found" };
+    }
+
+    const settings = await activitySettingsQueries.upsert(data.id, {
+      sessionGoalSeconds: data.sessionGoalSeconds,
+      notifyOnGoalReached: data.notifyOnGoalReached,
+      notifyOnLongPause: data.notifyOnLongPause,
+      longPauseThresholdSeconds: data.longPauseThresholdSeconds,
+      notifyOnLongActivity: data.notifyOnLongActivity,
+      longActivityThresholdSeconds: data.longActivityThresholdSeconds,
+    });
+
+    return { success: true, data: settings };
+  } catch (error) {
+    console.error("Update activity settings error:", error);
+    return { success: false, message: "Failed to update activity settings" };
+  }
 };
 
 type GetActivitySessionsByActivityIdResponse =
@@ -1035,4 +1141,6 @@ export const activitiesService = {
   getActivitiesAnalytics,
   getGroupedActivities,
   getGroupedActivityItems,
+  getActivitySettings,
+  updateActivitySettings,
 };

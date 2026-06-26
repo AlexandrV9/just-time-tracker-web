@@ -17,6 +17,7 @@ import {
   startActivitySchema,
   pauseActivitySchema,
   finishActivitySchema,
+  updateActivitySettingsParamsSchema,
 } from "@time-tracker/shared";
 
 import {
@@ -77,6 +78,24 @@ export const activityHandlers = {
     parse: (c) => ({ id: c.req.param("id") }),
     schema: baseIdSchema,
     service: activitiesService.deleteActivity,
+  }),
+
+  getActivitySettings: createValidatedHandler({
+    parse: (c) => ({ id: c.req.param("id") }),
+    schema: baseIdSchema,
+    map: (data, c) => ({ ...data, userId: c.get("user").id }),
+    service: activitiesService.getActivitySettings,
+  }),
+
+  updateActivitySettings: createValidatedHandler({
+    parse: async (c) => {
+      const body = await c.req.json();
+      const payload = (body?.data ?? body) as Record<string, unknown>;
+      return { id: c.req.param("id"), ...payload };
+    },
+    schema: updateActivitySettingsParamsSchema,
+    map: (data, c) => ({ ...data, userId: c.get("user").id }),
+    service: activitiesService.updateActivitySettings,
   }),
 
   startActivity: createValidatedHandler({

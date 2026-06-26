@@ -1,4 +1,5 @@
 /// <reference lib="webworker" />
+/// <reference types="vite/client" />
 
 import { clientsClaim } from "workbox-core";
 import {
@@ -21,9 +22,12 @@ const sw = self;
 const DEFAULT_NOTIFICATION_ICON = "/icons/logo-192x192.png";
 const DEFAULT_NOTIFICATION_BADGE = "/icons/logo-120x120.png";
 
+/** Injected at build time from root package.json version (vite.config). */
+const APP_VERSION = import.meta.env.VITE_APP_VERSION;
+
 const CACHE_NAMES = {
-  googleFonts: "google-fonts",
-  publicAssets: "public-assets",
+  googleFonts: `google-fonts-${APP_VERSION}`,
+  publicAssets: `public-assets-${APP_VERSION}`,
 };
 
 /** Injected at build time by vite-plugin-pwa (injectManifest). */

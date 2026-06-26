@@ -16,6 +16,32 @@ export type FetchCurrentActivityDataResult = {
   segment: ActivitySessionSegmentDTO | null;
 };
 
+export type CurrentActivitySnapshot = FetchCurrentActivityDataResult;
+
+export function mergeCurrentActivityFromServer(
+  prev: CurrentActivitySnapshot,
+  server: FetchCurrentActivityDataResult,
+): CurrentActivitySnapshot {
+  const { activity: serverActivity } = server;
+
+  if (!prev.activity) {
+    return server;
+  }
+
+  if (
+    serverActivity?.status === "active" &&
+    serverActivity.id !== prev.activity.id
+  ) {
+    return server;
+  }
+
+  if (serverActivity?.id === prev.activity.id) {
+    return server;
+  }
+
+  return prev;
+}
+
 export async function fetchCurrentActivityData({
   fromDate,
   toDate,

@@ -10,6 +10,9 @@ import { createDayPlansTable } from "./createDayPlansTable.js";
 import { createDayPlanItemsTable } from "./createDayPlanItemsTable.js";
 import { createEmailVerificationsTable } from "./createEmailVerificationsTable.js";
 import { createPasswordResetsTable } from "./createPasswordResetsTable.js";
+import { createNotificationJobsTable } from "./createNotificationJobsTable.js";
+import { createPushSubscriptionsTable } from "./createPushSubscriptionsTable.js";
+import { createActivitySettingsTable } from "./createActivitySettingsTable.js";
 
 export const createAllTables = async () => {
   await ensureDatabase();
@@ -25,6 +28,9 @@ export const createAllTables = async () => {
   await createDayPlanItemsTable();
   await createEmailVerificationsTable();
   await createPasswordResetsTable();
+  await createNotificationJobsTable();
+  await createPushSubscriptionsTable();
+  await createActivitySettingsTable();
 };
 
 if (isMainModule(import.meta.url)) {

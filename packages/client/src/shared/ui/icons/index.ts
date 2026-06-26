@@ -42,5 +42,6 @@ export * from "./Warning";
 export * from "./Info";
 export * from "./YandexLogo";
 export * from "./Copy";
+export * from "./ChartLine";
 
 export * from "./withIconProps";
