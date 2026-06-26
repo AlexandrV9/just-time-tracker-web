@@ -90,6 +90,45 @@
         "cancelEditButton": "Отмена",
         "titleRequiredError": "Введите название активности.",
         "editDialogTitle": "Редактировать активность"
+      },
+      "analytics": {
+        "title": "Аналитика",
+        "navLabel": "Аналитика"
+      },
+      "settings": {
+        "navLabel": "Настройки",
+        "subtitle": "Настройки активности",
+        "backButton": "Назад",
+        "saveButton": "Сохранить",
+        "cancelButton": "Отмена",
+        "saveSuccess": "Настройки сохранены",
+        "saveError": "Не удалось сохранить настройки. Попробуйте ещё раз.",
+        "motivation": {
+          "title": "Мотивация",
+          "sessionGoal": {
+            "label": "Цель одной сессии"
+          }
+        },
+        "notifications": {
+          "title": "Уведомления",
+          "goalReached": {
+            "label": "Напомнить при достижении цели",
+            "notificationTitle": "🎉 Цель достигнута",
+            "notificationBody": "Отличная работа! Вы достигли цели сессии «{{activityTitle}}»."
+          },
+          "longPause": {
+            "label": "Напомнить при долгой паузе",
+            "thresholdLabel": "Если пауза длится более:",
+            "notificationTitle": "⏸️ Долгая пауза",
+            "notificationBody": "Пауза по «{{activityTitle}}» затянулась. Готовы продолжить?"
+          },
+          "longActivity": {
+            "label": "Напомнить при долгой активности",
+            "thresholdLabel": "Если активность длится более:",
+            "notificationTitle": "⏱️ Проверьте таймер",
+            "notificationBody": "«{{activityTitle}}» длится уже долго. Всё ещё работаете над ней?"
+          }
+        }
       }
     },
     "settings": {

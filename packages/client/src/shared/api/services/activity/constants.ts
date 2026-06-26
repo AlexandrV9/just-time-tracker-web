@@ -7,3 +7,4 @@ export const ACTIVITY_SESSION_SEGMENTS_QUERY_KEY = "activity_session_segments";
 
 export const ACTIVITIES_ANALYTICS_QUERY_KEY = "activities_analytics";
 export const ACTIVITY_ANALYTICS_QUERY_KEY = "activity_analytics";
+export const ACTIVITY_SETTINGS_QUERY_KEY = "activity_settings";

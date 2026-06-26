@@ -1,5 +1,40 @@
 # Changelog
 
+## 1.1.7
+
+### Активности
+
+- Страница активности разбита на подмаршруты: **таймер**, **аналитика**, **настройки**
+- **Настройки активности**: цель сессии (мотивация), уведомления (долгая пауза, долгая активность, достижение цели)
+- Формы настроек на react-hook-form с автосохранением и скелетонами при загрузке
+- In-app напоминания через SSE (`useActivityReminders`) с локализованным title/body
+- Кнопка «Назад» с детальной страницы ведёт на `/activities`, а не в history браузера
+- Сброс скролла при переходе между страницами
+
+### UI
+
+- Общие компоненты `NavList`, `SettingsCard`, `DurationField`
+- NavBar: типы вынесены в constants, обновлён `Item`
+
+### Backend
+
+- Модуль **notifications**: планировщик, worker (таймер + fallback poll ≤5 с), SSE/console/composite senders
+- Планирование long pause / long activity по **текущему сегменту** (не суммарному времени сессии)
+- API `GET/PATCH /activities/:id/settings`
+- Таблицы `notification_jobs`, `push_subscriptions`, `activity_settings`
+- `notify_on_goal_reached` по умолчанию `false`
+
+### PWA
+
+- Runtime-кэши SW (`locales`, `icons`, fonts) версионируются через `VITE_APP_VERSION` — сброс после деплоя
+
+### DevOps
+
+- Миграция **`003_notifications_and_activity_settings.sql`** (jobs + push + activity settings)
+- Версия приложения: **1.1.7**
+
+---
+
 ## 1.0.7
 
 ### UI

@@ -7,6 +7,7 @@ import { authActions, useAuthStore } from "~/features/auth";
 import { userApiService } from "~/shared/api";
 import { useTranslation } from "~/shared/hooks";
 import {
+  Box,
   Card,
   CheckIcon,
   CloseIcon,
@@ -15,6 +16,7 @@ import {
   IconButton,
   Input,
   Stack,
+  Text,
   toast,
   useForm,
 } from "~/shared/ui";
@@ -147,7 +149,16 @@ export const MainInfo = () => {
 
   return (
     <Card.Root borderRadius="1rem">
-      <Card.Header p="0.8rem">
+      <Card.Header
+        p="0.8rem"
+        display="flex"
+        flexDirection="row"
+        justifyContent="space-between"
+        gap="0.5rem"
+      >
+        <Text textStyle="lg" fontWeight="semibold" alignSelf="center">
+          Основная информация
+        </Text>
         <Stack.HStack justifyContent="flex-end" gap="0.5rem">
           {isEditing ? (
             <>
@@ -184,6 +195,7 @@ export const MainInfo = () => {
           )}
         </Stack.HStack>
       </Card.Header>
+      <Box h="1px" bg="border.emphasized" />
       <Card.Body
         as="form"
         width="full"

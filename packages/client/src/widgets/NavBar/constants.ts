@@ -1,7 +1,7 @@
 import { BookIcon, HomeIcon, LightningIcon, SettingsIcon } from "~/shared/ui";
-import type { NavItemProps } from "./types";
+import type { NavBarItemProps } from "./Item";
 
-export const navItems: NavItemProps[] = [
+export const navItems: NavBarItemProps[] = [
   {
     id: "nav_item_home",
     title: "Home",

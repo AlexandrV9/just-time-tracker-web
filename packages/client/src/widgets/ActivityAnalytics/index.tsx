@@ -39,7 +39,7 @@ export const ActivityAnalytics = ({ activityId }: ActivityAnalyticsProps) => {
   const navigate = useNavigate();
 
   const { date: dateFromSearchQuery } = useSearch({
-    from: "/(private)/_private/activities/$activityId",
+    from: "/(private)/_private/activities/$activityId/analytics",
   });
 
   const deleteDialog = useDialog();
@@ -183,7 +183,7 @@ export const ActivityAnalytics = ({ activityId }: ActivityAnalyticsProps) => {
       if (date) {
         setSelectedDate(date);
         navigate({
-          to: "/activities/$activityId",
+          to: "/activities/$activityId/analytics",
           params: { activityId },
           search: (prev) => ({ ...prev, date: getCalendarDay(date) }),
           replace: true,

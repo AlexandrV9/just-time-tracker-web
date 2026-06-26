@@ -90,6 +90,45 @@
         "cancelEditButton": "Cancel",
         "titleRequiredError": "Enter a name for the activity.",
         "editDialogTitle": "Edit activity"
+      },
+      "analytics": {
+        "title": "Analytics",
+        "navLabel": "Analytics"
+      },
+      "settings": {
+        "navLabel": "Settings",
+        "subtitle": "Activity settings",
+        "backButton": "Back",
+        "saveButton": "Save",
+        "cancelButton": "Cancel",
+        "saveSuccess": "Settings saved",
+        "saveError": "Could not save settings. Try again.",
+        "motivation": {
+          "title": "Motivation",
+          "sessionGoal": {
+            "label": "Session goal"
+          }
+        },
+        "notifications": {
+          "title": "Notifications",
+          "goalReached": {
+            "label": "Remind when goal is reached",
+            "notificationTitle": "🎉 Goal reached",
+            "notificationBody": "Great work! You've reached the session goal for \"{{activityTitle}}\"."
+          },
+          "longPause": {
+            "label": "Remind during a long pause",
+            "thresholdLabel": "If the pause lasts more than:",
+            "notificationTitle": "⏸️ Long pause",
+            "notificationBody": "The pause for \"{{activityTitle}}\" has gone on for a while. Ready to continue?"
+          },
+          "longActivity": {
+            "label": "Remind during long activity",
+            "thresholdLabel": "If the activity lasts more than:",
+            "notificationTitle": "⏱️ Check the timer",
+            "notificationBody": "\"{{activityTitle}}\" has been running for a long time. Still working on it?"
+          }
+        }
       }
     },
     "settings": {

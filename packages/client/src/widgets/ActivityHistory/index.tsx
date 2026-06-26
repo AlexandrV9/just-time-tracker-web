@@ -41,7 +41,7 @@ export const ActivityHistory = () => {
   const handleSelectActivity = useCallback(
     (activityId: string, groupDateStart: string) => {
       navigate({
-        to: "/activities/$activityId",
+        to: "/activities/$activityId/analytics",
         params: { activityId },
         search: { date: groupDateStart },
       });

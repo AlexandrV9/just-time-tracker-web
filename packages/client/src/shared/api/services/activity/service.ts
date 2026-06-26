@@ -30,11 +30,18 @@ import type {
   StartActivityDataDTO,
   FinishActivityDataDTO,
   PauseActivityDataDTO,
+  ActivitySettingsDTO,
 } from "@time-tracker/shared";
 import { baseApi } from "../base";
 import type { RequestResponse } from "../types";
 
 type DeleteActivitySessionDTO = { id: string };
+
+export type { ActivitySettingsDTO };
+
+export type UpdateActivitySettingsDTO = ActivitySettingsDTO & {
+  activityId: string;
+};
 
 export class ActivityService {
   createActivity(data: CreateActivityDataDTO) {
@@ -79,6 +86,20 @@ export class ActivityService {
 
   updateActivity(data: UpdateActivityDataDTO) {
     return baseApi.patch<ActivityDTO>(`/api/activities/${data.id}`, { data });
+  }
+
+  getActivitySettings({ activityId }: { activityId: string }) {
+    return baseApi.get<ActivitySettingsDTO>(
+      `/api/activities/${activityId}/settings`,
+    );
+  }
+
+  updateActivitySettings(data: UpdateActivitySettingsDTO) {
+    const { activityId, ...settings } = data;
+    return baseApi.patch<ActivitySettingsDTO>(
+      `/api/activities/${activityId}/settings`,
+      { data: settings },
+    );
   }
 
   deleteActivity(data: DeleteActivityDataDTO) {

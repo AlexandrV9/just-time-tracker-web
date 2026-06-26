@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { activityTrackingEventSchema } from "@time-tracker/shared";
+import { activityStreamEventSchema } from "@time-tracker/shared";
 import { useCallback, useEffect, useRef } from "react";
 import { useAuthStore } from "~/features/auth";
 import { ACCESS_TOKEN_KEY } from "~/shared/constants";
@@ -9,7 +9,7 @@ import {
   getOrCreateClientId,
 } from "~/shared/libs";
 import { useCurrentActivityStore } from "../useCurrentActivity/useCurrentActivityStore";
-import { fetchCurrentActivityData } from "../useCurrentActivity/utils";
+import { fetchCurrentActivityData, mergeCurrentActivityFromServer } from "../useCurrentActivity/utils";
 import { applyRemoteActivityTrackingEvent } from "./applyRemoteActivityTrackingEvent";
 import {
   invalidateActivityTrackingQueries,
@@ -17,6 +17,7 @@ import {
 } from "./invalidateActivityTrackingQueries";
 import { parseSseStream } from "./parseSseStream";
 import { useShallow } from "zustand/react/shallow";
+import { handleActivityReminderEvent } from "../useActivityReminders";
 
 const SSE_URL = "/api/activities/events";
 const MAX_RECONNECT_DELAY_MS = 30_000;
@@ -44,10 +45,21 @@ export function useActivityEvents() {
         fromDate,
         toDate,
       });
-      updateData({
-        currentActivity: result.activity,
-        currentSession: result.session,
-        currentSegment: result.segment,
+      updateData((prev) => {
+        const merged = mergeCurrentActivityFromServer(
+          {
+            activity: prev.currentActivity ?? null,
+            session: prev.currentSession ?? null,
+            segment: prev.currentSegment ?? null,
+          },
+          result,
+        );
+
+        return {
+          currentActivity: merged.activity,
+          currentSession: merged.session,
+          currentSegment: merged.segment,
+        };
       });
     } catch (error) {
       console.error(
@@ -61,6 +73,10 @@ export function useActivityEvents() {
     (eventType: string, rawData: string) => {
       if (eventType === "ping" || !rawData) return;
 
+      if (handleActivityReminderEvent(rawData)) {
+        return;
+      }
+
       let parsed: unknown;
       try {
         parsed = JSON.parse(rawData);
@@ -71,7 +87,7 @@ export function useActivityEvents() {
         return;
       }
 
-      const result = activityTrackingEventSchema.safeParse(parsed);
+      const result = activityStreamEventSchema.safeParse(parsed);
       if (!result.success) {
         console.error("SSE activity event validation failed", result.error);
         syncCurrentActivityFromServer();
@@ -80,6 +96,10 @@ export function useActivityEvents() {
       }
 
       const event = result.data;
+      if (event.type === "reminder") {
+        return;
+      }
+
       if (event.clientId === getOrCreateClientId()) return;
 
       applyRemoteActivityTrackingEvent(event, updateData);

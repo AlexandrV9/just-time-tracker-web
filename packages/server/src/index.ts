@@ -13,6 +13,14 @@ import {
 import { dayPlanItemsRouter, dayPlansRouter } from "./dayPlan/index.js";
 import { emailVerificationRouter } from "./emailVerification/index.js";
 import { usersRouter } from "./user/index.js";
+import {
+  CompositeNotificationSender,
+  ConsoleNotificationSender,
+  createNotificationWorker,
+  MAX_NOTIFICATION_DELIVERY_LAG_MS,
+  setNotificationJobsChangeListener,
+  SseNotificationSender,
+} from "./modules/notifications/index.js";
 
 const app = new Hono();
 
@@ -43,12 +51,25 @@ protectedRouter.route("/email-verification", emailVerificationRouter);
 
 app.route("/", protectedRouter);
 
+const notificationWorker = createNotificationWorker({
+  sender: new CompositeNotificationSender([
+    new ConsoleNotificationSender(),
+    new SseNotificationSender(),
+  ]),
+});
+
+setNotificationJobsChangeListener(() => {
+  void notificationWorker.reschedule();
+});
+
 serve(
   {
     fetch: app.fetch,
     port: Number(config.app.serverPort),
   },
   (info) => {
+    notificationWorker.start();
+
     console.log(
       `Server is running on http://localhost:${info.port} (NODE_ENV=${config.app.nodeEnv})`,
     );
@@ -58,5 +79,8 @@ serve(
         "Verification codes → server log [EmailService:console] + browser DevTools [dev] ...",
       );
     }
+    console.log(
+      `Notification worker started (max delivery lag: ${MAX_NOTIFICATION_DELIVERY_LAG_MS / 1000}s)`,
+    );
   },
 );
