@@ -1,9 +1,13 @@
+import type { UserLocaleDTO } from "@time-tracker/shared";
+
 export type AuthUserDTO = {
   id: string;
   name: string;
   login: string;
   email?: string | null;
   avatar?: string | null;
+  locale: UserLocaleDTO;
+  pushNotificationsEnabled: boolean;
 };
 
 export type ErrorField = {

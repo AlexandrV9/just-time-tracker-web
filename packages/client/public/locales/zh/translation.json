@@ -167,6 +167,15 @@
           "emailInvalid": "请输入有效邮箱"
         }
       },
+      "notifications": {
+        "title": "通知",
+        "description": "应用关闭时，通过浏览器推送接收活动提醒。",
+        "unsupported": "此浏览器不支持推送通知。",
+        "pushEnabled": {
+          "label": "推送通知"
+        },
+        "permissionDenied": "浏览器已阻止通知。请在网站设置中允许通知以接收提醒。"
+      },
       "security": {
         "loginMethods": {
           "title": "登录方式",
@@ -310,6 +319,7 @@
       "title": "账户设置",
       "options": {
         "profile": "个人资料",
+        "notifications": "通知",
         "security": "安全与登录"
       }
     },

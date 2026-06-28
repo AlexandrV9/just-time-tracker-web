@@ -14,6 +14,9 @@ let poolInstance: Pool | null = null;
 export const getPool = (): Pool => {
   if (!poolInstance) {
     poolInstance = new pg.Pool(getPoolConfig());
+    poolInstance.on("error", () => {
+      // Idle client errors during pool shutdown must not crash the process.
+    });
   }
 
   return poolInstance;
@@ -24,8 +27,14 @@ export const closePool = async () => {
     return;
   }
 
-  await poolInstance.end();
+  const instance = poolInstance;
   poolInstance = null;
+
+  try {
+    await instance.end();
+  } catch {
+    // Pool may already be closed (e.g. shared test teardown).
+  }
 };
 
 /** Lazy singleton for app code (`pool.query(...)`). */

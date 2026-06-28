@@ -1,17 +1,15 @@
 import { tokenService } from "../shared/index.js";
 import type { ErrorResponse, SuccessResponse } from "../shared/types.js";
 import { authRepository } from "./auth.repository.js";
+import {
+  mapAuthUserResponse,
+  type AuthUserResponseDTO,
+} from "../shared/auth/mapAuthUserResponse.js";
 
 type AuthUserResponse = {
   accessToken: string;
   refreshToken: string;
-  user: {
-    id: string;
-    login: string;
-    name: string;
-    avatar: string | null;
-    email: string | null;
-  };
+  user: AuthUserResponseDTO;
 };
 
 type SignInResponse = SuccessResponse<AuthUserResponse> | ErrorResponse;
@@ -49,13 +47,7 @@ const signIn = async (data: {
     data: {
       accessToken,
       refreshToken,
-      user: {
-        id: user.id,
-        login: user.login,
-        name: user.name,
-        avatar: user.avatar,
-        email: user.email,
-      },
+      user: mapAuthUserResponse(user),
     },
   };
 };
@@ -91,13 +83,7 @@ const signUp = async (data: {
       data: {
         accessToken,
         refreshToken,
-        user: {
-          id: user.id,
-          login: user.login,
-          name: user.name,
-          avatar: user.avatar,
-          email: user.email,
-        },
+        user: mapAuthUserResponse(user),
       },
       message: "User registered successfully",
     };

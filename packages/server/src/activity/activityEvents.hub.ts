@@ -44,6 +44,11 @@ class ActivityEventsHub {
       }
     }
   }
+
+  hasSubscribers(userId: string | number): boolean {
+    const listeners = this.subscribers.get(normalizeUserId(userId));
+    return Boolean(listeners && listeners.size > 0);
+  }
 }
 
 export const activityEventsHub = new ActivityEventsHub();

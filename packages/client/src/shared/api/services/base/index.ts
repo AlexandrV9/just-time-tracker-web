@@ -68,7 +68,7 @@ export class HttpService {
 
   async delete<TData = unknown, TError = unknown>(
     url: string,
-    config?: Omit<RequestConfig, "method" | "url" | "data">
+    config?: Omit<RequestConfig, "method" | "url">
   ): Promise<RequestResponse<TData, TError>> {
     return this.adapter.request({
       method: "DELETE",

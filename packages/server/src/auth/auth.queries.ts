@@ -23,6 +23,8 @@ const findUserByLogin = async (login: string) => {
       first_name AS name,
       email,
       avatar,
+      locale,
+      push_notifications_enabled AS "pushNotificationsEnabled",
       is_active
     FROM users
     WHERE login = $1
@@ -62,6 +64,8 @@ const findUserById = async (userId: AuthUser["id"]) => {
       first_name AS name,
       email,
       avatar,
+      locale,
+      push_notifications_enabled AS "pushNotificationsEnabled",
       is_active AS "isActive"
     FROM users
     WHERE id = $1
@@ -80,6 +84,8 @@ const findUserByEmail = async (email: string) => {
       first_name AS name,
       email,
       avatar,
+      locale,
+      push_notifications_enabled AS "pushNotificationsEnabled",
       is_active
     FROM users
     WHERE email = $1
@@ -115,6 +121,8 @@ const createOAuthUser = async (data: {
     login: string;
     email: string | null;
     avatar: string | null;
+    locale: string;
+    pushNotificationsEnabled: boolean;
   };
 };
 

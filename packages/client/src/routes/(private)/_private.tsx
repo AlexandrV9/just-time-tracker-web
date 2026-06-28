@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useLayoutEffect } from "react";
 import { LangSwitcher, ThemeSwitcher, useActivityEvents } from "~/features";
 import { authManager, AuthUserAvatar, useAuthStore } from "~/features/auth";
-import { NotificationButton } from "~/features/notifications";
+import { NotificationButton, usePushNotifications } from "~/features/notifications";
 import {
   useDeviceDetect,
   useOrientation,
@@ -71,8 +71,8 @@ export function PrivateLayout() {
   const { setContent } = useHeaderStore();
 
   useSeo({ noIndex: true });
-
   useActivityEvents();
+  usePushNotifications();
 
   useLayoutEffect(() => {
     setContent("left", <AuthUserAvatar />);

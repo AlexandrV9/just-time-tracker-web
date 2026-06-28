@@ -6,6 +6,7 @@ import type { Context } from "hono";
 import type { BlankEnv, BlankInput } from "hono/types";
 import { signInSchema, signUpSchema } from "./auth.schema.js";
 import { config, isUuid, tokenService, validationUtils } from "../shared/index.js";
+import { mapAuthUserResponse } from "../shared/auth/mapAuthUserResponse.js";
 
 const nameRefreshTokenInCookie = config.auth.refreshToken.cookie;
 
@@ -41,13 +42,7 @@ const init = async (c: Context<BlankEnv, "/auth", BlankInput>) => {
         {
           success: true,
           data: {
-            user: {
-              id: String(user.id),
-              login: user.login,
-              name: user.name,
-              email: user.email ?? null,
-              avatar: user.avatar ?? null,
-            },
+            user: mapAuthUserResponse(user),
           },
         },
         200
@@ -77,13 +72,7 @@ const init = async (c: Context<BlankEnv, "/auth", BlankInput>) => {
         {
           success: true,
           data: {
-            user: {
-              id: String(user.id),
-              login: user.login,
-              name: user.name,
-              email: user.email ?? null,
-              avatar: user.avatar ?? null,
-            },
+            user: mapAuthUserResponse(user),
             accessToken: newAccessToken,
           },
         },
@@ -180,8 +169,15 @@ const refresh = async (c: Context<BlankEnv, "/refresh", BlankInput>) => {
 
   try {
     const accessToken = await tokenService.generateAccessToken(authUser);
+    const user = await findUserByTokenId(String(authUser.id));
+
+    if (!user) {
+      deleteCookie(c, nameRefreshTokenInCookie);
+      return c.json({ success: false, message: "Invalid token" }, 401);
+    }
+
     return c.json({
-      data: { accessToken, user: authUser },
+      data: { accessToken, user: mapAuthUserResponse(user) },
       success: true,
     });
   } catch (error) {

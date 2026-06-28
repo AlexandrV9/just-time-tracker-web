@@ -1,4 +1,5 @@
 import { authService, type ErrorField } from "~/shared/api";
+import { applyUserLocale } from "~/shared/libs";
 import { authActions, useAuthStore } from "./useAuthStore";
 import { getJwtUserId, isUuid, tokenManager } from "~/shared/utils";
 import axios from "axios";
@@ -40,6 +41,7 @@ class AuthManager {
           ...response.data.user,
           id: response.data.user.id.toString(),
         });
+        applyUserLocale(response.data.user.locale);
       }
 
       authActions.setStatus("AUTHENTICATED");
@@ -68,8 +70,13 @@ class AuthManager {
         ...response.data.user,
         id: response.data.user.id.toString(),
       });
+
+      applyUserLocale(response.data.user.locale);
+
       authActions.setStatus("AUTHENTICATED");
+
       tokenManager.setAccessToken(response.data.accessToken);
+
       return response;
     } catch (error) {
       authActions.setStatus("UNAUTHENTICATED");
@@ -101,7 +108,11 @@ class AuthManager {
         ...response.data.user,
         id: response.data.user.id.toString(),
       });
+
+      applyUserLocale(response.data.user.locale);
+
       authActions.setStatus("AUTHENTICATED");
+
       tokenManager.setAccessToken(response.data.accessToken);
 
       return response;

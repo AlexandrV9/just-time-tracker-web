@@ -49,6 +49,7 @@ services:
       args:
         VITE_API_ENDPOINT: ${VITE_API_ENDPOINT:-http://localhost:3000}
         VITE_APP_URL: ${VITE_APP_URL:-http://localhost:3000}
+        VITE_VAPID_PUBLIC_KEY: ${VITE_VAPID_PUBLIC_KEY:-}
     container_name: time-tracker-client
     ports:
       - "${CLIENT_PORT:-3000}:80"

@@ -1,7 +1,18 @@
 import { config, tokenService } from "../shared/index.js";
 import type { ErrorResponse, SuccessResponse } from "../shared/types.js";
 import { authRepository } from "./auth.repository.js";
+import {
+  mapAuthUserResponse,
+  type AuthUserResponseDTO,
+} from "../shared/auth/mapAuthUserResponse.js";
 
+export type OAuthTokens = {
+  accessToken: string;
+  refreshToken: string;
+  user: AuthUserResponseDTO;
+};
+
+type LoginResult = SuccessResponse<OAuthTokens> | ErrorResponse;
 export type YandexProfile = {
   id: string;
   default_email: string | null;
@@ -10,19 +21,6 @@ export type YandexProfile = {
   default_avatar_id: string | null;
 };
 
-export type OAuthTokens = {
-  accessToken: string;
-  refreshToken: string;
-  user: {
-    id: string;
-    login: string;
-    name: string;
-    avatar: string | null;
-    email: string | null;
-  };
-};
-
-type LoginResult = SuccessResponse<OAuthTokens> | ErrorResponse;
 type LinkResult = SuccessResponse<{ linked: true }> | ErrorResponse;
 
 export const buildYandexAvatarUrl = (
@@ -87,6 +85,8 @@ const issueTokens = async (user: {
   name: string;
   email: string | null;
   avatar: string | null;
+  locale?: string | null;
+  pushNotificationsEnabled?: boolean | null;
 }): Promise<OAuthTokens> => {
   const [accessToken, refreshToken] = await Promise.all([
     tokenService.generateAccessToken(user),
@@ -95,13 +95,7 @@ const issueTokens = async (user: {
   return {
     accessToken,
     refreshToken,
-    user: {
-      id: user.id,
-      login: user.login,
-      name: user.name,
-      avatar: user.avatar,
-      email: user.email,
-    },
+    user: mapAuthUserResponse(user),
   };
 };
 

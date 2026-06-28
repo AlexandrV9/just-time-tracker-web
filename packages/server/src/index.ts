@@ -18,6 +18,8 @@ import {
   ConsoleNotificationSender,
   createNotificationWorker,
   MAX_NOTIFICATION_DELIVERY_LAG_MS,
+  PushNotificationSender,
+  pushSubscriptionsRouter,
   setNotificationJobsChangeListener,
   SseNotificationSender,
 } from "./modules/notifications/index.js";
@@ -46,6 +48,7 @@ protectedRouter.route(
 protectedRouter.route("/day-plans", dayPlansRouter);
 protectedRouter.route("/day-plan-items", dayPlanItemsRouter);
 protectedRouter.route("/users", usersRouter);
+protectedRouter.route("/push-subscriptions", pushSubscriptionsRouter);
 protectedRouter.route("/email-verification", emailVerificationRouter);
 // protectedRouter.post("/auth/yandex/link", yandexHandlers.startLink);
 
@@ -55,6 +58,7 @@ const notificationWorker = createNotificationWorker({
   sender: new CompositeNotificationSender([
     new ConsoleNotificationSender(),
     new SseNotificationSender(),
+    new PushNotificationSender(),
   ]),
 });
 

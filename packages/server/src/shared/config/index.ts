@@ -8,11 +8,14 @@ const repoRoot = path.resolve(
 );
 
 // Root .env (Yandex, shared secrets) + packages/server/.env (local DB overrides)
-dotenv.config({ path: path.join(repoRoot, ".env") });
-dotenv.config({
-  path: path.join(repoRoot, "packages/server/.env"),
-  override: true,
-});
+// Vitest loads env in tests/setup/vitest.setup.ts — do not override here.
+if (!process.env.VITEST) {
+  dotenv.config({ path: path.join(repoRoot, ".env") });
+  dotenv.config({
+    path: path.join(repoRoot, "packages/server/.env"),
+    override: true,
+  });
+}
 
 export const config = {
   app: {
@@ -71,9 +74,23 @@ export const config = {
     verification: {
       codeTtlSec: Number(process.env.EMAIL_CODE_TTL_SEC ?? 600),
       maxAttempts: Number(process.env.EMAIL_CODE_MAX_ATTEMPTS ?? 5),
-      resendCooldownSec: Number(process.env.EMAIL_CODE_RESEND_COOLDOWN_SEC ?? 60),
+      resendCooldownSec: Number(
+        process.env.EMAIL_CODE_RESEND_COOLDOWN_SEC ?? 60,
+      ),
     },
     /** Max verification/reset emails per user per UTC day. 0 = unlimited. */
     dailyLimitPerUser: Number(process.env.EMAIL_DAILY_LIMIT_PER_USER ?? 4),
+  },
+
+  vapid: {
+    publicKey: process.env.VAPID_PUBLIC_KEY,
+    privateKey: process.env.VAPID_PRIVATE_KEY,
+    subject: process.env.VAPID_SUBJECT || "mailto:noreply@localhost",
+  },
+
+  push: {
+    enabled: Boolean(
+      process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY,
+    ),
   },
 } as const;

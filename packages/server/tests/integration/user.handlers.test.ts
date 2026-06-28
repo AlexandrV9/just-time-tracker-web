@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import type { TestDatabase } from "../setup/test-db.js";
 import {
   releaseTestDatabase,
+  resetNotificationsTables,
   resetUsersTables,
   startTestDatabase,
 } from "../setup/test-db.js";
@@ -339,6 +340,100 @@ describe("usersRouter", () => {
 
       expect(startBody.success).toBe(false);
       expect(startBody.message).toBe("EMAIL_ALREADY_EXISTS");
+    });
+  });
+
+  describe("PATCH /me/locale", () => {
+    it("updates locale successfully", async () => {
+      const res = await testRouter.request("/me/locale", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ locale: "ru" }),
+      });
+      const body = await json(res);
+
+      expect(res.status).toBe(200);
+      expect(body.success).toBe(true);
+      expect((body.data as { locale: string }).locale).toBe("ru");
+
+      const { rows } = await testDb.pool.query(
+        "SELECT locale FROM users WHERE id = $1",
+        [testUserId],
+      );
+      expect(rows[0].locale).toBe("ru");
+    });
+
+    it("returns validation error for unsupported locale", async () => {
+      const res = await testRouter.request("/me/locale", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ locale: "de" }),
+      });
+      const body = await json(res);
+
+      expect(res.status).toBe(400);
+      expect(body.success).toBe(false);
+      expect(body.message).toBe("Validation failed");
+    });
+  });
+
+  describe("PATCH /me/push-notifications", () => {
+    beforeEach(async () => {
+      await resetNotificationsTables(testDb.pool);
+    });
+
+    it("disables push and removes all subscriptions", async () => {
+      await testDb.pool.query(
+        `INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth)
+         VALUES ($1, $2, $3, $4)`,
+        [
+          testUserId,
+          "https://push.example/subscription-1",
+          "p256dh-key",
+          "auth-secret",
+        ],
+      );
+
+      const res = await testRouter.request("/me/push-notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: false }),
+      });
+      const body = await json(res);
+
+      expect(res.status).toBe(200);
+      expect(body.success).toBe(true);
+      expect(
+        (body.data as { pushNotificationsEnabled: boolean })
+          .pushNotificationsEnabled,
+      ).toBe(false);
+
+      const { rows: subscriptionRows } = await testDb.pool.query(
+        "SELECT id FROM push_subscriptions WHERE user_id = $1",
+        [testUserId],
+      );
+      expect(subscriptionRows).toHaveLength(0);
+    });
+
+    it("enables push without creating subscriptions", async () => {
+      await testDb.pool.query(
+        `UPDATE users SET push_notifications_enabled = false WHERE id = $1`,
+        [testUserId],
+      );
+
+      const res = await testRouter.request("/me/push-notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: true }),
+      });
+      const body = await json(res);
+
+      expect(res.status).toBe(200);
+      expect(body.success).toBe(true);
+      expect(
+        (body.data as { pushNotificationsEnabled: boolean })
+          .pushNotificationsEnabled,
+      ).toBe(true);
     });
   });
 });

@@ -167,6 +167,15 @@
           "emailInvalid": "Enter a valid email"
         }
       },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Manage browser push notifications for activity reminders when the app is closed.",
+        "unsupported": "Push notifications are not supported in this browser.",
+        "pushEnabled": {
+          "label": "Push notifications"
+        },
+        "permissionDenied": "Notifications are blocked in browser settings. Allow them for this site to receive reminders."
+      },
       "security": {
         "loginMethods": {
           "title": "Sign-in methods",
@@ -310,6 +319,7 @@
       "title": "Account Settings",
       "options": {
         "profile": "Profile",
+        "notifications": "Notifications",
         "security": "Security & sign-in"
       }
     },
