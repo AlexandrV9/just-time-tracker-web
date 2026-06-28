@@ -19,7 +19,7 @@ describe("healthRouter GET /", () => {
       success: true,
       message: "Database connection successful",
       details: {
-        database: "test_db",
+        database: "time_tracker_test",
         host: "localhost",
         port: 5432,
         user: "test",
@@ -36,7 +36,7 @@ describe("healthRouter GET /", () => {
     expect(body.success).toBe(true);
     expect(body.message).toBe("Database connection successful");
     expect(body.details).toMatchObject({
-      database: "test_db",
+      database: "time_tracker_test",
       host: "localhost",
       port: 5432,
       user: "test",

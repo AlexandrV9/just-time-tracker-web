@@ -28,6 +28,18 @@ vi.mock("web-push", () => ({
   },
 }));
 
+vi.mock("../../src/shared/config/index.js", () => ({
+  config: {
+    push: { enabled: true },
+    vapid: {
+      subject: "mailto:test@localhost",
+      publicKey: "test-public-key",
+      privateKey: "test-private-key",
+    },
+    clientUrl: "http://localhost:3000",
+  },
+}));
+
 describe("PushNotificationSender", () => {
   let testDb: TestDatabase;
 
@@ -56,15 +68,9 @@ describe("PushNotificationSender", () => {
         "auth-secret",
       ],
     );
-
-    process.env.VAPID_PUBLIC_KEY = "test-public-key";
-    process.env.VAPID_PRIVATE_KEY = "test-private-key";
-    vi.resetModules();
   });
 
   afterAll(async () => {
-    delete process.env.VAPID_PUBLIC_KEY;
-    delete process.env.VAPID_PRIVATE_KEY;
     await releaseTestDatabase();
   });
 

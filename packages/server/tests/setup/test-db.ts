@@ -10,6 +10,84 @@ export type TestDatabase = {
 
 const CONNECTION_TIMEOUT_MS = 5_000;
 const TESTCONTAINERS_TIMEOUT_MS = 180_000;
+export const DEFAULT_TEST_DB_NAME = "time_tracker_test";
+
+type SavedDbEnv = {
+  DB_HOST?: string;
+  DB_PORT?: string;
+  DB_NAME?: string;
+  DB_USER?: string;
+  DB_PASSWORD?: string;
+};
+
+let savedDbEnv: SavedDbEnv | null = null;
+
+export const normalizeEnvValue = (value?: string) =>
+  value?.trim().replace(/^(['"])(.*)\1$/, "$2") ?? "";
+
+export const isEnvTruthy = (value?: string) => {
+  const normalized = normalizeEnvValue(value).toLowerCase();
+  return normalized === "true" || normalized === "1" || normalized === "yes";
+};
+
+const getProtectedDatabaseNames = (): string[] => {
+  const fromEnv =
+    normalizeEnvValue(process.env.DEV_DB_PROTECT) || "time_tracker";
+
+  return [
+    ...new Set(
+      fromEnv
+        .split(",")
+        .map((name) => name.trim())
+        .filter(Boolean),
+    ),
+  ];
+};
+
+export const assertSafeTestDatabase = async (pool: Pool) => {
+  const { rows } = await pool.query<{ current_database: string }>(
+    "SELECT current_database()",
+  );
+  const currentDatabase = rows[0]?.current_database;
+  const protectedNames = getProtectedDatabaseNames();
+
+  if (currentDatabase && protectedNames.includes(currentDatabase)) {
+    throw new Error(
+      [
+        `Refusing to modify protected database "${currentDatabase}".`,
+        "Use USE_TESTCONTAINERS=true (default in .env.test) or TEST_DB_NAME on a separate database.",
+        `Protected: ${protectedNames.join(", ")}`,
+      ].join("\n"),
+    );
+  }
+};
+
+const saveDbEnv = () => {
+  if (savedDbEnv) return;
+
+  savedDbEnv = {
+    DB_HOST: process.env.DB_HOST,
+    DB_PORT: process.env.DB_PORT,
+    DB_NAME: process.env.DB_NAME,
+    DB_USER: process.env.DB_USER,
+    DB_PASSWORD: process.env.DB_PASSWORD,
+  };
+};
+
+const restoreDbEnv = () => {
+  if (!savedDbEnv) return;
+
+  for (const key of Object.keys(savedDbEnv) as (keyof SavedDbEnv)[]) {
+    const value = savedDbEnv[key];
+    if (value === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = value;
+    }
+  }
+
+  savedDbEnv = null;
+};
 
 export const configureDatabaseEnv = (container: StartedPostgreSqlContainer) => {
   process.env.DB_HOST = container.getHost();
@@ -147,6 +225,8 @@ export const setupActivitiesSchema = async (pool: Pool) => {
 };
 
 export const resetActivitiesTables = async (pool: Pool) => {
+  await assertSafeTestDatabase(pool);
+
   await pool.query(`
     TRUNCATE TABLE
       activity_session_segments,
@@ -236,6 +316,8 @@ export const setupUsersSchema = async (pool: Pool) => {
 };
 
 export const resetUsersTables = async (pool: Pool) => {
+  await assertSafeTestDatabase(pool);
+
   await pool.query(
     `TRUNCATE TABLE user_email_daily_sends, password_resets, email_verifications, auth_providers, users RESTART IDENTITY CASCADE`,
   );
@@ -303,6 +385,8 @@ export const setupNotificationsSchema = async (pool: Pool) => {
 };
 
 export const resetNotificationsTables = async (pool: Pool) => {
+  await assertSafeTestDatabase(pool);
+
   await pool.query(`
     TRUNCATE TABLE notification_jobs, push_subscriptions RESTART IDENTITY CASCADE
   `);
@@ -333,7 +417,23 @@ export const setupActivitySettingsSchema = async (pool: Pool) => {
 const createTestDatabase = async (
   container: StartedPostgreSqlContainer | null,
 ): Promise<TestDatabase> => {
+  saveDbEnv();
+
+  const testConnectionEnv: SavedDbEnv = {
+    DB_HOST: process.env.DB_HOST,
+    DB_PORT: process.env.DB_PORT,
+    DB_NAME: process.env.DB_NAME,
+    DB_USER: process.env.DB_USER,
+    DB_PASSWORD: process.env.DB_PASSWORD,
+  };
+
   const { getPool, closePool } = await import("../../src/shared/db/pool.js");
+
+  for (const [key, value] of Object.entries(testConnectionEnv)) {
+    if (value !== undefined) {
+      process.env[key] = value;
+    }
+  }
 
   await closePool();
 
@@ -344,10 +444,22 @@ const createTestDatabase = async (
   await setupNotificationsSchema(pool);
   await setupActivitySettingsSchema(pool);
 
+  await assertSafeTestDatabase(pool);
+
+  const { rows } = await pool.query<{ current_database: string }>(
+    "SELECT current_database()",
+  );
+  console.info(
+    `[tests] Using database "${rows[0]?.current_database ?? "unknown"}"${container ? " (Testcontainers)" : ""}`,
+  );
+
   return {
     container,
     pool,
     stop: async () => {
+      pool.on("error", () => undefined);
+
+      const { closePool } = await import("../../src/shared/db/pool.js");
       await closePool();
 
       if (container) {
@@ -359,7 +471,7 @@ const createTestDatabase = async (
 
 const startWithTestcontainers = async (): Promise<TestDatabase> => {
   const container = await new PostgreSqlContainer("postgres:16-alpine")
-    .withDatabase("test_db")
+    .withDatabase(DEFAULT_TEST_DB_NAME)
     .withUsername("test")
     .withPassword("test")
     .withStartupTimeout(TESTCONTAINERS_TIMEOUT_MS)
@@ -377,7 +489,14 @@ const startFromEnv = async (): Promise<TestDatabase | null> => {
     return null;
   }
 
-  const testDbName = process.env.TEST_DB_NAME ?? "test_db";
+  const testDbName =
+    normalizeEnvValue(process.env.TEST_DB_NAME) || DEFAULT_TEST_DB_NAME;
+
+  if (getProtectedDatabaseNames().includes(testDbName)) {
+    throw new Error(
+      `TEST_DB_NAME "${testDbName}" is protected (DEV_DB_PROTECT). Use Testcontainers or another database name.`,
+    );
+  }
 
   const canReachPostgres = await probeConnection({
     ...getBasePoolConfig(),
@@ -414,7 +533,7 @@ const bootstrapTestDatabase = async (): Promise<TestDatabase> => {
     return createTestDatabase(null);
   }
 
-  if (process.env.USE_TESTCONTAINERS === "true") {
+  if (isEnvTruthy(process.env.USE_TESTCONTAINERS)) {
     return startWithTestcontainers();
   }
 
@@ -427,8 +546,9 @@ const bootstrapTestDatabase = async (): Promise<TestDatabase> => {
   throw new Error(
     [
       "Postgres для интеграционных тестов недоступен.",
-      "Запусти БД: docker compose -f .docker/docker-compose.yaml up -d postgres",
-      "Или задай TEST_DATABASE_URL / USE_TESTCONTAINERS=true",
+      "По умолчанию нужен Docker: USE_TESTCONTAINERS=true (см. .env.test).",
+      "Fallback: docker compose -f .docker/docker-compose.yaml up -d postgres + TEST_DB_NAME=time_tracker_test",
+      "Или задай TEST_DATABASE_URL.",
     ].join("\n"),
   );
 };
@@ -456,4 +576,6 @@ export const releaseTestDatabase = async (): Promise<void> => {
     sharedTestDb = null;
     sharedTestDbInit = null;
   }
+
+  restoreDbEnv();
 };
