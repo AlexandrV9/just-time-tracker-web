@@ -6,6 +6,39 @@
 
 ---
 
+## Деплой 1.1.10 (фикс push на iOS PWA)
+
+Краткий чеклист для обновления **существующего** prod с 1.1.9.
+
+### 1. GitHub — до деплоя
+
+1. Смержить ветку в `main`.
+2. Дождаться зелёного CI (сборка `client` + `server` в GHCR).
+
+Миграция БД **не нужна**. Новых переменных в `.env` нет (VAPID из 1.1.9 должен остаться).
+
+### 2. Подтянуть образы и перезапустить
+
+```bash
+cd /opt/time-tracker
+
+docker compose -f docker-compose.prod.yml --env-file .env pull
+docker compose -f docker-compose.prod.yml --env-file .env up -d
+```
+
+### 3. Smoke-тест после 1.1.10
+
+| # | Действие | Ожидание |
+|---|----------|----------|
+| 1 | `curl https://<домен>/api/health` | `status: OK` |
+| 2 | PWA с Home Screen → открыть → `/settings/notifications` push **on** | Подписка в `push_subscriptions` |
+| 3 | Свернуть PWA → дождаться reminder | Push на lock screen |
+| 4 | Закрыть PWA из app switcher → дождаться reminder | Push через SW |
+
+Runtime-кэши SW версионируются через `VITE_APP_VERSION` (`1.1.10`).
+
+---
+
 ## Деплой 1.1.9 (Web Push)
 
 Краткий чеклист для обновления **существующего** prod с 1.1.8.

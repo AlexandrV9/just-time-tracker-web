@@ -111,11 +111,26 @@ export function useActivityEvents() {
   useEffect(() => {
     if (status !== "AUTHENTICATED" || !userId) return;
 
-    const abortController = new AbortController();
+    let abortController = new AbortController();
     let reconnectTimeoutId: ReturnType<typeof setTimeout> | undefined;
+    let isPaused = document.visibilityState === "hidden";
+
+    const clearReconnectTimeout = () => {
+      if (reconnectTimeoutId) {
+        clearTimeout(reconnectTimeoutId);
+        reconnectTimeoutId = undefined;
+      }
+    };
+
+    const disconnect = () => {
+      clearReconnectTimeout();
+      abortController.abort();
+      hadConnectionRef.current = false;
+      isConnectingRef.current = false;
+    };
 
     const scheduleReconnect = () => {
-      if (abortController.signal.aborted) return;
+      if (abortController.signal.aborted || isPaused) return;
 
       const delay = Math.min(
         1000 * 2 ** reconnectAttemptRef.current,
@@ -129,7 +144,9 @@ export function useActivityEvents() {
     };
 
     const connect = async () => {
-      if (isConnectingRef.current || abortController.signal.aborted) return;
+      if (isConnectingRef.current || abortController.signal.aborted || isPaused) {
+        return;
+      }
 
       const token = localStorage.getItem(ACCESS_TOKEN_KEY);
       if (!token) return;
@@ -181,18 +198,26 @@ export function useActivityEvents() {
 
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible") {
+        isPaused = false;
         syncCurrentActivityFromServer();
+        abortController = new AbortController();
+        reconnectAttemptRef.current = 0;
+        connect();
+        return;
       }
+
+      isPaused = true;
+      disconnect();
     };
 
-    connect();
+    if (!isPaused) {
+      connect();
+    }
     document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
-      abortController.abort();
-      hadConnectionRef.current = false;
-      isConnectingRef.current = false;
-      if (reconnectTimeoutId) clearTimeout(reconnectTimeoutId);
+      isPaused = true;
+      disconnect();
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [status, userId, handleRemoteEvent, syncCurrentActivityFromServer]);

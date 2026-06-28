@@ -4,7 +4,6 @@ import {
   NOTIFICATION_JOB_TYPES,
   type NotificationJobTypeDTO,
 } from "@time-tracker/shared";
-import { activityEventsHub } from "../../activity/activityEvents.hub.js";
 import { config } from "../../shared/config/index.js";
 import { userQueries } from "../../user/user.queries.js";
 import type { NotificationSender } from "./notificationSender.interface.js";
@@ -33,9 +32,7 @@ const buildPushPayload = (job: NotificationJob, locale: string) => {
 
   const { title, body } = getReminderCopy(locale, job.type, job.title);
   const tag = `reminder:${job.id}:${job.type}`;
-  const url = job.activityId
-    ? `/activities/${job.activityId}`
-    : "/activities";
+  const url = job.activityId ? `/activities/${job.activityId}` : "/activities";
 
   return {
     title,
@@ -81,11 +78,9 @@ export class PushNotificationSender implements NotificationSender {
       return;
     }
 
-    if (activityEventsHub.hasSubscribers(job.userId)) {
-      return;
-    }
-
-    const preferences = await userQueries.getNotificationPreferences(job.userId);
+    const preferences = await userQueries.getNotificationPreferences(
+      job.userId,
+    );
     if (!preferences?.pushNotificationsEnabled) {
       return;
     }
@@ -98,9 +93,7 @@ export class PushNotificationSender implements NotificationSender {
       return;
     }
 
-    const payload = JSON.stringify(
-      buildPushPayload(job, preferences.locale),
-    );
+    const payload = JSON.stringify(buildPushPayload(job, preferences.locale));
 
     await Promise.all(
       subscriptions.map(async (subscription) => {

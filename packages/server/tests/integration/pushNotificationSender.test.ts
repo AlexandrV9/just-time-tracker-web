@@ -74,7 +74,7 @@ describe("PushNotificationSender", () => {
     await releaseTestDatabase();
   });
 
-  it("skips push when user has active SSE subscribers", async () => {
+  it("sends push even when user has active SSE subscribers", async () => {
     const { activityEventsHub } =
       await import("../../src/activity/activityEvents.hub.js");
     const { PushNotificationSender } =
@@ -101,7 +101,7 @@ describe("PushNotificationSender", () => {
       updatedAt: new Date().toISOString(),
     });
 
-    expect(sendNotification).not.toHaveBeenCalled();
+    expect(sendNotification).toHaveBeenCalledTimes(1);
     unsubscribe();
   });
 
