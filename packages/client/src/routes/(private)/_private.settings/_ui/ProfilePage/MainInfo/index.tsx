@@ -177,6 +177,7 @@ export const MainInfo = () => {
                 variant="outline"
                 size="sm"
                 type="submit"
+                form="profile-main-info-form"
                 loading={isPending}
               >
                 <CheckIcon size={18} />
@@ -198,6 +199,7 @@ export const MainInfo = () => {
       <Box h="1px" bg="border.emphasized" />
       <Card.Body
         as="form"
+        id="profile-main-info-form"
         width="full"
         display="flex"
         flexDirection="column"
