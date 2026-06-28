@@ -1,5 +1,8 @@
 import { useCallback } from "react";
+import type { UserLocaleDTO } from "@time-tracker/shared";
+import { useAuthStore } from "~/features/auth";
 import { useTranslation } from "~/shared/hooks";
+import { userApiService } from "~/shared/api/services";
 
 import { Select, Text } from "~/shared/ui";
 import { createListCollection } from "~/shared/utils";
@@ -25,14 +28,19 @@ function capitalizeFirstLetter(str: string) {
 
 export const LangSwitcher = ({ isShort = true }: LangSwitcherProps) => {
   const { i18n, t } = useTranslation();
+  const authStatus = useAuthStore((state) => state.status);
 
   const currentLn = i18n.language;
 
   const handleChangeLanguage = useCallback(
     (lng: string) => {
-      i18n.changeLanguage(lng);
+      void i18n.changeLanguage(lng);
+
+      if (authStatus === "AUTHENTICATED") {
+        void userApiService.updateLocale({ locale: lng as UserLocaleDTO });
+      }
     },
-    [i18n],
+    [authStatus, i18n],
   );
 
   return (

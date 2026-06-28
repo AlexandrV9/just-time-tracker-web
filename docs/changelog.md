@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.1.9
+
+### Уведомления
+
+- **Web Push** для activity reminders: VAPID, `PushNotificationSender`, API подписок
+- Дедупликация: push не шлётся, если у пользователя активное SSE-соединение
+- Локализация push на сервере (`getReminderCopy`) по `users.locale`
+- Авто-подписка после входа; переключатель в `/settings/notifications`
+- `LangSwitcher` синхронизирует locale в БД; locale из профиля применяется при auth
+
+### Backend
+
+- Миграция `004_users_locale_and_push.sql`: `users.locale`, `users.push_notifications_enabled`
+- `PUT/DELETE /push-subscriptions`, `PATCH /users/me/locale`, `PATCH /users/me/push-notifications`
+- Auth user: `locale`, `pushNotificationsEnabled`
+
+### DevOps
+
+- Версия приложения: **1.1.9**
+- `.env`: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `VITE_VAPID_PUBLIC_KEY`
+- GitHub Actions Variable: `VITE_VAPID_PUBLIC_KEY` (тот же public key, что на сервере)
+
+---
+
 ## 1.1.8
 
 ### Исправления

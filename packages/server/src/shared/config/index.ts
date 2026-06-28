@@ -76,4 +76,16 @@ export const config = {
     /** Max verification/reset emails per user per UTC day. 0 = unlimited. */
     dailyLimitPerUser: Number(process.env.EMAIL_DAILY_LIMIT_PER_USER ?? 4),
   },
+
+  vapid: {
+    publicKey: process.env.VAPID_PUBLIC_KEY,
+    privateKey: process.env.VAPID_PRIVATE_KEY,
+    subject: process.env.VAPID_SUBJECT || "mailto:noreply@localhost",
+  },
+
+  push: {
+    enabled: Boolean(
+      process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY,
+    ),
+  },
 } as const;

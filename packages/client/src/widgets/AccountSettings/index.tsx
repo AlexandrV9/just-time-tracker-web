@@ -3,6 +3,7 @@ import type { FileRouteTypes } from "~/routeTree.gen";
 import { useTranslation } from "~/shared/hooks";
 import {
   Box,
+  BellIcon,
   ChevronRightIcon,
   Flex,
   Link,
@@ -61,6 +62,11 @@ export const AccountSettings = () => {
           to="/settings/profile"
           icon={<UserCircleIcon />}
           label={t("widgets.accountSettings.options.profile")}
+        />
+        <SettingsLink
+          to="/settings/notifications"
+          icon={<BellIcon />}
+          label={t("widgets.accountSettings.options.notifications")}
         />
         {/* <SettingsLink
           to="/settings/security"

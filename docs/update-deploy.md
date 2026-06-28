@@ -6,6 +6,79 @@
 
 ---
 
+## Деплой 1.1.9 (Web Push)
+
+Краткий чеклист для обновления **существующего** prod с 1.1.8.
+
+### 1. GitHub — до деплоя
+
+1. Смержить ветку в `main`.
+2. Дождаться зелёного CI (сборка `client` + `server` в GHCR).
+3. Сгенерировать VAPID-ключи (один раз):
+
+   ```bash
+   npx web-push generate-vapid-keys
+   ```
+
+4. В **Settings → Actions → Variables** добавить/обновить:
+   - `VITE_APP_URL=https://<ваш-домен>`
+   - `VITE_API_ENDPOINT=https://<ваш-домен>`
+   - `VITE_VAPID_PUBLIC_KEY=<public key из шага 3>`
+
+### 2. Обновить `.env` на VPS
+
+```env
+VAPID_PUBLIC_KEY=<тот же public key>
+VAPID_PRIVATE_KEY=<private key из шага 3>
+VAPID_SUBJECT=mailto:noreply@yourdomain.com
+```
+
+Без `VAPID_*` push отключён (SSE/in-app reminders работают как раньше).
+
+### 3. Миграция БД (обязательно)
+
+На **существующей** базе один раз:
+
+**С локальной машины:**
+
+```bash
+scp packages/server/db/migrations/004_users_locale_and_push.sql \
+  <USER>@<SERVER>:~/004_users_locale_and_push.sql
+```
+
+**На сервере:**
+
+```bash
+docker exec -i time-tracker-postgres psql -U postgres -d time_tracker \
+  < ~/004_users_locale_and_push.sql
+
+rm ~/004_users_locale_and_push.sql
+```
+
+Миграция идемпотентна (`IF NOT EXISTS`).
+
+### 4. Подтянуть образы и перезапустить
+
+```bash
+cd /opt/time-tracker
+
+docker compose -f docker-compose.prod.yml --env-file .env pull
+docker compose -f docker-compose.prod.yml --env-file .env up -d
+```
+
+### 5. Smoke-тест после 1.1.9
+
+| # | Действие | Ожидание |
+|---|----------|----------|
+| 1 | `curl https://<домен>/api/health` | `status: OK` |
+| 2 | `/settings/notifications` → включить push | Запрос permission; подписка в БД |
+| 3 | Закрыть вкладку → дождаться reminder | Push от SW (не дублируется с открытой вкладкой) |
+| 4 | Сменить язык в LangSwitcher | `users.locale` обновлён; push-тексты на новом языке |
+
+Runtime-кэши SW версионируются через `VITE_APP_VERSION` (`1.1.9`).
+
+---
+
 ## Деплой 1.1.8 (фикс goal-уведомлений)
 
 Краткий чеклист для обновления **существующего** prod с 1.1.7.
@@ -352,6 +425,7 @@ docker compose -f docker-compose.prod.yml --env-file .env up -d
 | 1.0.1 | `001_add_users_email_avatar.sql` | email + avatar в users |
 | 1.0.6 | `002_email_auth_verification.sql` | OAuth, verification, password reset, лимит писем |
 | 1.1.7 | `003_notifications_and_activity_settings.sql` | notification jobs, push subscriptions, activity settings |
+| 1.1.9 | `004_users_locale_and_push.sql` | user locale, push_notifications_enabled |
 
 **Через Docker:**
 

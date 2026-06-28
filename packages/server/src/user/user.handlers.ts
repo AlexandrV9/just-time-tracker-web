@@ -1,4 +1,10 @@
-import { setPasswordSchema, updatePasswordSchema, updateProfileSchema } from "@time-tracker/shared";
+import {
+  setPasswordSchema,
+  updatePasswordSchema,
+  updateProfileSchema,
+  updatePushNotificationsSchema,
+  updateUserLocaleSchema,
+} from "@time-tracker/shared";
 import type { Context } from "hono";
 import type { AuthVariables } from "../shared/auth/auth.variables.js";
 import { getAuthenticatedUserId } from "../shared/auth/with-created-by-id.js";
@@ -8,14 +14,15 @@ import { userService } from "./user.service.js";
 
 const SUPPORTED_PROVIDERS = ["yandex"];
 
-const getAuthProviders = async (
-  c: Context<{ Variables: AuthVariables }>,
-) => {
+const getAuthProviders = async (c: Context<{ Variables: AuthVariables }>) => {
   const userId = getAuthenticatedUserId(c);
   const providers = await authRepository.findAuthProvidersByUserId(userId);
   return c.json({
     success: true,
-    data: providers.map((p) => ({ provider: p.provider, createdAt: p.createdAt })),
+    data: providers.map((p) => ({
+      provider: p.provider,
+      createdAt: p.createdAt,
+    })),
   });
 };
 
@@ -60,6 +67,24 @@ export const userHandlers = {
       newPassword: data.newPassword,
     }),
     service: userService.updatePassword,
+  }),
+  updateLocale: createValidatedHandler({
+    parse: (c) => c.req.json(),
+    schema: updateUserLocaleSchema,
+    map: (data, c) => ({
+      userId: getAuthenticatedUserId(c),
+      locale: data.locale,
+    }),
+    service: userService.updateLocale,
+  }),
+  updatePushNotifications: createValidatedHandler({
+    parse: (c) => c.req.json(),
+    schema: updatePushNotificationsSchema,
+    map: (data, c) => ({
+      userId: getAuthenticatedUserId(c),
+      enabled: data.enabled,
+    }),
+    service: userService.updatePushNotifications,
   }),
   getAuthProviders,
   unlinkProvider,

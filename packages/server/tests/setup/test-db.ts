@@ -168,8 +168,14 @@ export const setupUsersSchema = async (pool: Pool) => {
       login VARCHAR(255) NOT NULL UNIQUE,
       email VARCHAR(255) UNIQUE,
       email_verified_at TIMESTAMPTZ,
-      avatar TEXT
+      avatar TEXT,
+      locale VARCHAR(5) NOT NULL DEFAULT 'en',
+      push_notifications_enabled BOOLEAN NOT NULL DEFAULT true
     );
+
+    ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS locale VARCHAR(5) NOT NULL DEFAULT 'en',
+      ADD COLUMN IF NOT EXISTS push_notifications_enabled BOOLEAN NOT NULL DEFAULT true;
 
     CREATE TABLE IF NOT EXISTS auth_providers (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -73,6 +73,17 @@ describe("activityEventsHub", () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
+  it("reports active subscribers via hasSubscribers", () => {
+    const listener = vi.fn();
+    expect(activityEventsHub.hasSubscribers("user-1")).toBe(false);
+
+    const unsubscribe = activityEventsHub.subscribe("user-1", listener);
+    expect(activityEventsHub.hasSubscribers("user-1")).toBe(true);
+
+    unsubscribe();
+    expect(activityEventsHub.hasSubscribers("user-1")).toBe(false);
+  });
+
   it("matches numeric and string user ids", () => {
     const listener = vi.fn();
     const unsubscribe = activityEventsHub.subscribe(1, listener);

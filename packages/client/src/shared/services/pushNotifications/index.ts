@@ -41,14 +41,12 @@ export function isPushSupported() {
   );
 }
 
-export async function getPushPermission() {
-  if (!isPushSupported()) return "denied" as NotificationPermission;
-  return Notification.permission;
+export function getPushPermission(): NotificationPermission {
+  return isPushSupported() ? Notification.permission : "denied";
 }
 
 export async function requestPushPermission() {
-  if (!isPushSupported()) return "denied" as NotificationPermission;
-  return Notification.requestPermission();
+  return isPushSupported() ? Notification.requestPermission() : "denied";
 }
 
 export async function getServiceWorkerRegistration() {

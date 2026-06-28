@@ -90,10 +90,21 @@ const deleteById = async (id: string): Promise<boolean> => {
   return (result.rowCount ?? 0) > 0;
 };
 
+const deleteByUserId = async (userId: string): Promise<number> => {
+  const query = `
+    DELETE FROM push_subscriptions
+    WHERE user_id = $1
+  `;
+
+  const result = await pool.query(query, [userId]);
+  return result.rowCount ?? 0;
+};
+
 export const pushSubscriptionsRepository = {
   createSubscription,
   findByUserId,
   findByEndpoint,
   deleteByEndpoint,
   deleteById,
+  deleteByUserId,
 };

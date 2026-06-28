@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS users (
   email_verified_at TIMESTAMPTZ,
   avatar TEXT,
   is_active BOOLEAN NOT NULL DEFAULT true,
+  locale VARCHAR(5) NOT NULL DEFAULT 'en',
+  push_notifications_enabled BOOLEAN NOT NULL DEFAULT true,
 
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

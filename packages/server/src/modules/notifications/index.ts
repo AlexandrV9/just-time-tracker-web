@@ -21,6 +21,8 @@ export { activityNotificationScheduler } from "./activityNotification.scheduler.
 export { notificationsRepository } from "./notifications.repository.js";
 export { pushSubscriptionsRepository } from "./pushSubscriptions.repository.js";
 export { notificationsService, setNotificationJobsChangeListener } from "./notifications.service.js";
+export { PushNotificationSender } from "./pushNotificationSender.js";
+export { pushSubscriptionsRouter } from "./pushSubscriptions.routes.js";
 export {
   createNotificationWorker,
   MAX_NOTIFICATION_DELIVERY_LAG_MS,

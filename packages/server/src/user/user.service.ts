@@ -1,7 +1,10 @@
+import type { UserLocaleDTO } from "@time-tracker/shared";
 import { tokenService } from "../shared/index.js";
 import type { ErrorResponse, SuccessResponse } from "../shared/types.js";
 import { authRepository } from "../auth/auth.repository.js";
+import type { PublicUserRow } from "./user.queries.js";
 import { userQueries } from "./user.queries.js";
+import { pushSubscriptionsRepository } from "../modules/notifications/pushSubscriptions.repository.js";
 
 type UpdateProfileInput = {
   userId: string;
@@ -9,15 +12,7 @@ type UpdateProfileInput = {
   login: string;
 };
 
-type UpdateProfileResponse =
-  | SuccessResponse<{
-      id: string;
-      name: string;
-      login: string;
-      email: string | null;
-      avatar: string | null;
-    }>
-  | ErrorResponse;
+type UpdateProfileResponse = SuccessResponse<PublicUserRow> | ErrorResponse;
 
 const updateProfile = async (
   input: UpdateProfileInput,
@@ -173,9 +168,71 @@ const updatePassword = async (
   }
 };
 
+type UpdateLocaleInput = {
+  userId: string;
+  locale: UserLocaleDTO;
+};
+
+type UpdateLocaleResponse = SuccessResponse<PublicUserRow> | ErrorResponse;
+
+const updateLocale = async (
+  input: UpdateLocaleInput,
+): Promise<UpdateLocaleResponse> => {
+  try {
+    const updatedUser = await userQueries.updateUserLocale(
+      input.userId,
+      input.locale,
+    );
+
+    if (!updatedUser) {
+      return { success: false, message: "User not found" };
+    }
+
+    return { success: true, data: updatedUser };
+  } catch (error) {
+    console.error("Update locale error:", error);
+    return { success: false, message: "Internal server error" };
+  }
+};
+
+type UpdatePushNotificationsInput = {
+  userId: string;
+  enabled: boolean;
+};
+
+type UpdatePushNotificationsResponse =
+  | SuccessResponse<PublicUserRow>
+  | ErrorResponse;
+
+const updatePushNotifications = async (
+  input: UpdatePushNotificationsInput,
+): Promise<UpdatePushNotificationsResponse> => {
+  try {
+    const updatedUser = await userQueries.updatePushNotificationsEnabled(
+      input.userId,
+      input.enabled,
+    );
+
+    if (!updatedUser) {
+      return { success: false, message: "User not found" };
+    }
+
+    if (!input.enabled) {
+      await pushSubscriptionsRepository.deleteByUserId(input.userId);
+    }
+
+    return { success: true, data: updatedUser };
+  } catch (error) {
+    console.error("Update push notifications error:", error);
+    return { success: false, message: "Internal server error" };
+  }
+};
+
 export const userService = {
   updateProfile,
   unlinkProvider,
   setPassword,
   updatePassword,
+  updateLocale,
+  updatePushNotifications,
 };

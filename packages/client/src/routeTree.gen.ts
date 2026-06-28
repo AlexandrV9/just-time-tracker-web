@@ -29,6 +29,7 @@ import { Route as authAuthRecoverAccountIndexRouteImport } from './routes/(auth)
 import { Route as authAuthCallbackIndexRouteImport } from './routes/(auth)/_auth.callback/index'
 import { Route as privatePrivateSettingsSecurityRouteImport } from './routes/(private)/_private.settings/security'
 import { Route as privatePrivateSettingsProfileRouteImport } from './routes/(private)/_private.settings/profile'
+import { Route as privatePrivateSettingsNotificationsRouteImport } from './routes/(private)/_private.settings/notifications'
 import { Route as privatePrivateActivitiesActivityIdRouteImport } from './routes/(private)/_private.activities/$activityId'
 import { Route as privatePrivateActivitiesActivityIdIndexRouteImport } from './routes/(private)/_private.activities/$activityId/index'
 import { Route as privatePrivateActivitiesActivityIdSettingsRouteImport } from './routes/(private)/_private.activities/$activityId.settings'
@@ -148,6 +149,12 @@ const privatePrivateSettingsProfileRoute =
     path: '/settings/profile',
     getParentRoute: () => privatePrivateRoute,
   } as any)
+const privatePrivateSettingsNotificationsRoute =
+  privatePrivateSettingsNotificationsRouteImport.update({
+    id: '/settings/notifications',
+    path: '/settings/notifications',
+    getParentRoute: () => privatePrivateRoute,
+  } as any)
 const privatePrivateActivitiesActivityIdRoute =
   privatePrivateActivitiesActivityIdRouteImport.update({
     id: '/activities/$activityId',
@@ -176,6 +183,7 @@ const privatePrivateActivitiesActivityIdAnalyticsRoute =
 export interface FileRoutesByFullPath {
   '/': typeof privatePrivateIndexRoute
   '/activities/$activityId': typeof privatePrivateActivitiesActivityIdRouteWithChildren
+  '/settings/notifications': typeof privatePrivateSettingsNotificationsRoute
   '/settings/profile': typeof privatePrivateSettingsProfileRoute
   '/settings/security': typeof privatePrivateSettingsSecurityRoute
   '/callback': typeof authAuthCallbackIndexRoute
@@ -196,6 +204,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof privatePrivateIndexRoute
+  '/settings/notifications': typeof privatePrivateSettingsNotificationsRoute
   '/settings/profile': typeof privatePrivateSettingsProfileRoute
   '/settings/security': typeof privatePrivateSettingsSecurityRoute
   '/callback': typeof authAuthCallbackIndexRoute
@@ -224,6 +233,7 @@ export interface FileRoutesById {
   '/(public)/_public': typeof publicPublicRouteWithChildren
   '/(private)/_private/': typeof privatePrivateIndexRoute
   '/(private)/_private/activities/$activityId': typeof privatePrivateActivitiesActivityIdRouteWithChildren
+  '/(private)/_private/settings/notifications': typeof privatePrivateSettingsNotificationsRoute
   '/(private)/_private/settings/profile': typeof privatePrivateSettingsProfileRoute
   '/(private)/_private/settings/security': typeof privatePrivateSettingsSecurityRoute
   '/(auth)/_auth/callback/': typeof authAuthCallbackIndexRoute
@@ -247,6 +257,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/activities/$activityId'
+    | '/settings/notifications'
     | '/settings/profile'
     | '/settings/security'
     | '/callback'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/settings/notifications'
     | '/settings/profile'
     | '/settings/security'
     | '/callback'
@@ -294,6 +306,7 @@ export interface FileRouteTypes {
     | '/(public)/_public'
     | '/(private)/_private/'
     | '/(private)/_private/activities/$activityId'
+    | '/(private)/_private/settings/notifications'
     | '/(private)/_private/settings/profile'
     | '/(private)/_private/settings/security'
     | '/(auth)/_auth/callback/'
@@ -468,6 +481,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof privatePrivateSettingsProfileRouteImport
       parentRoute: typeof privatePrivateRoute
     }
+    '/(private)/_private/settings/notifications': {
+      id: '/(private)/_private/settings/notifications'
+      path: '/settings/notifications'
+      fullPath: '/settings/notifications'
+      preLoaderRoute: typeof privatePrivateSettingsNotificationsRouteImport
+      parentRoute: typeof privatePrivateRoute
+    }
     '/(private)/_private/activities/$activityId': {
       id: '/(private)/_private/activities/$activityId'
       path: '/activities/$activityId'
@@ -551,6 +571,7 @@ const privatePrivateActivitiesActivityIdRouteWithChildren =
 interface privatePrivateRouteChildren {
   privatePrivateIndexRoute: typeof privatePrivateIndexRoute
   privatePrivateActivitiesActivityIdRoute: typeof privatePrivateActivitiesActivityIdRouteWithChildren
+  privatePrivateSettingsNotificationsRoute: typeof privatePrivateSettingsNotificationsRoute
   privatePrivateSettingsProfileRoute: typeof privatePrivateSettingsProfileRoute
   privatePrivateSettingsSecurityRoute: typeof privatePrivateSettingsSecurityRoute
   privatePrivateActivitiesIndexRoute: typeof privatePrivateActivitiesIndexRoute
@@ -564,6 +585,8 @@ const privatePrivateRouteChildren: privatePrivateRouteChildren = {
   privatePrivateIndexRoute: privatePrivateIndexRoute,
   privatePrivateActivitiesActivityIdRoute:
     privatePrivateActivitiesActivityIdRouteWithChildren,
+  privatePrivateSettingsNotificationsRoute:
+    privatePrivateSettingsNotificationsRoute,
   privatePrivateSettingsProfileRoute: privatePrivateSettingsProfileRoute,
   privatePrivateSettingsSecurityRoute: privatePrivateSettingsSecurityRoute,
   privatePrivateActivitiesIndexRoute: privatePrivateActivitiesIndexRoute,

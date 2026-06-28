@@ -1,6 +1,25 @@
 import z from "zod";
+import { SUPPORTED_LOCALES } from "../notifications/reminderCopy.js";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export const userLocaleSchema = z.enum(SUPPORTED_LOCALES);
+
+export type UserLocaleDTO = z.infer<typeof userLocaleSchema>;
+
+export const updateUserLocaleSchema = z.object({
+  locale: userLocaleSchema,
+});
+
+export type UpdateUserLocaleDTO = z.infer<typeof updateUserLocaleSchema>;
+
+export const updatePushNotificationsSchema = z.object({
+  enabled: z.boolean(),
+});
+
+export type UpdatePushNotificationsDTO = z.infer<
+  typeof updatePushNotificationsSchema
+>;
 
 export const loginSchema = z
   .string()
@@ -64,6 +83,8 @@ export const profileUserSchema = z.object({
   login: z.string(),
   email: z.string().nullable(),
   avatar: z.string().nullable(),
+  locale: userLocaleSchema,
+  pushNotificationsEnabled: z.boolean(),
 });
 
 export type ProfileUserDTO = z.infer<typeof profileUserSchema>;
