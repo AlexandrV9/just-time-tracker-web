@@ -157,7 +157,7 @@ export const MainInfo = () => {
         gap="0.5rem"
       >
         <Text textStyle="lg" fontWeight="semibold" alignSelf="center">
-          Основная информация
+          {t(`${baseLocale}.mainInfoTitle`)}
         </Text>
         <Stack.HStack justifyContent="flex-end" gap="0.5rem">
           {isEditing ? (

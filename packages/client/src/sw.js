@@ -4,10 +4,10 @@
 import { clientsClaim } from "workbox-core";
 import {
   cleanupOutdatedCaches,
-  matchPrecache,
+  createHandlerBoundToURL,
   precacheAndRoute,
 } from "workbox-precaching";
-import { registerRoute } from "workbox-routing";
+import { NavigationRoute, registerRoute } from "workbox-routing";
 import {
   CacheFirst,
   NetworkOnly,
@@ -59,23 +59,12 @@ registerRoute(
   new NetworkOnly(),
 );
 
-// SPA-навигация: свежий HTML из сети, офлайн — precached index.html.
+// SPA-навигация: сразу precached index.html (без ожидания сети), офлайн тоже работает.
+const navigationHandler = createHandlerBoundToURL("/index.html");
 registerRoute(
-  ({ request }) => request.mode === "navigate",
-  async ({ request }) => {
-    try {
-      return await fetch(request);
-    } catch {
-      const cachedIndex = await matchPrecache("/index.html");
-      return (
-        cachedIndex ||
-        new Response("Offline", {
-          status: 503,
-          headers: { "Content-Type": "text/plain; charset=utf-8" },
-        })
-      );
-    }
-  },
+  new NavigationRoute(navigationHandler, {
+    denylist: [/^\/api\//],
+  }),
 );
 
 // Локали и публичные ассеты (не попали в precache).

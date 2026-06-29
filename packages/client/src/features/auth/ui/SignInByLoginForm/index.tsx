@@ -182,10 +182,6 @@ function getTranslatedError(
       return t(`${baseLocale}.passwordInput.errors.minLength`, {
         count: minLengthPassword,
       });
-    case "passwords.mismatch":
-      return t(`${baseLocale}.repeatPasswordInput.errors.mismatch`, {
-        count: minLengthPassword,
-      });
     default: {
       return null;
     }

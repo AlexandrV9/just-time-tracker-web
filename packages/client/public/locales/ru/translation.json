@@ -79,6 +79,8 @@
         "historyTitle": "История",
         "createdAtLabel": "Создано",
         "updatedAtLabel": "Обновлено",
+        "mainInfoTitle": "Основная информация",
+        "descriptionLabel": "Описание",
         "sessionStart": "Начало",
         "sessionEnd": "Конец",
         "duration": "Длительность",
@@ -133,6 +135,7 @@
     },
     "settings": {
       "profile": {
+        "mainInfoTitle": "Основная информация",
         "nameInput": {
           "label": "Имя",
           "placeholder": "Введите имя"
@@ -588,6 +591,10 @@
     }
   },
   "common": {
+    "durationField": {
+      "cancelButton": "Отмена",
+      "confirmButton": "Подтвердить"
+    },
     "aria": {
       "togglePasswordVisibility": "Показать или скрыть пароль",
       "previousMonth": "Предыдущий месяц",

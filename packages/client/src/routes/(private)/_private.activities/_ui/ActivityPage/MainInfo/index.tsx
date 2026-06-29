@@ -129,7 +129,7 @@ export const MainInfo = ({ activityId }: MainInfoProps) => {
           minHeight="60px"
         >
           <Text fontWeight="semibold" textStyle="lg" alignSelf="center">
-            Основная информация
+            {t("pages.activities.detail.mainInfoTitle")}
           </Text>
           <Flex alignItems="center" gap="0.5rem">
             <IconButton
@@ -177,7 +177,7 @@ export const MainInfo = ({ activityId }: MainInfoProps) => {
             {activity.description && (
               <Flex flexDirection="column" gap={1}>
                 <Text textStyle="sm" color="fg.muted">
-                  Описание
+                  {t("pages.activities.detail.descriptionLabel")}
                 </Text>
                 <Text textStyle="sm" fontWeight="medium">
                   {activity.description}

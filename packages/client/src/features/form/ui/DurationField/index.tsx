@@ -1,10 +1,11 @@
-import { useMemo, type ChangeEvent } from "react";
-import {
-  convertSecondsToTimeObject,
-  convertTimeObjectToSeconds,
-  convertTimeObjectToTimeString,
-} from "~/shared/libs";
+import { useMemo, useState, type ChangeEvent } from "react";
 import { Field, Input } from "~/shared/ui";
+import {
+  prefersTouchDurationPicker,
+  secondsToTimeInputValue,
+  timeInputValueToSeconds,
+} from "../../utils/duration";
+import { TouchDurationPicker } from "../TouchDurationPicker";
 
 export type DurationFieldProps = {
   label: string;
@@ -14,14 +15,6 @@ export type DurationFieldProps = {
   hint?: string;
 };
 
-const secondsToTimeInputValue = (valueSeconds: number) =>
-  convertTimeObjectToTimeString(convertSecondsToTimeObject(valueSeconds));
-
-const timeInputValueToSeconds = (value: string) => {
-  const [hours = 0, minutes = 0, seconds = 0] = value.split(":").map(Number);
-  return convertTimeObjectToSeconds({ hours, minutes, seconds });
-};
-
 export const DurationField = ({
   label,
   valueSeconds,
@@ -29,12 +22,14 @@ export const DurationField = ({
   disabled,
   hint,
 }: DurationFieldProps) => {
+  const [useTouchPicker] = useState(prefersTouchDurationPicker);
+
   const timeValue = useMemo(
     () => secondsToTimeInputValue(valueSeconds),
     [valueSeconds],
   );
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleNativeChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
     if (!nextValue) return;
 
@@ -49,22 +44,31 @@ export const DurationField = ({
           {hint}
         </Field.HelperText>
       )}
-      <Input
-        type="time"
-        step={1}
-        width="110px"
-        value={timeValue}
-        onChange={handleChange}
-        disabled={disabled}
-        fontFamily="Roboto Mono, monospace"
-        css={{
-          appearance: "none",
-          "&::-webkit-calendar-picker-indicator": {
-            display: "none",
+
+      {useTouchPicker ? (
+        <TouchDurationPicker
+          valueSeconds={valueSeconds}
+          onChange={onChange}
+          disabled={disabled}
+        />
+      ) : (
+        <Input
+          type="time"
+          step={1}
+          width="110px"
+          value={timeValue}
+          onChange={handleNativeChange}
+          disabled={disabled}
+          fontFamily="Roboto Mono, monospace"
+          css={{
             appearance: "none",
-          },
-        }}
-      />
+            "&::-webkit-calendar-picker-indicator": {
+              display: "none",
+              appearance: "none",
+            },
+          }}
+        />
+      )}
     </Field.Root>
   );
 };

@@ -11,6 +11,7 @@ import type { RouterContext } from "./types";
 const router = createRouter({
   routeTree,
   defaultPreload: "intent",
+  defaultPendingMs: 0,
   context: {
     queryClient,
   } as unknown as RouterContext,

@@ -1,6 +1,6 @@
 {
   "name": "time-tracker",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -13,8 +13,9 @@
     "build:server": "pnpm --filter @time-tracker/server build",
     "build": "concurrently \"pnpm run build:shared\" \"pnpm run build:client\" \"pnpm run build:server\"",
     "lint": "pnpm --filter @time-tracker/client eslint",
+    "i18n:check": "pnpm --filter @time-tracker/client i18n:check",
     "test": "pnpm --filter @time-tracker/server test",
-    "verify": "pnpm lint && pnpm build:shared && pnpm test && pnpm build",
+    "verify": "pnpm lint && pnpm i18n:check && pnpm build:shared && pnpm test && pnpm build",
     "prepare": "husky"
   },
   "keywords": [],
