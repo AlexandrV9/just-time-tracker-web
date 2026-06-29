@@ -97,7 +97,7 @@ export function PrivateLayout() {
     case "mobile":
       return <MobileLayout />;
     default:
-      return null;
+      return <MobileLayout />;
   }
 }
 
@@ -297,7 +297,26 @@ function MobileLayout() {
         </PageLayout>
       );
     }
-    default:
-      return null;
+    default: {
+      return (
+        <PageLayout>
+          <PageLayout.TopContainer
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            borderBottom="1px solid"
+            borderColor="border.emphasized"
+          >
+            <Header />
+          </PageLayout.TopContainer>
+          <PageLayout.MainContainer>
+            <Outlet />
+          </PageLayout.MainContainer>
+          <PageLayout.BottomContainer>
+            <NavBar />
+          </PageLayout.BottomContainer>
+        </PageLayout>
+      );
+    }
   }
 }

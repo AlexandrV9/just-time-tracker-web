@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.1.11
+
+### Исправления
+
+- **PWA / белый экран при запуске**: inline splash в `index.html`, precached `index.html` в service worker, reload при `vite:preloadError`, синхронный `useDeviceDetect` (без flash `unknown`)
+- **Системная тема**: при выборе «Системная» после перезагрузки приложение следует light/dark ОС (macOS/iOS)
+- **DurationField на touch-устройствах**: drum-пикер с секундами и модалка Confirm/Cancel вместо native `input[type=time]` (на iOS секунды недоступны)
+- **i18n**: недостающие ключи в MainInfo (активность, профиль)
+
+### Dev
+
+- Скрипт `i18n:check` в `verify` и pre-commit
+- nginx: `no-cache` для `index.html` (входит в образ `client`)
+
+### DevOps
+
+- Версия приложения: **1.1.11**
+- Миграций БД нет (обновление с 1.1.10 — только `pull` + `up -d`)
+
+---
+
 ## 1.1.10
 
 ### Исправления

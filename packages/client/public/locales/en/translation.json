@@ -79,6 +79,8 @@
         "historyTitle": "History",
         "createdAtLabel": "Created",
         "updatedAtLabel": "Last updated",
+        "mainInfoTitle": "Main information",
+        "descriptionLabel": "Description",
         "sessionStart": "Start",
         "sessionEnd": "End",
         "duration": "Duration",
@@ -133,6 +135,7 @@
     },
     "settings": {
       "profile": {
+        "mainInfoTitle": "Main information",
         "nameInput": {
           "label": "Name",
           "placeholder": "Enter your name"
@@ -588,6 +591,10 @@
     }
   },
   "common": {
+    "durationField": {
+      "cancelButton": "Cancel",
+      "confirmButton": "Confirm"
+    },
     "aria": {
       "togglePasswordVisibility": "Toggle password visibility",
       "previousMonth": "Previous month",

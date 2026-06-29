@@ -79,6 +79,8 @@
         "historyTitle": "历史",
         "createdAtLabel": "创建时间",
         "updatedAtLabel": "最后更新",
+        "mainInfoTitle": "基本信息",
+        "descriptionLabel": "描述",
         "sessionStart": "开始",
         "sessionEnd": "结束",
         "duration": "时长",
@@ -133,6 +135,7 @@
     },
     "settings": {
       "profile": {
+        "mainInfoTitle": "基本信息",
         "nameInput": {
           "label": "姓名",
           "placeholder": "请输入姓名"
@@ -588,6 +591,10 @@
     }
   },
   "common": {
+    "durationField": {
+      "cancelButton": "取消",
+      "confirmButton": "确认"
+    },
     "aria": {
       "togglePasswordVisibility": "显示或隐藏密码",
       "previousMonth": "上个月",

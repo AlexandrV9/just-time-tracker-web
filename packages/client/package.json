@@ -1,7 +1,7 @@
 {
   "name": "@time-tracker/client",
   "private": true,
-  "version": "1.1.10",
+  "version": "1.1.11",
   "type": "module",
   "scripts": {
     "dev": "vite --port 3000",
@@ -10,6 +10,7 @@
     "eslint": "eslint 'src/**/*.{js,ts,jsx,tsx}' --max-warnings 0",
     "eslint:fix": "eslint 'src/**/*.{js,ts,jsx,tsx}' --fix",
     "typecheck": "tsc --noEmit",
+    "i18n:check": "pnpm exec tsx scripts/check-i18n.ts",
     "generate:chakra_config": "npx @chakra-ui/cli typegen ./src/shared/config/chakra.ts",
     "preview": "vite preview"
   },
