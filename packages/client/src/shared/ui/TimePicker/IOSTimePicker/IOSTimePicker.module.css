@@ -7,6 +7,10 @@
   overflow: hidden;
 }
 
+.container > * {
+  min-width: 0;
+}
+
 .container:before,
 .container:after {
   position: absolute;
