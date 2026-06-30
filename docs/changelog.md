@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.1.12
+
+### Исправления
+
+- **IOSTimePicker / DurationField на iPhone**: `min-width: 0` в 3-колоночной сетке (часы/минуты/секунды), скрытие пустого label — колонки не ломают layout
+
+### CI / DevOps
+
+- **i18n:check в CI**: `tsx` добавлен в devDependencies клиента
+- **Docker build**: setup-buildx, pre-pull base images с retry, убран `# syntax=docker/dockerfile:1` (меньше таймаутов Docker Hub)
+
+### DevOps
+
+- Версия приложения: **1.1.12**
+- Миграций БД нет (обновление с 1.1.11 — только `pull` + `up -d`)
+
+---
+
 ## 1.1.11
 
 ### Исправления

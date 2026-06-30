@@ -6,6 +6,38 @@
 
 ---
 
+## Деплой 1.1.12 (TimePicker layout, CI/Docker)
+
+Краткий чеклист для обновления **существующего** prod с 1.1.11.
+
+### 1. GitHub — до деплоя
+
+1. Смержить ветку в `main`.
+2. Дождаться зелёного CI (сборка `client` + `server` в GHCR).
+
+Миграция БД **не нужна**. Новых переменных в `.env` нет.
+
+### 2. Подтянуть образы и перезапустить
+
+```bash
+cd /opt/time-tracker
+
+docker compose -f docker-compose.prod.yml --env-file .env pull
+docker compose -f docker-compose.prod.yml --env-file .env up -d
+```
+
+### 3. Smoke-тест после 1.1.12
+
+| # | Действие | Ожидание |
+|---|----------|----------|
+| 1 | `curl https://<домен>/api/health` | `status: OK` |
+| 2 | Активность → Настройки → поле длительности (iPhone) | 3 колонки, барабан скроллится, Confirm/Cancel |
+| 3 | Календарь / date picker с временем | Time picker без overflow |
+
+Runtime-кэши SW версионируются через `VITE_APP_VERSION` (`1.1.12`).
+
+---
+
 ## Деплой 1.1.11 (PWA startup, тема, duration picker)
 
 Краткий чеклист для обновления **существующего** prod с 1.1.10.
