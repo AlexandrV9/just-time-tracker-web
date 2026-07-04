@@ -40,7 +40,6 @@ export const ThemeSwitcher = () => {
           cursor="pointer"
           justifyContent="center"
           borderRadius={12}
-          shadow="0 2px 8px rgba(0, 0, 0, 0.25)"
           _hover={{ cursor: "pointer", bg: "bg.muted" }}
         >
           <Select.ValueText color="fg" fontWeight="semibold">

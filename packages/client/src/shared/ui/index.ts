@@ -37,6 +37,7 @@ export * from "./PinInput";
 export * from "./Group";
 export * from "./Span";
 export * from "./Clipboard";
+export * from "./Image";
 
 export * from "./icons";
 export * from "./controls";

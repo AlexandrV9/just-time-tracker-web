@@ -1,3 +1,4 @@
+import { Spinner } from "@chakra-ui/react";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useLayoutEffect } from "react";
 import { LangSwitcher, ThemeSwitcher, useActivityEvents } from "~/features";
@@ -10,14 +11,24 @@ import {
 } from "~/shared/hooks";
 import { buildLocationRedirectPath } from "~/shared/libs";
 import { useSeo } from "~/shared/seo";
-import { Box, Flex, PageLayout, Text } from "~/shared/ui";
+import { Box, Flex, PageLayout } from "~/shared/ui";
 import { Header, HeaderAppTitle, NavBar, useHeaderStore } from "~/widgets";
+import { prefetchNavTabForPath } from "./_private/_lib/prefetchNavTabs";
+import { usePreloadNavTabs } from "./_private/_lib/usePreloadNavTabs";
 
 function PrivateRoutePending() {
   const { t } = useTranslation();
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" p={8}>
-      <Text color="fg.muted">{t("pages.private.pending")}</Text>
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minH="100dvh"
+      role="status"
+      aria-live="polite"
+      aria-label={t("pages.private.pending")}
+    >
+      <Spinner size="lg" color="fg.muted" />
     </Box>
   );
 }
@@ -64,6 +75,12 @@ export const Route = createFileRoute("/(private)/_private")({
     }
   },
   pendingComponent: PrivateRoutePending,
+  loader: async ({ context, location }) => {
+    const userId = useAuthStore.getState().user?.id;
+    if (!userId) return;
+
+    await prefetchNavTabForPath(location.pathname, userId, context.queryClient);
+  },
   component: PrivateLayout,
 });
 
@@ -73,6 +90,7 @@ export function PrivateLayout() {
   useSeo({ noIndex: true });
   useActivityEvents();
   usePushNotifications();
+  usePreloadNavTabs();
 
   useLayoutEffect(() => {
     setContent("left", <AuthUserAvatar />);

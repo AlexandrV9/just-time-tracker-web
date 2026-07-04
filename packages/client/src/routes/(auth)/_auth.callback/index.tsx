@@ -1,3 +1,4 @@
+import { Spinner } from "@chakra-ui/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
@@ -6,7 +7,7 @@ import { authManager } from "~/features/auth";
 import { useTranslation } from "~/shared/hooks";
 import { useSeo } from "~/shared/seo";
 import { toast } from "~/shared/ui";
-import { Flex, Text } from "~/shared/ui";
+import { Flex } from "~/shared/ui";
 
 const searchSchema = z.object({
   redirect: z.string().optional().catch(""),
@@ -51,8 +52,11 @@ function OAuthCallbackPage() {
       justify="center"
       w="full"
       h="100dvh"
+      role="status"
+      aria-live="polite"
+      aria-label={t("pages.private.pending")}
     >
-      <Text color="fg">{t("pages.private.pending")}</Text>
+      <Spinner size="lg" color="fg.muted" />
     </Flex>
   );
 }

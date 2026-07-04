@@ -179,6 +179,70 @@
         },
         "permissionDenied": "Уведомления заблокированы в настройках браузера. Разрешите их для этого сайта."
       },
+      "pwaInstall": {
+        "title": "Установка приложения на рабочий стол",
+        "stepLabel": "Шаг {{step}}",
+        "sections": {
+          "ios": {
+            "title": "Установка на iPhone / iPad",
+            "browserSafari": "Safari",
+            "browserChrome": "Chrome",
+            "steps": {
+              "1": {
+                "description": "Откройте сайт в Safari или Chrome на iPhone / iPad.\n\nSafari — нажмите кнопку с троеточием внизу экрана.\nChrome — нажмите иконку «Поделиться» вверху."
+              },
+              "2": {
+                "description": "Откройте меню «Поделиться».\n\nSafari — в выпадающем меню нажмите «Поделиться».\nChrome — в выпадающем меню нажмите «Показать ещё»."
+              },
+              "3": {
+                "description": "Нажмите «На экран Домой» и подтвердите добавление."
+              }
+            }
+          },
+          "android": {
+            "title": "Установка на Android",
+            "steps": {
+              "1": {
+                "description": "Откройте сайт в Chrome на Android."
+              },
+              "2": {
+                "description": "Нажмите меню (⋮) в правом верхнем углу."
+              },
+              "3": {
+                "description": "Выберите «Установить приложение» или «Добавить на главный экран» и подтвердите установку."
+              }
+            }
+          },
+          "macos": {
+            "title": "Установка на macOS",
+            "steps": {
+              "1": {
+                "description": "Откройте сайт в Safari или Chrome."
+              },
+              "2": {
+                "description": "В Safari нажмите кнопку «Поделиться», в Chrome — иконку установки в адресной строке."
+              },
+              "3": {
+                "description": "Выберите «Добавить в Dock» или «Установить приложение» и подтвердите установку."
+              }
+            }
+          },
+          "windows": {
+            "title": "Установка на Windows",
+            "steps": {
+              "1": {
+                "description": "Откройте сайт в Chrome или Microsoft Edge."
+              },
+              "2": {
+                "description": "Нажмите иконку установки в адресной строке браузера."
+              },
+              "3": {
+                "description": "Нажмите «Установить» — приложение появится в меню «Пуск»."
+              }
+            }
+          }
+        }
+      },
       "security": {
         "loginMethods": {
           "title": "Способы входа",
@@ -324,6 +388,12 @@
         "profile": "Профиль",
         "notifications": "Уведомления",
         "security": "Безопасность и вход"
+      }
+    },
+    "helpInfoSettings": {
+      "title": "Справочная информация",
+      "options": {
+        "desktopInstall": "Установка приложения на рабочий стол"
       }
     },
     "unfinishedActivities": {
@@ -598,7 +668,9 @@
     "aria": {
       "togglePasswordVisibility": "Показать или скрыть пароль",
       "previousMonth": "Предыдущий месяц",
-      "nextMonth": "Следующий месяц"
+      "nextMonth": "Следующий месяц",
+      "previousStep": "Предыдущий шаг",
+      "nextStep": "Следующий шаг"
     }
   }
 }

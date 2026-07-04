@@ -1,45 +1,13 @@
-import type { ReactNode } from "react";
-import type { FileRouteTypes } from "~/routeTree.gen";
+import { SettingsLink } from "~/shared/components";
 import { useTranslation } from "~/shared/hooks";
 import {
   Box,
   BellIcon,
-  ChevronRightIcon,
-  Flex,
-  Link,
   List,
   // SafeLockIcon,
   Text,
   UserCircleIcon,
 } from "~/shared/ui";
-
-type SettingsLinkProps = {
-  to: FileRouteTypes["to"];
-  icon: ReactNode;
-  label: string;
-};
-
-const SettingsLink = ({ to, icon, label }: SettingsLinkProps) => (
-  <List.Item display="flex" alignItems="center" gap="0.5rem">
-    <Flex
-      asChild
-      width="full"
-      display="grid"
-      gap="0.3rem"
-      py="0.5rem"
-      gridTemplateColumns="min-content 1fr min-content"
-      alignItems="center"
-    >
-      <Link to={to}>
-        {icon}
-        <Text textStyle="md" as="span">
-          {label}
-        </Text>
-        <ChevronRightIcon />
-      </Link>
-    </Flex>
-  </List.Item>
-);
 
 export const AccountSettings = () => {
   const { t } = useTranslation();

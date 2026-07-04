@@ -55,7 +55,7 @@ export const ActivityList = () => {
   }, [isLastInView, fetchNextPage, hasNextPage]);
 
   const renderContent = () => {
-    if (isPending) {
+    if (isPending && activities.length === 0) {
       return null;
     }
 
