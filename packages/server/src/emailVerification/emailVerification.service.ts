@@ -97,7 +97,9 @@ type StartInput = { userId: string; email: string; lang?: EmailLang };
 
 const start = async (
   input: StartInput,
-): Promise<SuccessResponse<PendingState> | ErrorResponse<{ retryAfter: string }>> => {
+): Promise<
+  SuccessResponse<PendingState> | ErrorResponse<{ retryAfter: string } | null>
+> => {
   const { userId, lang } = input;
   const email = normalizeEmail(input.email);
 
@@ -129,7 +131,9 @@ const start = async (
   }
 
   const sent = await sendCode(userId, email, lang);
-  if (!("code" in sent)) return sent;
+  if (!("code" in sent)) {
+    return sent as ErrorResponse<{ retryAfter: string } | null>;
+  }
 
   await rateLimitService.consumeRequest(rateLimitKey, 3600);
 
@@ -164,8 +168,7 @@ type ConfirmResult =
 const confirm = async (
   input: ConfirmInput,
 ): Promise<
-  | SuccessResponse<ConfirmResult>
-  | ErrorResponse<{ retryAfter: string } | null>
+  SuccessResponse<ConfirmResult> | ErrorResponse<{ retryAfter: string } | null>
 > => {
   const { userId, code } = input;
   const { maxAttempts } = config.email.verification;
@@ -255,7 +258,10 @@ const resend = async (input: {
     return {
       success: false,
       message: "TOO_MANY_ATTEMPTS",
-      data: { resendAvailableAt: lockCheck.retryAfter, retryAfter: lockCheck.retryAfter },
+      data: {
+        resendAvailableAt: lockCheck.retryAfter,
+        retryAfter: lockCheck.retryAfter,
+      },
     };
   }
 

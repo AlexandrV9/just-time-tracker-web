@@ -25,7 +25,9 @@ const isExpired = (row: PasswordResetRow) =>
 // ── Reset token (HMAC-signed proof that the code was verified) ───────────────
 
 const signResetToken = (data: string) =>
-  createHmac("sha256", config.auth.accessToken.secret).update(data).digest("hex");
+  createHmac("sha256", config.auth.accessToken.secret)
+    .update(data)
+    .digest("hex");
 
 const encodeResetToken = (userId: string): string => {
   const exp = Date.now() + config.email.verification.codeTtlSec * 1000;
@@ -55,7 +57,11 @@ const decodeResetToken = (token: string): { userId: string } | null => {
       Buffer.from(payload, "base64url").toString(),
     ) as { userId: string; exp: number };
 
-    if (typeof userId !== "string" || typeof exp !== "number" || exp <= Date.now()) {
+    if (
+      typeof userId !== "string" ||
+      typeof exp !== "number" ||
+      exp <= Date.now()
+    ) {
       return null;
     }
 
@@ -169,7 +175,9 @@ const getStatus = async (input: {
 const start = async (input: {
   email: string;
   lang?: EmailLang;
-}): Promise<SuccessResponse<PendingState> | ErrorResponse<{ retryAfter: string }>> => {
+}): Promise<
+  SuccessResponse<PendingState> | ErrorResponse<{ retryAfter: string } | null>
+> => {
   const email = normalizeEmail(input.email);
   const user = await getActiveUserByEmail(email);
 
@@ -238,8 +246,7 @@ const verify = async (input: {
   email: string;
   code: string;
 }): Promise<
-  | SuccessResponse<VerifyResult>
-  | ErrorResponse<{ retryAfter: string } | null>
+  SuccessResponse<VerifyResult> | ErrorResponse<{ retryAfter: string } | null>
 > => {
   const email = normalizeEmail(input.email);
   const { maxAttempts } = config.email.verification;
@@ -319,7 +326,10 @@ const resend = async (input: {
     return {
       success: false,
       message: "TOO_MANY_ATTEMPTS",
-      data: { resendAvailableAt: lockCheck.retryAfter, retryAfter: lockCheck.retryAfter },
+      data: {
+        resendAvailableAt: lockCheck.retryAfter,
+        retryAfter: lockCheck.retryAfter,
+      },
     };
   }
 
@@ -391,7 +401,10 @@ const confirm = async (input: {
   }
 
   const currentHash = await authRepository.getUserPasswordHash(userId);
-  if (currentHash && tokenService.comparePassword(input.newPassword, currentHash)) {
+  if (
+    currentHash &&
+    tokenService.comparePassword(input.newPassword, currentHash)
+  ) {
     return { success: false, message: "SAME_PASSWORD" };
   }
 
