@@ -2,6 +2,8 @@ import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 import {
   config,
   deliverVerificationEmail,
+  rateLimitKeys,
+  rateLimitService,
   shouldExposeDevCode,
   tokenService,
   type EmailLang,
@@ -167,7 +169,7 @@ const getStatus = async (input: {
 const start = async (input: {
   email: string;
   lang?: EmailLang;
-}): Promise<SuccessResponse<PendingState> | ErrorResponse> => {
+}): Promise<SuccessResponse<PendingState> | ErrorResponse<{ retryAfter: string }>> => {
   const email = normalizeEmail(input.email);
   const user = await getActiveUserByEmail(email);
 
@@ -187,8 +189,25 @@ const start = async (input: {
     };
   }
 
+  const rateLimitKey = rateLimitKeys.resetEmail(email);
+  const rateLimitCheck = await rateLimitService.checkRequestLimit(
+    rateLimitKey,
+    config.rateLimit.passwordResetStart.maxPerHourPerEmail,
+    3600,
+  );
+  if (rateLimitCheck.blocked) {
+    return {
+      success: false,
+      message: "RATE_LIMITED",
+      data: { retryAfter: rateLimitCheck.retryAfter },
+    };
+  }
+
   const sent = await sendCode(user.id, email, input.lang);
   if (!("code" in sent)) return sent;
+
+  await rateLimitService.consumeRequest(rateLimitKey, 3600);
+
   const { code, codeHash, expiresAt, resendAvailableAt } = sent;
 
   const row = await passwordResetQueries.upsert({
@@ -220,7 +239,7 @@ const verify = async (input: {
   code: string;
 }): Promise<
   | SuccessResponse<VerifyResult>
-  | ErrorResponse<{ resendAvailableAt: string } | null>
+  | ErrorResponse<{ retryAfter: string } | null>
 > => {
   const email = normalizeEmail(input.email);
   const { maxAttempts } = config.email.verification;
@@ -228,6 +247,16 @@ const verify = async (input: {
   const user = await getActiveUserByEmail(email);
   if (!user) {
     return { success: false, message: "INVALID_CODE" };
+  }
+
+  const verifyKey = rateLimitKeys.verifyReset(user.id);
+  const lockCheck = await rateLimitService.checkLocked([verifyKey]);
+  if (lockCheck.blocked) {
+    return {
+      success: false,
+      message: "TOO_MANY_ATTEMPTS",
+      data: { retryAfter: lockCheck.retryAfter },
+    };
   }
 
   const row = await passwordResetQueries.findByUserId(user.id);
@@ -241,35 +270,26 @@ const verify = async (input: {
   }
 
   if (row.attemptsCount >= maxAttempts) {
-    const updated = await passwordResetQueries.allowImmediateResend(user.id);
-    return {
-      success: false,
-      message: "TOO_MANY_ATTEMPTS",
-      data: {
-        resendAvailableAt:
-          updated?.resendAvailableAt ?? new Date().toISOString(),
-      },
-    };
+    await passwordResetQueries.resetAttempts(user.id);
   }
 
   const isValid = tokenService.comparePassword(input.code, row.codeHash);
   if (!isValid) {
-    const attempts = await passwordResetQueries.incrementAttempts(user.id);
+    await passwordResetQueries.incrementAttempts(user.id);
+    const failureResult = await rateLimitService.recordFailure([verifyKey]);
 
-    if (attempts !== null && attempts >= maxAttempts) {
-      const updated = await passwordResetQueries.allowImmediateResend(user.id);
+    if (failureResult.blocked) {
       return {
         success: false,
         message: "TOO_MANY_ATTEMPTS",
-        data: {
-          resendAvailableAt:
-            updated?.resendAvailableAt ?? new Date().toISOString(),
-        },
+        data: { retryAfter: failureResult.retryAfter },
       };
     }
 
     return { success: false, message: "INVALID_CODE" };
   }
+
+  await rateLimitService.recordSuccess([verifyKey]);
 
   return {
     success: true,
@@ -283,13 +303,24 @@ const resend = async (input: {
   email: string;
   lang?: EmailLang;
 }): Promise<
-  SuccessResponse<PendingState> | ErrorResponse<{ resendAvailableAt: string } | null>
+  | SuccessResponse<PendingState>
+  | ErrorResponse<{ resendAvailableAt: string; retryAfter?: string } | null>
 > => {
   const email = normalizeEmail(input.email);
   const user = await getActiveUserByEmail(email);
 
   if (!user) {
     return { success: false, message: "USER_NOT_FOUND" };
+  }
+
+  const verifyKey = rateLimitKeys.verifyReset(user.id);
+  const lockCheck = await rateLimitService.checkLocked([verifyKey]);
+  if (lockCheck.blocked) {
+    return {
+      success: false,
+      message: "TOO_MANY_ATTEMPTS",
+      data: { resendAvailableAt: lockCheck.retryAfter, retryAfter: lockCheck.retryAfter },
+    };
   }
 
   const existing = await passwordResetQueries.findByUserId(user.id);

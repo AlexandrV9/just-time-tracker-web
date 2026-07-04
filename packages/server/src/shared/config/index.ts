@@ -93,4 +93,32 @@ export const config = {
       process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY,
     ),
   },
+
+  rateLimit: {
+    login: {
+      maxRequestsPerMinutePerIp: Number(
+        process.env.RATE_LIMIT_LOGIN_MAX_PER_MINUTE_IP ?? 5,
+      ),
+      maxFailuresBeforeLockout: Number(
+        process.env.RATE_LIMIT_LOGIN_MAX_FAILURES ?? 5,
+      ),
+      lockoutDelaysSec: [
+        1 * 60, // 1 min  (after 5 failures)
+        5 * 60, // 5 min  (after 10 failures)
+        15 * 60, // 15 min (after 15 failures)
+        60 * 60, // 1 hour (after 20 failures)
+        24 * 60 * 60, // 24 hours (after 25+ failures)
+      ] as const,
+    },
+    passwordResetStart: {
+      maxPerHourPerEmail: Number(
+        process.env.RATE_LIMIT_RESET_MAX_PER_HOUR_EMAIL ?? 3,
+      ),
+    },
+    emailVerificationStart: {
+      maxPerHourPerEmail: Number(
+        process.env.RATE_LIMIT_EMAIL_VERIFY_MAX_PER_HOUR ?? 3,
+      ),
+    },
+  },
 } as const;

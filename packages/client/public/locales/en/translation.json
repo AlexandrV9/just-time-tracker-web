@@ -414,6 +414,7 @@
         "forgotPasswordLink": "Forgot password?",
         "errors": {
           "invalidCredentials": "Incorrect login or password",
+          "rateLimited": "Too many attempts. Try again in {{time}}",
           "unknown": "Unknown error"
         }
       },
@@ -503,7 +504,8 @@
         "requestFailed": "Could not send verification code",
         "invalidCode": "Invalid verification code",
         "codeExpired": "Verification code expired. Request a new one",
-        "tooManyAttempts": "Too many attempts. Request a new code",
+        "tooManyAttempts": "Too many attempts. Try again in {{time}}",
+        "rateLimited": "Too many attempts. Try again in {{time}}",
         "verifyFailed": "Could not verify email",
         "resendTooEarly": "Please wait before requesting a new code",
         "codeNotFound": "No active verification request. Start again",
@@ -581,7 +583,8 @@
         "requestFailed": "Could not send the code",
         "invalidCode": "Invalid code",
         "codeExpired": "The code has expired. Request a new one",
-        "tooManyAttempts": "Too many attempts. Request a new code",
+        "tooManyAttempts": "Too many attempts. Try again in {{time}}",
+        "rateLimited": "Too many attempts. Try again in {{time}}",
         "verifyFailed": "Could not verify the code",
         "resendTooEarly": "Please wait before requesting a new code",
         "samePassword": "Please choose a different password",
@@ -591,6 +594,7 @@
     }
   },
   "common": {
+    "retryAfter": "Try again in {{time}}",
     "durationField": {
       "cancelButton": "Cancel",
       "confirmButton": "Confirm"

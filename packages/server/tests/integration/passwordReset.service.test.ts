@@ -134,11 +134,11 @@ describe("password reset service", () => {
       expect(result.data.resetToken.length).toBeGreaterThan(0);
     });
 
-    it("blocks after too many attempts and allows immediate resend", async () => {
+    it("blocks after too many attempts and applies lockout", async () => {
       await startAndGetCode();
 
       let lastMessage = "";
-      let resendAvailableAt: string | undefined;
+      let retryAfter: string | undefined;
       for (let i = 0; i < 5; i++) {
         const result = await passwordResetService.verify({
           email: EMAIL,
@@ -146,16 +146,17 @@ describe("password reset service", () => {
         });
         if (result.success) continue;
         lastMessage = result.message;
-        resendAvailableAt = (
-          result.data as { resendAvailableAt?: string } | undefined | null
-        )?.resendAvailableAt;
+        retryAfter = (
+          result.data as { retryAfter?: string } | undefined | null
+        )?.retryAfter;
       }
 
       expect(lastMessage).toBe("TOO_MANY_ATTEMPTS");
-      expect(resendAvailableAt).toBeDefined();
-      expect(Date.parse(resendAvailableAt as string)).toBeLessThanOrEqual(
-        Date.now(),
-      );
+      expect(retryAfter).toBeDefined();
+      expect(Date.parse(retryAfter as string)).toBeGreaterThan(Date.now() - 1000);
+      expect(
+        Date.parse(retryAfter as string) - Date.now(),
+      ).toBeGreaterThan(50_000);
     });
   });
 

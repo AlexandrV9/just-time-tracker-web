@@ -15,6 +15,7 @@ import {
   Input,
   PinInput,
   Portal,
+  RetryAfterMessage,
   Skeleton,
   Span,
   Stack,
@@ -110,8 +111,9 @@ export function EmailVerificationDialog({
 
   const emailValue = watch("email");
   const isSendDisabled =
-    normalizeEmail(currentEmail).length > 0 &&
-    normalizeEmail(emailValue) === normalizeEmail(currentEmail);
+    emailVerification.isEmailRateLimited ||
+    (normalizeEmail(currentEmail).length > 0 &&
+      normalizeEmail(emailValue) === normalizeEmail(currentEmail));
 
   const handleStart = useCallback(async () => {
     const valid = await trigger("email");
@@ -203,6 +205,9 @@ export function EmailVerificationDialog({
               {getEmailErrorMessage(errors.email?.message)}
             </Field.ErrorText>
           </Field.Root>
+          <RetryAfterMessage
+            secondsLeft={emailVerification.emailRetrySecondsLeft}
+          />
         </>
       );
     }
@@ -221,7 +226,9 @@ export function EmailVerificationDialog({
           <PinInput.Root
             count={6}
             size="md"
-            disabled={emailVerification.isExpired}
+            disabled={
+              emailVerification.isExpired || emailVerification.isVerifyLocked
+            }
             value={Array.from({ length: 6 }, (_, i) => code[i] ?? "")}
             onValueChange={(details) => setCode(details.value)}
             otp
@@ -289,7 +296,11 @@ export function EmailVerificationDialog({
         <Button
           onClick={handleConfirm}
           loading={emailVerification.isConfirmPending}
-          disabled={emailVerification.isExpired || code.join("").length !== 6}
+          disabled={
+            emailVerification.isExpired ||
+            emailVerification.isVerifyLocked ||
+            code.join("").length !== 6
+          }
         >
           {t(`${baseLocale}.verifyButton`)}
         </Button>

@@ -2,7 +2,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import type { PasswordResetStatusDTO } from "@time-tracker/shared";
 import { useCallback, useEffect, useState } from "react";
 import { authService } from "~/shared/api/services/auth";
-import { useNowMs, useTranslation } from "~/shared/hooks";
+import { useNowMs, useRetryAfterCountdown, useTranslation } from "~/shared/hooks";
+import { getRetryAfter } from "~/shared/libs";
 import { toast } from "~/shared/ui";
 import { logDevCode, mapCodeErrorKey, mapStartErrorKey } from "./utils";
 
@@ -40,6 +41,8 @@ export function useResetPassword({
   const [resetToken, setResetToken] = useState<string | null>(null);
   const [codeResetKey, setCodeResetKey] = useState(0);
   const [isDailyLimitReached, setIsDailyLimitReached] = useState(false);
+  const emailRateLimit = useRetryAfterCountdown();
+  const verifyLockout = useRetryAfterCountdown();
 
   const resetCodeInput = useCallback(() => {
     setCodeResetKey((key) => key + 1);
@@ -126,6 +129,13 @@ export function useResetPassword({
     mutationFn: authService.startPasswordReset,
     onSuccess: (response) => {
       if (!response.success) {
+        if (response.message === "RATE_LIMITED") {
+          const retryAfter = getRetryAfter(response.data);
+          if (retryAfter) {
+            emailRateLimit.setRetryAfter(retryAfter);
+            return;
+          }
+        }
         if (response.message === "EMAIL_DAILY_LIMIT") {
           setIsDailyLimitReached(true);
         }
@@ -155,6 +165,13 @@ export function useResetPassword({
         if (response.message === "EMAIL_DAILY_LIMIT") {
           setIsDailyLimitReached(true);
         }
+        if (response.message === "TOO_MANY_ATTEMPTS") {
+          const retryAfter = getRetryAfter(response.data);
+          if (retryAfter) {
+            verifyLockout.setRetryAfter(retryAfter);
+            return;
+          }
+        }
         const key =
           response.message === "RESEND_TOO_EARLY"
             ? "errors.resendTooEarly"
@@ -176,22 +193,17 @@ export function useResetPassword({
     mutationFn: authService.verifyPasswordReset,
     onSuccess: (response) => {
       if (!response.success) {
+        if (response.message === "TOO_MANY_ATTEMPTS") {
+          resetCodeInput();
+          const retryAfter = getRetryAfter(response.data);
+          if (retryAfter) {
+            verifyLockout.setRetryAfter(retryAfter);
+            return;
+          }
+        }
         toast.error(t(`${baseLocale}.${mapCodeErrorKey(response.message)}`));
         if (response.message === "INVALID_CODE") {
           resetCodeInput();
-        }
-        if (response.message === "TOO_MANY_ATTEMPTS") {
-          resetCodeInput();
-          const next = (
-            response.data as { resendAvailableAt?: string } | undefined
-          )?.resendAvailableAt;
-          if (next) {
-            setServerState((prev) =>
-              prev && prev.status !== "none"
-                ? { ...prev, resendAvailableAt: next }
-                : prev,
-            );
-          }
         }
         return;
       }
@@ -275,9 +287,9 @@ export function useResetPassword({
   );
 
   const resend = useCallback(() => {
-    if (resendSecondsLeft > 0) return;
+    if (resendSecondsLeft > 0 || verifyLockout.isBlocked) return;
     resendMutation.mutate();
-  }, [resendMutation, resendSecondsLeft]);
+  }, [resendMutation, resendSecondsLeft, verifyLockout.isBlocked]);
 
   const confirm = useCallback(
     (newPassword: string) => confirmMutation.mutate(newPassword),
@@ -296,7 +308,11 @@ export function useResetPassword({
     email,
     isExpired,
     resendSecondsLeft,
-    canResend: resendSecondsLeft <= 0,
+    canResend: resendSecondsLeft <= 0 && !verifyLockout.isBlocked,
+    emailRetrySecondsLeft: emailRateLimit.secondsLeft,
+    isEmailRateLimited: emailRateLimit.isBlocked,
+    verifyLockSecondsLeft: verifyLockout.secondsLeft,
+    isVerifyLocked: verifyLockout.isBlocked,
     isStatusLoading,
     codeResetKey,
     isStartPending: startMutation.isPending,

@@ -38,7 +38,6 @@ export default defineConfig(({ mode }) => {
           ],
           maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         },
-
         devOptions: {
           enabled: false,
           type: "module",
@@ -61,11 +60,19 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api/, ""),
           configure: (proxy) => {
             proxy.on("proxyReq", (proxyReq, req) => {
+              const clientIp = req.socket?.remoteAddress;
+
+              if (clientIp) {
+                proxyReq.setHeader("X-Forwarded-For", clientIp);
+                proxyReq.setHeader("X-Real-IP", clientIp);
+              }
+
               if (req.url?.includes("/activities/events")) {
                 proxyReq.setHeader("Accept", "text/event-stream");
                 proxyReq.setHeader("Cache-Control", "no-cache");
               }
             });
+
             proxy.on("proxyRes", (proxyRes, req) => {
               if (req.url?.includes("/activities/events")) {
                 delete proxyRes.headers["content-length"];
