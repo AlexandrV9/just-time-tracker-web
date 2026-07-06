@@ -6,6 +6,71 @@
 
 ---
 
+## Деплой 1.1.13 (PWA install + rate limit)
+
+Краткий чеклист для обновления **существующего** prod с 1.1.12.
+
+### 1. GitHub — до деплоя
+
+1. Смержить ветку в `main`.
+2. Дождаться зелёного CI (сборка `client` + `server` в GHCR).
+
+Новые переменные в `.env` **не обязательны** — rate limit работает с дефолтами. При необходимости можно задать:
+
+```env
+RATE_LIMIT_LOGIN_MAX_PER_MINUTE_IP=5
+RATE_LIMIT_LOGIN_MAX_FAILURES=5
+RATE_LIMIT_RESET_MAX_PER_HOUR_EMAIL=3
+RATE_LIMIT_EMAIL_VERIFY_MAX_PER_HOUR=3
+```
+
+### 2. Миграция БД (обязательно)
+
+На **существующей** базе один раз:
+
+**С локальной машины:**
+
+```bash
+scp packages/server/db/migrations/005_auth_rate_limits.sql \
+  <USER>@<SERVER>:~/005_auth_rate_limits.sql
+```
+
+**На сервере:**
+
+```bash
+docker exec -i time-tracker-postgres psql -U postgres -d time_tracker \
+  < ~/005_auth_rate_limits.sql
+
+rm ~/005_auth_rate_limits.sql
+```
+
+Миграция идемпотентна (`CREATE TABLE IF NOT EXISTS`).
+
+### 3. Подтянуть образы и перезапустить
+
+```bash
+cd /opt/time-tracker
+
+docker compose -f docker-compose.prod.yml --env-file .env pull
+docker compose -f docker-compose.prod.yml --env-file .env up -d
+```
+
+### 4. Smoke-тест после 1.1.13
+
+| # | Действие | Ожидание |
+|---|----------|----------|
+| 1 | `curl https://<домен>/api/health` | `status: OK` |
+| 2 | Выйти → войти в браузере (не PWA) | Модалка с предложением установить приложение |
+| 3 | Настройки → Справочная информация → Установка приложения | Страница `/settings/pwa-install`, accordion по платформам |
+| 4 | Модалка → «Показать инструкцию» | Переход на `/settings/pwa-install` |
+| 5 | Модалка → «Больше не показывать» + Ок → повторный вход | Модалка не появляется |
+| 6 | Вход: 5+ неверных паролей подряд | `RATE_LIMITED`, таймер до повтора |
+| 7 | Восстановление пароля: 4+ запроса кода на один email за час | `RATE_LIMITED` с таймером |
+
+Runtime-кэши SW версионируются через `VITE_APP_VERSION` (`1.1.13`).
+
+---
+
 ## Деплой 1.1.12 (TimePicker layout, CI/Docker)
 
 Краткий чеклист для обновления **существующего** prod с 1.1.11.
@@ -525,6 +590,7 @@ docker compose -f docker-compose.prod.yml --env-file .env up -d
 | 1.0.6 | `002_email_auth_verification.sql` | OAuth, verification, password reset, лимит писем |
 | 1.1.7 | `003_notifications_and_activity_settings.sql` | notification jobs, push subscriptions, activity settings |
 | 1.1.9 | `004_users_locale_and_push.sql` | user locale, push_notifications_enabled |
+| 1.1.13 | `005_auth_rate_limits.sql` | rate limiting login / reset / email verification |
 
 **Через Docker:**
 
