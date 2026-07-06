@@ -5,13 +5,13 @@ import {
 
 import { routeTree } from "~/routeTree.gen";
 
-import { queryClient } from "~/shared/libs";
 import type { RouterContext } from "./types";
+import { queryClient } from "~/shared/config";
 
 const router = createRouter({
   routeTree,
   defaultPreload: "intent",
-  defaultPendingMs: 0,
+  defaultPendingMs: 150,
   context: {
     queryClient,
   } as unknown as RouterContext,

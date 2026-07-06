@@ -10,6 +10,8 @@ export const mapStartErrorKey = (message?: string) => {
       return "errors.userNotFound";
     case "EMAIL_DAILY_LIMIT":
       return "errors.dailyLimit";
+    case "RATE_LIMITED":
+      return "errors.rateLimited";
     default:
       return "errors.requestFailed";
   }

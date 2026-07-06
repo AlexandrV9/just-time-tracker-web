@@ -1,17 +1,15 @@
 import { useCallback } from "react";
+import { LuChevronDown } from "react-icons/lu";
 import type { UserLocaleDTO } from "@time-tracker/shared";
 import { useAuthStore } from "~/features/auth";
 import { useTranslation } from "~/shared/hooks";
 import { userApiService } from "~/shared/api/services";
-
-import { Select, Text } from "~/shared/ui";
+import { Flex, Select, Text } from "~/shared/ui";
 import { createListCollection } from "~/shared/utils";
+import { LangFlag } from "./LangFlag";
+import { LANGUAGES, type Language } from "./constants";
 
-export const LANGUAGES = {
-  en: "en",
-  ru: "ru",
-  zh: "zh",
-} as const;
+export { LANGUAGES } from "./constants";
 
 const languageListCollection = createListCollection({
   items: Object.keys(LANGUAGES).map((item) => ({ label: item, value: item })),
@@ -21,66 +19,77 @@ export type LangSwitcherProps = {
   isShort?: boolean;
 };
 
-function capitalizeFirstLetter(str: string) {
-  if (!str) return "";
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
+const formatLangCode = (lng: string) => lng.toUpperCase();
+
+const isLanguage = (lng: string): lng is Language => lng in LANGUAGES;
 
 export const LangSwitcher = ({ isShort = true }: LangSwitcherProps) => {
   const { i18n, t } = useTranslation();
   const authStatus = useAuthStore((state) => state.status);
 
-  const currentLn = i18n.language;
+  const currentLanguage = isLanguage(i18n.language) ? i18n.language : "en";
 
   const handleChangeLanguage = useCallback(
     (lng: string) => {
-      void i18n.changeLanguage(lng);
+      i18n.changeLanguage(lng);
 
       if (authStatus === "AUTHENTICATED") {
-        void userApiService.updateLocale({ locale: lng as UserLocaleDTO });
+        userApiService.updateLocale({ locale: lng as UserLocaleDTO });
       }
     },
     [authStatus, i18n],
   );
 
+  const renderLabel = (lng: Language) =>
+    isShort ? formatLangCode(lng) : t(`languages.${lng}`);
+
   return (
     <Select.Root
-      value={[currentLn]}
+      value={[currentLanguage]}
       collection={languageListCollection}
       onValueChange={(e) => handleChangeLanguage(e.value[0])}
-      width={isShort ? "40px" : "fit-content"}
+      width="fit-content"
     >
       <Select.HiddenSelect />
       <Select.Control>
         <Select.Trigger
-          p={0}
+          px="0.5rem"
+          py="0.35rem"
+          gap="0.35rem"
           cursor="pointer"
-          justifyContent="center"
-          borderRadius={12}
-          shadow="0 2px 8px rgba(0, 0, 0, 0.25)"
+          borderRadius="xl"
           _hover={{ cursor: "pointer", bg: "bg.muted" }}
         >
-          <Select.ValueText color="fg" fontWeight="semibold">
-            {isShort
-              ? capitalizeFirstLetter(currentLn)
-              : t(`languages.${currentLn}`)}
-          </Select.ValueText>
+          <Flex alignItems="center" gap="0.35rem">
+            <LangFlag code={currentLanguage} size={22} />
+            <Select.ValueText color="fg" fontWeight="semibold">
+              {renderLabel(currentLanguage)}
+            </Select.ValueText>
+            <LuChevronDown size={14} />
+          </Flex>
         </Select.Trigger>
       </Select.Control>
       <Select.Positioner>
-        <Select.Content>
-          {languageListCollection.items.map(({ label, value: ln }) => (
-            <Select.Item
-              item={label}
-              key={ln}
-              color="fg"
-              _hover={{ cursor: "pointer" }}
-            >
-              <Text fontWeight="medium">
-                {isShort ? capitalizeFirstLetter(ln) : t(`languages.${ln}`)}
-              </Text>
-            </Select.Item>
-          ))}
+        <Select.Content minW="100%" w="max-content">
+          {languageListCollection.items.map(({ label, value: ln }) => {
+            if (!isLanguage(ln)) return null;
+
+            return (
+              <Select.Item
+                item={label}
+                key={ln}
+                color="fg"
+                _hover={{ cursor: "pointer" }}
+              >
+                <Flex alignItems="center" gap="0.5rem">
+                  <LangFlag code={ln} size={22} />
+                  <Text fontWeight="medium" textWrap="nowrap">
+                    {renderLabel(ln)}
+                  </Text>
+                </Flex>
+              </Select.Item>
+            );
+          })}
         </Select.Content>
       </Select.Positioner>
     </Select.Root>

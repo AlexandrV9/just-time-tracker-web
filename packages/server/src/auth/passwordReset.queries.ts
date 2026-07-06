@@ -125,6 +125,17 @@ const incrementAttempts = async (userId: string) => {
   );
 };
 
+const resetAttempts = async (userId: string) => {
+  await pool.query(
+    `
+    UPDATE password_resets
+    SET attempts_count = 0, updated_at = NOW()
+    WHERE user_id = $1
+    `,
+    [userId],
+  );
+};
+
 const deleteByUserId = async (userId: string) => {
   await pool.query(`DELETE FROM password_resets WHERE user_id = $1`, [userId]);
 };
@@ -135,5 +146,6 @@ export const passwordResetQueries = {
   refreshForResend,
   allowImmediateResend,
   incrementAttempts,
+  resetAttempts,
   deleteByUserId,
 };

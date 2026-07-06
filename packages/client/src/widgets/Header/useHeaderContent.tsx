@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { useHeaderStore } from "./useHeaderStore";
 
 export function useHeaderContent(
@@ -9,7 +9,7 @@ export function useHeaderContent(
   const setContent = useHeaderStore((state) => state.setContent);
   const prevContent = useRef<ReactNode>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     prevContent.current = getContent(position);
     setContent(position, content);
 

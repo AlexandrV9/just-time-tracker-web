@@ -85,6 +85,7 @@ class AuthManager {
         throw ApiError.fromResponse({
           message: error.response?.data?.message,
           code: error.response?.status,
+          data: error.response?.data?.data,
         });
       } else {
         console.log("another error", error);

@@ -5,3 +5,4 @@ export * from "./types.js";
 export * from "./validation/validation-utils.js";
 export * from "./validation/is-uuid.js";
 export * from "./email/index.js";
+export * from "./rateLimit/index.js";

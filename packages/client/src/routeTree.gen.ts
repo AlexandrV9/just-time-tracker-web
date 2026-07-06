@@ -28,6 +28,7 @@ import { Route as authAuthSigninIndexRouteImport } from './routes/(auth)/_auth.s
 import { Route as authAuthRecoverAccountIndexRouteImport } from './routes/(auth)/_auth.recover-account/index'
 import { Route as authAuthCallbackIndexRouteImport } from './routes/(auth)/_auth.callback/index'
 import { Route as privatePrivateSettingsSecurityRouteImport } from './routes/(private)/_private.settings/security'
+import { Route as privatePrivateSettingsPwaInstallRouteImport } from './routes/(private)/_private.settings/pwa-install'
 import { Route as privatePrivateSettingsProfileRouteImport } from './routes/(private)/_private.settings/profile'
 import { Route as privatePrivateSettingsNotificationsRouteImport } from './routes/(private)/_private.settings/notifications'
 import { Route as privatePrivateActivitiesActivityIdRouteImport } from './routes/(private)/_private.activities/$activityId'
@@ -143,6 +144,12 @@ const privatePrivateSettingsSecurityRoute =
     path: '/settings/security',
     getParentRoute: () => privatePrivateRoute,
   } as any)
+const privatePrivateSettingsPwaInstallRoute =
+  privatePrivateSettingsPwaInstallRouteImport.update({
+    id: '/settings/pwa-install',
+    path: '/settings/pwa-install',
+    getParentRoute: () => privatePrivateRoute,
+  } as any)
 const privatePrivateSettingsProfileRoute =
   privatePrivateSettingsProfileRouteImport.update({
     id: '/settings/profile',
@@ -185,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/activities/$activityId': typeof privatePrivateActivitiesActivityIdRouteWithChildren
   '/settings/notifications': typeof privatePrivateSettingsNotificationsRoute
   '/settings/profile': typeof privatePrivateSettingsProfileRoute
+  '/settings/pwa-install': typeof privatePrivateSettingsPwaInstallRoute
   '/settings/security': typeof privatePrivateSettingsSecurityRoute
   '/callback': typeof authAuthCallbackIndexRoute
   '/recover-account': typeof authAuthRecoverAccountIndexRoute
@@ -206,6 +214,7 @@ export interface FileRoutesByTo {
   '/': typeof privatePrivateIndexRoute
   '/settings/notifications': typeof privatePrivateSettingsNotificationsRoute
   '/settings/profile': typeof privatePrivateSettingsProfileRoute
+  '/settings/pwa-install': typeof privatePrivateSettingsPwaInstallRoute
   '/settings/security': typeof privatePrivateSettingsSecurityRoute
   '/callback': typeof authAuthCallbackIndexRoute
   '/recover-account': typeof authAuthRecoverAccountIndexRoute
@@ -235,6 +244,7 @@ export interface FileRoutesById {
   '/(private)/_private/activities/$activityId': typeof privatePrivateActivitiesActivityIdRouteWithChildren
   '/(private)/_private/settings/notifications': typeof privatePrivateSettingsNotificationsRoute
   '/(private)/_private/settings/profile': typeof privatePrivateSettingsProfileRoute
+  '/(private)/_private/settings/pwa-install': typeof privatePrivateSettingsPwaInstallRoute
   '/(private)/_private/settings/security': typeof privatePrivateSettingsSecurityRoute
   '/(auth)/_auth/callback/': typeof authAuthCallbackIndexRoute
   '/(auth)/_auth/recover-account/': typeof authAuthRecoverAccountIndexRoute
@@ -259,6 +269,7 @@ export interface FileRouteTypes {
     | '/activities/$activityId'
     | '/settings/notifications'
     | '/settings/profile'
+    | '/settings/pwa-install'
     | '/settings/security'
     | '/callback'
     | '/recover-account'
@@ -280,6 +291,7 @@ export interface FileRouteTypes {
     | '/'
     | '/settings/notifications'
     | '/settings/profile'
+    | '/settings/pwa-install'
     | '/settings/security'
     | '/callback'
     | '/recover-account'
@@ -308,6 +320,7 @@ export interface FileRouteTypes {
     | '/(private)/_private/activities/$activityId'
     | '/(private)/_private/settings/notifications'
     | '/(private)/_private/settings/profile'
+    | '/(private)/_private/settings/pwa-install'
     | '/(private)/_private/settings/security'
     | '/(auth)/_auth/callback/'
     | '/(auth)/_auth/recover-account/'
@@ -474,6 +487,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof privatePrivateSettingsSecurityRouteImport
       parentRoute: typeof privatePrivateRoute
     }
+    '/(private)/_private/settings/pwa-install': {
+      id: '/(private)/_private/settings/pwa-install'
+      path: '/settings/pwa-install'
+      fullPath: '/settings/pwa-install'
+      preLoaderRoute: typeof privatePrivateSettingsPwaInstallRouteImport
+      parentRoute: typeof privatePrivateRoute
+    }
     '/(private)/_private/settings/profile': {
       id: '/(private)/_private/settings/profile'
       path: '/settings/profile'
@@ -573,6 +593,7 @@ interface privatePrivateRouteChildren {
   privatePrivateActivitiesActivityIdRoute: typeof privatePrivateActivitiesActivityIdRouteWithChildren
   privatePrivateSettingsNotificationsRoute: typeof privatePrivateSettingsNotificationsRoute
   privatePrivateSettingsProfileRoute: typeof privatePrivateSettingsProfileRoute
+  privatePrivateSettingsPwaInstallRoute: typeof privatePrivateSettingsPwaInstallRoute
   privatePrivateSettingsSecurityRoute: typeof privatePrivateSettingsSecurityRoute
   privatePrivateActivitiesIndexRoute: typeof privatePrivateActivitiesIndexRoute
   privatePrivateCalendarIndexRoute: typeof privatePrivateCalendarIndexRoute
@@ -588,6 +609,7 @@ const privatePrivateRouteChildren: privatePrivateRouteChildren = {
   privatePrivateSettingsNotificationsRoute:
     privatePrivateSettingsNotificationsRoute,
   privatePrivateSettingsProfileRoute: privatePrivateSettingsProfileRoute,
+  privatePrivateSettingsPwaInstallRoute: privatePrivateSettingsPwaInstallRoute,
   privatePrivateSettingsSecurityRoute: privatePrivateSettingsSecurityRoute,
   privatePrivateActivitiesIndexRoute: privatePrivateActivitiesIndexRoute,
   privatePrivateCalendarIndexRoute: privatePrivateCalendarIndexRoute,

@@ -1,8 +1,13 @@
+import { Spinner } from "@chakra-ui/react";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { useLayoutEffect } from "react";
+import { useCallback, useLayoutEffect } from "react";
 import { LangSwitcher, ThemeSwitcher, useActivityEvents } from "~/features";
 import { authManager, AuthUserAvatar, useAuthStore } from "~/features/auth";
-import { NotificationButton, usePushNotifications } from "~/features/notifications";
+import {
+  NotificationButton,
+  usePushNotifications,
+} from "~/features/notifications";
+import { PwaInstallDialog } from "~/features/pwa-install";
 import {
   useDeviceDetect,
   useOrientation,
@@ -10,14 +15,24 @@ import {
 } from "~/shared/hooks";
 import { buildLocationRedirectPath } from "~/shared/libs";
 import { useSeo } from "~/shared/seo";
-import { Box, Flex, PageLayout, Text } from "~/shared/ui";
+import { Box, Flex, PageLayout } from "~/shared/ui";
 import { Header, HeaderAppTitle, NavBar, useHeaderStore } from "~/widgets";
+import { prefetchNavTabForPath } from "./_private/_lib/prefetchNavTabs";
+import { usePreloadNavTabs } from "./_private/_lib/usePreloadNavTabs";
 
 function PrivateRoutePending() {
   const { t } = useTranslation();
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" p={8}>
-      <Text color="fg.muted">{t("pages.private.pending")}</Text>
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minH="100dvh"
+      role="status"
+      aria-live="polite"
+      aria-label={t("pages.private.pending")}
+    >
+      <Spinner size="lg" color="fg.muted" />
     </Box>
   );
 }
@@ -64,16 +79,22 @@ export const Route = createFileRoute("/(private)/_private")({
     }
   },
   pendingComponent: PrivateRoutePending,
+  loader: async ({ context, location }) => {
+    const userId = useAuthStore.getState().user?.id;
+    if (!userId) return;
+
+    await prefetchNavTabForPath(location.pathname, userId, context.queryClient);
+  },
   component: PrivateLayout,
 });
 
-export function PrivateLayout() {
+function PrivateLayout() {
   const { setContent } = useHeaderStore();
 
   useSeo({ noIndex: true });
   useActivityEvents();
   usePushNotifications();
-
+  usePreloadNavTabs();
   useLayoutEffect(() => {
     setContent("left", <AuthUserAvatar />);
     setContent("center", <HeaderAppTitle />);
@@ -89,16 +110,27 @@ export function PrivateLayout() {
 
   const { type: deviceType } = useDeviceDetect();
 
-  switch (deviceType) {
-    case "desktop":
-      return <DesktopLayout />;
-    case "tablet":
-      return <TabletLayout />;
-    case "mobile":
-      return <MobileLayout />;
-    default:
-      return <MobileLayout />;
-  }
+  const renderLayoutComponent = useCallback(() => {
+    switch (deviceType) {
+      case "desktop":
+        return <DesktopLayout />;
+      case "tablet":
+        return <TabletLayout />;
+      case "mobile":
+        return <MobileLayout />;
+      default:
+        return <MobileLayout />;
+    }
+  }, [deviceType]);
+
+  const layoutComponent = renderLayoutComponent();
+
+  return (
+    <>
+      {layoutComponent}
+      <PwaInstallDialog />
+    </>
+  );
 }
 
 function DesktopLayout() {

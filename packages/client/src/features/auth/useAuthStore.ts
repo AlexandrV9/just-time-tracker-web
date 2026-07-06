@@ -17,5 +17,5 @@ export const useAuthStore = create<AuthStore>()(
   devtools(() => ({
     status: "IDLE",
     user: null,
-  }))
+  })),
 );

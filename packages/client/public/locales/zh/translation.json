@@ -179,6 +179,70 @@
         },
         "permissionDenied": "浏览器已阻止通知。请在网站设置中允许通知以接收提醒。"
       },
+      "pwaInstall": {
+        "title": "将应用安装到桌面",
+        "stepLabel": "第 {{step}} 步",
+        "sections": {
+          "ios": {
+            "title": "在 iPhone / iPad 上安装",
+            "browserSafari": "Safari",
+            "browserChrome": "Chrome",
+            "steps": {
+              "1": {
+                "description": "在 iPhone 或 iPad 上用 Safari 或 Chrome 打开网站。\n\nSafari — 点击屏幕底部的“更多”按钮（⋯）。\nChrome — 点击顶部的“分享”图标。"
+              },
+              "2": {
+                "description": "打开“分享”菜单。\n\nSafari — 在菜单中点击“分享”。\nChrome — 在菜单中点击“显示更多”。"
+              },
+              "3": {
+                "description": "点击“添加到主屏幕”并确认添加。"
+              }
+            }
+          },
+          "android": {
+            "title": "在 Android 上安装",
+            "steps": {
+              "1": {
+                "description": "在 Android 上用 Chrome 打开网站。"
+              },
+              "2": {
+                "description": "点击右上角的菜单 (⋮)。"
+              },
+              "3": {
+                "description": "选择“安装应用”或“添加到主屏幕”并确认安装。"
+              }
+            }
+          },
+          "macos": {
+            "title": "在 macOS 上安装",
+            "steps": {
+              "1": {
+                "description": "在 Safari 或 Chrome 中打开网站。"
+              },
+              "2": {
+                "description": "Safari 中点击“分享”；Chrome 中点击地址栏的安装图标。"
+              },
+              "3": {
+                "description": "选择“添加到程序坞”或“安装应用”，并确认安装。"
+              }
+            }
+          },
+          "windows": {
+            "title": "在 Windows 上安装",
+            "steps": {
+              "1": {
+                "description": "在 Chrome 或 Microsoft Edge 中打开网站。"
+              },
+              "2": {
+                "description": "点击浏览器地址栏中的安装图标。"
+              },
+              "3": {
+                "description": "点击“安装”——应用将出现在“开始”菜单中。"
+              }
+            }
+          }
+        }
+      },
       "security": {
         "loginMethods": {
           "title": "登录方式",
@@ -326,6 +390,12 @@
         "security": "安全与登录"
       }
     },
+    "helpInfoSettings": {
+      "title": "参考信息",
+      "options": {
+        "desktopInstall": "将应用安装到桌面"
+      }
+    },
     "unfinishedActivities": {
       "title": "未完成的活动"
     },
@@ -414,6 +484,7 @@
         "forgotPasswordLink": "忘记密码？",
         "errors": {
           "invalidCredentials": "登录名或密码错误",
+          "rateLimited": "尝试次数过多，请在 {{time}} 后重试",
           "unknown": "未知错误"
         }
       },
@@ -479,6 +550,22 @@
       "empty": "暂无通知",
       "emptyDescription": "已全部读完"
     },
+    "pwaInstall": {
+      "dialog": {
+        "title": "安装 Just Time Tracker",
+        "description": "如果你经常使用这款应用，可以将其添加到桌面。",
+        "benefitsIntro": "安装后：",
+        "benefit1": "✅ 一键启动；",
+        "benefit2": "✅ 在独立窗口中打开；",
+        "benefit3": "✅ 像普通应用一样使用。",
+        "installLink": "查看安装说明",
+        "laterHintPrefix": "说明随时可在",
+        "laterHintBold": "设置 → 安装应用",
+        "laterHintSuffix": "中找到。",
+        "dontShowAgain": "不再显示",
+        "okButton": "确定"
+      }
+    },
     "emailVerification": {
       "dialogTitle": "确认邮箱",
       "backButton": "返回",
@@ -503,7 +590,8 @@
         "requestFailed": "无法发送验证码",
         "invalidCode": "验证码无效",
         "codeExpired": "验证码已过期，请重新获取",
-        "tooManyAttempts": "尝试次数过多，请重新获取验证码",
+        "tooManyAttempts": "尝试次数过多，请在 {{time}} 后重试",
+        "rateLimited": "尝试次数过多，请在 {{time}} 后重试",
         "verifyFailed": "无法确认邮箱",
         "resendTooEarly": "请稍后再试",
         "codeNotFound": "没有进行中的验证请求，请重新开始",
@@ -581,7 +669,8 @@
         "requestFailed": "无法发送验证码",
         "invalidCode": "验证码无效",
         "codeExpired": "验证码已过期，请重新获取",
-        "tooManyAttempts": "尝试次数过多，请重新获取验证码",
+        "tooManyAttempts": "尝试次数过多，请在 {{time}} 后重试",
+        "rateLimited": "尝试次数过多，请在 {{time}} 后重试",
         "verifyFailed": "无法验证验证码",
         "resendTooEarly": "请稍后再请求新验证码",
         "samePassword": "请选择其他密码",
@@ -591,6 +680,7 @@
     }
   },
   "common": {
+    "retryAfter": "请在 {{time}} 后重试",
     "durationField": {
       "cancelButton": "取消",
       "confirmButton": "确认"
@@ -598,7 +688,9 @@
     "aria": {
       "togglePasswordVisibility": "显示或隐藏密码",
       "previousMonth": "上个月",
-      "nextMonth": "下个月"
+      "nextMonth": "下个月",
+      "previousStep": "上一步",
+      "nextStep": "下一步"
     }
   }
 }

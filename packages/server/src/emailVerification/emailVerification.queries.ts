@@ -123,6 +123,17 @@ const incrementAttempts = async (userId: string) => {
   return (rows[0] as { attemptsCount: number } | undefined)?.attemptsCount ?? null;
 };
 
+const resetAttempts = async (userId: string) => {
+  await pool.query(
+    `
+    UPDATE email_verifications
+    SET attempts_count = 0, updated_at = NOW()
+    WHERE user_id = $1
+    `,
+    [userId],
+  );
+};
+
 const deleteByUserId = async (userId: string) => {
   await pool.query(`DELETE FROM email_verifications WHERE user_id = $1`, [
     userId,
@@ -169,6 +180,7 @@ export const emailVerificationQueries = {
   refreshForResend,
   allowImmediateResend,
   incrementAttempts,
+  resetAttempts,
   deleteByUserId,
   confirmUserEmail,
   isEmailTakenByAnotherUser,

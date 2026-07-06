@@ -2,7 +2,7 @@
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-import { queryClient } from "~/shared/libs";
+import { queryClient } from "~/shared/config";
 
 export function TanstackProvider({ children }: { children: ReactNode }) {
   return (
