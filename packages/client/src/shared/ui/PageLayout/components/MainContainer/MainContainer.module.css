@@ -6,7 +6,7 @@
   max-width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  scrollbar-gutter: both-edges;
+  scrollbar-gutter: stable;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
@@ -23,6 +23,10 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
+  .root {
+    overflow-y: scroll;
+  }
+
   .root::-webkit-scrollbar {
     width: 10px;
   }

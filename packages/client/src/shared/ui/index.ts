@@ -38,6 +38,7 @@ export * from "./Group";
 export * from "./Span";
 export * from "./Clipboard";
 export * from "./RetryAfterMessage";
+export * from "./Image";
 
 export * from "./icons";
 export * from "./controls";

@@ -179,6 +179,70 @@
         },
         "permissionDenied": "Notifications are blocked in browser settings. Allow them for this site to receive reminders."
       },
+      "pwaInstall": {
+        "title": "Install app to desktop",
+        "stepLabel": "Step {{step}}",
+        "sections": {
+          "ios": {
+            "title": "Install on iPhone / iPad",
+            "browserSafari": "Safari",
+            "browserChrome": "Chrome",
+            "steps": {
+              "1": {
+                "description": "Open the site in Safari or Chrome on your iPhone or iPad.\n\nSafari — tap the More button (⋯) at the bottom of the screen.\nChrome — tap the Share icon at the top."
+              },
+              "2": {
+                "description": "Open the Share menu.\n\nSafari — tap Share in the menu.\nChrome — tap Show more in the menu."
+              },
+              "3": {
+                "description": "Tap Add to Home Screen and confirm."
+              }
+            }
+          },
+          "android": {
+            "title": "Install on Android",
+            "steps": {
+              "1": {
+                "description": "Open the site in Chrome on Android."
+              },
+              "2": {
+                "description": "Tap the menu (⋮) in the top-right corner."
+              },
+              "3": {
+                "description": "Choose Install app or Add to Home screen and confirm installation."
+              }
+            }
+          },
+          "macos": {
+            "title": "Install on macOS",
+            "steps": {
+              "1": {
+                "description": "Open the site in Safari or Chrome."
+              },
+              "2": {
+                "description": "In Safari, tap Share. In Chrome, click the install icon in the address bar."
+              },
+              "3": {
+                "description": "Choose Add to Dock or Install app and confirm installation."
+              }
+            }
+          },
+          "windows": {
+            "title": "Install on Windows",
+            "steps": {
+              "1": {
+                "description": "Open the site in Chrome or Microsoft Edge."
+              },
+              "2": {
+                "description": "Click the install icon in the browser address bar."
+              },
+              "3": {
+                "description": "Click Install — the app will appear in the Start menu."
+              }
+            }
+          }
+        }
+      },
       "security": {
         "loginMethods": {
           "title": "Sign-in methods",
@@ -324,6 +388,12 @@
         "profile": "Profile",
         "notifications": "Notifications",
         "security": "Security & sign-in"
+      }
+    },
+    "helpInfoSettings": {
+      "title": "Reference information",
+      "options": {
+        "desktopInstall": "Install app to desktop"
       }
     },
     "unfinishedActivities": {
@@ -602,7 +672,9 @@
     "aria": {
       "togglePasswordVisibility": "Toggle password visibility",
       "previousMonth": "Previous month",
-      "nextMonth": "Next month"
+      "nextMonth": "Next month",
+      "previousStep": "Previous step",
+      "nextStep": "Next step"
     }
   }
 }

@@ -24,7 +24,9 @@ export const useTodayPlanItems = () => {
     enabled: Boolean(userId),
     select: (response) => (response.success ? response.data.data[0] : null),
     placeholderData: (previousData, previousQuery) =>
-      previousQuery?.queryKey[2] === todayCalendarDay ? previousData : undefined,
+      previousQuery?.queryKey[2] === todayCalendarDay
+        ? previousData
+        : undefined,
   });
 
   const todayPlanId = todayPlanQuery.data?.id;
