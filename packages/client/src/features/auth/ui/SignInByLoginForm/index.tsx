@@ -4,6 +4,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { TFunction } from "i18next";
 import z from "zod";
 import { authManager } from "~/features/auth";
+import { requestPwaInstallDialog } from "~/features/pwa-install";
 import { useTranslation } from "~/shared/hooks";
 import shineStyles from "~/shared/styles/shineRing.module.css";
 
@@ -37,6 +38,7 @@ export const SignInByLoginForm = () => {
     mutationFn: (data: SignInFormSchema) => authManager.signInByLogin(data),
     onSuccess: (response) => {
       if (response.success) {
+        requestPwaInstallDialog();
         navigate({ to: redirect || "/" });
         return;
       }

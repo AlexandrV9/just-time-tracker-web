@@ -549,6 +549,22 @@
       "empty": "Нет уведомлений",
       "emptyDescription": "Вы всё просмотрели"
     },
+    "pwaInstall": {
+      "dialog": {
+        "title": "Установите Just Time Tracker",
+        "description": "Если вы пользуетесь приложением регулярно, добавьте его на рабочий стол.",
+        "benefitsIntro": "После установки оно:",
+        "benefit1": "✅ запускается одним нажатием;",
+        "benefit2": "✅ открывается в отдельном окне;",
+        "benefit3": "✅ работает как обычное приложение.",
+        "installLink": "Показать инструкцию",
+        "laterHintPrefix": "Инструкцию всегда можно найти в разделе ",
+        "laterHintBold": "Настройки → Установка приложения.",
+        "laterHintSuffix": "",
+        "dontShowAgain": "Больше не показывать",
+        "okButton": "Ок"
+      }
+    },
     "emailVerification": {
       "dialogTitle": "Подтверждение email",
       "backButton": "Назад",

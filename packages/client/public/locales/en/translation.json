@@ -549,6 +549,22 @@
       "empty": "No notifications",
       "emptyDescription": "You're all caught up"
     },
+    "pwaInstall": {
+      "dialog": {
+        "title": "Install Just Time Tracker",
+        "description": "If you use the app regularly, add it to your desktop.",
+        "benefitsIntro": "Once installed, it:",
+        "benefit1": "✅ launches with one tap;",
+        "benefit2": "✅ opens in a separate window;",
+        "benefit3": "✅ works like a regular app.",
+        "installLink": "Show instructions",
+        "laterHintPrefix": "You can always find the instructions in ",
+        "laterHintBold": "Settings → Install app.",
+        "laterHintSuffix": "",
+        "dontShowAgain": "Don't show again",
+        "okButton": "OK"
+      }
+    },
     "emailVerification": {
       "dialogTitle": "Confirm email",
       "backButton": "Back",

@@ -549,6 +549,22 @@
       "empty": "暂无通知",
       "emptyDescription": "已全部读完"
     },
+    "pwaInstall": {
+      "dialog": {
+        "title": "安装 Just Time Tracker",
+        "description": "如果你经常使用这款应用，可以将其添加到桌面。",
+        "benefitsIntro": "安装后：",
+        "benefit1": "✅ 一键启动；",
+        "benefit2": "✅ 在独立窗口中打开；",
+        "benefit3": "✅ 像普通应用一样使用。",
+        "installLink": "查看安装说明",
+        "laterHintPrefix": "说明随时可在",
+        "laterHintBold": "设置 → 安装应用",
+        "laterHintSuffix": "中找到。",
+        "dontShowAgain": "不再显示",
+        "okButton": "确定"
+      }
+    },
     "emailVerification": {
       "dialogTitle": "确认邮箱",
       "backButton": "返回",
