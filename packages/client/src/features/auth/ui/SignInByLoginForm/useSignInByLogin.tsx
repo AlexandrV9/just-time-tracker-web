@@ -6,6 +6,7 @@ import { ApiError } from "~/shared/config/error";
 import { useRetryAfterCountdown, useTranslation } from "~/shared/hooks";
 import { getRetryAfter } from "~/shared/libs";
 import { toast } from "~/shared/ui";
+import { requestPwaInstallDialog } from "~/features/pwa-install";
 
 export type UseSignInByLoginProps = {
   successRedirectUrl?: string;
@@ -34,6 +35,7 @@ export const useSignInByLogin = (props?: UseSignInByLoginProps) => {
         return;
       }
 
+      requestPwaInstallDialog();
       navigate({ to: successRedirectUrl });
     },
     onError: (error) => {
@@ -93,4 +95,4 @@ function showSignInErrorToast(
     draggable: true,
     toastId: "error_sign_in",
   });
-};
+}

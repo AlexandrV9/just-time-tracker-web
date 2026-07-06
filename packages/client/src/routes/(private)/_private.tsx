@@ -1,9 +1,13 @@
 import { Spinner } from "@chakra-ui/react";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { useLayoutEffect } from "react";
+import { useCallback, useLayoutEffect } from "react";
 import { LangSwitcher, ThemeSwitcher, useActivityEvents } from "~/features";
 import { authManager, AuthUserAvatar, useAuthStore } from "~/features/auth";
-import { NotificationButton, usePushNotifications } from "~/features/notifications";
+import {
+  NotificationButton,
+  usePushNotifications,
+} from "~/features/notifications";
+import { PwaInstallDialog } from "~/features/pwa-install";
 import {
   useDeviceDetect,
   useOrientation,
@@ -84,14 +88,13 @@ export const Route = createFileRoute("/(private)/_private")({
   component: PrivateLayout,
 });
 
-export function PrivateLayout() {
+function PrivateLayout() {
   const { setContent } = useHeaderStore();
 
   useSeo({ noIndex: true });
   useActivityEvents();
   usePushNotifications();
   usePreloadNavTabs();
-
   useLayoutEffect(() => {
     setContent("left", <AuthUserAvatar />);
     setContent("center", <HeaderAppTitle />);
@@ -107,16 +110,27 @@ export function PrivateLayout() {
 
   const { type: deviceType } = useDeviceDetect();
 
-  switch (deviceType) {
-    case "desktop":
-      return <DesktopLayout />;
-    case "tablet":
-      return <TabletLayout />;
-    case "mobile":
-      return <MobileLayout />;
-    default:
-      return <MobileLayout />;
-  }
+  const renderLayoutComponent = useCallback(() => {
+    switch (deviceType) {
+      case "desktop":
+        return <DesktopLayout />;
+      case "tablet":
+        return <TabletLayout />;
+      case "mobile":
+        return <MobileLayout />;
+      default:
+        return <MobileLayout />;
+    }
+  }, [deviceType]);
+
+  const layoutComponent = renderLayoutComponent();
+
+  return (
+    <>
+      {layoutComponent}
+      <PwaInstallDialog />
+    </>
+  );
 }
 
 function DesktopLayout() {

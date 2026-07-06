@@ -8,6 +8,7 @@ import { useTranslation } from "~/shared/hooks";
 import { useSeo } from "~/shared/seo";
 import { toast } from "~/shared/ui";
 import { Flex } from "~/shared/ui";
+import { requestPwaInstallDialog } from "~/features";
 
 const searchSchema = z.object({
   redirect: z.string().optional().catch(""),
@@ -38,6 +39,7 @@ function OAuthCallbackPage() {
 
     authManager.checkAuth().then((ok) => {
       if (ok) {
+        requestPwaInstallDialog();
         navigate({ to: redirectTo ?? "/" });
       } else {
         navigate({ to: "/signin" });
