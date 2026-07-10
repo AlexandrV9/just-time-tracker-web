@@ -4,7 +4,6 @@ import type {
   ActivitySessionDTO,
   ActivitySessionSegmentDTO,
 } from "@time-tracker/shared";
-import { useCurrentActivityStore } from "~/features";
 import {
   activityApiService,
   ACTIVITIES_CURRENT_QUERY_KEY,
@@ -16,6 +15,7 @@ import {
   type ActivityState,
 } from "~/shared/api/services";
 import { getOrCreateClientId } from "~/shared/libs";
+import { useCurrentActivityStore } from "../useCurrentActivity/useCurrentActivityStore";
 
 type FinishActivityData = {
   finishedAt: string;

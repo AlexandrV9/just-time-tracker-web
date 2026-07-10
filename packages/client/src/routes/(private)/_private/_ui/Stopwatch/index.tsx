@@ -1,20 +1,38 @@
-import { Box, formatSecondsAsTimeString, Stack, Text } from "~/shared/ui";
-import { useCurrentActivity, useDisplayedSessionSeconds } from "~/features";
+import {
+  Box,
+  Button,
+  Flex,
+  formatSecondsAsTimeString,
+  PauseIcon,
+  PlayIcon,
+  Stack,
+  StopCircleIcon,
+  Text,
+} from "~/shared/ui";
+import { useCurrentActivity } from "~/features";
 import { useTranslation } from "~/shared/hooks";
+
+import styles from "./Stopwatch.module.css";
 
 export function Stopwatch() {
   const { t } = useTranslation();
 
-  const { currentActivity, currentSession, currentSegment } =
-    useCurrentActivity();
-
-  const seconds = useDisplayedSessionSeconds({
-    session: currentSession,
-    segment: currentSegment,
-  });
+  const {
+    currentActivity,
+    currentSession,
+    status,
+    displayedSeconds,
+    start,
+    pause,
+    finish,
+  } = useCurrentActivity();
 
   const displayedTitle = currentActivity?.title;
-  const displayedTime = formatSecondsAsTimeString(seconds);
+  const displayedTime = formatSecondsAsTimeString(displayedSeconds);
+
+  const hasActivity = Boolean(currentActivity);
+  const isActive = status === "active";
+  const canStop = Boolean(currentSession);
 
   return (
     <Stack.VStack
@@ -24,6 +42,7 @@ export function Stopwatch() {
       gap="0.8rem"
       overflow="hidden"
       maxWidth="500px"
+      className={styles.container}
     >
       <Box
         display="flex"
@@ -49,6 +68,31 @@ export function Stopwatch() {
         >
           {displayedTime}
         </Text>
+        <Flex
+          gap="1rem"
+          minW="220px"
+          w="full"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Button
+            variant="subtle"
+            borderRadius="0.5rem"
+            w="100px"
+            disabled={!canStop}
+            onClick={() => finish()}
+          >
+            <StopCircleIcon />
+          </Button>
+          <Button
+            borderRadius="0.5rem"
+            w="100px"
+            disabled={!hasActivity}
+            onClick={() => (isActive ? pause() : start())}
+          >
+            {isActive ? <PauseIcon /> : <PlayIcon />}
+          </Button>
+        </Flex>
       </Box>
     </Stack.VStack>
   );

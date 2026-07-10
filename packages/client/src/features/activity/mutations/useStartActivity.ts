@@ -5,7 +5,6 @@ import type {
   ActivitySessionSegmentDTO,
   StartActivityDataDTO,
 } from "@time-tracker/shared";
-import { useCurrentActivityStore } from "~/features";
 
 import {
   activityApiService,
@@ -15,6 +14,7 @@ import {
   ACTIVITIES_CURRENT_QUERY_KEY,
 } from "~/shared/api/services";
 import { getOrCreateClientId } from "~/shared/libs";
+import { useCurrentActivityStore } from "../useCurrentActivity/useCurrentActivityStore";
 
 export const useStartActivity = () => {
   const queryClient = useQueryClient();

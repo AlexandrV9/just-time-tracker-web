@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 
 export function useNowMs(enabled: boolean, syncKey?: unknown): number | null {
-  const [nowMs, setNowMs] = useState<number | null>(null);
+  const [nowMs, setNowMs] = useState<number | null>(() =>
+    enabled ? Date.now() : null,
+  );
 
   useEffect(() => {
     if (!enabled) {
@@ -9,11 +11,21 @@ export function useNowMs(enabled: boolean, syncKey?: unknown): number | null {
       return;
     }
 
-    setNowMs(Date.now());
+    let timeoutId: number;
 
-    const intervalId = setInterval(() => setNowMs(Date.now()), 1000);
+    const tick = () => {
+      const now = Date.now();
+      const delay = 1000 - (now % 1000);
 
-    return () => clearInterval(intervalId);
+      setNowMs(now);
+      timeoutId = window.setTimeout(tick, delay);
+    };
+
+    tick();
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [enabled, syncKey]);
 
   return enabled ? nowMs : null;

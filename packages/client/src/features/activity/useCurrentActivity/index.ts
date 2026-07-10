@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import type { ActivityStatusDTO } from "@time-tracker/shared";
 import { getCalendarDay, getDateIntervalByCalendarDay } from "~/shared/libs";
 import { ACTIVITIES_CURRENT_QUERY_KEY } from "~/shared/api/services";
 
@@ -7,6 +8,12 @@ import { useAuthStore } from "../../auth/useAuthStore";
 import { useShallow } from "zustand/react/shallow";
 import { useCurrentActivityStore } from "./useCurrentActivityStore";
 import { fetchCurrentActivityData, mergeCurrentActivityFromServer } from "./utils";
+import { useDisplayedSessionSeconds } from "../useDisplayedSessionSeconds";
+import {
+  useFinishActivity,
+  usePauseActivity,
+  useStartActivity,
+} from "../mutations";
 
 export function useCurrentActivity() {
   const userId = useAuthStore((state) => state.user?.id);
@@ -63,6 +70,56 @@ export function useCurrentActivity() {
     });
   }, [query.data, updateData]);
 
+  const status: ActivityStatusDTO = useMemo(() => {
+    const sessionStatus = currentSession?.status;
+    if (sessionStatus === "active" || sessionStatus === "paused") {
+      return sessionStatus;
+    }
+
+    return currentActivity?.status ?? "idle";
+  }, [currentSession?.status, currentActivity?.status]);
+
+  const displayedSeconds = useDisplayedSessionSeconds({
+    session: currentSession,
+    segment: currentSegment,
+  });
+
+  const { mutateAsync: startActivity } = useStartActivity();
+  const { mutateAsync: pauseActivity } = usePauseActivity();
+  const { mutateAsync: finishActivity } = useFinishActivity();
+
+  const start = useCallback(async () => {
+    if (!currentActivity || status === "active") return;
+
+    return startActivity({
+      activityId: currentActivity.id,
+      startedAt: new Date().toISOString(),
+      activeDurationMs: currentActivity.activeDurationMs,
+    });
+  }, [currentActivity, status, startActivity]);
+
+  const pause = useCallback(async () => {
+    if (!currentActivity || status !== "active") return;
+
+    return pauseActivity({
+      activity: currentActivity,
+      session: currentSession,
+      segment: currentSegment,
+      pausedAt: new Date().toISOString(),
+    });
+  }, [currentActivity, currentSession, currentSegment, status, pauseActivity]);
+
+  const finish = useCallback(async () => {
+    if (!currentActivity || status === "idle") return;
+
+    return finishActivity({
+      activity: currentActivity,
+      session: currentSession,
+      segment: currentSegment,
+      finishedAt: new Date().toISOString(),
+    });
+  }, [currentActivity, currentSession, currentSegment, status, finishActivity]);
+
   return {
     isLoading: query.isLoading,
     isError: query.isError,
@@ -73,5 +130,10 @@ export function useCurrentActivity() {
     setCurrentSession,
     currentSegment,
     setCurrentSegment,
+    status,
+    displayedSeconds,
+    start,
+    pause,
+    finish,
   };
 }

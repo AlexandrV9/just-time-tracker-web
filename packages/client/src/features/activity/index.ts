@@ -3,3 +3,8 @@ export { useDisplayedSessionSeconds } from "./useDisplayedSessionSeconds";
 export { useCurrentActivity } from "./useCurrentActivity";
 export { useCurrentActivityStore } from "./useCurrentActivity/useCurrentActivityStore";
 export { useActivityEvents } from "./useActivityEvents";
+export {
+  useFinishActivity,
+  usePauseActivity,
+  useStartActivity,
+} from "./mutations";

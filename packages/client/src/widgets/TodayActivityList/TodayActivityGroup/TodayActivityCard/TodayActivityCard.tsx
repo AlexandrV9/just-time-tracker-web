@@ -97,7 +97,7 @@ export const TodayActivityCard = ({
       border="2px solid border.muted"
       borderColor={
         showSelectionOutline
-          ? "border.emphasized"
+          ? "yellow.400"
           : isHighlighted
             ? "transparent"
             : undefined

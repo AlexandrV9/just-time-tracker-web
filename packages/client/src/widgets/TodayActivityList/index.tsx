@@ -15,12 +15,12 @@ import {
   useFinishActivity,
   usePauseActivity,
   useStartActivity,
-  useAddTodayActivities,
-} from "./mutations";
+  useCurrentActivity,
+} from "~/features";
+import { useAddTodayActivities } from "./mutations";
 import { useTranslation } from "~/shared/hooks";
 import { TodayActivityGroup } from "./TodayActivityGroup";
 import type { ActivityState } from "~/shared/api/services";
-import { useCurrentActivity } from "~/features";
 
 export const TodayActivityList = () => {
   const { t } = useTranslation();
