@@ -9,7 +9,7 @@ import {
   Text,
   VersionIcon,
 } from "~/shared/ui";
-import { AddTodayActivitiesDialog } from "./AddTodayActivityDialog";
+import { AddActivitiesDialog } from "../AddActivitiesDialog";
 import { useTodayActivities } from "./useTodayActivities";
 import {
   useFinishActivity,
@@ -29,7 +29,7 @@ export const TodayActivityList = () => {
   const { currentActivity, setCurrentActivity, updateData } =
     useCurrentActivity();
 
-  const { planId, activityGroup, isLoading, isError } = useTodayActivities();
+  const { activityGroup, isLoading, isError } = useTodayActivities();
 
   const currentActivityId = currentActivity?.id;
   const hasRunningActivity = currentActivity?.status === "active";
@@ -86,9 +86,7 @@ export const TodayActivityList = () => {
     });
   };
 
-  const { mutateAsync: addTodayActivities } = useAddTodayActivities({
-    planId,
-  });
+  const { mutateAsync: addTodayActivities } = useAddTodayActivities();
 
   const renderContent = () => {
     if (isLoading) {
@@ -170,9 +168,9 @@ export const TodayActivityList = () => {
         </Flex>
         <Box w="full">{content}</Box>
       </Stack.VStack>
-      <AddTodayActivitiesDialog
+      <AddActivitiesDialog
         dialog={addTodayActivityDialog}
-        selectedActivityIds={activityGroup.activities.map(
+        excludeActivityIds={activityGroup.activities.map(
           (item) => item.activity.id,
         )}
         onSubmit={addTodayActivities}

@@ -6,36 +6,34 @@
   },
   "pages": {
     "landing": {
-      "title": "Track every minute — without spreadsheets",
-      "subtitle": "A focused time-tracking app with a central timer, activities, analytics, calendar, and history — so you know where your day went.",
-      "featuresTitle": "What you get",
+      "title": "Stop guessing where your day goes",
+      "subtitle": "Plan activities, track time with one tap, and see where your hours actually go. All in one app — no spreadsheets, no extra steps.",
+      "featuresTitle": "What you can do in the app",
       "features": [
         {
-          "title": "Unified stopwatch",
-          "body": "Start, pause, and finish sessions from the main timer and activity cards — the numbers stay aligned."
+          "title": "Track time with one tap",
+          "body": "Start, pause, and finish activities in seconds. The timer stays in sync and always shows the current time."
         },
         {
-          "title": "Activities & today’s board",
-          "body": "Create reusable activities with tags, run them alongside your day plan, and keep unfinished sessions under control."
+          "title": "Plan your day",
+          "body": "Add activities to your plan ahead of time and start them when you actually begin work. The plan helps you remember what matters and see your load for the day."
         },
         {
-          "title": "Calendar view",
-          "body": "See sessions on the grid and skim how time distributes across dates."
+          "title": "Build your own activity library",
+          "body": "Create, edit, and delete activities. Reuse them in a few taps and track how much time you spend on each one."
         },
         {
-          "title": "Histories",
-          "body": "Grouped history by day lets you revisit past intervals and reopen details without digging through spreadsheets."
+          "title": "Analyze your history",
+          "body": "Go back to past days, review sessions, and see how much time went to each activity."
         },
         {
-          "title": "Per-activity analytics",
-          "body": "Day timeline, session breakdown, and durations so you spot patterns and outliers."
-        },
-        {
-          "title": "Account & profile",
-          "body": "Sign in securely, tweak profile text, theme, language, and notifications from one place."
+          "title": "Make the app yours",
+          "body": "Choose a theme and interface language, set up push notifications, and manage your account security."
         }
       ],
+      "signUpButton": "Get started",
       "signInButton": "Sign in",
+      "aboutAppButton": "About the app",
       "signInPageLink": "Already registered? Sign in"
     },
     "home": {
@@ -53,9 +51,20 @@
       "comingSoon": "Activity calendar coming soon",
       "comingSoonDescription": "On this page you will be able to see all your activities and how they are distributed across days, and plan activities for the future.",
       "mockEvents": {
+        "morningRoutine": "Morning routine",
+        "codeReview": "Code review",
         "designSync": "Design sync",
-        "featureDevelopment": "Feature development"
-      }
+        "standup": "Standup",
+        "featureDevelopment": "Feature development",
+        "lunch": "Lunch",
+        "testing": "Testing",
+        "documentation": "Documentation",
+        "teamRetro": "Team retro",
+        "exercise": "Exercise"
+      },
+      "emptyPlannedActivities": "No planned activities for this day",
+      "addActivitiesTitle": "Add activities to date",
+      "addActivitiesDateLabel": "Date"
     },
     "activities": {
       "title": "Activities",
@@ -270,6 +279,27 @@
           "title": "Something went wrong",
           "okButton": "Got it"
         }
+      },
+      "interfaceSettings": {
+        "title": "Interface settings",
+        "links": {
+          "language": "Language",
+          "theme": "Theme"
+        }
+      },
+      "language": {
+        "title": "Language",
+        "sectionTitle": "INTERFACE LANGUAGE"
+      },
+      "theme": {
+        "title": "Theme",
+        "sectionTitle": "APP THEME",
+        "dark": "Dark",
+        "light": "Light",
+        "system": "System",
+        "darkDescription": "Always dark interface",
+        "lightDescription": "Always light interface",
+        "systemDescription": "Follows device settings"
       }
     },
     "private": {
@@ -360,7 +390,8 @@
         "Home": "Home",
         "Settings": "Settings",
         "Activities": "Activities",
-        "History": "History"
+        "History": "History",
+        "Calendar": "Calendar"
       }
     },
     "activityAnalytics": {

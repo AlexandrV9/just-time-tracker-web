@@ -4,3 +4,4 @@ export * from "./router";
 export * from "./clientId";
 export * from "./i18n/applyUserLocale";
 export * from "./rateLimit";
+export * from "./array";

@@ -1,0 +1,44 @@
+.container {
+  flex: 1;
+  width: 100%;
+  min-height: clamp(7.5rem, 28vw, 10rem);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0.8rem;
+  border-radius: 16px;
+  gap: 1rem;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+
+  position: relative;
+  border: 1px solid #222;
+  background-color: #111;
+  
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  --spotlight-color: rgba(255, 255, 255, 0.05);
+}
+
+.container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    var(--spotlight-color),
+    transparent 80%
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.container:hover::before,
+.container:focus-within::before {
+  opacity: 0.6;
+}

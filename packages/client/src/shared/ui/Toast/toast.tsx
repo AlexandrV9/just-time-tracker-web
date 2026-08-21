@@ -48,6 +48,7 @@ function ToastContent({
       <CloseButton
         variant="subtle"
         size="xs"
+        position="static"
         onClick={closeToast}
         className={styles.closeButton}
       />

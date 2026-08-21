@@ -202,9 +202,10 @@ export const IOSDatePicker = ({
   const accordionBodyContent = renderAccordionBodyContent();
 
   return (
-    <Stack.HStack justifyContent="space-between">
+    <Stack.HStack justifyContent="space-between" w="full">
       <Accordion.Root
         collapsible
+        w="full"
         value={isExpanded ? ["dateSelector"] : []}
         onValueChange={handleChangeAccordionValue}
         ref={accordionRef}

@@ -15,56 +15,57 @@ export function SignUpPage() {
   });
 
   return (
-    <Flex
-      direction="column"
-      align="center"
-      justify="flex-start"
-      gap="1rem"
-      w="full"
-      minW={0}
-      maxW="full"
-      py="1rem"
-      px="1rem"
-      overflowX="hidden"
-    >
-      <Box
-        padding="1.5rem"
-        bg="bg"
-        borderRadius="xl"
-        width="full"
-        minW={0}
-        maxW={400}
+    <Box position="relative" w="full" minH="100%">
+      <Flex
+        direction="column"
+        align="center"
+        w="full"
+        pt={{ base: "1.5rem", md: "2rem" }}
+        pb="2rem"
+        px="1rem"
+        position="relative"
+        zIndex={1}
       >
-        <SignUpForm />
-      </Box>
-      <Text
-        color="fg.subtle"
-        textStyle="sm"
-        textAlign="center"
-        maxW="400px"
-        lineHeight="1.5"
-      >
-        {t(`${baseLocale}.prefix`)}{" "}
-        <Text
-          as="span"
-          color="fg"
-          textDecoration="underline"
-          textUnderlineOffset="3px"
-          _hover={{ opacity: 0.8 }}
+        <Box
+          padding="1.5rem"
+          borderRadius="xl"
+          width="full"
+          minW={0}
+          maxW={400}
         >
-          <Link to="/terms-of-service">{t(`${baseLocale}.termsLink`)}</Link>
-        </Text>{" "}
-        {t(`${baseLocale}.middle`)}{" "}
+          <SignUpForm />
+        </Box>
+
         <Text
-          as="span"
-          color="fg"
-          textDecoration="underline"
-          textUnderlineOffset="3px"
-          _hover={{ opacity: 0.8 }}
+          mt="1.5rem"
+          color="fg.subtle"
+          textStyle="sm"
+          textAlign="center"
+          maxW="400px"
+          lineHeight="1.5"
         >
-          <Link to="/privacy-policy">{t(`${baseLocale}.privacyLink`)}</Link>
+          {t(`${baseLocale}.prefix`)}{" "}
+          <Text
+            as="span"
+            color="fg"
+            textDecoration="underline"
+            textUnderlineOffset="3px"
+            _hover={{ opacity: 0.8 }}
+          >
+            <Link to="/terms-of-service">{t(`${baseLocale}.termsLink`)}</Link>
+          </Text>{" "}
+          {t(`${baseLocale}.middle`)}{" "}
+          <Text
+            as="span"
+            color="fg"
+            textDecoration="underline"
+            textUnderlineOffset="3px"
+            _hover={{ opacity: 0.8 }}
+          >
+            <Link to="/privacy-policy">{t(`${baseLocale}.privacyLink`)}</Link>
+          </Text>
         </Text>
-      </Text>
-    </Flex>
+      </Flex>
+    </Box>
   );
 }

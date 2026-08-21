@@ -3,11 +3,12 @@ import { Box, type BoxProps } from "~/shared/ui";
 
 import styles from "./BottomContainer.module.css";
 
-export type BottomContainerProps = BoxProps;
+export type BottomContainerProps = BoxProps & { contentProps?: BoxProps };
 
 export const BottomContainer = ({
   children,
   className,
+  contentProps,
   ...props
 }: BottomContainerProps) => {
   return (
@@ -19,7 +20,12 @@ export const BottomContainer = ({
       className={clsx(styles.wrapper, className)}
       {...props}
     >
-      <Box className={styles.content}>{children}</Box>
+      <Box
+        className={clsx(styles.content, contentProps?.className)}
+        {...contentProps}
+      >
+        {children}
+      </Box>
     </Box>
   );
 };

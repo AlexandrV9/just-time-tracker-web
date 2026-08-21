@@ -1,4 +1,4 @@
-export * from "./AuthUserAvatar";
+export * from "./AuthUser";
 export * from "./SignOutButton";
 export * from "./SignInByLoginForm";
 export * from "./SignUpForm";

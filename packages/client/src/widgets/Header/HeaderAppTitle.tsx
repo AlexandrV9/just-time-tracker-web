@@ -3,11 +3,7 @@ import { Flex, Text } from "~/shared/ui";
 
 export function HeaderAppTitle() {
   return (
-    <Flex
-      alignItems="center"
-      gap={2}
-      display={{ base: "none", md: "flex" }}
-    >
+    <Flex alignItems="center" gap={2} display={{ base: "none", md: "flex" }}>
       <Text
         textStyle="xl"
         m={0}

@@ -17,10 +17,17 @@ export type NavBarItemProps = {
   href: string;
   icon: (props: IconProps) => ReactNode;
   isActive?: boolean;
+  isHideText?: boolean;
 };
 
 export const NavBarItem = memo(
-  ({ href, isActive, icon: Icon, title }: NavBarItemProps) => {
+  ({
+    href,
+    isActive,
+    icon: Icon,
+    title,
+    isHideText = false,
+  }: NavBarItemProps) => {
     return (
       <List.Item
         alignContent="center"
@@ -38,13 +45,15 @@ export const NavBarItem = memo(
                 <Box className={styles.iconWrap}>
                   <Icon size={24} />
                 </Box>
-                <Text
-                  fontSize={{ base: "xs", "2xl": "md" }}
-                  fontWeight="semibold"
-                  lineHeight="shorter"
-                >
-                  {title}
-                </Text>
+                {!isHideText && (
+                  <Text
+                    fontSize={{ base: "xs", "2xl": "md" }}
+                    fontWeight="semibold"
+                    lineHeight="shorter"
+                  >
+                    {title}
+                  </Text>
+                )}
               </Stack.VStack>
             </Link>
           </Box>

@@ -406,6 +406,50 @@ export const resetNotificationsTables = async (pool: Pool) => {
   `);
 };
 
+export const setupDayPlansSchema = async (pool: Pool) => {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS day_plans (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      created_by_id TEXT NOT NULL,
+      date DATE NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT day_plans_created_by_date_unique UNIQUE (created_by_id, date)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_day_plans_created_by_id
+      ON day_plans(created_by_id);
+
+    CREATE INDEX IF NOT EXISTS idx_day_plans_date
+      ON day_plans(date);
+
+    CREATE TABLE IF NOT EXISTS day_plan_items (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      day_plan_id UUID NOT NULL
+        REFERENCES day_plans(id) ON DELETE CASCADE,
+      activity_id UUID NOT NULL
+        REFERENCES activities(id) ON DELETE CASCADE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT day_plan_items_plan_activity_unique UNIQUE (day_plan_id, activity_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_day_plan_items_day_plan_id
+      ON day_plan_items(day_plan_id);
+
+    CREATE INDEX IF NOT EXISTS idx_day_plan_items_activity_id
+      ON day_plan_items(activity_id);
+  `);
+};
+
+export const resetDayPlansTables = async (pool: Pool) => {
+  await assertSafeTestDatabase(pool);
+
+  await pool.query(`
+    TRUNCATE TABLE day_plan_items, day_plans RESTART IDENTITY CASCADE
+  `);
+};
+
 export const setupActivitySettingsSchema = async (pool: Pool) => {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS activity_settings (
@@ -457,6 +501,7 @@ const createTestDatabase = async (
   await setupUsersSchema(pool);
   await setupNotificationsSchema(pool);
   await setupActivitySettingsSchema(pool);
+  await setupDayPlansSchema(pool);
 
   await assertSafeTestDatabase(pool);
 

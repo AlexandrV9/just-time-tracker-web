@@ -1,7 +1,9 @@
 import type { WithCreatedById } from "../shared/auth/with-created-by-id.js";
 import type {
   CreateDayPlanDataDTO,
+  DayActivitiesByDateDTO,
   DayPlanDTO,
+  GetDayPlansByRangeDTO,
   GetDayPlansDTO,
   UpdateDayPlanDataDTO,
 } from "@time-tracker/shared";
@@ -105,6 +107,36 @@ const getDayPlans = async (filters: WithCreatedById<GetDayPlansDTO>) => {
   };
 };
 
+const getDayPlansByRange = async (
+  filters: WithCreatedById<GetDayPlansByRangeDTO>,
+): Promise<DayActivitiesByDateDTO[]> => {
+  const { createdById, fromDate, toDate } = filters;
+
+  const query = `
+    SELECT
+      dp.date::text AS date,
+      COALESCE(
+        json_agg(
+          json_build_object('name', a.title)
+          ORDER BY dpi.created_at
+        ) FILTER (WHERE a.id IS NOT NULL),
+        '[]'
+      ) AS activities
+    FROM day_plans dp
+    LEFT JOIN day_plan_items dpi ON dpi.day_plan_id = dp.id
+    LEFT JOIN activities a ON a.id = dpi.activity_id
+    WHERE dp.created_by_id = $1
+      AND dp.date >= $2::date
+      AND dp.date <= $3::date
+    GROUP BY dp.date
+    HAVING COUNT(a.id) > 0
+    ORDER BY dp.date
+  `;
+
+  const { rows } = await pool.query(query, [createdById, fromDate, toDate]);
+  return rows as DayActivitiesByDateDTO[];
+};
+
 const updateDayPlan = async (
   data: UpdateDayPlanDataDTO,
 ): Promise<DayPlanDTO | null> => {
@@ -144,6 +176,7 @@ export const dayPlanQueries = {
   createDayPlan,
   getDayPlanById,
   getDayPlans,
+  getDayPlansByRange,
   updateDayPlan,
   deleteDayPlan,
 };

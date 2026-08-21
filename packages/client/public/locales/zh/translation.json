@@ -6,36 +6,34 @@
   },
   "pages": {
     "landing": {
-      "title": "记录每一分钟——告别电子表格",
-      "subtitle": "一款专注的时间追踪应用：中央计时器、活动、分析、日历与历史，让你清楚时间都去了哪里。",
-      "featuresTitle": "你将获得",
+      "title": "别再猜测一天时间去哪了",
+      "subtitle": "提前规划活动，一键追踪时间，看清时间真正花在哪里。一个应用搞定——没有复杂表格，也没有多余操作。",
+      "featuresTitle": "你能在应用里做什么",
       "features": [
         {
-          "title": "统一秒表",
-          "body": "在主计时器与活动卡片上开始、暂停与结束会话——数字始终保持一致。"
+          "title": "一键追踪时间",
+          "body": "几秒内开始、暂停并结束活动。计时器始终同步，显示当前准确时间。"
         },
         {
-          "title": "活动与今日看板",
-          "body": "创建可复用的活动并打标签，与今日计划并行运行，并掌控未完成的会话。"
+          "title": "规划你的一天",
+          "body": "提前把活动加入计划，真正开始工作时再启动。计划帮你记住重要事项，并看清当天负荷。"
         },
         {
-          "title": "日历视图",
-          "body": "在网格上查看会话，快速了解各日期的时间分布。"
+          "title": "创建自己的活动库",
+          "body": "创建、编辑和删除活动。几次点击即可复用，并追踪你在每项活动上投入了多少时间。"
         },
         {
-          "title": "历史记录",
-          "body": "按日分组的历史便于回顾过去的时段并重新打开详情，无需在表格里翻找。"
+          "title": "分析你的历史",
+          "body": "回到过去的日子，查看会话，并分析每项活动花了多少时间。"
         },
         {
-          "title": "按活动分析",
-          "body": "当日时间轴、会话拆分与时长，帮助你发现规律与异常。"
-        },
-        {
-          "title": "账户与个人资料",
-          "body": "安全登录，并在一处调整个人资料文案、主题、语言与通知。"
+          "title": "按自己的方式设置应用",
+          "body": "选择主题和界面语言，配置推送通知，并管理账户安全。"
         }
       ],
+      "signUpButton": "开始使用",
       "signInButton": "登录",
+      "aboutAppButton": "关于应用",
       "signInPageLink": "已有账号？去登录"
     },
     "home": {
@@ -53,9 +51,20 @@
       "comingSoon": "活动日历即将上线",
       "comingSoonDescription": "在此页面，您将可以查看所有活动及其在不同日期的分布，并规划未来的活动。",
       "mockEvents": {
+        "morningRoutine": "晨间例行",
+        "codeReview": "代码审查",
         "designSync": "设计同步会",
-        "featureDevelopment": "功能开发"
-      }
+        "standup": "站会",
+        "featureDevelopment": "功能开发",
+        "lunch": "午餐",
+        "testing": "测试",
+        "documentation": "文档编写",
+        "teamRetro": "团队回顾",
+        "exercise": "锻炼"
+      },
+      "emptyPlannedActivities": "这一天没有计划的活动",
+      "addActivitiesTitle": "添加活动到日期",
+      "addActivitiesDateLabel": "日期"
     },
     "activities": {
       "title": "活动",
@@ -270,6 +279,27 @@
           "title": "操作失败",
           "okButton": "知道了"
         }
+      },
+      "interfaceSettings": {
+        "title": "界面设置",
+        "links": {
+          "language": "语言",
+          "theme": "主题"
+        }
+      },
+      "language": {
+        "title": "语言",
+        "sectionTitle": "界面语言"
+      },
+      "theme": {
+        "title": "主题",
+        "sectionTitle": "应用主题",
+        "dark": "深色",
+        "light": "浅色",
+        "system": "跟随系统",
+        "darkDescription": "始终使用深色界面",
+        "lightDescription": "始终使用浅色界面",
+        "systemDescription": "跟随设备设置"
       }
     },
     "private": {
@@ -360,7 +390,8 @@
         "Home": "首页",
         "Settings": "设置",
         "Activities": "活动",
-        "History": "历史"
+        "History": "历史",
+        "Calendar": "日历"
       }
     },
     "activityAnalytics": {

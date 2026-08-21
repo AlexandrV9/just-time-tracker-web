@@ -6,11 +6,14 @@ import { MainContainerProvider } from "./MainContainerProvider";
 
 import styles from "./MainContainer.module.css";
 
-export type MainContainerProps = BoxProps;
+export type MainContainerProps = BoxProps & {
+  contentProps?: BoxProps;
+};
 
 export const MainContainer = ({
   children,
   className,
+  contentProps,
   ...props
 }: MainContainerProps) => {
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -34,7 +37,11 @@ export const MainContainer = ({
         className={clsx(styles.root, className)}
         {...props}
       >
-        <Box className={styles.content} data-page-main-content>
+        <Box
+          data-page-main-content
+          {...contentProps}
+          className={clsx(styles.content, contentProps?.className)}
+        >
           {children}
         </Box>
       </Box>

@@ -203,9 +203,7 @@ export function ResetPasswordForm({
             variant="ghost"
             size="sm"
             onClick={resetPassword.resend}
-            disabled={
-              !resetPassword.canResend || resetPassword.isResendPending
-            }
+            disabled={!resetPassword.canResend || resetPassword.isResendPending}
             loading={resetPassword.isResendPending}
           >
             {t(`${baseLocale}.resendButton`)}
@@ -280,12 +278,11 @@ export function ResetPasswordForm({
 
   return (
     <Box
-      padding="1.5rem"
-      bg="bg"
-      borderRadius="xl"
+      as="form"
+      display="flex"
+      flexDirection="column"
+      gap="1rem"
       width="full"
-      minW={0}
-      maxW={400}
     >
       <Stack.VStack align="stretch" gap={4}>
         <Text as="h1" textStyle="2xl" fontWeight="semibold">

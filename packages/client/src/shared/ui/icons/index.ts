@@ -48,5 +48,6 @@ export * from "./AndroidLogo";
 export * from "./WindowsLogo";
 export * from "./Download";
 export * from "./StopCircle";
+export * from "./Earth";
 
 export * from "./withIconProps";

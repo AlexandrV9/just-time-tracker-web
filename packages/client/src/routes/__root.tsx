@@ -1,17 +1,19 @@
-import { Box } from "@chakra-ui/react";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 
 import type { RouterContext } from "~/app/providers/RouterProvider/types"; // TODO: подумать над другим местом размещения
 import { LangSwitcher, ThemeSwitcher } from "~/features";
-import { BackButton, Flex, PageLayout } from "~/shared/ui";
-// import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+// import { AuthFloatingLinesBackground } from "~/shared/components";
 
-const RootLayout = () => (
-  <>
-    <Outlet />
-    {/* <TanStackRouterDevtools position="bottom-right" initialIsOpen={false} /> */}
-  </>
-);
+import { BackButton, Box, Flex, PageLayout } from "~/shared/ui";
+
+const RootLayout = () => {
+  return (
+    <>
+      {/* <AuthFloatingLinesBackground /> */}
+      <Outlet />
+    </>
+  );
+};
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootLayout,

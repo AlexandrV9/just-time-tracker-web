@@ -20,16 +20,30 @@ import { useTranslation } from "~/shared/hooks";
 import { CreateActivityDialog } from "./CreateActivityDialog";
 import { ActivityListView } from "~/entities";
 
-export const ActivityList = () => {
+export type ActivityListProps = {
+  interactive?: boolean;
+  onAddClick?: () => void;
+  fromDate?: string;
+  toDate?: string;
+  isLoading?: boolean;
+};
+
+export const ActivityList = ({
+  interactive = true,
+  fromDate,
+  toDate,
+}: ActivityListProps) => {
   const { t } = useTranslation();
 
   const createActivityDialog = useDialog();
 
   const { data, fetchNextPage, hasNextPage, isError, isPending } =
     useInfiniteQuery({
-      queryKey: [ACTIVITIES_QUERY_KEY],
+      queryKey: [ACTIVITIES_QUERY_KEY, fromDate, toDate],
       queryFn: (ctx) =>
         activityApiService.getActivities({
+          fromDate,
+          toDate,
           page: ctx.pageParam,
           limit: 20,
         }),
@@ -103,7 +117,7 @@ export const ActivityList = () => {
       <ActivityListView>
         {activities.map((activity) => (
           <ActivityListView.Item key={activity.id}>
-            <ActivityCard activity={activity} />
+            <ActivityCard activity={activity} interactive={interactive} />
           </ActivityListView.Item>
         ))}
         <div ref={fetchRef} style={{ height: 1, width: "100%" }} />

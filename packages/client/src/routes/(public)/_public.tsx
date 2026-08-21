@@ -6,6 +6,7 @@ import {
 import { useLayoutEffect, useMemo } from "react";
 import { LangSwitcher, ThemeSwitcher } from "~/features";
 import { useTranslation } from "~/shared/hooks";
+import authChromeStyles from "~/shared/styles/authPageChrome.module.css";
 import { Button, Flex, Link, PageLayout } from "~/shared/ui";
 import { Header, HeaderAppTitle, useHeaderStore } from "~/widgets";
 
@@ -76,15 +77,25 @@ export function PublicLayout() {
   return (
     <PageLayout>
       <PageLayout.TopContainer
+        className={
+          isLanding
+            ? `${authChromeStyles.authHeader} ${authChromeStyles.authHeaderSticky}`
+            : undefined
+        }
         display="flex"
         justifyContent="center"
         alignItems="center"
         borderBottom="1px solid"
         borderColor="border.emphasized"
+        bg={isLanding ? "transparent" : undefined}
       >
         <Header />
       </PageLayout.TopContainer>
-      <PageLayout.MainContainer as="main">
+      <PageLayout.MainContainer
+        as="main"
+        p={isLanding ? "0" : undefined}
+        contentProps={isLanding ? { maxW: "none", p: 0 } : undefined}
+      >
         <Outlet />
       </PageLayout.MainContainer>
     </PageLayout>

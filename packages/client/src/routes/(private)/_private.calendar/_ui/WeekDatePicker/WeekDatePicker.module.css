@@ -1,0 +1,28 @@
+.viewport {
+  --slide-spacing: 10px;
+
+  /*
+   * Embla измеряет слайды через offsetLeft. Собственный transform на .container
+   * делает контейнер их offsetParent, поэтому вьюпорт тоже должен быть
+   * позиционирован — иначе container.offsetLeft берётся от страницы
+   * и все снапы уезжают.
+   */
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 420px;
+  box-sizing: border-box;
+}
+
+.container {
+  display: flex;
+  gap: var(--slide-spacing);
+  touch-action: pan-y pinch-zoom;
+  will-change: transform;
+}
+
+.slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}

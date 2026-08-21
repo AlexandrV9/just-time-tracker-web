@@ -24,7 +24,7 @@ export type DayInterval = {
  * // }
  */
 export const getDayInterval = (
-  date?: Date | string | Dayjs | null
+  date?: Date | string | Dayjs | null,
 ): DayInterval => {
   const d = date ? dayjs(date) : dayjs();
 
@@ -59,6 +59,13 @@ export const formatDateWithMonth = (date: Date, locale: string): string => {
 
   return formatted.replace(
     /\p{L}+/u,
-    (word) => word.charAt(0).toUpperCase() + word.slice(1)
+    (word) => word.charAt(0).toUpperCase() + word.slice(1),
   );
+};
+
+export const parseDateFromSearch = (value?: string): Date => {
+  if (!value) return new Date();
+
+  const parsed = dayjs(value, "YYYY-MM-DD", true);
+  return parsed.isValid() ? parsed.toDate() : new Date();
 };

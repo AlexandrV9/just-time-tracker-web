@@ -26,25 +26,23 @@ export default defineConfig(({ mode }) => {
       }),
       react(),
       sitemapPlugin(getSiteUrl(env)),
-      VitePWA({
-        registerType: "autoUpdate",
-        injectRegister: "auto",
-        strategies: "injectManifest",
-        srcDir: "src",
-        filename: "sw.js",
-        injectManifest: {
-          globPatterns: [
-            "**/*.{js,css,html,ico,png,svg,woff2,json,webmanifest}",
-          ],
-          maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
-        },
-        devOptions: {
-          enabled: false,
-          type: "module",
-          navigateFallback: "index.html",
-          suppressWarnings: true,
-        },
-      }),
+      ...(mode === "development"
+        ? []
+        : [
+            VitePWA({
+              registerType: "autoUpdate",
+              injectRegister: "auto",
+              strategies: "injectManifest",
+              srcDir: "src",
+              filename: "sw.js",
+              injectManifest: {
+                globPatterns: [
+                  "**/*.{js,css,html,ico,png,svg,woff2,json,webmanifest}",
+                ],
+                maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+              },
+            }),
+          ]),
     ],
     resolve: {
       alias: {

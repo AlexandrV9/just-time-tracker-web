@@ -12,7 +12,10 @@
     "typecheck": "tsc --noEmit",
     "i18n:check": "pnpm exec tsx scripts/check-i18n.ts",
     "generate:chakra_config": "npx @chakra-ui/cli typegen ./src/shared/config/chakra.ts",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deps:circular": "madge --circular --extensions ts,tsx src",
+    "deps:graph": "madge --image graph.svg --extensions ts,tsx src",
+    "deps:dot": "madge --dot --extensions ts,tsx src > graph.dot"
   },
   "dependencies": {
     "@ark-ui/react": "^5.25.1",
@@ -31,6 +34,7 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.18",
     "embla-carousel-react": "^8.6.0",
+    "gsap": "^3.15.0",
     "i18next": "^25.5.2",
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-http-backend": "^3.0.2",
@@ -43,6 +47,7 @@
     "react-intersection-observer": "^10.0.3",
     "react-toastify": "^11.0.5",
     "recharts": "^3.6.0",
+    "three": "^0.185.1",
     "uuid": "^13.0.0",
     "zod": "^4.1.12",
     "zustand": "^5.0.8"
@@ -53,12 +58,14 @@
     "@types/node": "^20.19.16",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
+    "@types/three": "^0.185.1",
     "@vitejs/plugin-react": "^5.0.0",
     "embla-carousel": "^8.6.0",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
+    "madge": "^8.0.0",
     "tsx": "^4.7.1",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",

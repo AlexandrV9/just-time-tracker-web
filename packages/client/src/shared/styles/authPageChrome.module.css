@@ -1,0 +1,36 @@
+.authHeader :global(.chakra-button) {
+  border-color: color-mix(in srgb, #c8baff 52%, transparent) !important;
+}
+
+.authHeader :global(button[data-part="trigger"]) {
+  border: 1px solid color-mix(in srgb, #c8baff 52%, transparent);
+}
+
+html[data-theme="light"] .authHeader :global(.chakra-button) {
+  border-color: color-mix(in srgb, #7c6fe0 42%, transparent) !important;
+}
+
+html[data-theme="light"] .authHeader :global(button[data-part="trigger"]) {
+  border-color: color-mix(in srgb, #7c6fe0 42%, transparent);
+}
+
+.authHeader :global(.shineText) {
+  color: var(--chakra-colors-fg);
+  background: none;
+  background-clip: unset;
+  -webkit-background-clip: unset;
+  animation: none;
+}
+
+.authHeaderSticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--chakra-colors-bg) 72%, transparent) !important;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+html[data-theme="light"] .authHeaderSticky {
+  background: color-mix(in srgb, var(--chakra-colors-bg) 85%, transparent) !important;
+}

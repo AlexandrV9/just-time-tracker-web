@@ -4,6 +4,8 @@ import type {
   DayPlanDTO,
   DayPlanItemDTO,
   GetDayPlanItemsDTO,
+  GetDayPlansByRangeDTO,
+  GetDayPlansByRangeResponseDTO,
   GetDayPlansDTO,
   GetDayPlanItemsResponseDTO,
   GetDayPlansResponseDTO,
@@ -18,6 +20,15 @@ export class DayPlanService {
     return baseApi.get<GetDayPlansResponseDTO>(`/api/day-plans`, {
       params: data,
     });
+  }
+
+  getDayPlansByRange(params: GetDayPlansByRangeDTO) {
+    return baseApi.get<GetDayPlansByRangeResponseDTO>(
+      `/api/day-plans/by-range`,
+      {
+        params,
+      },
+    );
   }
 
   createDayPlan(data: CreateDayPlanDataDTO) {
@@ -41,7 +52,9 @@ export class DayPlanService {
   addDayPlanItems(
     data: AddDayPlanItemsDataDTO,
   ): Promise<RequestResponse<DayPlanItemDTO[]>> {
-    return baseApi.post<DayPlanItemDTO[]>(`/api/day-plan-items/batch`, { data });
+    return baseApi.post<DayPlanItemDTO[]>(`/api/day-plan-items/batch`, {
+      data,
+    });
   }
 }
 
