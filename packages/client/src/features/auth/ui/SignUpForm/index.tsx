@@ -2,6 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { TFunction } from "i18next";
+import type { MouseEvent, ReactNode } from "react";
+import { Controller } from "react-hook-form";
 import z from "zod";
 import { authManager } from "~/features/auth";
 import { useTranslation } from "~/shared/hooks";
@@ -9,6 +11,7 @@ import shineStyles from "~/shared/styles/shineRing.module.css";
 import {
   Box,
   Button,
+  Checkbox,
   Field,
   Input,
   Link,
@@ -33,7 +36,8 @@ export const SignUpForm = () => {
   const navigate = useNavigate();
 
   const signUpMutatuin = useMutation({
-    mutationFn: (data: SignUpFormSchema) => authManager.signUp(data),
+    mutationFn: ({ firstName, login, password }: SignUpFormSchema) =>
+      authManager.signUp({ firstName, login, password }),
     onSuccess: (response) => {
       if (!response.success) {
         toast.error(t(`${baseLocale}.errorToast`), {
@@ -65,6 +69,7 @@ export const SignUpForm = () => {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<SignUpFormSchema>({
     resolver: zodResolver(signUpFormSchema),
@@ -74,6 +79,8 @@ export const SignUpForm = () => {
       login: "",
       password: "",
       repeatPassword: "",
+      acceptTerms: false,
+      acceptPrivacy: false,
     },
   });
 
@@ -164,6 +171,50 @@ export const SignUpForm = () => {
         </Field.ErrorText>
       </Field.Root>
 
+      <Stack.VStack align="stretch" gap={3} mt="0.25rem">
+        <Controller
+          name="acceptTerms"
+          control={control}
+          render={({ field: { value, onChange, onBlur, ref, name } }) => (
+            <ConsentCheckbox
+              name={name}
+              checked={value}
+              invalid={!!errors.acceptTerms}
+              disabled={signUpMutatuin.isPending}
+              inputRef={ref}
+              onBlur={onBlur}
+              onCheckedChange={onChange}
+            >
+              {t(`${baseLocale}.acceptTerms.prefix`)}{" "}
+              <ConsentLink to="/terms-of-service">
+                {t(`${baseLocale}.acceptTerms.link`)}
+              </ConsentLink>
+            </ConsentCheckbox>
+          )}
+        />
+
+        <Controller
+          name="acceptPrivacy"
+          control={control}
+          render={({ field: { value, onChange, onBlur, ref, name } }) => (
+            <ConsentCheckbox
+              name={name}
+              checked={value}
+              invalid={!!errors.acceptPrivacy}
+              disabled={signUpMutatuin.isPending}
+              inputRef={ref}
+              onBlur={onBlur}
+              onCheckedChange={onChange}
+            >
+              {t(`${baseLocale}.acceptPrivacy.prefix`)}{" "}
+              <ConsentLink to="/privacy-policy">
+                {t(`${baseLocale}.acceptPrivacy.link`)}
+              </ConsentLink>
+            </ConsentCheckbox>
+          )}
+        />
+      </Stack.VStack>
+
       <Button
         mt="1rem"
         type="submit"
@@ -186,6 +237,83 @@ export const SignUpForm = () => {
     </Box>
   );
 };
+
+type ConsentCheckboxProps = {
+  name: string;
+  checked: boolean;
+  invalid: boolean;
+  disabled?: boolean;
+  inputRef: (instance: HTMLInputElement | null) => void;
+  onBlur: () => void;
+  onCheckedChange: (checked: boolean) => void;
+  children: ReactNode;
+};
+
+function ConsentCheckbox({
+  name,
+  checked,
+  invalid,
+  disabled,
+  inputRef,
+  onBlur,
+  onCheckedChange,
+  children,
+}: ConsentCheckboxProps) {
+  return (
+    <Checkbox.Root
+      name={name}
+      size="sm"
+      alignItems="flex-start"
+      checked={checked}
+      invalid={invalid}
+      disabled={disabled}
+      colorPalette={invalid ? "red" : "gray"}
+      onBlur={onBlur}
+      onCheckedChange={(details) => onCheckedChange(Boolean(details.checked))}
+    >
+      <Checkbox.HiddenInput ref={inputRef} />
+      <Checkbox.Control mt="2px">
+        <Checkbox.Indicator />
+      </Checkbox.Control>
+      <Checkbox.Label
+        fontWeight="normal"
+        lineHeight="1.45"
+        color={invalid ? "fg.error" : "fg.muted"}
+        css={{ textWrap: "pretty" }}
+      >
+        {children}
+      </Checkbox.Label>
+    </Checkbox.Root>
+  );
+}
+
+function ConsentLink({
+  to,
+  children,
+}: {
+  to: "/terms-of-service" | "/privacy-policy";
+  children: ReactNode;
+}) {
+  return (
+    <Text
+      as="span"
+      color="fg"
+      fontWeight="600"
+      textDecoration="underline"
+      textUnderlineOffset="3px"
+      _hover={{ opacity: 0.8 }}
+    >
+      <Link
+        to={to}
+        onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+          event.stopPropagation();
+        }}
+      >
+        {children}
+      </Link>
+    </Text>
+  );
+}
 
 function getTranslatedError(
   t: TFunction<"translation", undefined>,

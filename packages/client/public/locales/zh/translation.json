@@ -275,14 +275,6 @@
     "private": {
       "pending": "加载中…"
     },
-    "signUp": {
-      "legalNotice": {
-        "prefix": "继续即表示您接受",
-        "termsLink": "用户协议",
-        "middle": "和",
-        "privacyLink": "隐私政策"
-      }
-    },
     "termsOfService": {
       "backButton": "返回",
       "title": "服务条款",
@@ -535,6 +527,14 @@
             "mismatch": "两次密码不一致",
             "required": "此项为必填"
           }
+        },
+        "acceptTerms": {
+          "prefix": "我同意",
+          "link": "用户协议"
+        },
+        "acceptPrivacy": {
+          "prefix": "我同意按照",
+          "link": "隐私政策处理个人数据"
         },
         "linkText": "去登录",
         "submitButton": "进入",
