@@ -10,13 +10,13 @@ import { useDayPlan } from "./useDayPlan";
  */
 export const useDayPlanItems = (date: Date) => {
   const dayPlanQuery = useDayPlan(date);
-  const dayPlanId = dayPlanQuery.dayPlanId;
+  const dayPlanId = dayPlanQuery.data?.id;
 
   const dayPlanItemsQuery = useQuery({
     queryKey: [DAY_PLAN_ITEMS_QUERY_KEY, dayPlanId],
     queryFn: () =>
       dayPlanApiService.getDayPlanItems({
-        dayPlanId,
+        dayPlanId: dayPlanId!,
         page: 0,
         limit: 100,
       }),
