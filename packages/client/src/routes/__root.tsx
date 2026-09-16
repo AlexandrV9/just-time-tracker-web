@@ -2,17 +2,11 @@ import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 
 import type { RouterContext } from "~/app/providers/RouterProvider/types"; // TODO: подумать над другим местом размещения
 import { LangSwitcher, ThemeSwitcher } from "~/features";
-// import { AuthFloatingLinesBackground } from "~/shared/components";
 
 import { BackButton, Box, Flex, PageLayout } from "~/shared/ui";
 
 const RootLayout = () => {
-  return (
-    <>
-      {/* <AuthFloatingLinesBackground /> */}
-      <Outlet />
-    </>
-  );
+  return <Outlet />;
 };
 
 export const Route = createRootRouteWithContext<RouterContext>()({

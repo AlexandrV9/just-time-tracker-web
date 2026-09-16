@@ -1,9 +1,8 @@
 import { SignOutButton } from "~/features/auth";
+import { AuthUserInfo, HelpInfoSettings } from "~/widgets";
 import { Stack } from "~/shared/ui";
-import { AuthUserInfo } from "~/widgets";
-import { InterfaceSettings } from "./InterfaceSettings";
 import { AccountSettings } from "./AccountSettings";
-import { HelpInfoSettings } from "./HelpInfoSettings";
+import { InterfaceSettings } from "./InterfaceSettings";
 
 export function SettingsPage() {
   return (
@@ -21,7 +20,7 @@ export function SettingsPage() {
       <AccountSettings />
       <InterfaceSettings />
       <HelpInfoSettings />
-      <Stack.HStack justify="center">
+      <Stack.HStack justifyContent="center">
         <SignOutButton />
       </Stack.HStack>
     </Stack.VStack>

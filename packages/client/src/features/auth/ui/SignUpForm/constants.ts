@@ -14,6 +14,12 @@ export const signUpFormSchema = z
     login: loginSchema,
     password: passwordSchema,
     repeatPassword: z.string().min(1, "repeatPassword.error.required"),
+    acceptTerms: z.boolean().refine((value) => value === true, {
+      message: "acceptTerms.error.required",
+    }),
+    acceptPrivacy: z.boolean().refine((value) => value === true, {
+      message: "acceptPrivacy.error.required",
+    }),
   })
   .refine((data) => data.password === data.repeatPassword, {
     message: "passwords.mismatch",

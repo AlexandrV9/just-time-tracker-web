@@ -305,14 +305,6 @@
     "private": {
       "pending": "Loading…"
     },
-    "signUp": {
-      "legalNotice": {
-        "prefix": "By continuing, you accept the",
-        "termsLink": "Terms of Service",
-        "middle": "and the",
-        "privacyLink": "Privacy Policy"
-      }
-    },
     "termsOfService": {
       "backButton": "Back",
       "title": "Terms of Service",
@@ -566,6 +558,14 @@
             "mismatch": "Passwords don't match",
             "required": "Field is required"
           }
+        },
+        "acceptTerms": {
+          "prefix": "I agree to the",
+          "link": "Terms of Service"
+        },
+        "acceptPrivacy": {
+          "prefix": "I consent to the processing of personal data in accordance with the",
+          "link": "Privacy Policy"
         },
         "linkText": "Sign in",
         "submitButton": "Enter",

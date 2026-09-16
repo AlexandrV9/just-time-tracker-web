@@ -1,3 +1,4 @@
+export * from "./HelpInfoSettings";
 export * from "./AuthUserInfo";
 export * from "./Header";
 export * from "./NavBar";

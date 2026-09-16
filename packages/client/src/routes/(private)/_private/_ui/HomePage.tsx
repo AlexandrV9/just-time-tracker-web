@@ -16,9 +16,11 @@ export function HomePage() {
       gap="0.5rem"
       maxWidth="100vw"
     >
-      <GlowFrame active={status === "active"}>
-        <Stopwatch />
-      </GlowFrame>
+      <Box px="0.5rem">
+        <GlowFrame active={status === "active"}>
+          <Stopwatch />
+        </GlowFrame>
+      </Box>
       <TodayActivityList />
     </Box>
   );

@@ -4,16 +4,16 @@ import clsx from "clsx";
 import styles from "./GlowFrame.module.css";
 
 type GlowFrameProps = {
-  width?: number;
-  height?: number;
+  maxWidth?: number;
+  minHeight?: number;
   active?: boolean;
   className?: string;
   children?: ReactNode;
 };
 
 export function GlowFrame({
-  width = 400,
-  height = 260,
+  maxWidth = 360,
+  minHeight = 220,
   active = false,
   className,
   children,
@@ -23,14 +23,15 @@ export function GlowFrame({
       className={clsx(styles.root, active && styles.active, className)}
       style={
         {
-          "--glow-frame-width": `${width}px`,
-          "--glow-frame-height": `${height}px`,
+          "--glow-frame-max-width": `${maxWidth}px`,
+          "--glow-frame-min-height": `${minHeight}px`,
         } as React.CSSProperties
       }
     >
       <svg
         className={styles.svg}
         viewBox="0 0 280 180"
+        preserveAspectRatio="none"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
