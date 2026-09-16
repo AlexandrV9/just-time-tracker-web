@@ -1,6 +1,6 @@
 import { SignUpForm } from "~/features/auth";
 import { useSeo } from "~/shared/seo";
-import { Flex } from "~/shared/ui";
+import { Box, Flex, Stack } from "~/shared/ui";
 
 export function SignUpPage() {
   useSeo({
@@ -10,7 +10,7 @@ export function SignUpPage() {
   });
 
   return (
-    <Flex position="relative" w="full" minH="100%">
+    <Box position="relative" w="full" minH="100%">
       <Flex
         direction="column"
         align="center"
@@ -21,8 +21,18 @@ export function SignUpPage() {
         position="relative"
         zIndex={1}
       >
-        <SignUpForm />
+        <Box
+          padding="1.5rem"
+          borderRadius="xl"
+          width="full"
+          minW={0}
+          maxW={400}
+        >
+          <Stack.VStack gap="1rem">
+            <SignUpForm />
+          </Stack.VStack>
+        </Box>
       </Flex>
-    </Flex>
+    </Box>
   );
 }

@@ -6,6 +6,38 @@
 
 ---
 
+## Деплой 1.1.16 (fix signup layout)
+
+Краткий чеклист для обновления **существующего** prod с 1.1.15.
+
+### 1. GitHub — до деплоя
+
+1. Смержить ветку в `main`.
+2. Дождаться зелёного CI (сборка `client` + `server` в GHCR).
+
+Миграция БД **не нужна**. Новых переменных в `.env` нет.
+
+### 2. Подтянуть образы и перезапустить
+
+```bash
+cd /opt/time-tracker
+
+docker compose -f docker-compose.prod.yml --env-file .env pull
+docker compose -f docker-compose.prod.yml --env-file .env up -d
+```
+
+### 3. Smoke-тест после 1.1.16
+
+| # | Действие | Ожидание |
+|---|----------|----------|
+| 1 | `curl https://<домен>/api/health` | `status: OK` |
+| 2 | `/signup` | Форма по центру, max-width как на `/signin` (~400px) |
+| 3 | `/signin` | Без регрессий |
+
+Runtime-кэши SW версионируются через `VITE_APP_VERSION` (`1.1.16`).
+
+---
+
 ## Деплой 1.1.15 (календарь + GlowFrame)
 
 Краткий чеклист для обновления **существующего** prod с 1.1.14.
