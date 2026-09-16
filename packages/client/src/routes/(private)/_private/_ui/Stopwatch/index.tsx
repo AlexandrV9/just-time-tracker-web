@@ -37,9 +37,10 @@ export function Stopwatch() {
   return (
     <Stack.VStack
       w="full"
-      backdropFilter="blur(20px)"
-      p="1rem"
-      gap="0.8rem"
+      pt="0.75rem"
+      px="0.75rem"
+      pb="0.4rem"
+      gap="0.65rem"
       overflow="hidden"
       maxWidth="500px"
       className={styles.container}
@@ -47,7 +48,7 @@ export function Stopwatch() {
       <Box
         display="flex"
         flexDirection="column"
-        gap="1rem"
+        gap="0.75rem"
         alignItems="center"
         w="full"
         justifyContent="center"

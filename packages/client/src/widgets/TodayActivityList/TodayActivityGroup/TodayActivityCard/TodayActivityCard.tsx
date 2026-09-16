@@ -15,7 +15,6 @@ import { Skeleton } from "./Skeleton";
 import type { CalendarDay } from "~/shared/libs";
 import { useTranslation } from "~/shared/hooks";
 import { useDisplayedSessionSeconds } from "~/features";
-import shineStyles from "~/shared/styles/shineRing.module.css";
 
 const highlightFade = keyframes`
   0%   { border-color: var(--chakra-colors-yellow-400) }
@@ -74,8 +73,6 @@ export const TodayActivityCard = ({
     [activity.activeDurationMs],
   );
 
-  const showRunningOutline = sessionStatus === "active";
-
   const showSelectionOutline = isSelected && sessionStatus !== "active";
 
   const sessionDisplayedSeconds = useDisplayedSessionSeconds({
@@ -88,7 +85,7 @@ export const TodayActivityCard = ({
     [sessionDisplayedSeconds],
   );
 
-  const card = (
+  return (
     <ActivityCardView
       onClick={onClick}
       cursor="pointer"
@@ -149,22 +146,6 @@ export const TodayActivityCard = ({
         </Box>
       </ActivityCardView.Footer>
     </ActivityCardView>
-  );
-
-  return (
-    <Box
-      className={
-        showRunningOutline
-          ? `${shineStyles.shineRingCardShell} ${shineStyles.shineRingCardActive}`
-          : shineStyles.shineRingCardShell
-      }
-      flex={1}
-      w="100%"
-      display="flex"
-      flexDirection="column"
-    >
-      {card}
-    </Box>
   );
 };
 

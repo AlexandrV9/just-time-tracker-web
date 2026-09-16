@@ -1,0 +1,89 @@
+.root {
+  --glow-frame-width: 400px;
+  --glow-frame-height: 260px;
+
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: var(--glow-frame-width);
+  min-height: 220px;
+}
+
+.svg {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: visible;
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.75rem 0.2rem;
+  width: 100%;
+}
+
+.glow,
+.highlight {
+  fill: none;
+  opacity: 0;
+}
+
+.ring {
+  fill: none;
+  stroke: #6b6b78;
+  stroke-width: 1.8;
+  opacity: 0.85;
+}
+
+.root.active {
+  .glow {
+    stroke: url("#glow-frame-gradient");
+    stroke-width: 6;
+    opacity: 0.15;
+    filter: drop-shadow(0 0 8px rgb(104 75 255 / 35%))
+      drop-shadow(0 0 16px rgb(70 100 255 / 18%));
+  }
+
+  .ring {
+    stroke: url("#glow-frame-gradient");
+    opacity: 0.9;
+    filter: drop-shadow(0 0 4px rgb(102 84 255 / 55%));
+  }
+
+  .highlight {
+    stroke: url("#glow-frame-highlight");
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-dasharray: 25 75;
+    opacity: 0.9;
+    filter: drop-shadow(0 0 5px rgb(170 90 255 / 60%));
+    animation: glow-frame-light 12s linear infinite;
+  }
+}
+
+@keyframes glow-frame-light {
+  from {
+    stroke-dashoffset: 0;
+  }
+
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .active .highlight {
+    animation: none;
+  }
+}

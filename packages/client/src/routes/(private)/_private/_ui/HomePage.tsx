@@ -1,8 +1,12 @@
-import { Box, Flex } from "~/shared/ui";
+import { Box } from "~/shared/ui";
+import { useCurrentActivity } from "~/features";
 import { TodayActivityList } from "~/widgets";
 import { Stopwatch } from "./Stopwatch";
+import { GlowFrame } from "./GlowFrame";
 
 export function HomePage() {
+  const { status } = useCurrentActivity();
+
   return (
     <Box
       display="flex"
@@ -12,9 +16,9 @@ export function HomePage() {
       gap="0.5rem"
       maxWidth="100vw"
     >
-      <Flex justifyContent="center">
+      <GlowFrame active={status === "active"}>
         <Stopwatch />
-      </Flex>
+      </GlowFrame>
       <TodayActivityList />
     </Box>
   );
