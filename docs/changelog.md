@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.1.15
+
+### Календарь
+
+- Страница **`/calendar`**: недельная лента дат (Embla), месяц/год picker, сетка дня
+- **Day plan**: API диапазона планов (`byRange`), виджеты planned activities на день
+- Счётчики активностей по дням в week strip
+
+### Главная / таймер
+
+- **`GlowFrame`**: рамка вокруг стопвотча — серая в idle, градиент + бегущий highlight при `active`
+- Адаптивная ширина рамки (`max-width`, без `min-width: 400px`) — корректный центр на iPhone SE
+- С карточек сегодняшних активностей убран переливающийся `shineRing`
+
+### UI / layout
+
+- `body`: явный `margin/padding: 0`; убран лишний `0.375rem` padding у `BottomContainer`
+- Удалены неиспользуемые `FloatingLines` / `AuthFloatingLinesBackground`
+
+### DevOps
+
+- Версия приложения: **1.1.15**
+- Миграций БД нет (обновление с 1.1.14 — только `pull` + `up -d`)
+
+---
+
 ## 1.1.14
 
 ### Auth / Compliance
