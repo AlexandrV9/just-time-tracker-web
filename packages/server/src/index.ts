@@ -12,7 +12,7 @@ import {
 } from "./activity/index.js";
 import { dayPlanItemsRouter, dayPlansRouter } from "./dayPlan/index.js";
 import { emailVerificationRouter } from "./emailVerification/index.js";
-import { usersRouter } from "./user/index.js";
+// import { usersRouter } from "./user/index.js";
 import {
   CompositeNotificationSender,
   ConsoleNotificationSender,
@@ -23,6 +23,7 @@ import {
   setNotificationJobsChangeListener,
   SseNotificationSender,
 } from "./modules/notifications/index.js";
+import { usersPublicRouter, usersRouter } from "modules/users/index.js";
 
 const app = new Hono();
 
@@ -36,6 +37,7 @@ app.use(
 
 app.route("/auth", authRouter);
 app.route("/health", healthRouter);
+app.route("/users", usersPublicRouter);
 
 const protectedRouter = new Hono<{ Variables: AuthVariables }>();
 protectedRouter.use("*", authMiddleware);

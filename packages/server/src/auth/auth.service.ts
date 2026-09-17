@@ -63,6 +63,7 @@ const signUp = async (data: {
 
   try {
     const passwordHash = await tokenService.generatePasswordHash(password);
+
     const newUser = await authRepository.createUser({
       firstName,
       login,
