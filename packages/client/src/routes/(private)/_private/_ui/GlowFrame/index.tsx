@@ -39,6 +39,8 @@ export function GlowFrame({
     const el = rootRef.current;
     if (!el) return;
 
+    el.style.setProperty("--glow-frame-radius", `${CORNER_RADIUS_PX}px`);
+
     const syncRadii = () => {
       const { width, height } = el.getBoundingClientRect();
       if (width <= 0 || height <= 0) return;
