@@ -10,7 +10,9 @@
     "jsxImportSource": "hono/jsx",
     "outDir": "./dist",
     "erasableSyntaxOnly": true,
-    "baseUrl": ".",
+    "paths": {
+      "*": ["./src/*"]
+    },
   },
   "exclude": [
     "node_modules",

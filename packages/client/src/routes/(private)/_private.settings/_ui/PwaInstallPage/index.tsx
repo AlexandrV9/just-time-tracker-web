@@ -18,7 +18,10 @@ const StepImages = ({
   images,
   imageAlt,
   getCaption,
-}: Pick<InstructionStepProps, "image" | "images" | "imageAlt" | "getCaption">) => {
+}: Pick<
+  InstructionStepProps,
+  "image" | "images" | "imageAlt" | "getCaption"
+>) => {
   if (images?.length) {
     return (
       <Flex
@@ -27,7 +30,12 @@ const StepImages = ({
         alignItems="stretch"
       >
         {images.map((item) => (
-          <Stack.VStack key={item.image} alignItems="stretch" gap="0.35rem" flex={1}>
+          <Stack.VStack
+            key={item.image}
+            alignItems="stretch"
+            gap="0.35rem"
+            flex={1}
+          >
             <Text textStyle="xs" fontWeight="medium" color="fg.muted">
               {getCaption(item.captionKey)}
             </Text>

@@ -99,11 +99,7 @@ export const ThemePage = () => {
                     onClick={() => handleChange(option.value)}
                   >
                     <Box flexShrink={0}>{option.icon}</Box>
-                    <Stack.VStack
-                      gap="0"
-                      alignItems="flex-start"
-                      flexGrow={1}
-                    >
+                    <Stack.VStack gap="0" alignItems="flex-start" flexGrow={1}>
                       <Text textStyle="md" fontWeight="medium">
                         {t(option.labelKey)}
                       </Text>

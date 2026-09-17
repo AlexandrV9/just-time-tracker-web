@@ -1,12 +1,5 @@
 import { useTranslation } from "~/shared/hooks";
-import {
-  Button,
-  CloseButton,
-  Dialog,
-  Portal,
-  Stack,
-  Text,
-} from "~/shared/ui";
+import { Button, CloseButton, Dialog, Portal, Stack, Text } from "~/shared/ui";
 
 const baseLocale = "pages.settings.security.errorDialog";
 
@@ -35,7 +28,9 @@ export function ProviderErrorDialog({
         <Dialog.Positioner>
           <Dialog.Content maxW="sm" w="full" mx={4} borderRadius="xl">
             <Dialog.Header>
-              <Dialog.Title fontSize="lg">{t(`${baseLocale}.title`)}</Dialog.Title>
+              <Dialog.Title fontSize="lg">
+                {t(`${baseLocale}.title`)}
+              </Dialog.Title>
             </Dialog.Header>
             <Dialog.Body>
               <Stack.VStack align="stretch">
