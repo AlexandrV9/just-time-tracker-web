@@ -1,11 +1,9 @@
+import clsx from "clsx";
 import {
-  Box,
   Button,
-  Flex,
   formatSecondsAsTimeString,
   PauseIcon,
   PlayIcon,
-  Stack,
   StopCircleIcon,
   Text,
 } from "~/shared/ui";
@@ -14,7 +12,11 @@ import { useTranslation } from "~/shared/hooks";
 
 import styles from "./Stopwatch.module.css";
 
-export function Stopwatch() {
+type StopwatchProps = {
+  collapsed?: boolean;
+};
+
+export function Stopwatch({ collapsed = false }: StopwatchProps) {
   const { t } = useTranslation();
 
   const {
@@ -35,25 +37,8 @@ export function Stopwatch() {
   const canStop = Boolean(currentSession);
 
   return (
-    <Stack.VStack
-      w="full"
-      pt="0.75rem"
-      px="0.75rem"
-      pb="0.4rem"
-      gap="0.65rem"
-      overflow="hidden"
-      maxWidth="500px"
-      className={styles.container}
-    >
-      <Box
-        display="flex"
-        flexDirection="column"
-        gap="0.75rem"
-        alignItems="center"
-        w="full"
-        justifyContent="center"
-        position="relative"
-      >
+    <div className={clsx(styles.container, collapsed && styles.collapsed)}>
+      <div className={styles.title} data-flip="title">
         <Text
           textStyle="sm"
           color={displayedTitle ? "fg.muted" : "fg.subtle"}
@@ -61,40 +46,41 @@ export function Stopwatch() {
         >
           {displayedTitle ?? t("pages.home.selectActivity")}
         </Text>
-        <Text
-          style={{
-            fontSize: 40,
-            fontFamily: "Roboto Mono, monospace",
-          }}
-        >
-          {displayedTime}
-        </Text>
-        <Flex
-          gap="1rem"
-          minW="220px"
+      </div>
+      <div className={styles.time} data-flip="time">
+        {displayedTime}
+      </div>
+      <div className={styles.stop} data-flip="stop">
+        <Button
+          variant="subtle"
+          borderRadius="0.5rem"
           w="full"
-          justifyContent="center"
-          alignItems="center"
+          h="full"
+          minW="0"
+          px="0"
+          disabled={!canStop}
+          onClick={() => finish()}
         >
-          <Button
-            variant="subtle"
-            borderRadius="0.5rem"
-            w="100px"
-            disabled={!canStop}
-            onClick={() => finish()}
-          >
-            <StopCircleIcon />
-          </Button>
-          <Button
-            borderRadius="0.5rem"
-            w="100px"
-            disabled={!hasActivity}
-            onClick={() => (isActive ? pause() : start())}
-          >
-            {isActive ? <PauseIcon /> : <PlayIcon />}
-          </Button>
-        </Flex>
-      </Box>
-    </Stack.VStack>
+          <StopCircleIcon className={styles.icon} />
+        </Button>
+      </div>
+      <div className={styles.play} data-flip="play">
+        <Button
+          borderRadius="0.5rem"
+          w="full"
+          h="full"
+          minW="0"
+          px="0"
+          disabled={!hasActivity}
+          onClick={() => (isActive ? pause() : start())}
+        >
+          {isActive ? (
+            <PauseIcon className={styles.icon} />
+          ) : (
+            <PlayIcon className={styles.icon} />
+          )}
+        </Button>
+      </div>
+    </div>
   );
 }

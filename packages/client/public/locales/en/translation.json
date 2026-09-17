@@ -38,6 +38,8 @@
     },
     "home": {
       "selectActivity": "Select activity",
+      "collapseStopwatch": "Collapse timer",
+      "expandStopwatch": "Expand timer",
       "circularTimerStart": "Start",
       "circularTimerPause": "Pause",
       "circularTimerFinish": "Finish",

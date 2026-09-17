@@ -1,18 +1,20 @@
 .root {
   --glow-frame-max-width: 400px;
   --glow-frame-min-height: 220px;
+  --glow-frame-rx: 16;
+  --glow-frame-ry: 16;
 
   position: relative;
 
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
 
   box-sizing: border-box;
   width: 100%;
-  max-width: var(--glow-frame-max-width);
-  min-height: var(--glow-frame-min-height);
   margin-inline: auto;
+  overflow: hidden;
+  border-radius: 16px;
 }
 
 .svg {
@@ -27,15 +29,8 @@
 }
 
 .content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  box-sizing: border-box;
   width: 100%;
-  padding: 0.35rem 0.75rem 0.2rem;
+  flex-shrink: 0;
 }
 
 .glow,
@@ -48,6 +43,9 @@
 .ring,
 .highlight {
   vector-effect: non-scaling-stroke;
+  rx: var(--glow-frame-rx);
+  ry: var(--glow-frame-ry);
+  transition: opacity 0.48s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .ring {
@@ -55,6 +53,8 @@
   stroke: #6b6b78;
   stroke-width: 1.8;
   opacity: 0.85;
+  filter: drop-shadow(0 0 3px rgb(0 0 0 / 28%))
+    drop-shadow(0 1px 4px rgb(0 0 0 / 18%));
 }
 
 .root.active {
@@ -69,7 +69,8 @@
   .ring {
     stroke: url("#glow-frame-gradient");
     opacity: 0.9;
-    filter: drop-shadow(0 0 4px rgb(102 84 255 / 55%));
+    filter: drop-shadow(0 0 4px rgb(102 84 255 / 55%))
+      drop-shadow(0 0 10px rgb(104 75 255 / 28%));
   }
 
   .highlight {
@@ -80,6 +81,14 @@
     opacity: 0.9;
     filter: drop-shadow(0 0 5px rgb(170 90 255 / 60%));
     animation: glow-frame-light 12s linear infinite;
+  }
+}
+
+.root.collapsed {
+  .glow,
+  .highlight {
+    opacity: 0;
+    animation: none;
   }
 }
 
@@ -94,6 +103,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .glow,
+  .highlight,
+  .ring {
+    transition: none;
+  }
+
   .active .highlight {
     animation: none;
   }

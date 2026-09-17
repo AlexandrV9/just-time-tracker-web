@@ -1,36 +1,80 @@
-import type { ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import clsx from "clsx";
 
 import styles from "./GlowFrame.module.css";
+import { Box } from "~/shared/ui";
+
+const VIEWBOX_WIDTH = 280;
+const VIEWBOX_HEIGHT = 180;
+const CORNER_RADIUS_PX = 16;
 
 type GlowFrameProps = {
   maxWidth?: number;
   minHeight?: number;
   active?: boolean;
+  collapsed?: boolean;
   className?: string;
   children?: ReactNode;
 };
 
 export function GlowFrame({
   maxWidth = 360,
-  minHeight = 220,
+  minHeight = 100,
   active = false,
+  collapsed = false,
   className,
   children,
 }: GlowFrameProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+
+    el.style.setProperty("--glow-frame-max-width", `${maxWidth}px`);
+    el.style.setProperty("--glow-frame-min-height", `${minHeight}px`);
+  }, [maxWidth, minHeight]);
+
+  useLayoutEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+
+    const syncRadii = () => {
+      const { width, height } = el.getBoundingClientRect();
+      if (width <= 0 || height <= 0) return;
+
+      el.style.setProperty(
+        "--glow-frame-rx",
+        String((CORNER_RADIUS_PX * VIEWBOX_WIDTH) / width),
+      );
+      el.style.setProperty(
+        "--glow-frame-ry",
+        String((CORNER_RADIUS_PX * VIEWBOX_HEIGHT) / height),
+      );
+    };
+
+    syncRadii();
+    const observer = new ResizeObserver(syncRadii);
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div
-      className={clsx(styles.root, active && styles.active, className)}
-      style={
-        {
-          "--glow-frame-max-width": `${maxWidth}px`,
-          "--glow-frame-min-height": `${minHeight}px`,
-        } as React.CSSProperties
-      }
+    <Box
+      ref={rootRef}
+      data-flip="frame"
+      maxW="400px"
+      className={clsx(
+        styles.root,
+        active && styles.active,
+        collapsed && styles.collapsed,
+        className,
+      )}
     >
       <svg
         className={styles.svg}
-        viewBox="0 0 280 180"
+        viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
         preserveAspectRatio="none"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -70,38 +114,32 @@ export function GlowFrame({
 
         <rect
           className={styles.glow}
-          x="12"
-          y="12"
-          width="256"
-          height="156"
-          rx="22"
-          ry="22"
+          x="0"
+          y="0"
+          width={VIEWBOX_WIDTH}
+          height={VIEWBOX_HEIGHT}
           pathLength="100"
         />
 
         <rect
           className={styles.ring}
-          x="12"
-          y="12"
-          width="256"
-          height="156"
-          rx="22"
-          ry="22"
+          x="0"
+          y="0"
+          width={VIEWBOX_WIDTH}
+          height={VIEWBOX_HEIGHT}
           pathLength="100"
         />
 
         <rect
           className={styles.highlight}
-          x="12"
-          y="12"
-          width="256"
-          height="156"
-          rx="22"
-          ry="22"
+          x="0"
+          y="0"
+          width={VIEWBOX_WIDTH}
+          height={VIEWBOX_HEIGHT}
           pathLength="100"
         />
       </svg>
-      {children ? <div className={styles.content}>{children}</div> : null}
-    </div>
+      {children && <div className={styles.content}>{children}</div>}
+    </Box>
   );
 }

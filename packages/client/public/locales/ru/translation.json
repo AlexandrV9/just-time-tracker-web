@@ -38,6 +38,8 @@
     },
     "home": {
       "selectActivity": "Выберите активность",
+      "collapseStopwatch": "Свернуть таймер",
+      "expandStopwatch": "Развернуть таймер",
       "circularTimerStart": "Старт",
       "circularTimerPause": "Пауза",
       "circularTimerFinish": "Завершить",

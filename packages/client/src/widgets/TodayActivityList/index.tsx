@@ -149,9 +149,6 @@ export const TodayActivityList = () => {
 
   return (
     <>
-      <Flex align="center" justify="center" h="30px" position="relative">
-        <Box w="full" h="1px" bg="bg.emphasized" />
-      </Flex>
       <Stack.VStack w="full" p="0.5rem" alignItems="stretch">
         <Flex gap="1rem" alignItems="center">
           <Text textStyle="2xl" fontWeight="bolder">

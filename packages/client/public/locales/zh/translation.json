@@ -38,6 +38,8 @@
     },
     "home": {
       "selectActivity": "选择活动",
+      "collapseStopwatch": "收起计时器",
+      "expandStopwatch": "展开计时器",
       "circularTimerStart": "开始",
       "circularTimerPause": "暂停",
       "circularTimerFinish": "结束",
