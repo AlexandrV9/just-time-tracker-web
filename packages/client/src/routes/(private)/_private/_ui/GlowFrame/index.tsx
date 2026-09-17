@@ -9,8 +9,6 @@ const VIEWBOX_HEIGHT = 180;
 const CORNER_RADIUS_PX = 16;
 
 type GlowFrameProps = {
-  maxWidth?: number;
-  minHeight?: number;
   active?: boolean;
   collapsed?: boolean;
   className?: string;
@@ -18,8 +16,6 @@ type GlowFrameProps = {
 };
 
 export function GlowFrame({
-  maxWidth = 360,
-  minHeight = 100,
   active = false,
   collapsed = false,
   className,
@@ -31,28 +27,23 @@ export function GlowFrame({
     const el = rootRef.current;
     if (!el) return;
 
-    el.style.setProperty("--glow-frame-max-width", `${maxWidth}px`);
-    el.style.setProperty("--glow-frame-min-height", `${minHeight}px`);
-  }, [maxWidth, minHeight]);
-
-  useLayoutEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-
     el.style.setProperty("--glow-frame-radius", `${CORNER_RADIUS_PX}px`);
 
+    const rects = Array.from(el.querySelectorAll("rect"));
+
+    // The viewBox is stretched (preserveAspectRatio="none"), so the radii are
+    // converted per axis to keep the on-screen corner at CORNER_RADIUS_PX.
     const syncRadii = () => {
       const { width, height } = el.getBoundingClientRect();
       if (width <= 0 || height <= 0) return;
 
-      el.style.setProperty(
-        "--glow-frame-rx",
-        String((CORNER_RADIUS_PX * VIEWBOX_WIDTH) / width),
-      );
-      el.style.setProperty(
-        "--glow-frame-ry",
-        String((CORNER_RADIUS_PX * VIEWBOX_HEIGHT) / height),
-      );
+      const rx = String((CORNER_RADIUS_PX * VIEWBOX_WIDTH) / width);
+      const ry = String((CORNER_RADIUS_PX * VIEWBOX_HEIGHT) / height);
+
+      rects.forEach((rect) => {
+        rect.setAttribute("rx", rx);
+        rect.setAttribute("ry", ry);
+      });
     };
 
     syncRadii();

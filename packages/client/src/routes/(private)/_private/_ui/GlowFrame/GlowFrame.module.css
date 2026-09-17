@@ -1,9 +1,5 @@
+/* --glow-frame-radius is set from the component (single source with rx/ry). */
 .root {
-  --glow-frame-max-width: 400px;
-  --glow-frame-min-height: 220px;
-  --glow-frame-rx: 16;
-  --glow-frame-ry: 16;
-
   position: relative;
 
   display: flex;
@@ -45,8 +41,6 @@
 .ring,
 .highlight {
   vector-effect: non-scaling-stroke;
-  rx: var(--glow-frame-rx);
-  ry: var(--glow-frame-ry);
   transition: opacity 0.48s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
