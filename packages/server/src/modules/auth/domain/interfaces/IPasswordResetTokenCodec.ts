@@ -7,7 +7,7 @@ export interface IPasswordResetTokenCodec {
    */
   encode(userId: string): string;
   /**
-   * Проверяет подпись и срок действия и если, все ок, то возвращает userId, иначе null.
+   * Проверяет подпись и срок действия токена и если, все ок, то возвращает userId, иначе null.
    */
   decode(token: string): { userId: string } | null;
 }
