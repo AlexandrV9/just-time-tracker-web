@@ -56,12 +56,9 @@ export interface IAuthRateLimitsRepository {
     requestCount: number;
   }): Promise<AuthRateLimitRecord>;
   /**
-   * Увеличивает счетчик числа запроса одного key
+   * Увеличивает счетчик числа запросов одного key
    */
-  incrementRequestCount(input: {
-    key: string;
-    windowStartedAt: Date;
-  }): Promise<AuthRateLimitRecord>;
+  incrementRequestCount(key: string): Promise<AuthRateLimitRecord>;
   /**
    * Увеличивает счетчик числа неправильных попыток одного запроса key
    */

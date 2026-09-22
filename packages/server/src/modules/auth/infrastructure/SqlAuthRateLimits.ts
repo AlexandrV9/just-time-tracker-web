@@ -104,21 +104,18 @@ export class SqlAuthRateLimits implements IAuthRateLimitsRepository {
     return this.toEntity(rows[0] as AuthRateLimitRow);
   }
 
-  async incrementRequestCount(input: {
-    key: string;
-    windowStartedAt: Date;
-  }): Promise<AuthRateLimitRecord> {
+  async incrementRequestCount(key: string): Promise<AuthRateLimitRecord> {
     const { rows } = await this.pool.query(
       `
-        INSERT INTO auth_rate_limits (key, window_started_at, request_count)
-        VALUES ($1, $2, 1)
+        INSERT INTO auth_rate_limits (key, request_count)
+        VALUES ($1, 1)
         ON CONFLICT (key) DO UPDATE
         SET
           request_count = auth_rate_limits.request_count + 1,
           updated_at = NOW()
         RETURNING ${SELECT_COLUMNS}
       `,
-      [input.key, input.windowStartedAt.toISOString()],
+      [key],
     );
 
     return this.toEntity(rows[0] as AuthRateLimitRow);
