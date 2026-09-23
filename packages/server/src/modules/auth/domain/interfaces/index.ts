@@ -6,3 +6,4 @@ export * from "./IRequestRateLimiter.js";
 export * from "./IJwtAuthTokenManager.js";
 export * from "./IVerificationCodeMailer.js";
 export * from "./IVerificationEmailSender.js";
+export * from "./IPasswordResetCodePolicy.js";
