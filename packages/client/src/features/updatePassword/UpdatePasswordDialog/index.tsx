@@ -195,7 +195,7 @@ export function UpdatePasswordDialog({ dialog }: UpdatePasswordDialogProps) {
               </Button>
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size="2xl" />
+              <CloseButton size="sm" />
             </Dialog.CloseTrigger>
           </Dialog.Content>
         </Dialog.Positioner>

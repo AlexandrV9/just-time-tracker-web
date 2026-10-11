@@ -4,5 +4,4 @@
 // export { authRouter } from "./auth.routes.js";
 // export { authMiddleware } from "./auth.middleware.js";
 
-// Yandex OAuth remains in this legacy folder until migrated to modules/auth.
 export { yandexHandlers } from "./yandex.handlers.js";

@@ -1,7 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { yandexHandlers } from "./auth/index.js";
 import type { AuthVariables } from "./shared/auth/auth.variables.js";
 import { config } from "./shared/index.js";
 import { healthRouter } from "./health/health.routes.js";
@@ -51,10 +50,6 @@ protectedRouter.route("/day-plan-items", dayPlanItemsRouter);
 protectedRouter.route("/users", usersRouter);
 protectedRouter.route("/push-subscriptions", pushSubscriptionsRouter);
 protectedRouter.route("/email-verification", emailVerificationRouter);
-
-// Yandex OAuth still lives in legacy src/auth (not migrated yet).
-// void yandexHandlers;
-// protectedRouter.post("/auth/yandex/link", yandexHandlers.startLink);
 
 app.route("/", protectedRouter);
 

@@ -2,14 +2,14 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import type { Context } from "hono";
 import type { BlankEnv, BlankInput } from "hono/types";
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
-import { config } from "../shared/index.js";
+import { config } from "../../../shared/index.js";
 import {
   exchangeYandexCode,
   fetchYandexProfile,
   loginWithYandex,
   linkYandexToUser,
 } from "./yandex.service.js";
-import type { AuthVariables } from "../shared/auth/auth.variables.js";
+import type { AuthVariables } from "../../../shared/auth/auth.variables.js";
 
 const OAUTH_STATE_COOKIE = "oauth_state";
 const OAUTH_STATE_TTL_SEC = 60 * 10; // 10 minutes
