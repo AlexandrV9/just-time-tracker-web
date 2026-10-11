@@ -1,5 +1,5 @@
 import pg from "pg";
-import { config } from "src/shared/config/index.js";
+import { config } from "shared/config/index.js";
 
 const DB_NAME_PATTERN = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 

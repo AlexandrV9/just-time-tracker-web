@@ -1,4 +1,4 @@
-import { pool } from "src/shared/index.js";
+import { pool } from "shared/index.js";
 import { ensureDatabase } from "./ensureDatabase.js";
 import { isMainModule } from "./isMainModule.js";
 import { createUsersTable } from "./createUsersTable.js";

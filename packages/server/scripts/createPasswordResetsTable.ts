@@ -1,4 +1,4 @@
-import { pool } from "src/shared/index.js";
+import { pool } from "shared/index.js";
 import { isMainModule } from "./isMainModule.js";
 
 export const createPasswordResetsTable = async () => {
