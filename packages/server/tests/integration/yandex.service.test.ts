@@ -9,7 +9,7 @@ import {
   loginWithYandex,
   linkYandexToUser,
   type YandexProfile,
-} from "../../src/auth/yandex.service.js";
+} from "../../src/modules/auth/_authYandex/yandex.service.js";
 
 const makeProfile = (overrides?: Partial<YandexProfile>): YandexProfile => ({
   id: "yandex-123",

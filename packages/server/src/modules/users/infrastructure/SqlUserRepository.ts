@@ -1,6 +1,6 @@
 import type { Pool } from "pg";
 import type { UserLocaleDTO } from "@time-tracker/shared";
-import { getPool } from "shared/index.js";
+import { pool as defaultPool } from "shared/index.js";
 import type {
   CreateUserDataDTO,
   UpdateUserDataDTO,
@@ -49,7 +49,7 @@ const USER_AUTH_COLUMNS = `
 export class SqlUserRepository implements IUserRepository {
   private readonly pool: Pool;
 
-  constructor(pool: Pool = getPool()) {
+  constructor(pool: Pool = defaultPool) {
     this.pool = pool;
   }
 

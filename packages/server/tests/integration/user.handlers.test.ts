@@ -135,7 +135,9 @@ describe("usersRouter", () => {
       const body = await json(res);
 
       expect(body.success).toBe(false);
-      expect(body.message).toBe("User not found");
+      expect(body.message).toBe(
+        'User with id "00000000-0000-0000-0000-000000000000" not found',
+      );
     });
 
     it("returns conflict error when login is already taken", async () => {
@@ -153,7 +155,9 @@ describe("usersRouter", () => {
       const body = await json(res);
 
       expect(body.success).toBe(false);
-      expect(body.message).toBe("User with this login already exists");
+      expect(body.message).toBe(
+        'User with login "otheruser" already exists',
+      );
     });
 
     it("persists changes to the database", async () => {

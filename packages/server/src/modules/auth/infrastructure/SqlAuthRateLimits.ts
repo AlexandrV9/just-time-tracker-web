@@ -1,5 +1,5 @@
 import type { Pool } from "pg";
-import { getPool } from "shared/index.js";
+import { pool as defaultPool } from "shared/index.js";
 import type {
   AuthRateLimitRecord,
   IAuthRateLimitsRepository,
@@ -31,7 +31,7 @@ const SELECT_COLUMNS = `
 export class SqlAuthRateLimits implements IAuthRateLimitsRepository {
   private readonly pool: Pool;
 
-  constructor(pool: Pool = getPool()) {
+  constructor(pool: Pool = defaultPool) {
     this.pool = pool;
   }
 

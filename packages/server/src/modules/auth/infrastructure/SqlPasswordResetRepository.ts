@@ -1,5 +1,5 @@
 import type { Pool } from "pg";
-import { getPool } from "shared/index.js";
+import { pool as defaultPool } from "shared/index.js";
 import type {
   IPasswordResetRepository,
   PasswordResetRecord,
@@ -26,7 +26,7 @@ const SELECT_COLUMNS = `
 export class SqlPasswordResetRepository implements IPasswordResetRepository {
   private readonly pool: Pool;
 
-  constructor(pool: Pool = getPool()) {
+  constructor(pool: Pool = defaultPool) {
     this.pool = pool;
   }
 
