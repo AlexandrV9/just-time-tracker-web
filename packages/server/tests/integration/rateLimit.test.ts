@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
-import { authRouter } from "../../src/auth/auth.routes.js";
-import { passwordResetService } from "../../src/auth/passwordReset.service.js";
+import { authRouter } from "../../src/modules/auth/index.js";
 import {
   config,
   rateLimitKeys,
@@ -58,6 +57,27 @@ describe("auth rate limiting", () => {
         "X-Forwarded-For": ip,
       },
       body: JSON.stringify({ login, password }),
+    });
+
+  const startReset = () =>
+    app.request("/auth/password-reset/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: EMAIL }),
+    });
+
+  const verifyReset = (code: string) =>
+    app.request("/auth/password-reset/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: EMAIL, code }),
+    });
+
+  const resendReset = () =>
+    app.request("/auth/password-reset/resend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: EMAIL }),
     });
 
   describe("login request limit", () => {
@@ -165,28 +185,31 @@ describe("auth rate limiting", () => {
         await testDb.pool.query(`DELETE FROM password_resets WHERE user_id = $1`, [
           userId,
         ]);
-        const result = await passwordResetService.start({ email: EMAIL });
-        expect(result.success).toBe(true);
+        const res = await startReset();
+        const body = await json(res);
+        expect(res.status).toBe(200);
+        expect(body.success).toBe(true);
       }
 
       await testDb.pool.query(`DELETE FROM password_resets WHERE user_id = $1`, [
         userId,
       ]);
-      const limited = await passwordResetService.start({ email: EMAIL });
+      const limitedRes = await startReset();
+      const limited = await json(limitedRes);
 
+      expect(limitedRes.status).toBe(429);
       expect(limited.success).toBe(false);
-      if (limited.success) return;
       expect(limited.message).toBe("RATE_LIMITED");
-      expect(Date.parse(limited.data!.retryAfter)).toBeGreaterThan(Date.now());
+      expect(Date.parse(limited.data.retryAfter)).toBeGreaterThan(Date.now());
     });
   });
 
   describe("password reset verify lockout", () => {
     const startAndGetCode = async () => {
-      const result = await passwordResetService.start({ email: EMAIL });
-      expect(result.success).toBe(true);
-      if (!result.success) throw new Error("start failed");
-      return result.data.devCode as string;
+      const res = await startReset();
+      const body = await json(res);
+      expect(body.success).toBe(true);
+      return body.data.devCode as string;
     };
 
     it("returns TOO_MANY_ATTEMPTS with a future retryAfter after 5 invalid codes", async () => {
@@ -196,13 +219,11 @@ describe("auth rate limiting", () => {
       let retryAfter: string | undefined;
 
       for (let i = 0; i < 5; i++) {
-        const result = await passwordResetService.verify({
-          email: EMAIL,
-          code: "000000",
-        });
-        if (result.success) continue;
-        lastMessage = result.message;
-        retryAfter = (result.data as { retryAfter?: string } | undefined)?.retryAfter;
+        const res = await verifyReset("000000");
+        const body = await json(res);
+        if (body.success) continue;
+        lastMessage = body.message;
+        retryAfter = body.data?.retryAfter;
       }
 
       expect(lastMessage).toBe("TOO_MANY_ATTEMPTS");
@@ -216,18 +237,14 @@ describe("auth rate limiting", () => {
       await startAndGetCode();
 
       for (let i = 0; i < 5; i++) {
-        await passwordResetService.verify({ email: EMAIL, code: "000000" });
+        await verifyReset("000000");
       }
 
-      const resend = await passwordResetService.resend({ email: EMAIL });
+      const resendRes = await resendReset();
+      const resend = await json(resendRes);
       expect(resend.success).toBe(false);
-      if (resend.success) return;
       expect(resend.message).toBe("TOO_MANY_ATTEMPTS");
-      expect(
-        Date.parse(
-          (resend.data as { retryAfter: string }).retryAfter,
-        ),
-      ).toBeGreaterThan(Date.now());
+      expect(Date.parse(resend.data.retryAfter)).toBeGreaterThan(Date.now());
     });
   });
 

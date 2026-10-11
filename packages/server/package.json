@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc && cp -r src/shared/email/assets dist/src/shared/email/assets",
+    "build": "tsc && cp -r src/shared/email/assets dist/src/shared/email/assets && cp -r src/shared/assets dist/src/shared/assets",
     "start": "node dist/src/index.js",
     "test": "vitest run",
     "test:watch": "vitest",

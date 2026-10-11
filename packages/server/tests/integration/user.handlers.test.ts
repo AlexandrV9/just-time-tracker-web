@@ -7,7 +7,7 @@ import {
   resetUsersTables,
   startTestDatabase,
 } from "../setup/test-db.js";
-import { usersRouter } from "../../src/user/user.routes.js";
+import { usersRouter } from "../../src/modules/users/index.js";
 import { emailVerificationRouter } from "../../src/emailVerification/index.js";
 import type { AuthVariables } from "../../src/shared/auth/auth.variables.js";
 
@@ -175,7 +175,10 @@ describe("usersRouter", () => {
       const res = await testRouter.request("/me", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "  Trimmed Name  ", login: "trimmed_login" }),
+        body: JSON.stringify({
+          name: "  Trimmed Name  ",
+          login: "trimmed_login",
+        }),
       });
       const body = await json(res);
 
@@ -309,10 +312,9 @@ describe("usersRouter", () => {
     it("blocks resend before the cooldown elapses", async () => {
       await start("verified@example.com");
 
-      const resendRes = await testRouter.request(
-        "/email-verification/resend",
-        { method: "POST" },
-      );
+      const resendRes = await testRouter.request("/email-verification/resend", {
+        method: "POST",
+      });
       const resendBody = await json(resendRes);
 
       expect(resendBody.success).toBe(false);

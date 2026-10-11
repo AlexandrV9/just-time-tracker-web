@@ -84,6 +84,20 @@ export class SqlUserRepository implements IUserRepository {
     `);
   }
 
+  async findById(id: string): Promise<UserDTO | null> {
+    const { rows } = await this.pool.query(
+      `
+        SELECT ${USER_PUBLIC_COLUMNS}
+        FROM users
+        WHERE id = $1 AND is_active = true
+      `,
+      [id],
+    );
+
+    const row = rows[0] as UserRow | undefined;
+    return row ? this.toEntity(row) : null;
+  }
+
   async findByLogin(login: string): Promise<UserDTO | null> {
     const { rows } = await this.pool.query(
       `
@@ -92,6 +106,20 @@ export class SqlUserRepository implements IUserRepository {
         WHERE login = $1 AND is_active = true
       `,
       [login],
+    );
+
+    const row = rows[0] as UserRow | undefined;
+    return row ? this.toEntity(row) : null;
+  }
+
+  async findByEmail(email: string): Promise<UserDTO | null> {
+    const { rows } = await this.pool.query(
+      `
+        SELECT ${USER_PUBLIC_COLUMNS}
+        FROM users
+        WHERE email = $1 AND is_active = true
+      `,
+      [email],
     );
 
     const row = rows[0] as UserRow | undefined;
@@ -173,6 +201,31 @@ export class SqlUserRepository implements IUserRepository {
 
     const row = rows[0] as UserRow | undefined;
     return row ? this.toEntity(row) : null;
+  }
+
+  async getPasswordHash(userId: string): Promise<string | null> {
+    const { rows } = await this.pool.query(
+      `SELECT password_hash FROM users WHERE id = $1`,
+      [userId],
+    );
+    const row = rows[0] as { password_hash: string | null } | undefined;
+    return row ? row.password_hash : null;
+  }
+
+  async setPasswordHash(
+    userId: string,
+    passwordHash: string,
+  ): Promise<boolean> {
+    const { rows } = await this.pool.query(
+      `
+        UPDATE users
+        SET password_hash = $1, updated_at = NOW()
+        WHERE id = $2 AND is_active = true
+        RETURNING id
+      `,
+      [passwordHash, userId],
+    );
+    return Boolean(rows[0]);
   }
 
   private toEntity(row: UserRow): UserDTO {

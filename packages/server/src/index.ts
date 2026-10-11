@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { authMiddleware, authRouter, yandexHandlers } from "./auth/index.js";
+import { yandexHandlers } from "./auth/index.js";
 import type { AuthVariables } from "./shared/auth/auth.variables.js";
 import { config } from "./shared/index.js";
 import { healthRouter } from "./health/health.routes.js";
@@ -12,7 +12,6 @@ import {
 } from "./activity/index.js";
 import { dayPlanItemsRouter, dayPlansRouter } from "./dayPlan/index.js";
 import { emailVerificationRouter } from "./emailVerification/index.js";
-// import { usersRouter } from "./user/index.js";
 import {
   CompositeNotificationSender,
   ConsoleNotificationSender,
@@ -23,7 +22,8 @@ import {
   setNotificationJobsChangeListener,
   SseNotificationSender,
 } from "./modules/notifications/index.js";
-import { usersPublicRouter, usersRouter } from "modules/users/index.js";
+import { authMiddleware, authRouter } from "modules/auth/index.js";
+import { usersRouter } from "modules/users/index.js";
 
 const app = new Hono();
 
@@ -37,7 +37,6 @@ app.use(
 
 app.route("/auth", authRouter);
 app.route("/health", healthRouter);
-app.route("/users", usersPublicRouter);
 
 const protectedRouter = new Hono<{ Variables: AuthVariables }>();
 protectedRouter.use("*", authMiddleware);
@@ -52,6 +51,9 @@ protectedRouter.route("/day-plan-items", dayPlanItemsRouter);
 protectedRouter.route("/users", usersRouter);
 protectedRouter.route("/push-subscriptions", pushSubscriptionsRouter);
 protectedRouter.route("/email-verification", emailVerificationRouter);
+
+// Yandex OAuth still lives in legacy src/auth (not migrated yet).
+// void yandexHandlers;
 // protectedRouter.post("/auth/yandex/link", yandexHandlers.startLink);
 
 app.route("/", protectedRouter);

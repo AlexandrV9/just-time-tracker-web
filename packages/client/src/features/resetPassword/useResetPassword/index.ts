@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import type { PasswordResetStatusDTO } from "@time-tracker/shared";
 import { useCallback, useEffect, useState } from "react";
 import { authService } from "~/shared/api/services/auth";
+import { noThrowRequest } from "~/shared/api/services/base/adapters";
 import { useNowMs, useRetryAfterCountdown, useTranslation } from "~/shared/hooks";
 import { getRetryAfter } from "~/shared/libs";
 import { toast } from "~/shared/ui";
@@ -51,7 +52,9 @@ export function useResetPassword({
   const statusQuery = useQuery({
     queryKey: ["password-reset-status", recoveryEmail],
     queryFn: () =>
-      authService.getPasswordResetStatus({ email: recoveryEmail!.trim() }),
+      noThrowRequest(
+        authService.getPasswordResetStatus({ email: recoveryEmail!.trim() }),
+      ),
     enabled: !!recoveryEmail?.trim() && resetToken === null,
     refetchOnWindowFocus: false,
     gcTime: 0,
@@ -60,6 +63,15 @@ export function useResetPassword({
   useEffect(() => {
     if (statusQuery.data?.success) {
       setServerState(statusQuery.data.data);
+      return;
+    }
+
+    if (
+      statusQuery.data &&
+      !statusQuery.data.success &&
+      statusQuery.data.message === "PASSWORD_RESET_NOT_REQUESTED"
+    ) {
+      setServerState({ status: "none" });
     }
   }, [statusQuery.data]);
 

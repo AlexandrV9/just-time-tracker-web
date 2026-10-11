@@ -3,7 +3,7 @@ import {
   UserAlreadyExistsException,
   UserNotFoundException,
   type IUserRepository,
-} from "../../domain/index.js";
+} from "../../../domain/index.js";
 
 /**
  * Входные данные для сценария обновления профиля.

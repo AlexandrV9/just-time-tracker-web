@@ -1,175 +1,78 @@
 import {
-  loginSchema,
-  passwordSchema,
+  setPasswordSchema,
+  updatePasswordSchema,
   updateProfileSchema,
+  updatePushNotificationsSchema,
+  updateUserLocaleSchema,
 } from "@time-tracker/shared";
 import { Hono } from "hono";
 import type { Context } from "hono";
-import { setCookie } from "hono/cookie";
 import type { BlankSchema } from "hono/types";
-import { z } from "zod";
 import type { AuthVariables } from "shared/auth/auth.variables.js";
 import { getAuthenticatedUserId } from "shared/auth/with-created-by-id.js";
-import { config } from "shared/index.js";
 import {
   respondInternalError,
   respondValidationError,
 } from "shared/utils/request.js";
 import type {
-  AuthorizUserUseCase,
-  RegisterUserUseCase,
+  GetAuthProvidersUseCase,
+  SetPasswordUseCase,
+  UnlinkProviderUseCase,
+  UpdateLocaleUseCase,
+  UpdatePasswordUseCase,
+  UpdatePushNotificationsUseCase,
   UpdateUserUseCase,
 } from "../application/index.js";
 import {
-  InvalidCredentialsException,
+  InvalidCurrentPasswordException,
+  NeedPasswordBeforeUnlinkException,
+  PasswordAlreadySetException,
+  PasswordNotSetException,
+  ProviderNotLinkedException,
+  ProviderNotSupportedException,
+  SamePasswordException,
   UserAlreadyExistsException,
   UserNotFoundException,
   WeakPasswordException,
 } from "../domain/index.js";
 
-type Router = Hono<
-  {
-    Variables: AuthVariables;
-  },
-  BlankSchema,
-  "/"
->;
+type AuthData = {
+  Variables: AuthVariables;
+};
 
-const registerUserSchema = z.object({
-  firstName: z.string().trim().min(1),
-  login: loginSchema,
-  password: passwordSchema,
-});
-
-const authorizeUserSchema = z.object({
-  login: z.string().min(1),
-  password: z.string().min(1),
-});
+type Router = Hono<AuthData, BlankSchema, "/">;
 
 /**
- * Контроллер пользователей.
- * Отвечает за приём HTTP-запросов, валидацию
- * и делегирование выполнения сценарию использования.
+ * Контроллер пользователей (профиль / пароль / providers).
  */
 export class UsersController {
   constructor(
-    private readonly registerUseCase: RegisterUserUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
-    private readonly authorizUserUseCase: AuthorizUserUseCase,
+    private readonly updateLocaleUseCase: UpdateLocaleUseCase,
+    private readonly updatePushNotificationsUseCase: UpdatePushNotificationsUseCase,
+    private readonly setPasswordUseCase: SetPasswordUseCase,
+    private readonly updatePasswordUseCase: UpdatePasswordUseCase,
+    private readonly getAuthProvidersUseCase: GetAuthProvidersUseCase,
+    private readonly unlinkProviderUseCase: UnlinkProviderUseCase,
   ) {}
 
-  /**
-   * Публичные маршруты (без auth middleware).
-   */
-  registerPublic(router: Hono): void {
-    router.post("/register", this.handleRegister);
-    router.post("/sign-in", this.handleAuthorizeUser);
-  }
-
-  /**
-   * Защищённые маршруты контроллера.
-   */
   register(router: Router): void {
     router.patch("/me", this.handleUpdateUser);
+    router.patch("/me/locale", this.handleUpdateLocale);
+    router.patch(
+      "/me/push-notifications",
+      this.handleUpdatePushNotifications,
+    );
+    router.post("/me/password", this.handleSetPassword);
+    router.patch("/me/password", this.handleUpdatePassword);
+    router.get("/me/auth-providers", this.handleGetAuthProviders);
+    router.delete(
+      "/me/auth-providers/:provider",
+      this.handleUnlinkProvider,
+    );
   }
 
-  /**
-   * Обрабатывает POST-запрос регистрации пользователя.
-   */
-  private handleRegister = async (c: Context<{ Variables: AuthVariables }>) => {
-    const parsed = registerUserSchema.safeParse(await c.req.json());
-    if (!parsed.success) {
-      return respondValidationError(c, parsed.error.message);
-    }
-
-    try {
-      const result = await this.registerUseCase.execute(parsed.data);
-      return c.json(
-        {
-          success: true,
-          data: result,
-          message: "User registered successfully",
-        },
-        201,
-      );
-    } catch (error) {
-      if (error instanceof WeakPasswordException) {
-        return c.json(
-          {
-            success: false,
-            message: error.message,
-            data: error.violations,
-          },
-          400,
-        );
-      }
-
-      if (error instanceof UserAlreadyExistsException) {
-        return c.json(
-          {
-            success: false,
-            message: error.message,
-          },
-          409,
-        );
-      }
-
-      console.error("Registration error:", error);
-      return respondInternalError(c);
-    }
-  };
-
-  /**
-   * Обрабатывает POST-запрос авторизации пользователя.
-   */
-  private handleAuthorizeUser = async (
-    c: Context<{ Variables: AuthVariables }>,
-  ) => {
-    const parsed = authorizeUserSchema.safeParse(await c.req.json());
-    if (!parsed.success) {
-      return respondValidationError(c, parsed.error.message);
-    }
-
-    try {
-      const result = await this.authorizUserUseCase.execute(parsed.data);
-
-      setCookie(c, config.auth.refreshToken.cookie, result.refreshToken, {
-        secure: config.app.isProduction,
-        httpOnly: true,
-        sameSite: "strict",
-        maxAge: config.auth.refreshToken.expInSec,
-      });
-
-      return c.json({
-        success: true,
-        data: {
-          accessToken: result.accessToken,
-          refreshToken: result.refreshToken,
-          user: result.user,
-        },
-      });
-    } catch (error) {
-      if (error instanceof InvalidCredentialsException) {
-        return c.json(
-          {
-            success: false,
-            message: error.message,
-          },
-          401,
-        );
-      }
-
-      console.error("Authorization error:", error);
-      return respondInternalError(c);
-    }
-  };
-
-  /**
-   * Обрабатывает PATCH-запрос обновления данных пользователя.
-   */
-  private handleUpdateUser = async (
-    c: Context<{ Variables: AuthVariables }>,
-  ) => {
+  private handleUpdateUser = async (c: Context<AuthData>) => {
     const parsed = updateProfileSchema.safeParse(await c.req.json());
     if (!parsed.success) {
       return respondValidationError(c, parsed.error.message);
@@ -182,32 +85,162 @@ export class UsersController {
         login: parsed.data.login,
       });
 
-      return c.json({
-        success: true,
-        data: result,
-      });
+      return c.json({ success: true, data: result });
     } catch (error) {
       if (error instanceof UserAlreadyExistsException) {
-        return c.json(
-          {
-            success: false,
-            message: error.message,
-          },
-          409,
-        );
+        return c.json({ success: false, message: error.message }, 409);
       }
-
       if (error instanceof UserNotFoundException) {
+        return c.json({ success: false, message: error.message }, 404);
+      }
+      console.error("Update user error:", error);
+      return respondInternalError(c);
+    }
+  };
+
+  private handleUpdateLocale = async (c: Context<AuthData>) => {
+    const parsed = updateUserLocaleSchema.safeParse(await c.req.json());
+    if (!parsed.success) {
+      return respondValidationError(c, parsed.error.message);
+    }
+
+    try {
+      const result = await this.updateLocaleUseCase.execute({
+        userId: getAuthenticatedUserId(c),
+        locale: parsed.data.locale,
+      });
+      return c.json({ success: true, data: result });
+    } catch (error) {
+      if (error instanceof UserNotFoundException) {
+        return c.json({ success: false, message: error.message }, 404);
+      }
+      console.error("Update locale error:", error);
+      return respondInternalError(c);
+    }
+  };
+
+  private handleUpdatePushNotifications = async (c: Context<AuthData>) => {
+    const parsed = updatePushNotificationsSchema.safeParse(await c.req.json());
+    if (!parsed.success) {
+      return respondValidationError(c, parsed.error.message);
+    }
+
+    try {
+      const result = await this.updatePushNotificationsUseCase.execute({
+        userId: getAuthenticatedUserId(c),
+        enabled: parsed.data.enabled,
+      });
+      return c.json({ success: true, data: result });
+    } catch (error) {
+      if (error instanceof UserNotFoundException) {
+        return c.json({ success: false, message: error.message }, 404);
+      }
+      console.error("Update push notifications error:", error);
+      return respondInternalError(c);
+    }
+  };
+
+  private handleSetPassword = async (c: Context<AuthData>) => {
+    const parsed = setPasswordSchema.safeParse(await c.req.json());
+    if (!parsed.success) {
+      return respondValidationError(c, parsed.error.message);
+    }
+
+    try {
+      await this.setPasswordUseCase.execute({
+        userId: getAuthenticatedUserId(c),
+        newPassword: parsed.data.newPassword,
+      });
+      return c.json({ success: true, data: null });
+    } catch (error) {
+      if (error instanceof WeakPasswordException) {
         return c.json(
           {
             success: false,
             message: error.message,
+            data: error.violations,
           },
-          404,
+          400,
         );
       }
+      if (error instanceof PasswordAlreadySetException) {
+        return c.json({ success: false, message: error.message }, 409);
+      }
+      if (error instanceof UserNotFoundException) {
+        return c.json({ success: false, message: error.message }, 404);
+      }
+      console.error("Set password error:", error);
+      return respondInternalError(c);
+    }
+  };
 
-      console.error("Update user error:", error);
+  private handleUpdatePassword = async (c: Context<AuthData>) => {
+    const parsed = updatePasswordSchema.safeParse(await c.req.json());
+    if (!parsed.success) {
+      return respondValidationError(c, parsed.error.message);
+    }
+
+    try {
+      await this.updatePasswordUseCase.execute({
+        userId: getAuthenticatedUserId(c),
+        currentPassword: parsed.data.currentPassword,
+        newPassword: parsed.data.newPassword,
+      });
+      return c.json({ success: true, data: null });
+    } catch (error) {
+      if (error instanceof WeakPasswordException) {
+        return c.json(
+          {
+            success: false,
+            message: error.message,
+            data: error.violations,
+          },
+          400,
+        );
+      }
+      if (
+        error instanceof PasswordNotSetException ||
+        error instanceof InvalidCurrentPasswordException ||
+        error instanceof SamePasswordException
+      ) {
+        return c.json({ success: false, message: error.message }, 400);
+      }
+      if (error instanceof UserNotFoundException) {
+        return c.json({ success: false, message: error.message }, 404);
+      }
+      console.error("Update password error:", error);
+      return respondInternalError(c);
+    }
+  };
+
+  private handleGetAuthProviders = async (c: Context<AuthData>) => {
+    try {
+      const providers = await this.getAuthProvidersUseCase.execute(
+        getAuthenticatedUserId(c),
+      );
+      return c.json({ success: true, data: providers });
+    } catch (error) {
+      console.error("Get auth providers error:", error);
+      return respondInternalError(c);
+    }
+  };
+
+  private handleUnlinkProvider = async (c: Context<AuthData>) => {
+    try {
+      await this.unlinkProviderUseCase.execute({
+        userId: getAuthenticatedUserId(c),
+        provider: c.req.param("provider"),
+      });
+      return c.json({ success: true, data: null });
+    } catch (error) {
+      if (
+        error instanceof ProviderNotSupportedException ||
+        error instanceof ProviderNotLinkedException ||
+        error instanceof NeedPasswordBeforeUnlinkException
+      ) {
+        return c.json({ success: false, message: error.message }, 400);
+      }
+      console.error("Unlink provider error:", error);
       return respondInternalError(c);
     }
   };

@@ -5,10 +5,12 @@ import {
   type NotificationJobTypeDTO,
 } from "@time-tracker/shared";
 import { config } from "../../shared/config/index.js";
-import { userQueries } from "../../user/user.queries.js";
+import { SqlUserRepository } from "../users/infrastructure/index.js";
 import type { NotificationSender } from "./notificationSender.interface.js";
 import type { NotificationJob } from "./notifications.types.js";
 import { pushSubscriptionsRepository } from "./pushSubscriptions.repository.js";
+
+const userRepository = new SqlUserRepository();
 
 const NOTIFICATION_ICON_PATH = "/icons/logo-192x192.png";
 const NOTIFICATION_BADGE_PATH = "/icons/logo-120x120.png";
@@ -78,10 +80,8 @@ export class PushNotificationSender implements NotificationSender {
       return;
     }
 
-    const preferences = await userQueries.getNotificationPreferences(
-      job.userId,
-    );
-    if (!preferences?.pushNotificationsEnabled) {
+    const user = await userRepository.findById(job.userId);
+    if (!user?.pushNotificationsEnabled) {
       return;
     }
 
@@ -93,7 +93,7 @@ export class PushNotificationSender implements NotificationSender {
       return;
     }
 
-    const payload = JSON.stringify(buildPushPayload(job, preferences.locale));
+    const payload = JSON.stringify(buildPushPayload(job, user.locale));
 
     await Promise.all(
       subscriptions.map(async (subscription) => {

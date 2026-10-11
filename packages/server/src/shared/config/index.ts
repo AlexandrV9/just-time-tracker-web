@@ -36,6 +36,9 @@ export const config = {
       cookie: "refresh_token",
       secret: process.env.REFRESH_TOKEN_SECRET!,
     },
+    resetPasswordToken: {
+      secret: process.env.RESET_PASSWORD_TOKEN_SECRET!,
+    },
   },
 
   yandex: {

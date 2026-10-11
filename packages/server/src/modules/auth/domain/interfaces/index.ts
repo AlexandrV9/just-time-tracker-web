@@ -1,3 +1,4 @@
+export * from "./IAuthProviderRepository.js";
 export * from "./IAuthRateLimitsRepository.js";
 export * from "./IEmailDailyLimitRepository.js";
 export * from "./IPasswordResetRepository.js";
