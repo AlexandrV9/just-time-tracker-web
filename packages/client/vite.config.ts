@@ -4,6 +4,7 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { visualizer } from "rollup-plugin-visualizer";
 import { getSiteUrl, sitemapPlugin } from "./scripts/sitemap";
 
 const appVersion = JSON.parse(
@@ -46,6 +47,12 @@ export default defineConfig(({ mode }) => {
           suppressWarnings: true,
         },
       }),
+      env.ANALYZE === "true" &&
+        visualizer({
+          filename: "reports/bundle.html",
+          gzipSize: true,
+          brotliSize: true,
+        }),
     ],
     resolve: {
       alias: {
