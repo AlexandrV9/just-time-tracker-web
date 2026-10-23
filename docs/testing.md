@@ -1,244 +1,130 @@
 # Тестирование
 
-Краткое руководство: как запускать тесты локально и что проверяется в CI.
-
-## Обзор
-
-| Область                     | Инструмент          | Где                                    |
-| --------------------------- | ------------------- | -------------------------------------- |
-| Server (unit + integration) | Vitest 3            | `packages/server`                      |
-| Client                      | —                   | тестов нет                             |
-| Shared                      | через server/client | отдельных тестов нет                   |
-| CI                          | `pnpm verify`       | `.github/workflows/docker-publish.yml` |
+Сверено с конфигурацией версии **1.1.12**. Автоматические тесты есть у сервера (Vitest 3); отдельных client/shared тестов нет. Клиент проверяется ESLint, проверкой переводов и сборкой TypeScript/Vite.
 
 ## Быстрый старт
 
+Из корня репозитория, при запущенном Docker daemon:
+
 ```bash
-# 1. PostgreSQL для интеграционных тестов
-docker compose -f .docker/docker-compose.yaml up -d postgres
-
-# 2. Переменные (можно скопировать из .env.example)
-cp .env.example .env
-
-# 3. Сборка shared (нужна до test/build)
+pnpm install --frozen-lockfile
 pnpm build:shared
-
-# 4. Все тесты сервера
 pnpm test
 ```
 
-Полная проверка перед merge (как в CI):
+По умолчанию `.env.test` включает Testcontainers: отдельный PostgreSQL `postgres:16-alpine` создаётся на время тестов. Compose postgres для этого варианта не нужен.
+
+Полная проверка:
 
 ```bash
-pnpm verify   # lint + build:shared + test + build
+pnpm verify
 ```
+
+Порядок из корневого `package.json`:
+
+1. `pnpm lint` — ESLint клиента, без предупреждений.
+2. `pnpm i18n:check` — проверка ключей переводов скриптом клиента.
+3. `pnpm build:shared` — сборка shared до импортирующих его тестов.
+4. `pnpm test` — все тесты сервера.
+5. `pnpm build` — параллельная сборка shared, client и server.
 
 ## Команды
 
-Из корня репозитория:
-
-```bash
-pnpm test                                          # все тесты server
-pnpm --filter @time-tracker/server test:watch        # watch-режим
-pnpm --filter @time-tracker/server vitest run src      # только unit (без integration)
-pnpm --filter @time-tracker/server vitest run tests/integration/activity.handlers.test.ts
-```
-
-Из `packages/server`:
-
 ```bash
 pnpm test
-pnpm test:watch
-pnpm exec vitest run --reporter=verbose
+pnpm --filter @time-tracker/server test:watch
+pnpm --filter @time-tracker/server exec vitest run src
+pnpm --filter @time-tracker/server exec vitest run tests/integration/activity.handlers.test.ts
+pnpm --filter @time-tracker/server exec vitest run --reporter=verbose
 ```
 
-## PostgreSQL для тестов
+Фильтр `src` сейчас запускает только `health.routes.test.ts`. Тест hub находится в `tests/integration/activityEvents.hub.test.ts`, хотя проверяет hub без настоящей БД.
 
-Интеграционные тесты требуют Postgres. Подключение выбирается в таком порядке (`tests/setup/test-db.ts`):
+## Выбор тестовой БД
 
-1. `**TEST_DATABASE_URL**` — полный connection string (приоритет)
-2. `**USE_TESTCONTAINERS=true**` — ephemeral Postgres в Docker (**default** через `.env.test`)
-3. **Переменные `DB_*`** — fallback: отдельная БД `TEST_DB_NAME` на локальном Postgres
+`tests/setup/test-db.ts` выбирает подключение по приоритету:
 
-**Dev-БД (`time_tracker`) не трогается:** `DEV_DB_PROTECT` + guard перед каждым `TRUNCATE`.  
-Vitest загружает `.env.test` последним → `USE_TESTCONTAINERS=true`.
+1. `TEST_DATABASE_URL` — готовая **отдельная тестовая** БД.
+2. `USE_TESTCONTAINERS=true` — временный PostgreSQL 16 в Docker.
+3. `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` — существующий PostgreSQL; helper создаёт БД `TEST_DB_NAME` (по умолчанию `time_tracker_test`) через подключение к `postgres`.
 
-### Вариант A: Testcontainers (рекомендуется, default)
+В fallback-варианте пользователь должен иметь право создавать БД. Схему тесты создают своими helpers, а не прогоном production migrations. Файлы тестов выполняются последовательно (`fileParallelism: false`), чтобы не конфликтовать при очистке таблиц.
 
-Нужен **Docker daemon**. Отдельный ephemeral Postgres на время `pnpm test`:
+### Загрузка env и переопределения
+
+Vitest загружает:
+
+1. Корневой `.env` — без override уже заданных переменных процесса.
+2. `packages/server/.env` — также без override.
+3. Корневой `.env.test` — **с `override: true`**.
+
+Поэтому `USE_TESTCONTAINERS=false pnpm test` **не отключит** Testcontainers: значение будет заменено из `.env.test`. Для fallback измените `USE_TESTCONTAINERS=false` в `.env.test` и задайте `DB_HOST=localhost`, остальные `DB_*` и `TEST_DB_NAME=time_tracker_test`.
 
 ```bash
+# После изменения .env.test и настройки DB_*
+docker compose --env-file .env -f .docker/docker-compose.yaml up -d postgres
 pnpm test
 ```
 
-В логе: `[tests] Using database "time_tracker_test" (Testcontainers)`.
+Compose использует PostgreSQL **15**, а Testcontainers — **16**.
 
-Явно:
-
-```bash
-USE_TESTCONTAINERS=true pnpm test
-```
-
-### Вариант B: Docker Compose postgres + отдельная time_tracker_test
-
-Если Testcontainers недоступен:
+Альтернатива без изменения `USE_TESTCONTAINERS`: `TEST_DATABASE_URL` имеет более высокий приоритет:
 
 ```bash
-USE_TESTCONTAINERS=false pnpm test
+TEST_DATABASE_URL=postgresql://postgres:password@localhost:5432/time_tracker_test pnpm test
 ```
+
+В этом варианте БД должна уже существовать. Используйте только выделенную тестовую БД: тесты очищают таблицы.
+
+`DEV_DB_PROTECT` задаёт имена защищённых БД через запятую; `.env.test` устанавливает `time_tracker`. Helpers проверяют имя БД перед очисткой. При нестандартном имени dev-БД добавьте его в `DEV_DB_PROTECT` в `.env.test`; не полагайтесь на защиту только стандартного имени.
+
+### CI
+
+Workflow `.github/workflows/docker-publish.yml` объявляет service `postgres:15-alpine` с БД `time_tracker_test` и задаёт `DB_*`. Однако текущий `.env.test` принудительно включает Testcontainers, поэтому helpers выбирают PostgreSQL 16, а не этот service. Секреты токенов из `.env.test` также перекрывают значения CI. Чтобы использовать service, нужно изменить настройки загрузки env или задать `TEST_DATABASE_URL`.
+
+## Что покрывают тесты
+
+| Файлы в `packages/server` | Покрытие |
+| --- | --- |
+| `src/health/health.routes.test.ts` | health router |
+| `tests/integration/activityEvents.hub.test.ts` | публикация событий, подписчики пользователя |
+| `tests/integration/activity.test.ts` | repository CRUD |
+| `tests/integration/activity.tracking.test.ts` | start/pause/resume/finish, сегменты и длительности |
+| `tests/integration/activity.handlers.test.ts` | HTTP handlers, validation, списки, аналитика |
+| `tests/integration/user.handlers.test.ts` | профиль пользователя |
+| `tests/integration/passwordReset.service.test.ts` | восстановление пароля |
+| `tests/integration/yandex.service.test.ts` | OAuth service; это не проверка включённых production routes |
+| `tests/integration/notifications.test.ts` | jobs и worker |
+| `tests/integration/activityNotification.scheduler.test.ts` | планирование напоминаний |
+| `tests/integration/pushNotificationSender.test.ts` | push sender с mock зависимостями |
+| `tests/integration/pushSubscriptions.handlers.test.ts` | HTTP API подписок |
+
+HTTP-тесты защищённых routers используют mock auth (`tests/setup/test-auth.ts`, `TEST_USER_ID = "user-1"`), а не настоящий JWT. Эти тесты не доказывают полную изоляцию ресурсов между пользователями. Успешный тест OAuth service также не означает доступность OAuth endpoints — сейчас они закомментированы.
+
+## Ручная проверка
+
+Для запуска через `pnpm dev` нужны PostgreSQL со схемой, серверный `DB_HOST=localhost` и `packages/client/.env` с `VITE_APP_URL=http://localhost:3000`, `VITE_API_ENDPOINT=http://localhost:9000`. Vite не читает корневой `.env` автоматически. Подробности: [docker.md](docker.md).
+
+1. Открыть `http://localhost:3000`: регистрация, вход, refresh после трёх минут.
+2. Создать activity, start → pause → resume → finish; проверить таймер и план на сегодня.
+3. Проверить историю, переход с датой в аналитику и возврат с выделением карточки, удаление завершённой сессии.
+4. Открыть вторую вкладку: синхронизация через SSE; скрыть/вернуть вкладку и проверить восстановление состояния.
+5. Проверить профиль, смену email и reset password. При `EMAIL_TRANSPORT=console` коды смотреть в логах сервера; для реального письма нужен SMTP.
+6. Собрать production/PWA с VAPID, разрешить push, включить напоминания активности; проверить уведомления при открытом и закрытом приложении. В Vite dev service worker отключён.
+7. `/calendar` должен показывать заглушку; Yandex OAuth сейчас не входит в успешный smoke-сценарий.
 
 ```bash
-docker compose -f .docker/docker-compose.yaml up -d postgres
-```
-
-Тесты используют `TEST_DB_NAME=time_tracker_test` (не `time_tracker`).
-
-Поднимается `postgres:16-alpine`, схема создаётся в `beforeAll`.
-
-### Вариант C: CI (GitHub Actions)
-
-Job `verify` в workflow поднимает service container `postgres:15-alpine` и задаёт env:
-
-```
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=time_tracker_test
-DB_USER=postgres
-DB_PASSWORD=postgres
-ACCESS_TOKEN_SECRET=ci-access-token-secret
-REFRESH_TOKEN_SECRET=ci-refresh-token-secret
-```
-
-## Структура тестов
-
-```
-packages/server/
-├── vitest.config.ts
-├── tests/
-│   ├── setup/
-│   │   ├── vitest.setup.ts      # загрузка .env
-│   │   ├── test-db.ts           # Postgres + DDL для тестов
-│   │   └── test-auth.ts         # mock auth (TEST_USER_ID = "user-1")
-│   └── integration/
-│       ├── activity.handlers.test.ts   # HTTP router (17 tests)
-│       ├── activity.tracking.test.ts   # start/pause/finish service
-│       └── activity.test.ts            # repository CRUD
-└── src/
-    ├── activity/activityEvents.hub.test.ts
-    └── health/health.routes.test.ts
-```
-
-### Типы тестов
-
-| Файл                         | Уровень     | БД  | Auth mock                    |
-| ---------------------------- | ----------- | --- | ---------------------------- |
-| `activityEvents.hub.test.ts` | unit        | нет | нет                          |
-| `health.routes.test.ts`      | unit        | нет | нет                          |
-| `activity.test.ts`           | integration | да  | нет (repository)             |
-| `activity.tracking.test.ts`  | integration | да  | нет (service)                |
-| `activity.handlers.test.ts`  | integration | да  | да (`testRouter` + JWT user) |
-
-### Auth в integration-тестах
-
-HTTP-тесты не используют реальный JWT. Router оборачивается middleware, который ставит `user.id = "user-1"`:
-
-```ts
-testRouter.use("*", async (c, next) => {
-  c.set("user", { id: TEST_USER_ID });
-  await next();
-});
-testRouter.route("/", activitiesRouter);
-```
-
-`createdById` в query/body **не передаётся** — как в production, подставляется на сервере.
-
-## Переменные окружения
-
-| Variable               | Назначение                         |
-| ---------------------- | ---------------------------------- |
-| `DB_HOST`              | хост Postgres                      |
-| `DB_PORT`              | порт (5432)                        |
-| `DB_USER`              | пользователь                       |
-| `DB_PASSWORD`          | пароль                             |
-| `DB_NAME`              | основная БД приложения             |
-| `TEST_DB_NAME`         | БД для fallback-тестов (default: `time_tracker_test`) |
-| `DEV_DB_PROTECT`       | dev-БД, которую тесты **никогда** не TRUNCATE (default: `time_tracker`) |
-| `TEST_DATABASE_URL`    | альтернатива `DB_*` (полный URL)   |
-| `USE_TESTCONTAINERS`   | `true` → Docker Testcontainers (**default** в `.env.test`) |
-| `ACCESS_TOKEN_SECRET`  | нужен при импорте server config    |
-| `REFRESH_TOKEN_SECRET` | нужен при импорте server config    |
-
-Vitest setup загружает env из:
-
-1. `<repo>/.env`
-2. `packages/server/.env`
-3. `<repo>/.env.test` — override: `USE_TESTCONTAINERS=true`, `DEV_DB_PROTECT=time_tracker`
-
-## Что проверяет `pnpm verify`
-
-Последовательность (как в CI):
-
-1. `**pnpm lint`\*\* — ESLint клиента (`packages/client`)
-2. `**pnpm build:shared**` — сборка `@time-tracker/shared` (нужна для импортов в тестах)
-3. `**pnpm test**` — Vitest server
-4. `**pnpm build**` — сборка shared + client + server
-
-## Ручное тестирование (smoke)
-
-### API
-
-```bash
-# health
 curl http://localhost:9000/health
-
-# sign-up / sign-in → получить access token
-# далее запросы с Authorization: Bearer <token>
-```
-
-### Client
-
-1. `pnpm dev` + postgres
-2. [http://localhost:3000](http://localhost:3000) — регистрация, вход
-3. Создание activity, start/pause/finish
-4. Today plan, history
-5. SSE: открыть вторую вкладку — синхронизация таймера
-
-### Docker-образы
-
-```bash
-docker build -f packages/server/Dockerfile -t time-tracker-server .
-docker build -f packages/client/Dockerfile \
-  --build-arg VITE_API_ENDPOINT=http://localhost:9000 \
-  --build-arg VITE_APP_URL=http://localhost:9000 \
-  -t time-tracker-client .
+# В Docker через client nginx:
+curl http://localhost:3000/api/health
 ```
 
 ## Troubleshooting
 
-### `Cannot find module '@time-tracker/shared'`
+- `Cannot find module '@time-tracker/shared'`: выполните `pnpm build:shared`.
+- Ошибка Docker/Testcontainers: запустите Docker daemon либо настройте выделенную БД через `TEST_DATABASE_URL`.
+- Нужен fallback `DB_*`: измените `.env.test`, одного shell-переопределения `USE_TESTCONTAINERS=false` недостаточно.
+- Проверка CI остановилась на переводах: `pnpm i18n:check`.
+- Ошибка сборки клиента: `pnpm --filter @time-tracker/client build`.
 
-```bash
-pnpm build:shared
-```
-
-### Integration tests skipped / failed on DB
-
-- Проверь, что Postgres запущен: `docker compose -f .docker/docker-compose.yaml ps`
-- Проверь `DB_*` в `.env`
-- Или: `USE_TESTCONTAINERS=true pnpm test`
-
-### Testcontainers timeout
-
-Docker daemon должен быть запущен. При проблемах с сетью используй вариант A (docker compose postgres).
-
-### CI падает на `build:client`
-
-Частая причина — TypeScript ошибки в client. Локально: `pnpm --filter @time-tracker/client build`.
-
-## Добавление новых тестов
-
-1. Unit — рядом с кодом: `src/**/*.test.ts`
-2. Integration — `tests/integration/*.test.ts`
-3. Если нужен Postgres — `beforeAll(() => startTestDatabase())`, `afterAll(() => testDb.stop())`
-4. HTTP-тесты protected routes — оборачивай router mock auth (см. `activity.handlers.test.ts`)
-5. Перед commit: `pnpm verify`
+Новые тесты размещайте в `src/**/*.test.ts` или `tests/**/*.test.ts`; для БД используйте существующие helpers и защиту перед очисткой. Перед merge запускайте `pnpm verify`.

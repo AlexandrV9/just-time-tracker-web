@@ -1,513 +1,473 @@
 # Time Tracker — Architecture
 
-Документ состоит из двух частей:
+## 1. Доменные сущности
 
-- **Часть A** — фактическая системная архитектура (как устроено сейчас)
-- **Часть B** — доменные правила и инварианты (целевая модель)
+### 1.1 Список сущностей
 
----
+| Сущность                 | Краткое описание                                                          |
+| ------------------------ | ------------------------------------------------------------------------- |
+| `User`                   | Пользователь приложения                                                   |
+| `Activity`               | Активность/занятие пользователя                                           |
+| `ActivitySession`        | Сессия активности                                                         |
+| `ActivitySessionSegment` | Непрерывный интервал работы или паузы внутри одной сессии активности      |
+| `DayPlan`                | План пользователя на конкретную календарную дату                          |
+| `DayPlanItem`            | Запись в плане, которая связывает конкретный день и конкретную активность |
+| `ActivitySettings`       | Настройки конкретной активности                                           |
+| `NotificationJob`        | Запланированная отправка уведомления пользователю                         |
+| `PushSubscription`       | Подписка браузера пользователя на Web Push                                |
 
-# Часть A. Системная архитектура
+### 1.2 User
 
-## A.1 Monorepo
+`User` — пользователь приложения. Хранится в таблице `users`
 
-```
-time-tracker/
-├── packages/
-│   ├── client/    @time-tracker/client   — React SPA
-│   ├── server/    @time-tracker/server   — Hono API
-│   └── shared/    @time-tracker/shared   — Zod-схемы и DTO
-├── .docker/       postgres + pgadmin для локальной разработки
-├── docker-compose.yml          — полный локальный стек
-├── docker-compose.prod.yml     — prod через GHCR-образы
-└── .github/workflows/docker-publish.yml
-```
-
-- **Package manager:** pnpm 10.26 (`pnpm-workspace.yaml`)
-- **Root scripts:** `pnpm dev` (client + server + shared), `pnpm verify` (lint → build:shared → test → build), `pnpm test` (только server)
-
-## A.2 Стек
-
-
-| Слой   | Технологии                                                                                                                 |
-| ------ | -------------------------------------------------------------------------------------------------------------------------- |
-| Client | React 19, Vite 7, TypeScript, TanStack Router, TanStack Query, Zustand, Chakra UI v3, axios, i18next, Zod, vite-plugin-pwa |
-| Server | Hono 4, `@hono/node-server`, TypeScript, `pg`, bcrypt                                                                      |
-| DB     | PostgreSQL 15                                                                                                              |
-| CI/CD  | GitHub Actions → GHCR (`ghcr.io/<owner>/time-tracker/{client,server}`)                                                     |
-
-
-## A.3 Аутентификация
-
-### Сервер
-
-**Публичные маршруты** (`packages/server/src/index.ts`):
-
-- `/auth/`* — вход, регистрация, восстановление сессии
-- `/health` — healthcheck
-
-**Защищённые маршруты** — всё остальное за `authMiddleware`:
-
-- проверяет `Authorization: Bearer <accessToken>`
-- кладёт в контекст `user: { id: string }`
-
-**Токены** (`packages/server/src/shared/config/index.ts`):
-
-- Access JWT — 3 минуты, в заголовке `Authorization`
-- Refresh JWT — 7 дней, httpOnly cookie `refresh_token`
-
-**Auth routes** (`packages/server/src/auth/auth.routes.ts`):
-
-
-| Метод | Путь                  | Назначение                                                     |
-| ----- | --------------------- | -------------------------------------------------------------- |
-| GET   | `/auth`               | init: access token → user; иначе refresh cookie → новый access |
-| POST  | `/auth/sign-in`       | вход                                                           |
-| POST  | `/auth/sign-up`       | регистрация                                                    |
-| POST  | `/auth/sign-out`      | выход                                                          |
-| GET   | `/auth/check-refresh` | проверка наличия refresh cookie                                |
-
-
-### Привязка данных к пользователю
-
-Клиент **не передаёт** `createdById` в запросах. Сервер подставляет его из JWT через `withCreatedById()` (`packages/server/src/shared/auth/with-created-by-id.ts`) в handlers для create/list/query операций.
-
-### Клиент
-
-- Access token — `localStorage` (`tokenManager`)
-- Refresh — httpOnly cookie (`withCredentials: true`)
-- Axios interceptor (`packages/client/src/shared/config/axios.ts`): при 401 пробует обновить токен
-- Приватные маршруты: `authManager.checkAuth()` в `beforeLoad` (`routes/(private)/_private.tsx`)
-
-## A.4 Серверная архитектура
-
-Паттерн на фичу (пример `packages/server/src/activity/`):
-
-```
-*.routes.ts  →  *.handlers.ts  →  *.service.ts  →  *.repository.ts + *.queries.ts
-```
-
-**Handlers** — `createValidatedHandler()` (`shared/utils/request.ts`):
-
-1. parse request (query / body / params)
-2. Zod-валидация через схемы из `@time-tracker/shared`
-3. optional `withCreatedById(c, data)` — для user-scoped операций
-4. вызов service → JSON-ответ
-
-**Tracking** — транзакционная логика в `activitySession.tracking.service.ts`; SSE-публикация из `activity.service.ts`.
-
-**SQL** — raw queries через `pg` pool (`shared/db/pool.ts`).
-
-### API-маршруты (фактические)
-
-Все за auth middleware, префикс `/`:
-
-
-| Префикс                      | Назначение                                     |
-| ---------------------------- | ---------------------------------------------- |
-| `/activities`                | CRUD, lifecycle, analytics, grouped lists, SSE |
-| `/activity-sessions`         | GET/DELETE по id                               |
-| `/activity-session-segments` | GET по id                                      |
-| `/day-plans`                 | планы на день                                  |
-| `/day-plan-items`            | элементы плана (+ batch add)                   |
-
-
-**Activities** (`packages/server/src/activity/activity.routes.ts`):
-
-```
-GET    /activities/events              SSE-поток событий трекинга
-GET    /activities                     список (фильтр по текущему user)
-POST   /activities                     создать activity
-GET    /activities/current             текущие/активные за интервал
-GET    /activities/tracked             завершённые за интервал
-GET    /activities/grouped             история по группам (day/week/month)
-GET    /activities/grouped/items       догрузка элементов группы
-GET    /activities/analytics           batch analytics
-POST   /activities/start               start / resume
-POST   /activities/pause               pause
-POST   /activities/finish              finish
-GET    /activities/:id                 по id
-PATCH  /activities/:id                 обновить title/description/tags
-DELETE /activities/:id
-GET    /activities/:id/sessions
-GET    /activities/:id/session-segments
-GET    /activities/:id/analytics
-POST   /activities/by-ids
-```
-
-**Lifecycle body** (не path-param):
-
-```ts
-POST /activities/start   { activityId, startedAt, clientId? }
-POST /activities/pause   { activityId, pausedAt, clientId? }
-POST /activities/finish  { activityId, finishedAt, clientId? }
-```
-
-Отдельного `resume` endpoint нет — resume через `POST /activities/start` на paused session.
-
-**Lifecycle response:**
-
-```ts
+```json
+// ProfileUserDTO
 {
-  activity: ActivityDTO;
-  session: ActivitySessionDTO;
-  segment: ActivitySessionSegmentDTO | null;
+  "id": "string (UUID) — идентификатор пользователя",
+  "name": "string — имя пользователя; в БД хранится как first_name",
+  "login": "string — уникальный логин для входа",
+  "email": "string | null — уникальный email; null, если не задан",
+  "avatar": "string | null — ссылка на аватар; null, если отсутствует",
+  "locale": "en | ru | zh — язык пользователя и push-уведомлений",
+  "pushNotificationsEnabled": "boolean — разрешена ли отправка Web Push пользователю"
 }
 ```
 
-## A.5 Клиентская архитектура
+**Важно!**
+Пароль пользователя хранится в виде хэша, значениеем может быть `string` или `null` для аккаунтов без пароля. Если
 
-Структура (FSD-подобная):
+Дополнительно в таблице `users` у каждого пользователя хранятся поля, не входящие в `ProfileUserDTO`:
 
-
-| Слой     | Путь            | Содержимое                                      |
-| -------- | --------------- | ----------------------------------------------- |
-| app      | `src/app/`      | providers, глобальные стили                     |
-| routes   | `src/routes/`   | TanStack file-based routing                     |
-| features | `src/features/` | auth, activity hooks, i18n, theme               |
-| widgets  | `src/widgets/`  | TodayActivityList, ActivityList, NavBar, Header |
-| entities | `src/entities/` | карточки Activity                               |
-| shared   | `src/shared/`   | api, ui, hooks, libs, config                    |
-
-
-**Routing:** `@tanstack/router-plugin` → `routeTree.gen.ts`; router context несёт `queryClient`.
-
-**State:**
-
-- **TanStack Query** — серверные данные (activities, day plans, analytics)
-- **Zustand** — auth, current activity, header
-
-**API layer:** `shared/api/services/` → `baseApi` (axios) → `/api/...`
-
-**Dev proxy** (`vite.config.ts`): `/api` → `VITE_API_ENDPOINT` (prefix `/api` снимается); для SSE `/activities/events` — специальные заголовки без буферизации.
-
-**Real-time:** `useActivityEvents` в private layout подписывается на `GET /api/activities/events`, валидирует события shared-схемой, обновляет Zustand + invalidates React Query.
-
-**Env:**
-
-- `VITE_API_ENDPOINT` — target для Vite proxy и refresh URL
-- `VITE_APP_URL` — axios `baseURL`
-
-## A.6 Shared package
-
-`packages/shared/src/` — единый источник Zod-схем и TypeScript DTO для client и server:
-
-- `activity/` — activity, session, segment, events, analytics, grouped
-- `dayPlan/`, `dayPlanItem/`
-- `common/` — pagination, `baseIdSchema`
-
-Сборка: `tsc` → `dist/`; импорт как `workspace:`*.
-
-Request-схемы **не содержат** `createdById` — только response DTO (поле есть у сущностей).
-
-## A.7 Деплой
-
-
-| Файл                          | Назначение                                    |
-| ----------------------------- | --------------------------------------------- |
-| `.docker/docker-compose.yaml` | только postgres (+ pgadmin) для `pnpm dev`    |
-| `docker-compose.yml`          | client + server + postgres (локальная сборка) |
-| `docker-compose.prod.yml`     | pull образов из GHCR + postgres               |
-
-
-CI: push в `main` → `pnpm verify` (с postgres service) → docker build/push client + server.
-
-Подробности: [docs/docker.md](docs/docker.md).
-
-## A.8 Тестирование
-
-- **Scope:** только server (`pnpm test` → Vitest)
-- **Integration:** HTTP-тесты router с mock auth middleware (`tests/setup/test-auth.ts`, `TEST_USER_ID = "user-1"`)
-- **DB:** Testcontainers PostgreSQL или существующий postgres (`tests/setup/test-db.ts`)
-- **Client tests:** нет
-
-## A.9 Статус реализации
-
-
-| Функция                                              | Статус                                                                        |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Activity tracking (start/pause/finish/resume)        | ✅ реализовано                                                                 |
-| SSE sync между вкладками/устройствами                | ✅ реализовано                                                                 |
-| Day plans                                            | ✅ реализовано                                                                 |
-| Grouped history / analytics                          | ✅ реализовано                                                                 |
-| User scoping через JWT (без `createdById` с клиента) | ✅ реализовано                                                                 |
-| SyncManager / offline sync                           | ⏳ код закомментирован, не активен                                             |
-| IndexedDB wrapper                                    | ⏳ есть (`shared/services/IndexedDB/`), используется только SyncManager        |
-| CORS на сервере                                      | ⏳ закомментирован в `index.ts`                                                |
-
-
----
-
-# Часть B. Domain Specification
-
-Доменные правила. Любые изменения модели должны проверяться на соответствие этим правилам.
-
-## B.1 Core Domain Model
-
-### B.1.1 Activity
-
-`Activity` — долгоживущая сущность, описывающая тип работы.
-
-Примеры: Work, Reading, Coding.
-
-**Важно:**
-
-- Activity ≠ выполнение
-- Activity может иметь много сессий (ActivitySession)
-
-### B.1.2 ActivitySession
-
-`ActivitySession` — один непрерывный эпизод работы над активностью.
-
-Сессия:
-
-- начинается при `start`
-- заканчивается при `finish`
-- состоит из непрерывных сегментов (ActivitySessionSegment); между сегментами нет «дыр»
-- содержит сегменты двух типов: `active` / `pause`
-
-### B.1.3 ActivitySessionSegment
-
-`ActivitySessionSegment` — минимальная единица времени (источник истины).
-
-Типы: `active`, `pause`.
-
-## B.2 Source of Truth
-
-### B.2.1 Иерархия истины
-
-```
-Segment → Session → Activity
-```
-
-- Segment — единственный источник истины
-- Session — агрегат по сегментам
-- Activity — агрегат по сессиям
-
-### B.2.2 Денормализованные поля
-
-Допустимые кэш-поля:
-
-- `Activity.activeDurationMs`, `Activity.pauseDurationMs`
-- `ActivitySession.activeDurationMs`, `ActivitySession.pauseDurationMs`
-
-Они ускоряют чтение и могут быть пересчитаны из сегментов.
-
-### B.2.3 Activity status
-
-В **таблице** `activities` нет колонки `status`.
-
-Статус **вычисляется** при чтении (SQL join с `activity_sessions` по `currentActivitySessionId`):
-
-- `currentActivitySessionId = null` → `idle`
-- session `active` → `active`
-- session `paused` → `paused`
-
-В **DTO** (`ActivityDTO`) поле `status` присутствует — это computed field для API/UI, не persisted state.
-
-## B.3 Invariants
-
-### B.3.1 Единственная активная сессия
-
-У пользователя: максимум 1 незавершённая session.
-
-### B.3.2 Связь Activity ↔ Session
-
-Если `activity.currentActivitySessionId !== null`, то session существует и не в статусе `finished`.
-
-### B.3.3 Status ↔ endedAt
-
-
-| status   | endedAt  |
-| -------- | -------- |
-| active   | null     |
-| paused   | null     |
-| finished | NOT null |
-
-
-### B.3.4 Открытые сегменты
-
-У незавершённой session: ровно 1 segment с `endedAt = null`.
-
-### B.3.5 Соответствие статусу
-
-
-| session.status | open segment type |
-| -------------- | ----------------- |
-| active         | active            |
-| paused         | pause             |
-| finished       | none              |
-
-
-### B.3.6 Последовательность сегментов
-
-Сегменты внутри session:
-
-- не пересекаются
-- идут подряд
-- чередуются: `active → pause → active → ...`
-
-### B.3.7 Первый сегмент
-
-Новая session всегда начинается с `active` segment.
-
-## B.4 State Transitions
-
-### B.4.1 Start (новая activity)
-
-Создаёт: session (active) + первый active segment.
-
-### B.4.2 Pause
-
-- закрывает active segment
-- обновляет activeDuration
-- session → paused
-- открывает pause segment
-
-### B.4.3 Resume
-
-- закрывает pause segment
-- обновляет pauseDuration
-- session → active
-- открывает active segment
-
-(Реализовано через `POST /activities/start`)
-
-### B.4.4 Finish
-
-- закрывает текущий segment
-- session → finished, `session.endedAt = now`
-- `activity.currentActivitySessionId = null`
-
-### B.4.5 Switch Activity
-
-Если есть незавершённая session — она автоматически завершается (finish), затем создаётся новая session для новой activity.
-
-## B.5 Time & Analytics
-
-### B.5.1 Сессии не делятся по дням
-
-Нельзя завершать session в полночь искусственно.
-
-### B.5.2 Аналитика строится по segment
-
-Не по session.
-
-### B.5.3 Пересечение полуночи
-
-Segment `23:50 → 00:20`:
-
-- день 1 → 10 мин
-- день 2 → 20 мин
-
-### B.5.4 Таймзона
-
-- хранение: UTC
-- аналитика: локальная TZ пользователя
-
-### B.5.5 История — read-only
-
-Исторические данные нельзя запускать/паузить — только просмотр.
-
-## B.6 UI Rules
-
-### B.6.1 Разделение зон
-
-1. Текущий таймер
-2. Активные карточки (today plan)
-3. История
-
-### B.6.2 Главный таймер
-
-Текущая session + текущее время.
-
-### B.6.3 Карточки
-
-- Активные (выбраны на сегодня): start / pause / resume
-- История: read-only
-
-### B.6.4 Время
-
-Главный счётчик = только active time.
-
-## B.7 API Rules
-
-### B.7.1 Отдельные действия
-
-Не использовать `PATCH /activities/:id` для start/pause/finish — только dedicated endpoints.
-
-### B.7.2 Lifecycle endpoints (фактические)
-
-```
-POST /activities/start
-POST /activities/pause
-POST /activities/finish
-```
-
-Body: `{ activityId, startedAt|pausedAt|finishedAt, clientId? }`.
-
-### B.7.3 Единый ответ lifecycle
-
-```ts
+```json
 {
-  activity: ActivityDTO;
-  session: ActivitySessionDTO;
-  segment: ActivitySessionSegmentDTO | null;
+  "password_hash": "string | null — хеш пароля; null у аккаунта без пароля",
+  "email_verified_at": "timestamp | null — время подтверждения email",
+  "is_active": "boolean — признак активности учётной записи",
+  "created_at": "timestamp — время создания пользователя",
+  "updated_at": "timestamp — время последнего обновления данных пользователя"
 }
 ```
 
-### B.7.4 Current / tracked activities
+В JSON профиля используются имена DTO; в БД `pushNotificationsEnabled` соответствует `push_notifications_enabled`.
 
+**Назначение:**
+Нужен для идентификации пользователя, привязки его активностей и планов, хранения профиля и персональных предпочтений.
+
+### 1.3 Activity
+
+`Activity` — долгоживущая сущность, описывающая одно занятие/процесс пользователя,например: Work, Reading или Coding.
+
+Принадлежит конкретному пользователю. Одна активность может иметь много сессий. Хранится в таблице `activities`.
+
+**Важно!**
+Активность содержит в себе также "накопленное активное время" и "накопленное время на паузе", а также ссылку на последнюю сессию. Статус активности вычисляется по последней сессии.
+
+```json
+// ActivityDTO
+{
+  "id": "string (UUID) — идентификатор активности",
+  "createdById": "string — идентификатор пользователя, которому принадлежит активность",
+  "title": "string — название активности",
+  "description": "string (необязательное поле) — описание активности",
+  "tags": "string[] — теги активности, не более 10",
+  "status": "idle | active | paused — статус в shared DTO; SQL также может вернуть finished, см. раздел Activity status",
+  "currentSessionId": "string | null — идентификатор последней сессии, включая завершённую; null, если ссылки нет",
+  "activeDurationMs": "number — накопленное время работы по закрытым сегментам, в миллисекундах",
+  "pauseDurationMs": "number — накопленное время пауз по закрытым сегментам, в миллисекундах",
+  "createdAt": "string (ISO 8601) — время создания активности",
+  "updatedAt": "string (ISO 8601) — время последнего обновления активности"
+}
 ```
-GET /activities/current?fromDate&toDate&status&page&limit
-GET /activities/tracked?fromDate&toDate&page&limit
+
+В обычном DTO длительности берутся из накопленных полей активности. В `/activities/current` и `/activities/tracked` поля длительности рассчитываются для запрошенного интервала; это отдельная семантика ответа.
+
+**Назначение:** Нужна, чтобы объединять повторяющиеся выполнения одного занятия и просматривать их суммарное время и историю.
+
+### 1.4 ActivitySession
+
+`ActivitySession` — один интервал активности от `start` до `finish`, включающий работу и паузы.
+
+Принадлежит одной активности. Новая сессия начинается со статусом `active`; пауза переводит её в `paused`, завершение — в `finished`. Возобновление продолжает ту же сессию. Хранится в таблице `activity_sessions`.
+
+**Важно:** При обычных переходах tracking service сегменты идут подряд, а сессия не завершается при наступлении полуночи.
+
+```json
+// ActivitySessionDTO
+{
+  "id": "string (UUID) — идентификатор сессии",
+  "activityId": "string — идентификатор активности, к которой относится сессия",
+  "startedAt": "string (ISO 8601) — время запуска сессии",
+  "endedAt": "string (ISO 8601) | null — время завершения; null у незавершённой сессии",
+  "status": "active | paused | finished — состояние сессии",
+  "activeDurationMs": "number — накопленная длительность закрытых active-сегментов в миллисекундах",
+  "pauseDurationMs": "number — накопленная длительность закрытых pause-сегментов в миллисекундах",
+  "currentSegmentId": "string | null — идентификатор текущего сегмента; null после finish",
+  "createdAt": "string (ISO 8601) — время создания записи сессии",
+  "updatedAt": "string (ISO 8601) — время последнего обновления записи сессии"
+}
 ```
 
-User scope — из JWT, `createdById` в query не передаётся.
+**Назначение:** Нужна, чтобы выделять отдельный запуск активности с его работой, паузами и завершением, не смешивая разные моменты выполнения.
 
-### B.7.5 SSE events
+### 1.5 ActivitySessionSegment
 
+`ActivitySessionSegment` — непрерывный интервал времени одного типа внутри сессии: `active` (работа) или `pause` (пауза).
+
+Принадлежит одной сессии. Содержит начало интервала и его окончание; у открытого сегмента `endedAt = null`. При pause/resume текущий сегмент закрывается и открывается сегмент другого типа. При finish текущий сегмент закрывается без создания следующего.
+
+Хранится в `activity_session_segments`. Сегменты служат источником временных интервалов для аналитики и расчёта длительностей.
+
+Поля (`имя поля: тип и описание`):
+
+```json
+// ActivitySessionSegmentDTO
+{
+  "id": "string (UUID) — идентификатор сегмента",
+  "sessionId": "string — идентификатор сессии, которой принадлежит сегмент",
+  "type": "active | pause — работа или пауза; колонка segment_type в БД",
+  "startedAt": "string (ISO 8601) — начало интервала",
+  "endedAt": "string (ISO 8601) | null — конец интервала; null у открытого сегмента",
+  "createdAt": "string (ISO 8601) — время создания записи сегмента",
+  "updatedAt": "string (ISO 8601) — время последнего обновления записи сегмента"
+}
 ```
-GET /activities/events
+
+**Назначение:** Нужен для точного учёта работы и пауз и распределения времени по выбранным интервалам и календарным дням.
+
+### 1.6 DayPlan
+
+`DayPlan` — план пользователя на календарную дату в формате `YYYY-MM-DD`.
+
+Содержит владельца и дату; выбранные активности представлены отдельными `DayPlanItem`. Для пары пользователь/дата в БД действует ограничение уникальности.
+
+Хранится в таблице `day_plans`. Удаление плана каскадно удаляет его элементы.
+
+```json
+// DayPlanDTO
+{
+  "id": "string (UUID) — идентификатор плана",
+  "createdById": "string — идентификатор владельца плана",
+  "date": "string (YYYY-MM-DD) — календарная дата плана без времени",
+  "createdAt": "string (ISO 8601) — время создания плана",
+  "updatedAt": "string (ISO 8601) — время последнего обновления плана"
+}
 ```
 
-События: `started` | `paused` | `finished` (+ `ping` keep-alive для поддержания SSE-соединения).
+**Назначение:** Нужен, чтобы хранить набор выбранных пользователем активностей на определённый день.
 
-## B.8 Consistency
+### 1.7 DayPlanItem
 
-### B.8.1 Транзакционность
+`DayPlanItem` — связь между планом на день и выбранной активностью.
 
-start, pause, resume, finish, switch — атомарны (DB transaction).
+Содержит `dayPlanId` и `activityId`. Одна активность может входить в планы разных дней, но в пределах одного плана не может повторяться: пара план/активность уникальна.
 
-### B.8.2 Сервер — источник истины
+Хранится в таблице `day_plan_items`. Удаляется каскадно при удалении плана или активности. Собственных сессий и длительностей у элемента плана нет.
 
-Frontend не решает бизнес-логику, только отображает состояние.
+```json
+// DayPlanItemDTO
+{
+  "id": "string (UUID) — идентификатор записи в плане",
+  "dayPlanId": "string — идентификатор плана на день",
+  "activityId": "string — идентификатор выбранной активности",
+  "createdAt": "string (ISO 8601) — время добавления активности в план",
+  "updatedAt": "string (ISO 8601) — время последнего обновления записи"
+}
+```
 
-### B.8.3 Предсказуемость
+**Назначение:** Нужен, чтобы включать активность в конкретный дневной план, сохраняя саму активность и её историю независимо от плана.
 
-Любое действие детерминировано и одинаково при повторе.
+### 1.8 ActivitySettings
 
-## B.9 Anti-Patterns (Запрещено)
+`ActivitySettings` — настройки активности.
 
-- ❌ Хранить `status` в таблице `activities`
-- ❌ Иметь 2 незавершённые session у одного user
-- ❌ Иметь session без открытого segment
-- ❌ Делить session по дням
-- ❌ Строить аналитику по session вместо segment
-- ❌ Делать историю интерактивной
-- ❌ Давать frontend управлять логикой состояний
-- ❌ Передавать `createdById` / `userId` с клиента в API-запросах
-- ❌ Автоматически завершать session без явного действия пользователя
+Содержит `sessionGoalSeconds`, флаги уведомлений о достижении цели, долгой работе и долгой паузе, а также пороги продолжительности работы и паузы. Несмотря на имя `sessionGoalSeconds`, планировщик уведомлений сравнивает цель с активным временем активности за текущий UTC-день.
 
-## B.10 Core Principles (TL;DR)
+Хранится в таблице `activity_settings`, где ID активности служит первичным ключом. Если сохранённой записи нет, API возвращает настройки по умолчанию. Значения и поведение планировщика описаны в разделе «Напоминания».
 
-1. Segment — источник истины
-2. Session — один запуск
-3. Activity — контейнер
-4. Только одна активная session на user
-5. Start другой activity → finish предыдущей
-6. День — это аналитика, не домен
-7. UI и Domain разделены
-8. User identity — только из auth middleware
-9. Session завершается только явным `finish` (или switch → finish предыдущей)
+```json
+// ActivitySettingsDTO
+{
+  "sessionGoalSeconds": "number (целое > 0) — цель в секундах; по умолчанию 5400 сек (1,5 часа); для напоминаний считается за UTC-день",
+  "notifyOnGoalReached": "boolean — уведомлять о достижении цели; по умолчанию false",
+  "notifyOnLongPause": "boolean — уведомлять о долгой паузе; по умолчанию false",
+  "longPauseThresholdSeconds": "number (целое > 0) — порог текущей паузы в секундах; по умолчанию 1800",
+  "notifyOnLongActivity": "boolean — уведомлять о долгой работе; по умолчанию false",
+  "longActivityThresholdSeconds": "number (целое > 0) — порог текущего active-сегмента в секундах; по умолчанию 1800"
+}
+```
 
+Привязка задаётся ID активности в маршруте API. В таблице `activity_settings` дополнительно хранятся `activity_id` (первичный ключ), `created_at` и `updated_at`; эти поля не входят в DTO.
+
+**Назначение:** Нужны, чтобы задавать отдельную цель и правила напоминаний для каждой активности.
+
+### 1.9 NotificationJob
+
+`NotificationJob` — задача отправки уведомления пользователю в заданный момент `sendAt`.
+
+Содержит пользователя, необязательную ссылку на активность, тип, заголовок, текст и дополнительные данные (`payload`). Для напоминаний в payload сохраняется ID сессии. Используемые типы напоминаний: достижение цели, долгая пауза и долгая работа.
+
+Хранится в тпблице `notification_jobs`. Статусы: `pending`, `sent`, `failed`, `canceled`. Worker выбирает ожидающие задачи, передаёт их отправителям и сохраняет результат отправки.
+
+```json
+// NotificationJobDTO
+{
+  "id": "string (UUID) — идентификатор задачи уведомления",
+  "userId": "string — идентификатор получателя",
+  "activityId": "string | null — связанная активность; может отсутствовать",
+  "type": "string — тип уведомления, в том числе напоминание о цели, долгой паузе или долгой работе",
+  "title": "string — заголовок; для activity reminders хранит название активности для локализации отправителем",
+  "body": "string — текст; для activity reminders планировщик сохраняет пустую строку, текст формируется при доставке",
+  "payload": "object | null — дополнительные данные; для activity reminders содержит sessionId",
+  "sendAt": "string (ISO 8601) — запланированное время отправки",
+  "status": "pending | sent | failed | canceled — состояние обработки задачи",
+  "sentAt": "string (ISO 8601) | null — время успешной обработки отправителями; null до отправки",
+  "createdAt": "string (ISO 8601) — время создания задачи",
+  "updatedAt": "string (ISO 8601) — время последнего обновления задачи"
+}
+```
+
+**Назначение:** Нужна, чтобы сохранять запланированное уведомление и результат его обработки независимо от открытого интерфейса пользователя.
+
+### 1.10 PushSubscription
+
+`PushSubscription` — подписка конкретного браузера пользователя на доставку Web Push.
+
+Содержит ID пользователя, endpoint push-сервиса и ключи `p256dh` и `auth`. У пользователя может быть несколько подписок, например для разных устройств. Endpoint уникален в БД.
+
+Хранится в таблице `push_subscriptions`. Используется push-отправителем вместе с настройками пользователя. Подписки, для которых push-сервис вернул 404 или 410, удаляются.
+
+```json
+// PushSubscriptionDTO
+{
+  "id": "string (UUID) — идентификатор сохранённой подписки",
+  "userId": "string — идентификатор владельца подписки",
+  "endpoint": "string (URL) — уникальный адрес подписки в push-сервисе браузера",
+  "p256dh": "string — публичный ключ браузера для шифрования push-сообщений",
+  "auth": "string — секрет подписки для шифрования push-сообщений",
+  "createdAt": "string (ISO 8601) — время создания подписки",
+  "updatedAt": "string (ISO 8601) — время последнего обновления подписки"
+}
+```
+
+JSON показывает серверную сохранённую подписку. В запросе регистрации передаются `endpoint` и объект `keys` с полями `p256dh` и `auth`; `userId` сервер берёт из авторизации.
+
+**Назначение:** Нужна, чтобы сервер мог отправлять Web Push в конкретный браузер пользователя, в том числе при закрытом приложении.
+
+## 2. Связи между сущностями
+
+| Связь | Как реализована |
+| --- | --- |
+| `User` → `Activity` | У пользователя может быть много активностей. Владелец указан в `Activity.createdById`. |
+| `User` → `DayPlan` | У пользователя может быть много дневных планов; пара владелец/дата уникальна в БД. |
+| `Activity` → `ActivitySession` | У активности может быть много сессий. Каждая сессия связана с одной активностью через `activityId`. |
+| `ActivitySession` → `ActivitySessionSegment` | Сессия состоит из сегментов; каждый сегмент связан с ней через `sessionId`. |
+| `DayPlan` → `DayPlanItem` → `Activity` | Элемент плана связывает день и активность. Пара план/активность уникальна в БД. |
+| `Activity` → `ActivitySettings` | У активности может быть одна сохранённая запись настроек; без неё API возвращает значения по умолчанию. |
+| `User` → `NotificationJob` | Задача содержит получателя `userId`; необязательная связь с активностью задана через `activityId`. |
+| `User` → `PushSubscription` | У пользователя может быть несколько подписок браузеров; endpoint уникален в БД. |
+
+`Activity.currentSessionId` указывает на последнюю сессию, а `ActivitySession.currentSegmentId` — на текущий сегмент. Это ссылки на разных уровнях модели.
+
+**Важно:** `createdById` в таблицах `activities` и `day_plans` хранится как `TEXT` без внешнего ключа на `users`. Привязка владельца и проверка доступа выполняются кодом приложения; ограничения этих проверок описаны в разделе 9.
+
+## 3. Источник данных и накопленное время
+
+### 3.1 Интервалы и агрегаты
+
+`ActivitySessionSegment` хранит интервалы активной работы и пауз. `ActivitySession` объединяет их в один запуск, а `Activity` объединяет запуски одного занятия.
+
+При закрытии сегмента tracking service добавляет его длительность к соответствующему полю `activeDurationMs` или `pauseDurationMs` у сессии и активности. Накопленные поля обновляются в той же транзакции, что и сегмент.
+
+Открытый сегмент ещё не включён в эти накопленные поля. Для отображения текущего времени клиент добавляет прошедшее время открытого сегмента. В ответах списков за интервал длительности могут рассчитываться отдельно по сегментам, как указано в пункте 1.3.
+
+### 3.2 Статус активности
+
+В таблице `activities` нет колонки `status`. При чтении SQL получает статус сессии по `last_activity_session_id`; если сессии нет, возвращается `idle`.
+
+В `ActivityDTO` эта ссылка называется `currentSessionId`, хотя может указывать и на завершённую сессию. После finish она сохраняется; обнуляется `ActivitySession.currentSegmentId`.
+
+**Важно:** shared-схема `ActivityDTO.status` допускает `idle | active | paused`, но SQL может вернуть `finished`. Преобразование строки БД в DTO использует приведение типа и не устраняет это расхождение.
+
+## 4. Состояние сессии и сегментов
+
+### 4.1 Соответствие полей
+
+При обычных переходах tracking service состояние `ActivitySession` связано с её текущим `ActivitySessionSegment` следующим образом:
+
+| `ActivitySession.status` | `ActivitySession.endedAt` | Текущий сегмент | `ActivitySession.currentSegmentId` |
+| --- | --- | --- | --- |
+| `active` | `null` | `type = active`, `endedAt = null` | ID открытого сегмента |
+| `paused` | `null` | `type = pause`, `endedAt = null` | ID открытого сегмента |
+| `finished` | Время завершения | Открытого сегмента нет | `null` |
+
+Новая сессия начинается с сегмента `active`. При pause/resume предыдущий сегмент закрывается тем же timestamp, с которого начинается следующий. При корректных временных метках интервалы идут подряд и чередуются: `active → pause → active`.
+
+Эти правила поддерживаются tracking service, но не полностью обеспечиваются ограничениями БД. Подробнее — в разделе 10.
+
+### 4.2 Несколько незавершённых сессий
+
+Tracking service блокирует строку конкретной `Activity` через `FOR UPDATE`. Общего ограничения на одну незавершённую `ActivitySession` для пользователя нет: API допускает незавершённые сессии разных активностей.
+
+Интерфейс блокирует start/resume/pause на других карточках, пока другая активность запущена. Это поведение клиента; автоматического завершения другой сессии на сервере нет.
+
+## 5. Запуск, пауза и завершение
+
+| Действие | Изменения сущностей |
+| --- | --- |
+| Start | Если последней сессии нет или она завершена, создаются `ActivitySession` со статусом `active` и первый `ActivitySessionSegment` типа `active`. Обновляются ссылки на последнюю сессию и текущий сегмент. |
+| Pause | Закрывается сегмент `active`, его время добавляется в `activeDurationMs` сессии и активности. Сессия получает статус `paused`, создаётся сегмент `pause`. |
+| Resume | Закрывается сегмент `pause`, его время добавляется в `pauseDurationMs` сессии и активности. Сессия получает статус `active`, создаётся сегмент `active`. Новая сессия не создаётся. |
+| Finish | Закрывается текущий сегмент, его время добавляется в соответствующие накопленные поля. Сессия получает `status = finished`, `endedAt = finishedAt`, `currentSegmentId = null`. Ссылка активности на последнюю сессию сохраняется. |
+
+Resume выполняется тем же endpoint, что и start. Время перехода приходит с клиента в `startedAt`, `pausedAt` или `finishedAt`.
+
+Отдельного действия switch нет. Start другой активности работает только с указанной активностью; завершение предыдущей требует отдельного finish.
+
+Повторный start активной сессии, pause неактивной или finish завершённой возвращает `success: false`. Эти действия не являются идемпотентными.
+
+## 6. Время, аналитика и история
+
+### 6.1 Границы сессии и дня
+
+`ActivitySession` не завершается автоматически в полночь. Один `ActivitySessionSegment` может пересекать границу дня; для аналитики его интервал разбивается на части без изменения сохранённого сегмента.
+
+Например, закрытый сегмент работы `23:50 → 00:20` через полночь UTC даёт 10 минут первому UTC-дню и 20 минут второму.
+
+`DayPlan.date` описывает календарный день плана. Включение активности в `DayPlanItem` не создаёт сессию и не меняет границы уже существующих сессий.
+
+### 6.2 Расчёт длительностей
+
+Серверная аналитика обрезает закрытые сегменты по запрошенному интервалу и распределяет время по UTC-дням. Открытые сегменты исключаются из этих totals; текущую длительность клиент считает отдельно.
+
+Клиент выбирает локальный календарный день и передаёт его границы в ISO 8601. Графики за выбранный день строятся из сегментов в этом интервале. Серверные UTC-группы и локальный день клиента могут иметь разные границы.
+
+Цель из `ActivitySettings.sessionGoalSeconds` для напоминаний рассчитывается по активному времени активности за текущий UTC-день, а не по длительности одной сессии.
+
+### 6.3 Просмотр и удаление истории
+
+Карточки истории показывают данные без start/pause. Из них можно перейти в аналитику активности, выбрать день и удалить сессию.
+
+API запрещает удалять `ActivitySession` в статусе `active` (HTTP 409), но допускает удаление `paused` и `finished`. Сегменты удаляются вместе с сессией по каскадной связи БД.
+
+## 7. Отображение сущностей в интерфейсе
+
+| Экран | Какие данные используются |
+| --- | --- |
+| Главная страница | Текущие `Activity`, `ActivitySession`, `ActivitySessionSegment` для таймера; `DayPlan` и `DayPlanItem` для списка на сегодня. |
+| Каталог активностей | Список `Activity`, создание и переход в сведения об активности. |
+| Сведения об активности | `Activity`, редактирование и удаление, переходы в аналитику и настройки. |
+| Аналитика активности | Сессии и сегменты за выбранный день, длительности работы и пауз, удаление сессии. |
+| Настройки активности | `ActivitySettings`, автосохранение цели и параметров напоминаний. |
+| Профиль и настройки уведомлений | Данные `User`, включая локаль и `pushNotificationsEnabled`; регистрация подписки браузера. |
+
+Главный счётчик показывает активное время сессии, без пауз. На карточках доступны start, pause/resume и finish в зависимости от состояния; для отдельных карточек управление может быть ограничено только finish. План на день не содержит собственных длительностей — отображается время связанных активностей и сессий.
+
+## 8. API и синхронизация событий
+
+### 8.1 Действия над сессией
+
+| Endpoint | Поля JSON-запроса |
+| --- | --- |
+| `POST /activities/start` | `activityId`, `startedAt`, необязательный `clientId` |
+| `POST /activities/pause` | `activityId`, `pausedAt`, необязательный `clientId` |
+| `POST /activities/finish` | `activityId`, `finishedAt`, необязательный `clientId` |
+
+Успешный ответ содержит согласованный набор сущностей для обновления интерфейса:
+
+```ts
+{
+  success: true;
+  data: {
+    activity: ActivityDTO;
+    session: ActivitySessionDTO;
+    segment: ActivitySessionSegmentDTO | null;
+  };
+}
+```
+
+`segment` — текущий сегмент; после finish равен `null`. `PATCH /activities/:id` используется для данных активности, а не для переходов состояния сессии.
+
+### 8.2 Получение текущих и отслеженных активностей
+
+| Endpoint | Назначение |
+| --- | --- |
+| `GET /activities/current` | Текущие активности с данными связанной сессии и сегмента; фильтры `fromDate`, `toDate`, `status`, пагинация `page`, `limit`. |
+| `GET /activities/tracked` | Отслеженные активности за интервал `fromDate`/`toDate`, пагинация `page`, `limit`. |
+
+В этих запросах владелец подставляется сервером из JWT; клиент не передаёт `createdById`.
+
+### 8.3 SSE
+
+`GET /activities/events` открывает поток для авторизованного пользователя.
+
+| Событие | Содержимое и назначение |
+| --- | --- |
+| `started` | Данные активности, сессии и сегмента после start/resume. |
+| `paused` | Данные активности, сессии и сегмента после pause. |
+| `finished` | Данные после finish; текущий сегмент отсутствует. |
+| `reminder` | ID задачи, тип напоминания, ID активности, заголовок и текст. |
+| `ping` | Служебное поддержание соединения, интервал 25 секунд. |
+
+Клиент проверяет события shared-схемой, обновляет Zustand и инвалидирует запросы TanStack Query. События трекинга с собственным `clientId` пропускаются. При скрытии страницы клиент закрывает соединение; при возврате запрашивает текущее состояние и подключается снова. Повторные подключения используют задержку до 30 секунд.
+
+Hub хранит подписчиков в памяти серверного процесса. Общего канала событий между несколькими процессами нет.
+
+## 9. Сохранение состояния и доступ к данным
+
+### 9.1 Транзакции
+
+Start/resume, pause и finish изменяют активность, сессию и сегменты в транзакции PostgreSQL с блокировкой строки активности.
+
+Ответ загружается после commit. Затем сервис публикует SSE и обновляет задачи напоминаний. Публикация событий и планирование `NotificationJob` не входят в транзакцию трекинга; ошибка планировщика не отменяет уже сохранённый переход.
+
+### 9.2 Состояние клиента
+
+Клиент выполняет оптимистичные обновления Zustand, затем применяет ответ API и инвалидирует TanStack Query. Сохранённое состояние находится на сервере; клиент дополнительно рассчитывает прошедшее время открытого сегмента для живого таймера.
+
+### 9.3 Владелец и авторизация
+
+JWT middleware устанавливает ID пользователя. При создании активности и плана, а также в списках с пользовательской фильтрацией сервер подставляет `createdById`. Настройки активности отдельно проверяют владельца.
+
+**Важно:** ряд операций по ID (CRUD активности, действия над сессиями, чтение сегментов, аналитика, получение по списку ID и операции с элементами плана) не получает ID текущего пользователя для проверки владельца. Наличие JWT middleware само по себе не обеспечивает изоляцию всех объектов пользователя.
+
+## 10. Ограничения реализации
+
+| Ограничение | Фактическое поведение |
+| --- | --- |
+| Одна незавершённая сессия на пользователя | Сервер и БД не обеспечивают это ограничение для разных активностей. |
+| Один открытый сегмент и соответствие статусу | Поддерживаются обычными переходами tracking service; полного набора ограничений БД нет. |
+| Последовательность временных меток | Метки приходят с клиента; tracking service не проверяет их монотонность. |
+| Отсутствие пересечений сегментов | При корректных метках переходы сервиса дают последовательные интервалы; БД не запрещает пересечения отдельно. |
+| Статус активности | SQL может вернуть `finished`, отсутствующий в shared-схеме `ActivityDTO.status`. |
+| Обновление настроек напоминаний | Сохраняет `ActivitySettings`, но само по себе не перепланирует ожидающие `NotificationJob`. |
+| Синхронизация нескольких серверных процессов | SSE hub работает в памяти одного процесса. |
+
+## 11. Напоминания и Web Push
+
+### 11.1 Настройки и планирование
+
+В `ActivitySettings` по умолчанию цель равна 5400 секунд, пороги долгой работы и паузы — 1800 секунд. Все три флага уведомлений выключены.
+
+| Событие сессии | Действия с `NotificationJob` |
+| --- | --- |
+| Start/resume | Отмена ожидающих задач сессии; планирование достижения цели и долгой работы при включённых флагах. |
+| Pause | Отмена ожидающих задач достижения цели и долгой работы; планирование долгой паузы при включённом флаге. |
+| Finish | Отмена ожидающих задач сессии. |
+
+Долгая работа и пауза отсчитываются по текущему сегменту. Цель сравнивается с активным временем активности за UTC-день; дополнительно проверяется, отправлялось ли уже уведомление о цели с начала этого дня.
+
+### 11.2 Обработка задач
+
+Worker работает в серверном процессе: использует таймер ближайшей задачи и резервный опрос с интервалом 5 секунд. Ожидающие задачи хранятся в PostgreSQL.
+
+Для каждой задачи составной отправитель вызывает console, SSE и Web Push. После успешной обработки задача получает `sent` и время `sentAt`; при ошибке — `failed`. Это результат обработки отправителями, а не подтверждение прочтения пользователем.
+
+### 11.3 Доставка пользователю
+
+SSE-reminder вызывает браузерное уведомление через service worker (`showNotification`) или `new Notification`. Для показа нужно разрешение браузера; отдельного сохраняемого списка входящих уведомлений этот механизм не создаёт.
+
+Для Web Push используются `PushSubscription` и настройка `User.pushNotificationsEnabled`. Нужны серверные `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY` и клиентский `VITE_VAPID_PUBLIC_KEY`. Наличие SSE-соединения не подавляет push.
+
+Язык текста push-сообщения определяется по `User.locale` (`en`, `ru`, `zh`). Если push-сервис возвращает для подписки 404 или 410, она удаляется из `push_subscriptions`.
+
+Проверки описаны в [testing.md](testing.md), запуск и обновление — в [docker.md](docker.md), [deploy.md](deploy.md) и [update-deploy.md](update-deploy.md).

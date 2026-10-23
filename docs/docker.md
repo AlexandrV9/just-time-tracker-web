@@ -24,21 +24,21 @@ cp .env.example .env   # заполните секреты
 Самый частый сценарий при разработке: приложение на хосте, БД в Docker.
 
 ```bash
-docker compose -f .docker/docker-compose.yaml up -d postgres
+docker compose --env-file .env -f .docker/docker-compose.yaml up -d postgres
 ```
 
 Проверка:
 
 ```bash
-docker compose -f .docker/docker-compose.yaml ps
+docker compose --env-file .env -f .docker/docker-compose.yaml ps
 ```
 
-Данные сохраняются в `.docker/postgres/data/`.
+Данные сохраняются в `.docker/postgres/data/` (bind mount): `down -v` этот каталог не удаляет. Этот compose не монтирует `init.sql`, поэтому на новой БД схему нужно создать отдельно. `--env-file .env` явно передаёт корневые переменные в compose из `.docker/`.
 
 С pgAdmin:
 
 ```bash
-docker compose -f .docker/docker-compose.yaml up -d
+docker compose --env-file .env -f .docker/docker-compose.yaml up -d
 ```
 
 - pgAdmin: http://localhost:8080
@@ -47,13 +47,30 @@ docker compose -f .docker/docker-compose.yaml up -d
 Остановка:
 
 ```bash
-docker compose -f .docker/docker-compose.yaml down        # контейнеры, данные сохраняются
-docker compose -f .docker/docker-compose.yaml down -v     # + удалить тома (данные БД)
+docker compose --env-file .env -f .docker/docker-compose.yaml down        # контейнеры, данные сохраняются
+docker compose --env-file .env -f .docker/docker-compose.yaml down -v     # bind mount с данными остаётся
 ```
 
-Дальше на хосте:
+Дальше на хосте: сервер читает корневой `.env`, затем `packages/server/.env` с override. Для PostgreSQL на хосте задайте `DB_HOST=localhost` (в `.env.example` его нет).
+
+На **новой пустой** БД создайте схему:
 
 ```bash
+docker compose --env-file .env -f .docker/docker-compose.yaml exec -T postgres \
+  sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"' \
+  < packages/server/db/init.sql
+```
+
+Vite читает env из `packages/client/`, а не из корня. Создайте `packages/client/.env`:
+
+```env
+VITE_APP_URL=http://localhost:3000
+VITE_API_ENDPOINT=http://localhost:9000
+```
+
+```bash
+pnpm install --frozen-lockfile
+pnpm build:shared
 pnpm dev
 ```
 
@@ -82,7 +99,7 @@ docker compose --profile tools up -d --build
 | API health | http://localhost:3000/api/health |
 | pgAdmin | http://localhost:8080 (profile `tools`) |
 
-PostgreSQL инициализируется автоматически при **первом** создании тома — скрипт [`packages/server/db/init.sql`](../packages/server/db/init.sql) монтируется в `docker-entrypoint-initdb.d`. Для сброса БД: `docker compose down -v` и поднять заново.
+PostgreSQL инициализируется автоматически при **первом** создании тома — скрипт [`packages/server/db/init.sql`](../packages/server/db/init.sql) монтируется в `docker-entrypoint-initdb.d`. Данные локального compose — bind mount `.docker/postgres/data/`: `docker compose down -v` их не сбрасывает. Для существующей БД применяйте [миграции](update-deploy.md#миграции-на-существующей-бд). В prod используется именованный том `postgres_data`, который `down -v` удаляет.
 
 Пересборка после изменений кода:
 
@@ -125,7 +142,7 @@ VITE_APP_URL=http://localhost:3000
 VITE_API_ENDPOINT=http://localhost:3000
 ```
 
-**Важно:** `VITE_*` попадают в статику client при **build**. Если меняете URL API — пересоберите client:
+**Важно:** `VITE_APP_URL` и `VITE_VAPID_PUBLIC_KEY` попадают в статику client; `VITE_API_ENDPOINT` задаёт Vite dev proxy и передаётся как build arg. Переменные задаются при **build**. Если меняете URL API — пересоберите client:
 
 ```bash
 docker compose up -d --build client
@@ -149,7 +166,9 @@ Server внутри compose подключается к postgres по hostname `
 | Variable | Пример (один домен) | Назначение |
 |----------|---------------------|------------|
 | `VITE_APP_URL` | `https://app.example.com` | axios `baseURL`, origin приложения |
-| `VITE_API_ENDPOINT` | `https://app.example.com` | тот же URL; refresh и SSE идут через `/api` на том же origin |
+| `VITE_API_ENDPOINT` | `https://app.example.com` | target dev proxy; в Docker указывается публичный URL |
+
+Для Web Push также задайте GitHub Variable `VITE_VAPID_PUBLIC_KEY` — тот же public key, что в серверном `VAPID_PUBLIC_KEY`. Для писем и push настройте runtime env по [deploy.md](deploy.md).
 
 ### Pull и запуск на сервере
 
@@ -181,7 +200,7 @@ Server **не публикуется** наружу — API доступен т�
 
 ## 4. Деплой на VPS (один домен, внешний HTTPS)
 
-Схема: Caddy/nginx на хосте → TLS → `localhost:80` (client container) → nginx проксирует `/api` → server.
+Схема: Caddy/nginx на хосте → TLS → `localhost:8081` (client container) → nginx проксирует `/api` → server.
 
 ### 1. Подготовка сервера
 
@@ -207,9 +226,11 @@ docker compose -f docker-compose.prod.yml up -d
 
 ### 3. Caddy на хосте (HTTPS)
 
+Задайте `CLIENT_PORT=8081` в `.env`, чтобы освободить порт 80 для Caddy, и пересоздайте client (`up -d client`).
+
 ```caddy
 app.example.com {
-    reverse_proxy localhost:80
+    reverse_proxy localhost:8081
 }
 ```
 
@@ -223,7 +244,7 @@ server {
     server_name app.example.com;
 
     location / {
-        proxy_pass http://127.0.0.1:80;
+        proxy_pass http://127.0.0.1:8081;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
@@ -264,11 +285,7 @@ docker run --rm -p 9000:9000 --env-file .env \
   time-tracker-server
 ```
 
-Client:
-
-```bash
-docker run --rm -p 3000:80 time-tracker-client
-```
+Client nginx ожидает hostname `server:9000`. Для совместного запуска образов используйте compose; отдельный `docker run` client без общей сети и server с alias `server` не обеспечит работу API.
 
 ## Dockerfile'ы
 
@@ -286,10 +303,10 @@ docker run --rm -p 3000:80 time-tracker-client
 Workflow: [`.github/workflows/docker-publish.yml`](../.github/workflows/docker-publish.yml)
 
 ```
-push main → pnpm verify (lint, test, build) → docker build/push client + server → GHCR
+push main → pnpm verify (lint, test, build) → docker build/push client + server → GHCR → SSH deploy на VPS
 ```
 
-Job `verify` поднимает postgres service container для интеграционных тестов.
+Job `verify` объявляет postgres service, но `.env.test` включает Testcontainers (см. [testing.md](testing.md)). Deploy job требует `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` и готовый `/opt/time-tracker`; миграции автоматически не запускает.
 
 ## Troubleshooting
 

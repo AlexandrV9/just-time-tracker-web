@@ -6,7 +6,7 @@
 
 ```
 Браузер → https://app.example.com (Caddy, TLS)
-       → localhost:80 (client container, nginx)
+       → localhost:8081 (client container, nginx)
        → /api/* → server container → postgres
 ```
 
@@ -40,6 +40,8 @@
 
 Оба — один и тот же публичный URL. API ходит через `/api` на том же домене.
 
+Для Web Push дополнительно задайте `VITE_VAPID_PUBLIC_KEY` (публичная часть серверной VAPID-пары). Эти переменные зашиваются в client при сборке.
+
 ### 2. Сборка образов
 
 Смержите изменения в `main`. Workflow [`.github/workflows/docker-publish.yml`](../.github/workflows/docker-publish.yml) выполнит `pnpm verify` и запушит:
@@ -47,7 +49,9 @@
 - `ghcr.io/alexandrv9/time-tracker/client:latest`
 - `ghcr.io/alexandrv9/time-tracker/server:latest`
 
-Проверка: **GitHub → Packages** — оба образа появились после зелёного CI.
+Проверка: **GitHub → Packages** — оба образа появились после успешного job `docker`.
+
+Workflow также запускает job `deploy` по SSH. Для него нужны secrets `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, настроенный Docker/GHCR и файлы в `/opt/time-tracker`. До первоначальной настройки VPS deploy job может завершаться ошибкой, даже если образы уже опубликованы. Автодеплой не копирует compose/SQL/env и не выполняет миграции.
 
 ### 3. Доступ к GHCR (если packages private)
 
@@ -170,8 +174,32 @@ ALLOWED_ORIGINS=https://app.example.com
 
 GHCR_IMAGE_PREFIX=ghcr.io/alexandrv9/time-tracker
 IMAGE_TAG=latest
-CLIENT_PORT=80
+CLIENT_PORT=8081
 ```
+
+`CLIENT_PORT=8081` освобождает порт 80 для Caddy. Значение по умолчанию в compose — 80, поэтому его нужно переопределить.
+
+Дополнительные runtime-переменные:
+
+```env
+CLIENT_URL=https://app.example.com
+EMAIL_TRANSPORT=smtp
+EMAIL_FROM=noreply@example.com
+EMAIL_FROM_NAME=Just Time Tracker
+SMTP_HOST=smtp.example.com
+SMTP_PORT=465
+SMTP_USER=noreply@example.com
+SMTP_PASSWORD=<пароль SMTP>
+EMAIL_DAILY_LIMIT_PER_USER=4
+
+VAPID_PUBLIC_KEY=<публичный ключ, совпадает с VITE_VAPID_PUBLIC_KEY>
+VAPID_PRIVATE_KEY=<приватный ключ>
+VAPID_SUBJECT=mailto:noreply@example.com
+```
+
+SMTP нужен для реальных писем verification/reset; по умолчанию `EMAIL_TRANSPORT=console`, коды пишутся в лог. `SMTP_PORT=465` включает implicit TLS, другой порт — STARTTLS. VAPID нужен только для Web Push; SSE-напоминания работают отдельно. `CLIENT_URL` используется для абсолютных ссылок и иконок push.
+
+Yandex OAuth сейчас отключён в серверных routers. Одного заполнения `YANDEX_*` недостаточно для включения входа/привязки: сначала потребуется изменение кода маршрутов.
 
 Сгенерировать секреты на сервере:
 
@@ -206,7 +234,7 @@ docker compose -f docker-compose.prod.yml ps
 Проверка API (пока без HTTPS):
 
 ```bash
-curl http://localhost/api/health
+curl http://localhost:8081/api/health
 # {"status":"OK","success":true,...}
 ```
 
@@ -220,7 +248,7 @@ nano /etc/caddy/Caddyfile
 
 ```caddy
 app.example.com {
-    reverse_proxy localhost:80
+    reverse_proxy localhost:8081
 }
 ```
 
@@ -289,12 +317,7 @@ docker compose -f docker-compose.prod.yml down -v
 
 ### `401 password authentication failed` / health ERROR
 
-Неверный `DB_PASSWORD` в `.env` при уже созданном томе postgres. Либо исправьте пароль в `.env` под существующую БД, либо сбросьте том:
-
-```bash
-docker compose -f docker-compose.prod.yml down -v
-docker compose -f docker-compose.prod.yml up -d
-```
+Неверный `DB_PASSWORD` в `.env` при уже созданном томе postgres. Исправьте пароль в `.env` под существующую БД либо согласованно смените пароль роли PostgreSQL. `down -v` удаляет production volume со всеми данными и не является способом исправления пароля с сохранением данных.
 
 ### Caddy не выдаёт сертификат
 
@@ -329,6 +352,6 @@ docker compose -f docker-compose.prod.yml up -d
 [ ] SSH на VPS → Docker + Caddy
 [ ] git clone / scp compose + .env
 [ ] docker login ghcr.io → pull → up -d
-[ ] Caddyfile → reverse_proxy localhost:80
+[ ] Caddyfile → reverse_proxy localhost:8081
 [ ] Smoke checklist
 ```
