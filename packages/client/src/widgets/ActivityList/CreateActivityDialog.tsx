@@ -5,7 +5,6 @@ import { useTranslation } from "~/shared/hooks";
 import { activityApiService } from "~/shared/api/services";
 import {
   Button,
-  CloseButton,
   Dialog,
   Field,
   Input,
@@ -118,7 +117,7 @@ export const CreateActivityDialog = ({ dialog }: CreateActivityDialogProps) => {
               </Button>
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size="2xl" />
+              <Dialog.CloseButton />
             </Dialog.CloseTrigger>
           </Dialog.Content>
         </Dialog.Positioner>

@@ -15,7 +15,7 @@ import {
   Text,
 } from "~/shared/ui";
 import type { Notification, NotificationStatus } from "./types";
-import { notificationStatusConfig, triggerButtonProps } from "./constants";
+import { notificationStatusConfig } from "./constants";
 
 function NotificationStatusIcon({ status }: { status: NotificationStatus }) {
   const { Icon, color } = notificationStatusConfig[status];
@@ -29,13 +29,17 @@ function NotificationStatusIcon({ status }: { status: NotificationStatus }) {
 
 export const NotificationButton = () => {
   const { t } = useTranslation();
-
   const notifications: Notification[] = [];
 
   return (
     <Popover.Root positioning={{ placement: "bottom-end", gutter: 8 }}>
       <Popover.Trigger asChild>
-        <IconButton aria-label="Notifications" {...triggerButtonProps}>
+        <IconButton
+          aria-label="Notifications"
+          variant="outline"
+          borderRadius="12px"
+          color="fg"
+        >
           <BellIcon />
         </IconButton>
       </Popover.Trigger>

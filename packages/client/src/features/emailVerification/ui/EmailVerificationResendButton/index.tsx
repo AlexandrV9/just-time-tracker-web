@@ -1,20 +1,30 @@
-import { Button, Text } from "~/shared/ui";
+import { Button, RetryAfterMessage, Text } from "~/shared/ui";
 import type { useEmailVerification } from "../../useEmailVerification";
 import { useTranslation } from "~/shared/hooks";
 
 type EmailVerificationResendButtonProps = Pick<
   ReturnType<typeof useEmailVerification>,
-  "isExpired" | "resendSecondsLeft" | "canResend" | "isResendPending" | "resend"
+  | "isExpired"
+  | "resendSecondsLeft"
+  | "verifyLockSecondsLeft"
+  | "canResend"
+  | "isResendPending"
+  | "resend"
 >;
 
 export function EmailVerificationResendButton({
   isExpired,
   resendSecondsLeft,
+  verifyLockSecondsLeft,
   resend,
   canResend,
   isResendPending,
 }: EmailVerificationResendButtonProps) {
   const { t } = useTranslation();
+
+  if (!isExpired && verifyLockSecondsLeft > 0) {
+    return <RetryAfterMessage secondsLeft={verifyLockSecondsLeft} />;
+  }
 
   if (!isExpired && resendSecondsLeft > 0) {
     return (

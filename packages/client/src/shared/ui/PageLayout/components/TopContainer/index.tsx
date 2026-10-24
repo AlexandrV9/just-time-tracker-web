@@ -3,12 +3,16 @@ import { Z_INDEX } from "~/shared/constants/zIndex";
 import { Box, type BoxProps } from "~/shared/ui";
 
 import styles from "./TopContainer.module.css";
+import type { CSSProperties } from "react";
 
 export type TopContainerProps = BoxProps;
+
+export const TOP_CONTAINER_HEIGHT_PX = 70;
 
 export const TopContainer = ({
   children,
   className,
+  style,
   ...props
 }: TopContainerProps) => {
   return (
@@ -17,6 +21,12 @@ export const TopContainer = ({
       zIndex={Z_INDEX.header}
       bg="bg"
       className={clsx(styles.container, className)}
+      style={
+        {
+          "--top-container-height": `${TOP_CONTAINER_HEIGHT_PX}px`,
+          ...style,
+        } as CSSProperties
+      }
       {...props}
     >
       <Box className={styles.content}>{children}</Box>

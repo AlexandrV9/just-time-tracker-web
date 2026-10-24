@@ -274,7 +274,7 @@ describe("usersRouter", () => {
       expect(confirmBody.message).toBe("INVALID_CODE");
     });
 
-    it("allows immediate resend after too many attempts", async () => {
+    it("blocks resend while verify lockout is active after too many attempts", async () => {
       await start("verified@example.com");
 
       for (let i = 0; i < 5; i++) {
@@ -284,26 +284,19 @@ describe("usersRouter", () => {
         } else {
           expect(body.message).toBe("TOO_MANY_ATTEMPTS");
           expect(
-            Date.parse(
-              (body.data as { resendAvailableAt: string }).resendAvailableAt,
-            ),
-          ).toBeLessThanOrEqual(Date.now());
+            Date.parse((body.data as { retryAfter: string }).retryAfter) -
+              Date.now(),
+          ).toBeGreaterThan(50_000);
         }
       }
-
-      const { rows } = await testDb.pool.query(
-        "SELECT id FROM email_verifications WHERE user_id = $1",
-        [testUserId],
-      );
-      expect(rows).toHaveLength(1);
 
       const resendBody = await json(
         await testRouter.request("/email-verification/resend", {
           method: "POST",
         }),
       );
-      expect(resendBody.success).toBe(true);
-      expect((resendBody.data as { status: string }).status).toBe("pending");
+      expect(resendBody.success).toBe(false);
+      expect(resendBody.message).toBe("TOO_MANY_ATTEMPTS");
     });
 
     it("returns CODE_NOT_FOUND when confirming without an active request", async () => {

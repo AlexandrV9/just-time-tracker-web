@@ -1,6 +1,17 @@
-// import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./app";
+
+const unregisterServiceWorkersInDev = () => {
+  if (!import.meta.env.DEV || !("serviceWorker" in navigator)) return;
+
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister();
+    }
+  });
+};
+
+unregisterServiceWorkersInDev();
 
 const reloadOnceOnChunkError = () => {
   const reloadKey = "chunk-reload";
@@ -29,8 +40,4 @@ if (!rootElement) {
   throw new Error("Root element not found");
 }
 
-createRoot(rootElement).render(
-  // <StrictMode>
-  <App />,
-  // </StrictMode>,
-);
+createRoot(rootElement).render(<App />);

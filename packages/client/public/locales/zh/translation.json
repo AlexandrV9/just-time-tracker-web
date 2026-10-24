@@ -6,40 +6,40 @@
   },
   "pages": {
     "landing": {
-      "title": "记录每一分钟——告别电子表格",
-      "subtitle": "一款专注的时间追踪应用：中央计时器、活动、分析、日历与历史，让你清楚时间都去了哪里。",
-      "featuresTitle": "你将获得",
+      "title": "别再猜测一天时间去哪了",
+      "subtitle": "提前规划活动，一键追踪时间，看清时间真正花在哪里。一个应用搞定——没有复杂表格，也没有多余操作。",
+      "featuresTitle": "你能在应用里做什么",
       "features": [
         {
-          "title": "统一秒表",
-          "body": "在主计时器与活动卡片上开始、暂停与结束会话——数字始终保持一致。"
+          "title": "一键追踪时间",
+          "body": "几秒内开始、暂停并结束活动。计时器始终同步，显示当前准确时间。"
         },
         {
-          "title": "活动与今日看板",
-          "body": "创建可复用的活动并打标签，与今日计划并行运行，并掌控未完成的会话。"
+          "title": "规划你的一天",
+          "body": "提前把活动加入计划，真正开始工作时再启动。计划帮你记住重要事项，并看清当天负荷。"
         },
         {
-          "title": "日历视图",
-          "body": "在网格上查看会话，快速了解各日期的时间分布。"
+          "title": "创建自己的活动库",
+          "body": "创建、编辑和删除活动。几次点击即可复用，并追踪你在每项活动上投入了多少时间。"
         },
         {
-          "title": "历史记录",
-          "body": "按日分组的历史便于回顾过去的时段并重新打开详情，无需在表格里翻找。"
+          "title": "分析你的历史",
+          "body": "回到过去的日子，查看会话，并分析每项活动花了多少时间。"
         },
         {
-          "title": "按活动分析",
-          "body": "当日时间轴、会话拆分与时长，帮助你发现规律与异常。"
-        },
-        {
-          "title": "账户与个人资料",
-          "body": "安全登录，并在一处调整个人资料文案、主题、语言与通知。"
+          "title": "按自己的方式设置应用",
+          "body": "选择主题和界面语言，配置推送通知，并管理账户安全。"
         }
       ],
+      "signUpButton": "开始使用",
       "signInButton": "登录",
+      "aboutAppButton": "关于应用",
       "signInPageLink": "已有账号？去登录"
     },
     "home": {
       "selectActivity": "选择活动",
+      "collapseStopwatch": "收起计时器",
+      "expandStopwatch": "展开计时器",
       "circularTimerStart": "开始",
       "circularTimerPause": "暂停",
       "circularTimerFinish": "结束",
@@ -53,9 +53,20 @@
       "comingSoon": "活动日历即将上线",
       "comingSoonDescription": "在此页面，您将可以查看所有活动及其在不同日期的分布，并规划未来的活动。",
       "mockEvents": {
+        "morningRoutine": "晨间例行",
+        "codeReview": "代码审查",
         "designSync": "设计同步会",
-        "featureDevelopment": "功能开发"
-      }
+        "standup": "站会",
+        "featureDevelopment": "功能开发",
+        "lunch": "午餐",
+        "testing": "测试",
+        "documentation": "文档编写",
+        "teamRetro": "团队回顾",
+        "exercise": "锻炼"
+      },
+      "emptyPlannedActivities": "这一天没有计划的活动",
+      "addActivitiesTitle": "添加活动到日期",
+      "addActivitiesDateLabel": "日期"
     },
     "activities": {
       "title": "活动",
@@ -179,6 +190,70 @@
         },
         "permissionDenied": "浏览器已阻止通知。请在网站设置中允许通知以接收提醒。"
       },
+      "pwaInstall": {
+        "title": "将应用安装到桌面",
+        "stepLabel": "第 {{step}} 步",
+        "sections": {
+          "ios": {
+            "title": "在 iPhone / iPad 上安装",
+            "browserSafari": "Safari",
+            "browserChrome": "Chrome",
+            "steps": {
+              "1": {
+                "description": "在 iPhone 或 iPad 上用 Safari 或 Chrome 打开网站。\n\nSafari — 点击屏幕底部的“更多”按钮（⋯）。\nChrome — 点击顶部的“分享”图标。"
+              },
+              "2": {
+                "description": "打开“分享”菜单。\n\nSafari — 在菜单中点击“分享”。\nChrome — 在菜单中点击“显示更多”。"
+              },
+              "3": {
+                "description": "点击“添加到主屏幕”并确认添加。"
+              }
+            }
+          },
+          "android": {
+            "title": "在 Android 上安装",
+            "steps": {
+              "1": {
+                "description": "在 Android 上用 Chrome 打开网站。"
+              },
+              "2": {
+                "description": "点击右上角的菜单 (⋮)。"
+              },
+              "3": {
+                "description": "选择“安装应用”或“添加到主屏幕”并确认安装。"
+              }
+            }
+          },
+          "macos": {
+            "title": "在 macOS 上安装",
+            "steps": {
+              "1": {
+                "description": "在 Safari 或 Chrome 中打开网站。"
+              },
+              "2": {
+                "description": "Safari 中点击“分享”；Chrome 中点击地址栏的安装图标。"
+              },
+              "3": {
+                "description": "选择“添加到程序坞”或“安装应用”，并确认安装。"
+              }
+            }
+          },
+          "windows": {
+            "title": "在 Windows 上安装",
+            "steps": {
+              "1": {
+                "description": "在 Chrome 或 Microsoft Edge 中打开网站。"
+              },
+              "2": {
+                "description": "点击浏览器地址栏中的安装图标。"
+              },
+              "3": {
+                "description": "点击“安装”——应用将出现在“开始”菜单中。"
+              }
+            }
+          }
+        }
+      },
       "security": {
         "loginMethods": {
           "title": "登录方式",
@@ -206,18 +281,31 @@
           "title": "操作失败",
           "okButton": "知道了"
         }
+      },
+      "interfaceSettings": {
+        "title": "界面设置",
+        "links": {
+          "language": "语言",
+          "theme": "主题"
+        }
+      },
+      "language": {
+        "title": "语言",
+        "sectionTitle": "界面语言"
+      },
+      "theme": {
+        "title": "主题",
+        "sectionTitle": "应用主题",
+        "dark": "深色",
+        "light": "浅色",
+        "system": "跟随系统",
+        "darkDescription": "始终使用深色界面",
+        "lightDescription": "始终使用浅色界面",
+        "systemDescription": "跟随设备设置"
       }
     },
     "private": {
       "pending": "加载中…"
-    },
-    "signUp": {
-      "legalNotice": {
-        "prefix": "继续即表示您接受",
-        "termsLink": "用户协议",
-        "middle": "和",
-        "privacyLink": "隐私政策"
-      }
     },
     "termsOfService": {
       "backButton": "返回",
@@ -296,7 +384,8 @@
         "Home": "首页",
         "Settings": "设置",
         "Activities": "活动",
-        "History": "历史"
+        "History": "历史",
+        "Calendar": "日历"
       }
     },
     "activityAnalytics": {
@@ -324,6 +413,12 @@
         "profile": "个人资料",
         "notifications": "通知",
         "security": "安全与登录"
+      }
+    },
+    "helpInfoSettings": {
+      "title": "参考信息",
+      "options": {
+        "desktopInstall": "将应用安装到桌面"
       }
     },
     "unfinishedActivities": {
@@ -414,6 +509,7 @@
         "forgotPasswordLink": "忘记密码？",
         "errors": {
           "invalidCredentials": "登录名或密码错误",
+          "rateLimited": "尝试次数过多，请在 {{time}} 后重试",
           "unknown": "未知错误"
         }
       },
@@ -465,6 +561,14 @@
             "required": "此项为必填"
           }
         },
+        "acceptTerms": {
+          "prefix": "我同意",
+          "link": "用户协议"
+        },
+        "acceptPrivacy": {
+          "prefix": "我同意按照",
+          "link": "隐私政策处理个人数据"
+        },
         "linkText": "去登录",
         "submitButton": "进入",
         "submitButtonLoadingText": "正在注册…",
@@ -478,6 +582,22 @@
       "title": "通知",
       "empty": "暂无通知",
       "emptyDescription": "已全部读完"
+    },
+    "pwaInstall": {
+      "dialog": {
+        "title": "安装 Just Time Tracker",
+        "description": "如果你经常使用这款应用，可以将其添加到桌面。",
+        "benefitsIntro": "安装后：",
+        "benefit1": "✅ 一键启动；",
+        "benefit2": "✅ 在独立窗口中打开；",
+        "benefit3": "✅ 像普通应用一样使用。",
+        "installLink": "查看安装说明",
+        "laterHintPrefix": "说明随时可在",
+        "laterHintBold": "设置 → 安装应用",
+        "laterHintSuffix": "中找到。",
+        "dontShowAgain": "不再显示",
+        "okButton": "确定"
+      }
     },
     "emailVerification": {
       "dialogTitle": "确认邮箱",
@@ -503,7 +623,8 @@
         "requestFailed": "无法发送验证码",
         "invalidCode": "验证码无效",
         "codeExpired": "验证码已过期，请重新获取",
-        "tooManyAttempts": "尝试次数过多，请重新获取验证码",
+        "tooManyAttempts": "尝试次数过多，请在 {{time}} 后重试",
+        "rateLimited": "尝试次数过多，请在 {{time}} 后重试",
         "verifyFailed": "无法确认邮箱",
         "resendTooEarly": "请稍后再试",
         "codeNotFound": "没有进行中的验证请求，请重新开始",
@@ -581,7 +702,8 @@
         "requestFailed": "无法发送验证码",
         "invalidCode": "验证码无效",
         "codeExpired": "验证码已过期，请重新获取",
-        "tooManyAttempts": "尝试次数过多，请重新获取验证码",
+        "tooManyAttempts": "尝试次数过多，请在 {{time}} 后重试",
+        "rateLimited": "尝试次数过多，请在 {{time}} 后重试",
         "verifyFailed": "无法验证验证码",
         "resendTooEarly": "请稍后再请求新验证码",
         "samePassword": "请选择其他密码",
@@ -591,6 +713,7 @@
     }
   },
   "common": {
+    "retryAfter": "请在 {{time}} 后重试",
     "durationField": {
       "cancelButton": "取消",
       "confirmButton": "确认"
@@ -598,7 +721,9 @@
     "aria": {
       "togglePasswordVisibility": "显示或隐藏密码",
       "previousMonth": "上个月",
-      "nextMonth": "下个月"
+      "nextMonth": "下个月",
+      "previousStep": "上一步",
+      "nextStep": "下一步"
     }
   }
 }

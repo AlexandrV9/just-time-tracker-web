@@ -3,7 +3,8 @@ import type { EmailVerificationStateDTO } from "@time-tracker/shared";
 import { useCallback, useEffect, useState } from "react";
 import { authActions } from "~/features/auth";
 import { emailVerificationApiService } from "~/shared/api/services";
-import { useNowMs, useTranslation } from "~/shared/hooks";
+import { useNowMs, useRetryAfterCountdown, useTranslation } from "~/shared/hooks";
+import { getRetryAfter } from "~/shared/libs";
 import { toast } from "~/shared/ui";
 import { mapConfirmErrorKey, mapRequestErrorKey } from "./constants";
 
@@ -48,6 +49,8 @@ export function useEmailVerification({
 
   const [codeResetKey, setCodeResetKey] = useState(0);
   const [isDailyLimitReached, setIsDailyLimitReached] = useState(false);
+  const emailRateLimit = useRetryAfterCountdown();
+  const verifyLockout = useRetryAfterCountdown();
 
   const resetCodeInput = useCallback(() => {
     setCodeResetKey((key) => key + 1);
@@ -115,6 +118,13 @@ export function useEmailVerification({
     mutationFn: emailVerificationApiService.start,
     onSuccess: (response) => {
       if (!response.success) {
+        if (response.message === "RATE_LIMITED") {
+          const retryAfter = getRetryAfter(response.data);
+          if (retryAfter) {
+            emailRateLimit.setRetryAfter(retryAfter);
+            return;
+          }
+        }
         if (response.message === "EMAIL_DAILY_LIMIT") {
           setIsDailyLimitReached(true);
         }
@@ -136,6 +146,13 @@ export function useEmailVerification({
     mutationFn: () => emailVerificationApiService.resend(),
     onSuccess: (response) => {
       if (!response.success) {
+        if (response.message === "TOO_MANY_ATTEMPTS") {
+          const retryAfter = getRetryAfter(response.data);
+          if (retryAfter) {
+            verifyLockout.setRetryAfter(retryAfter);
+            return;
+          }
+        }
         if (response.message === "EMAIL_DAILY_LIMIT") {
           setIsDailyLimitReached(true);
         }
@@ -157,19 +174,17 @@ export function useEmailVerification({
     mutationFn: emailVerificationApiService.confirm,
     onSuccess: (response) => {
       if (!response.success) {
+        if (response.message === "TOO_MANY_ATTEMPTS") {
+          resetCodeInput();
+          const retryAfter = getRetryAfter(response.data);
+          if (retryAfter) {
+            verifyLockout.setRetryAfter(retryAfter);
+            return;
+          }
+        }
         toast.error(t(`${baseLocale}.${mapConfirmErrorKey(response.message)}`));
         if (response.message === "INVALID_CODE") {
           resetCodeInput();
-        }
-        if (response.message === "TOO_MANY_ATTEMPTS") {
-          resetCodeInput();
-          setServerState((prev) => {
-            if (!prev || prev.status === "none") return prev;
-            const resendAvailableAt =
-              (response.data as { resendAvailableAt?: string } | undefined)
-                ?.resendAvailableAt ?? new Date().toISOString();
-            return { ...prev, resendAvailableAt };
-          });
         }
         return;
       }
@@ -228,9 +243,9 @@ export function useEmailVerification({
   );
 
   const resend = useCallback(() => {
-    if (resendSecondsLeft > 0) return;
+    if (resendSecondsLeft > 0 || verifyLockout.isBlocked) return;
     resendMutation.mutate();
-  }, [resendMutation, resendSecondsLeft]);
+  }, [resendMutation, resendSecondsLeft, verifyLockout.isBlocked]);
 
   const backToEmail = useCallback(() => {
     setViewStep("email");
@@ -255,7 +270,11 @@ export function useEmailVerification({
     isExpired,
     pendingEmail,
     resendSecondsLeft,
-    canResend: resendSecondsLeft <= 0,
+    canResend: resendSecondsLeft <= 0 && !verifyLockout.isBlocked,
+    emailRetrySecondsLeft: emailRateLimit.secondsLeft,
+    isEmailRateLimited: emailRateLimit.isBlocked,
+    verifyLockSecondsLeft: verifyLockout.secondsLeft,
+    isVerifyLocked: verifyLockout.isBlocked,
     isStatusLoading,
     isStartPending: startMutation.isPending,
     isConfirmPending: confirmMutation.isPending,

@@ -17,6 +17,7 @@ import {
   Group,
   Input,
   PinInput,
+  RetryAfterMessage,
   Skeleton,
   Span,
   Stack,
@@ -136,11 +137,16 @@ export function ResetPasswordForm({
           {getEmailErrorMessage(emailForm.formState.errors.email?.message)}
         </Field.ErrorText>
       </Field.Root>
+      <RetryAfterMessage secondsLeft={resetPassword.emailRetrySecondsLeft} />
       <ButtonGroup justify="space-between">
         <Button variant="outline" onClick={goToSignIn}>
           {t(`${baseLocale}.backButton`)}
         </Button>
-        <Button onClick={handleStart} loading={resetPassword.isStartPending}>
+        <Button
+          onClick={handleStart}
+          loading={resetPassword.isStartPending}
+          disabled={resetPassword.isEmailRateLimited}
+        >
           {t(`${baseLocale}.sendCodeButton`)}
         </Button>
       </ButtonGroup>
@@ -161,7 +167,7 @@ export function ResetPasswordForm({
         <PinInput.Root
           count={6}
           size="md"
-          disabled={resetPassword.isExpired}
+          disabled={resetPassword.isExpired || resetPassword.isVerifyLocked}
           value={Array.from({ length: 6 }, (_, i) => code[i] ?? "")}
           onValueChange={(details) => setCode(details.value)}
           otp
@@ -182,7 +188,11 @@ export function ResetPasswordForm({
           </PinInput.Control>
         </PinInput.Root>
 
-        {!resetPassword.isExpired && resetPassword.resendSecondsLeft > 0 ? (
+        {!resetPassword.isExpired && resetPassword.verifyLockSecondsLeft > 0 ? (
+          <RetryAfterMessage
+            secondsLeft={resetPassword.verifyLockSecondsLeft}
+          />
+        ) : !resetPassword.isExpired && resetPassword.resendSecondsLeft > 0 ? (
           <Text color="fg.muted" textStyle="sm">
             {t(`${baseLocale}.resendIn`, {
               seconds: resetPassword.resendSecondsLeft,
@@ -193,9 +203,7 @@ export function ResetPasswordForm({
             variant="ghost"
             size="sm"
             onClick={resetPassword.resend}
-            disabled={
-              !resetPassword.canResend || resetPassword.isResendPending
-            }
+            disabled={!resetPassword.canResend || resetPassword.isResendPending}
             loading={resetPassword.isResendPending}
           >
             {t(`${baseLocale}.resendButton`)}
@@ -211,7 +219,9 @@ export function ResetPasswordForm({
           onClick={handleVerify}
           loading={resetPassword.isVerifyPending}
           disabled={
-            resetPassword.isExpired || code.join("").length !== 6
+            resetPassword.isExpired ||
+            resetPassword.isVerifyLocked ||
+            code.join("").length !== 6
           }
         >
           {t(`${baseLocale}.verifyButton`)}
@@ -268,12 +278,11 @@ export function ResetPasswordForm({
 
   return (
     <Box
-      padding="1.5rem"
-      bg="bg"
-      borderRadius="xl"
+      as="form"
+      display="flex"
+      flexDirection="column"
+      gap="1rem"
       width="full"
-      minW={0}
-      maxW={400}
     >
       <Stack.VStack align="stretch" gap={4}>
         <Text as="h1" textStyle="2xl" fontWeight="semibold">

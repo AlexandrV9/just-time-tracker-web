@@ -1,5 +1,12 @@
+import { useRouter } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { NavList } from "~/shared/components";
+import {
+  ACTIVITY_SETTINGS_QUERY_KEY,
+  activityApiService,
+} from "~/shared/api/services";
 import { useTranslation } from "~/shared/hooks";
+import { queryClient } from "~/shared/config";
 import { Box, ChartLineIcon, SettingsIcon } from "~/shared/ui";
 
 export type NavLinksProps = {
@@ -8,6 +15,20 @@ export type NavLinksProps = {
 
 export const NavLinks = ({ activityId }: NavLinksProps) => {
   const { t } = useTranslation();
+  const router = useRouter();
+
+  useEffect(() => {
+    void router.preloadRoute({
+      to: "/activities/$activityId/settings",
+      params: { activityId },
+    });
+
+    void queryClient.prefetchQuery({
+      queryKey: [ACTIVITY_SETTINGS_QUERY_KEY, activityId],
+      queryFn: () =>
+        activityApiService.getActivitySettings({ activityId }),
+    });
+  }, [activityId, router]);
 
   return (
     <Box

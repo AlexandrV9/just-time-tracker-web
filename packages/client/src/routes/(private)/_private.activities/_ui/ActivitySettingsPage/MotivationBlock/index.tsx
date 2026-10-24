@@ -46,8 +46,12 @@ export const MotivationBlock = ({ activityId }: MotivationBlockProps) => {
     enabled: !!activityId,
   });
 
-  if (isPending || !settings) {
+  if (isPending && !settings) {
     return <MotivationBlockSkeleton />;
+  }
+
+  if (!settings) {
+    return null;
   }
 
   return <MotivationBlockContent activityId={activityId} settings={settings} />;

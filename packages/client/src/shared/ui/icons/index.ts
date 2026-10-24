@@ -43,5 +43,12 @@ export * from "./Info";
 export * from "./YandexLogo";
 export * from "./Copy";
 export * from "./ChartLine";
+export * from "./AppleLogo";
+export * from "./AndroidLogo";
+export * from "./WindowsLogo";
+export * from "./Download";
+export * from "./StopCircle";
+export * from "./Earth";
+export * from "./ChevronUp";
 
 export * from "./withIconProps";

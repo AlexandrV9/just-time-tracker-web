@@ -5,7 +5,16 @@ import { authQueries } from "./auth.queries.js";
 import type { Context } from "hono";
 import type { BlankEnv, BlankInput } from "hono/types";
 import { signInSchema, signUpSchema } from "./auth.schema.js";
-import { config, isUuid, tokenService, validationUtils } from "../shared/index.js";
+import {
+  config,
+  getClientIp,
+  isUuid,
+  rateLimitKeys,
+  rateLimitService,
+  respondRateLimited,
+  tokenService,
+  validationUtils,
+} from "../shared/index.js";
 import { mapAuthUserResponse } from "../shared/auth/mapAuthUserResponse.js";
 
 const nameRefreshTokenInCookie = config.auth.refreshToken.cookie;
@@ -96,10 +105,38 @@ const signIn = zValidator("json", signInSchema, async (result, c) => {
     return c.json({ success: false, message: result.error.message }, 400);
   }
 
+  const ip = getClientIp(c);
+  const login = result.data.login;
+  const lockoutKeys = [
+    rateLimitKeys.loginIp(ip),
+    rateLimitKeys.loginAccount(login),
+  ];
+
+  const lockCheck = await rateLimitService.checkLocked(lockoutKeys);
+  if (lockCheck.blocked) {
+    return respondRateLimited(c, lockCheck.retryAfter);
+  }
+
+  const requestCheck = await rateLimitService.checkAndConsumeRequest(
+    rateLimitKeys.loginIp(ip),
+    config.rateLimit.login.maxRequestsPerMinutePerIp,
+    60,
+  );
+  if (requestCheck.blocked) {
+    return respondRateLimited(c, requestCheck.retryAfter);
+  }
+
   const responseData = await authService.signIn(result.data);
   if (!responseData.success) {
+    const failureResult = await rateLimitService.recordFailure(lockoutKeys);
+    if (failureResult.blocked) {
+      return respondRateLimited(c, failureResult.retryAfter);
+    }
+
     return c.json(responseData, 401);
   }
+
+  await rateLimitService.recordSuccess(lockoutKeys);
 
   setCookie(c, nameRefreshTokenInCookie, responseData.data.refreshToken, {
     secure: config.app.isProduction,

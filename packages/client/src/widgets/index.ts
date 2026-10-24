@@ -1,4 +1,4 @@
-export * from "./AccountSettings";
+export * from "./HelpInfoSettings";
 export * from "./AuthUserInfo";
 export * from "./Header";
 export * from "./NavBar";
@@ -7,3 +7,5 @@ export * from "./TodayActivityList";
 export * from "./ActivityHistory";
 export * from "./ActivityAnalytics";
 export * from "./ActivityList";
+export * from "./AddActivitiesDialog";
+export * from "./PlannedActivityList";

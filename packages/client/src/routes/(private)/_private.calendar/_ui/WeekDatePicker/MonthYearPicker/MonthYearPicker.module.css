@@ -1,0 +1,24 @@
+.panel {
+  position: relative;
+  z-index: 1;
+  background: color-mix(
+    in srgb,
+    var(--chakra-colors-bg-emphasized) 88%,
+    transparent
+  );
+  backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid
+    color-mix(in srgb, var(--chakra-colors-border-muted) 50%, transparent);
+  box-shadow:
+    0 12px 40px color-mix(in srgb, var(--chakra-colors-black) 35%, transparent),
+    inset 0 1px 0
+      color-mix(in srgb, var(--chakra-colors-white) 10%, transparent);
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--chakra-colors-black) 55%, transparent);
+  backdrop-filter: blur(2px);
+}

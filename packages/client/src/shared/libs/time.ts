@@ -187,7 +187,7 @@ export const getTotalSecondsFromDay = (date?: string | Date | null): number => {
 /**
  * Преобразует объект времени TimeObject в количество секунд
  * @example
- * convertTimeObjectToSeconds({ hours: 00, minutes: 01, seconds: 45 }) // 105
+ * convertTimeObjectToSeconds({ hours: 0, minutes: 1, seconds: 45 }) // 105
  */
 export const convertTimeObjectToSeconds = (time: {
   hours: number;

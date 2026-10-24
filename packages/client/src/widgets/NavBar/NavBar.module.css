@@ -1,0 +1,16 @@
+.glass {
+  background: color-mix(
+    in srgb,
+    var(--chakra-colors-bg-emphasized) 72%,
+    transparent
+  );
+
+  backdrop-filter: blur(5px) saturate(180%);
+  /* -webkit-backdrop-filter: blur(20px) saturate(180%); */
+  border: 1px solid
+    color-mix(in srgb, var(--chakra-colors-border-muted) 45%, transparent);
+    
+  box-shadow:
+    0 4px 24px color-mix(in srgb, var(--chakra-colors-black) 10%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--chakra-colors-white) 12%, transparent);
+}

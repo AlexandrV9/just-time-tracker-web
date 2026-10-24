@@ -2,6 +2,8 @@ import { randomInt } from "node:crypto";
 import {
   config,
   deliverVerificationEmail,
+  rateLimitKeys,
+  rateLimitService,
   shouldExposeDevCode,
   tokenService,
   type EmailLang,
@@ -95,7 +97,9 @@ type StartInput = { userId: string; email: string; lang?: EmailLang };
 
 const start = async (
   input: StartInput,
-): Promise<SuccessResponse<PendingState> | ErrorResponse> => {
+): Promise<
+  SuccessResponse<PendingState> | ErrorResponse<{ retryAfter: string } | null>
+> => {
   const { userId, lang } = input;
   const email = normalizeEmail(input.email);
 
@@ -112,8 +116,27 @@ const start = async (
     return { success: true, data: toPendingState(existing) };
   }
 
+  const rateLimitKey = rateLimitKeys.emailVerificationStart(email);
+  const rateLimitCheck = await rateLimitService.checkRequestLimit(
+    rateLimitKey,
+    config.rateLimit.emailVerificationStart.maxPerHourPerEmail,
+    3600,
+  );
+  if (rateLimitCheck.blocked) {
+    return {
+      success: false,
+      message: "RATE_LIMITED",
+      data: { retryAfter: rateLimitCheck.retryAfter },
+    };
+  }
+
   const sent = await sendCode(userId, email, lang);
-  if (!("code" in sent)) return sent;
+  if (!("code" in sent)) {
+    return sent as ErrorResponse<{ retryAfter: string } | null>;
+  }
+
+  await rateLimitService.consumeRequest(rateLimitKey, 3600);
+
   const { code, codeHash, expiresAt, resendAvailableAt } = sent;
 
   const row = await emailVerificationQueries.upsertVerification({
@@ -145,11 +168,20 @@ type ConfirmResult =
 const confirm = async (
   input: ConfirmInput,
 ): Promise<
-  | SuccessResponse<ConfirmResult>
-  | ErrorResponse<{ resendAvailableAt: string } | null>
+  SuccessResponse<ConfirmResult> | ErrorResponse<{ retryAfter: string } | null>
 > => {
   const { userId, code } = input;
   const { maxAttempts } = config.email.verification;
+  const verifyKey = rateLimitKeys.verifyEmail(userId);
+
+  const lockCheck = await rateLimitService.checkLocked([verifyKey]);
+  if (lockCheck.blocked) {
+    return {
+      success: false,
+      message: "TOO_MANY_ATTEMPTS",
+      data: { retryAfter: lockCheck.retryAfter },
+    };
+  }
 
   const row = await emailVerificationQueries.findByUserId(userId);
 
@@ -163,25 +195,20 @@ const confirm = async (
   }
 
   if (row.attemptsCount >= maxAttempts) {
-    const updated = await emailVerificationQueries.allowImmediateResend(userId);
-    return {
-      success: false,
-      message: "TOO_MANY_ATTEMPTS",
-      data: { resendAvailableAt: updated?.resendAvailableAt ?? new Date().toISOString() },
-    };
+    await emailVerificationQueries.resetAttempts(userId);
   }
 
   const isValid = tokenService.comparePassword(code, row.codeHash);
 
   if (!isValid) {
-    const attempts = await emailVerificationQueries.incrementAttempts(userId);
+    await emailVerificationQueries.incrementAttempts(userId);
+    const failureResult = await rateLimitService.recordFailure([verifyKey]);
 
-    if (attempts !== null && attempts >= maxAttempts) {
-      const updated = await emailVerificationQueries.allowImmediateResend(userId);
+    if (failureResult.blocked) {
       return {
         success: false,
         message: "TOO_MANY_ATTEMPTS",
-        data: { resendAvailableAt: updated?.resendAvailableAt ?? new Date().toISOString() },
+        data: { retryAfter: failureResult.retryAfter },
       };
     }
 
@@ -199,6 +226,7 @@ const confirm = async (
     }
 
     await emailVerificationQueries.deleteByUserId(userId);
+    await rateLimitService.recordSuccess([verifyKey]);
 
     return { success: true, data: { status: "success", user: updatedUser } };
   } catch (error: unknown) {
@@ -220,9 +248,22 @@ const resend = async (input: {
   userId: string;
   lang?: EmailLang;
 }): Promise<
-  SuccessResponse<PendingState> | ErrorResponse<{ resendAvailableAt: string } | null>
+  | SuccessResponse<PendingState>
+  | ErrorResponse<{ resendAvailableAt: string; retryAfter?: string } | null>
 > => {
   const { userId, lang } = input;
+  const verifyKey = rateLimitKeys.verifyEmail(userId);
+  const lockCheck = await rateLimitService.checkLocked([verifyKey]);
+  if (lockCheck.blocked) {
+    return {
+      success: false,
+      message: "TOO_MANY_ATTEMPTS",
+      data: {
+        resendAvailableAt: lockCheck.retryAfter,
+        retryAfter: lockCheck.retryAfter,
+      },
+    };
+  }
 
   const row = await emailVerificationQueries.findByUserId(userId);
 

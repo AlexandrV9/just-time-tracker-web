@@ -14,6 +14,7 @@ import {
   Group,
   Input,
   PinInput,
+  RetryAfterMessage,
   Skeleton,
   Span,
   Stack,
@@ -128,6 +129,9 @@ export function SignUpEmailStep() {
               {getEmailErrorMessage(errors.email?.message)}
             </Field.ErrorText>
           </Field.Root>
+          <RetryAfterMessage
+            secondsLeft={emailVerification.emailRetrySecondsLeft}
+          />
           <ButtonGroup justify="space-between">
             <Button variant="outline" onClick={handleSkip}>
               {t(`${baseLocale}.skipButton`)}
@@ -135,6 +139,7 @@ export function SignUpEmailStep() {
             <Button
               onClick={handleStart}
               loading={emailVerification.isStartPending}
+              disabled={emailVerification.isEmailRateLimited}
             >
               {t(`${baseLocale}.sendCodeButton`)}
             </Button>
@@ -157,7 +162,7 @@ export function SignUpEmailStep() {
           <PinInput.Root
             count={6}
             size="md"
-            disabled={emailVerification.isExpired}
+            disabled={emailVerification.isExpired || emailVerification.isVerifyLocked}
             value={Array.from({ length: 6 }, (_, i) => code[i] ?? "")}
             onValueChange={(details) => setCode(details.value)}
             otp
@@ -193,7 +198,11 @@ export function SignUpEmailStep() {
           <Button
             onClick={handleConfirm}
             loading={emailVerification.isConfirmPending}
-            disabled={emailVerification.isExpired || code.join("").length !== 6}
+            disabled={
+              emailVerification.isExpired ||
+              emailVerification.isVerifyLocked ||
+              code.join("").length !== 6
+            }
           >
             {t(`${baseLocale}.verifyButton`)}
           </Button>

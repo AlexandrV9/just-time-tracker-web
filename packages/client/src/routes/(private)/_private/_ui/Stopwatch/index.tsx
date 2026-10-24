@@ -1,39 +1,44 @@
-import { Box, formatSecondsAsTimeString, Stack, Text } from "~/shared/ui";
-import { useCurrentActivity, useDisplayedSessionSeconds } from "~/features";
+import clsx from "clsx";
+import {
+  Button,
+  formatSecondsAsTimeString,
+  PauseIcon,
+  PlayIcon,
+  StopCircleIcon,
+  Text,
+} from "~/shared/ui";
+import { useCurrentActivity } from "~/features";
 import { useTranslation } from "~/shared/hooks";
 
-export function Stopwatch() {
+import styles from "./Stopwatch.module.css";
+
+type StopwatchProps = {
+  collapsed?: boolean;
+};
+
+export function Stopwatch({ collapsed = false }: StopwatchProps) {
   const { t } = useTranslation();
 
-  const { currentActivity, currentSession, currentSegment } =
-    useCurrentActivity();
-
-  const seconds = useDisplayedSessionSeconds({
-    session: currentSession,
-    segment: currentSegment,
-  });
+  const {
+    currentActivity,
+    currentSession,
+    status,
+    displayedSeconds,
+    start,
+    pause,
+    finish,
+  } = useCurrentActivity();
 
   const displayedTitle = currentActivity?.title;
-  const displayedTime = formatSecondsAsTimeString(seconds);
+  const displayedTime = formatSecondsAsTimeString(displayedSeconds);
+
+  const hasActivity = Boolean(currentActivity);
+  const isActive = status === "active";
+  const canStop = Boolean(currentSession);
 
   return (
-    <Stack.VStack
-      w="full"
-      backdropFilter="blur(20px)"
-      p="1rem"
-      gap="0.8rem"
-      overflow="hidden"
-      maxWidth="500px"
-    >
-      <Box
-        display="flex"
-        flexDirection="column"
-        gap="1rem"
-        alignItems="center"
-        w="full"
-        justifyContent="center"
-        position="relative"
-      >
+    <div className={clsx(styles.container, collapsed && styles.collapsed)}>
+      <div className={styles.title} data-flip="title">
         <Text
           textStyle="sm"
           color={displayedTitle ? "fg.muted" : "fg.subtle"}
@@ -41,15 +46,41 @@ export function Stopwatch() {
         >
           {displayedTitle ?? t("pages.home.selectActivity")}
         </Text>
-        <Text
-          style={{
-            fontSize: 40,
-            fontFamily: "Roboto Mono, monospace",
-          }}
+      </div>
+      <div className={styles.time} data-flip="time">
+        {displayedTime}
+      </div>
+      <div className={styles.stop} data-flip="stop">
+        <Button
+          variant="subtle"
+          borderRadius="0.5rem"
+          w="full"
+          h="full"
+          minW="0"
+          px="0"
+          disabled={!canStop}
+          onClick={() => finish()}
         >
-          {displayedTime}
-        </Text>
-      </Box>
-    </Stack.VStack>
+          <StopCircleIcon className={styles.icon} />
+        </Button>
+      </div>
+      <div className={styles.play} data-flip="play">
+        <Button
+          borderRadius="0.5rem"
+          w="full"
+          h="full"
+          minW="0"
+          px="0"
+          disabled={!hasActivity}
+          onClick={() => (isActive ? pause() : start())}
+        >
+          {isActive ? (
+            <PauseIcon className={styles.icon} />
+          ) : (
+            <PlayIcon className={styles.icon} />
+          )}
+        </Button>
+      </div>
+    </div>
   );
 }

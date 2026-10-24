@@ -4,6 +4,8 @@ import type {
   DayPlanDTO,
   DeleteDayPlanDataDTO,
   GetDayPlanDTO,
+  GetDayPlansByRangeDTO,
+  GetDayPlansByRangeResponseDTO,
   GetDayPlansDTO,
   GetDayPlansResponseDTO,
   UpdateDayPlanDataDTO,
@@ -74,6 +76,22 @@ const getDayPlans = async (
   }
 };
 
+type GetDayPlansByRangeResponse =
+  | SuccessResponse<GetDayPlansByRangeResponseDTO>
+  | ErrorResponse;
+
+const getDayPlansByRange = async (
+  filters: WithCreatedById<GetDayPlansByRangeDTO>,
+): Promise<GetDayPlansByRangeResponse> => {
+  try {
+    const data = await dayPlanQueries.getDayPlansByRange(filters);
+    return { success: true, data };
+  } catch (error) {
+    console.error("List day plans by range error:", error);
+    return { success: false, message: "Failed to fetch day plans by range" };
+  }
+};
+
 type UpdateDayPlanResponse = SuccessResponse<DayPlanDTO> | ErrorResponse;
 
 const updateDayPlan = async (
@@ -119,6 +137,7 @@ export const dayPlansService = {
   createDayPlan,
   getDayPlanById,
   getDayPlans,
+  getDayPlansByRange,
   updateDayPlan,
   deleteDayPlan,
 };

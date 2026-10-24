@@ -28,3 +28,7 @@ dev-dist
 .env.*
 
 .tanstack
+
+# Madge dependency graphs
+graph.svg
+graph.dot

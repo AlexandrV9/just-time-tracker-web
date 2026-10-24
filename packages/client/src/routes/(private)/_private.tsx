@@ -1,8 +1,13 @@
+import { Spinner } from "@chakra-ui/react";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { useLayoutEffect } from "react";
-import { LangSwitcher, ThemeSwitcher, useActivityEvents } from "~/features";
-import { authManager, AuthUserAvatar, useAuthStore } from "~/features/auth";
-import { NotificationButton, usePushNotifications } from "~/features/notifications";
+import { useCallback, useLayoutEffect } from "react";
+import { useActivityEvents } from "~/features";
+import { authManager, useAuthStore } from "~/features/auth";
+import {
+  NotificationButton,
+  usePushNotifications,
+} from "~/features/notifications";
+import { PwaInstallDialog } from "~/features/pwa-install";
 import {
   useDeviceDetect,
   useOrientation,
@@ -10,14 +15,31 @@ import {
 } from "~/shared/hooks";
 import { buildLocationRedirectPath } from "~/shared/libs";
 import { useSeo } from "~/shared/seo";
-import { Box, Flex, PageLayout, Text } from "~/shared/ui";
-import { Header, HeaderAppTitle, NavBar, useHeaderStore } from "~/widgets";
+import { Box, Flex, PageLayout } from "~/shared/ui";
+import {
+  Header,
+  HeaderAppTitle,
+  NavBar,
+  SideBar,
+  useHeaderStore,
+} from "~/widgets";
+import { prefetchNavTabForPath } from "./_private/_lib/prefetchNavTabs";
+import { usePreloadNavTabs } from "./_private/_lib/usePreloadNavTabs";
+import { AuthUser } from "~/features/auth/ui";
 
 function PrivateRoutePending() {
   const { t } = useTranslation();
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" p={8}>
-      <Text color="fg.muted">{t("pages.private.pending")}</Text>
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minH="100dvh"
+      role="status"
+      aria-live="polite"
+      aria-label={t("pages.private.pending")}
+    >
+      <Spinner size="lg" color="fg.muted" />
     </Box>
   );
 }
@@ -64,61 +86,95 @@ export const Route = createFileRoute("/(private)/_private")({
     }
   },
   pendingComponent: PrivateRoutePending,
+  loader: async ({ context, location }) => {
+    const userId = useAuthStore.getState().user?.id;
+    if (!userId) return;
+
+    await prefetchNavTabForPath(location.pathname, userId, context.queryClient);
+  },
   component: PrivateLayout,
 });
 
-export function PrivateLayout() {
+function PrivateLayout() {
   const { setContent } = useHeaderStore();
+
+  const { type: deviceType } = useDeviceDetect();
+  console.log("deviceType", deviceType);
 
   useSeo({ noIndex: true });
   useActivityEvents();
   usePushNotifications();
-
+  usePreloadNavTabs();
   useLayoutEffect(() => {
-    setContent("left", <AuthUserAvatar />);
-    setContent("center", <HeaderAppTitle />);
+    setContent("left", <AuthUser.Avatar />);
+
+    if (deviceType === "mobile") {
+      setContent("center", <HeaderAppTitle />);
+    }
+
     setContent(
       "right",
       <Flex justifyContent="end" gap={2}>
-        <LangSwitcher />
-        <ThemeSwitcher />
         <NotificationButton />
       </Flex>,
     );
-  }, [setContent]);
+  }, [deviceType, setContent]);
 
-  const { type: deviceType } = useDeviceDetect();
+  const renderLayoutComponent = useCallback(() => {
+    switch (deviceType) {
+      case "desktop":
+        return <DesktopLayout />;
+      case "tablet":
+        return <TabletLayout />;
+      case "mobile":
+        return <MobileLayout />;
+      default:
+        return <MobileLayout />;
+    }
+  }, [deviceType]);
 
-  switch (deviceType) {
-    case "desktop":
-      return <DesktopLayout />;
-    case "tablet":
-      return <TabletLayout />;
-    case "mobile":
-      return <MobileLayout />;
-    default:
-      return <MobileLayout />;
-  }
+  const layoutComponent = renderLayoutComponent();
+
+  return (
+    <>
+      {layoutComponent}
+      <PwaInstallDialog />
+    </>
+  );
 }
 
 function DesktopLayout() {
   return (
-    <PageLayout>
-      <PageLayout.TopContainer
+    <PageLayout
+      display="flex"
+      flexDirection="row"
+      justifyContent="stretch"
+      alignContent="stretch"
+      p="0.5rem"
+      gap="0.5rem"
+    >
+      <Box w="300px" flexShrink={0} overflow="hidden">
+        <Box h="full" rounded="0.5rem" p="0.5rem" pb="1.2rem">
+          <SideBar />
+        </Box>
+      </Box>
+      <Box
         display="flex"
-        justifyContent="center"
-        alignItems="center"
-        borderBottom="1px solid"
-        borderColor="border.emphasized"
+        flexDirection="column"
+        w="full"
+        minW={0}
+        minH={0}
+        gap="inherit"
       >
-        <Header />
-      </PageLayout.TopContainer>
-      <PageLayout.MainContainer>
-        <Outlet />
-      </PageLayout.MainContainer>
-      <PageLayout.BottomContainer>
-        <NavBar />
-      </PageLayout.BottomContainer>
+        <Box w="full" h="80px" flexShrink={0}>
+          <Box h="full" rounded="0.5rem" p="0.5rem">
+            <Header />
+          </Box>
+        </Box>
+        <PageLayout.MainContainer>
+          <Outlet />
+        </PageLayout.MainContainer>
+      </Box>
     </PageLayout>
   );
 }
@@ -147,7 +203,7 @@ function TabletLayout() {
 
 function MobileLayout() {
   const { orientation } = useOrientation();
-  // console.log(orientation);
+  console.log(orientation);
 
   switch (orientation) {
     case "landscape-primary":
@@ -180,10 +236,13 @@ function MobileLayout() {
           <Box
             display="flex"
             justifyContent="center"
+            alignItems="center"
             borderLeft="1px solid"
             borderColor="border.emphasized"
           >
             <NavBar
+              position="absolute"
+              bottom="10px"
               display="flex"
               justifyContent="center"
               alignItems="center"
@@ -278,7 +337,7 @@ function MobileLayout() {
       );
     case "portrait-primary": {
       return (
-        <PageLayout>
+        <PageLayout position="relative">
           <PageLayout.TopContainer
             display="flex"
             justifyContent="center"
@@ -288,10 +347,16 @@ function MobileLayout() {
           >
             <Header />
           </PageLayout.TopContainer>
-          <PageLayout.MainContainer>
+          <PageLayout.MainContainer pb="65px">
             <Outlet />
           </PageLayout.MainContainer>
-          <PageLayout.BottomContainer>
+          <PageLayout.BottomContainer
+            position="absolute"
+            bottom="10px"
+            border="none"
+            bg="transparent"
+            contentProps={{ w: "fit-content" }}
+          >
             <NavBar />
           </PageLayout.BottomContainer>
         </PageLayout>

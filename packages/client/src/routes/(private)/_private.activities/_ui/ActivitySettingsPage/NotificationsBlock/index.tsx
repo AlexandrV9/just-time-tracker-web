@@ -58,8 +58,12 @@ export const NotificationsBlock = ({ activityId }: NotificationsBlockProps) => {
     enabled: !!activityId,
   });
 
-  if (isPending || !settings) {
+  if (isPending && !settings) {
     return <NotificationsBlockSkeleton />;
+  }
+
+  if (!settings) {
+    return null;
   }
 
   return (

@@ -1,9 +1,12 @@
+import clsx from "clsx";
 import { type ReactNode } from "react";
 import { List, Box, type IconProps, type BoxProps } from "~/shared/ui";
 import { navItems } from "./constants";
 import { NavBarItem } from "./Item";
 import { useLocation } from "@tanstack/react-router";
-import { useTranslation } from "~/shared/hooks";
+import { useDeviceDetect, useScreenSize, useTranslation } from "~/shared/hooks";
+
+import styles from "./NavBar.module.css";
 
 export type NavBarItemProps = {
   children: ReactNode;
@@ -17,6 +20,43 @@ export interface NavBarProps extends BoxProps {
 export function NavBar({ isVertical = false, ...props }: NavBarProps) {
   const { t } = useTranslation();
   const location = useLocation();
+
+  const { isMobile } = useDeviceDetect();
+  const { width } = useScreenSize();
+
+  const isHideText = width <= 480;
+
+  if (isMobile) {
+    return (
+      <Box
+        as="nav"
+        {...props}
+        className={clsx(styles.glass, props.className)}
+        borderRadius="full"
+        display="flex"
+        justifyContent="center"
+        w="auto"
+        p="0 10px"
+      >
+        <List.Root
+          display="flex"
+          flexDir="row"
+          listStyleType="none"
+          gap={isHideText ? "2rem" : "1rem"}
+        >
+          {navItems.map((item) => (
+            <NavBarItem
+              key={item.href}
+              {...item}
+              isHideText={isHideText}
+              title={t(`widgets.navbar.menuItems.${item.title}`)}
+              isActive={checkIsActive(item.href, location.pathname)}
+            />
+          ))}
+        </List.Root>
+      </Box>
+    );
+  }
 
   return (
     <Box as="nav" {...props}>

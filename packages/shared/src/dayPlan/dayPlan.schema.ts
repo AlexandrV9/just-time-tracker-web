@@ -45,3 +45,43 @@ export type GetDayPlanDTO = z.infer<typeof baseIdSchema>;
 export const getDayPlansResponseSchema =
   paginationResponseSchema(dayPlanSchema);
 export type GetDayPlansResponseDTO = z.infer<typeof getDayPlansResponseSchema>;
+
+export const getDayPlansByRangeSchema = z
+  .object({
+    fromDate: ymdDateString,
+    toDate: ymdDateString,
+  })
+  .superRefine(({ fromDate, toDate }, ctx) => {
+    if (toDate < fromDate) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["toDate"],
+        message: "toDate must be on or after fromDate",
+      });
+    }
+  });
+
+export type GetDayPlansByRangeDTO = z.infer<typeof getDayPlansByRangeSchema>;
+
+export const dayActivityByDateItemSchema = z.object({
+  name: z.string(),
+});
+
+export type DayActivityByDateItemDTO = z.infer<
+  typeof dayActivityByDateItemSchema
+>;
+
+export const dayActivitiesByDateSchema = z.object({
+  date: ymdDateString,
+  activities: z.array(dayActivityByDateItemSchema),
+});
+
+export type DayActivitiesByDateDTO = z.infer<typeof dayActivitiesByDateSchema>;
+
+export const getDayPlansByRangeResponseSchema = z.array(
+  dayActivitiesByDateSchema,
+);
+
+export type GetDayPlansByRangeResponseDTO = z.infer<
+  typeof getDayPlansByRangeResponseSchema
+>;

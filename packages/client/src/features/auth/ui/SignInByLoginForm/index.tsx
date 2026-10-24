@@ -1,9 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useSearch } from "@tanstack/react-router";
 import type { TFunction } from "i18next";
 import z from "zod";
-import { authManager } from "~/features/auth";
 import { useTranslation } from "~/shared/hooks";
 import shineStyles from "~/shared/styles/shineRing.module.css";
 
@@ -15,9 +13,10 @@ import {
   Link,
   Box,
   useForm,
-  toast,
   Text,
+  RetryAfterMessage,
 } from "~/shared/ui";
+import { useSignInByLogin } from "./useSignInByLogin";
 
 const minLengthPassword = 1;
 const baseLocale = "features.auth.signInByLoginForm";
@@ -30,24 +29,13 @@ type SignInFormSchema = z.infer<typeof signInFormSchema>;
 
 export const SignInByLoginForm = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { redirect } = useSearch({ from: "/(auth)/_auth/signin/" });
 
-  const { isPending, mutate } = useMutation({
-    mutationFn: (data: SignInFormSchema) => authManager.signInByLogin(data),
-    onSuccess: (response) => {
-      if (response.success) {
-        navigate({ to: redirect || "/" });
-        return;
-      }
+  const { redirect = "/" } = useSearch({ from: "/(auth)/_auth/signin/" });
 
-      showSignInErrorToast(t, response.message);
-    },
-    onError: (error) => {
-      const message = error instanceof Error ? error.message : undefined;
-      showSignInErrorToast(t, message);
-    },
-  });
+  const { signInFn, retrySecondsLeft, isRetryBlocked, isPending } =
+    useSignInByLogin({
+      successRedirectUrl: redirect,
+    });
 
   const {
     register,
@@ -55,14 +43,14 @@ export const SignInByLoginForm = () => {
     formState: { errors },
   } = useForm<SignInFormSchema>({
     resolver: zodResolver(signInFormSchema),
-    disabled: isPending,
+    disabled: isPending || isRetryBlocked,
     defaultValues: {
       login: "",
       password: "",
     },
   });
 
-  const submitHandler = handleSubmit((data) => mutate(data));
+  const submitHandler = handleSubmit((data) => signInFn(data));
 
   return (
     <Box
@@ -120,11 +108,13 @@ export const SignInByLoginForm = () => {
           {t(`${baseLocale}.forgotPasswordLink`)}
         </Link>
       </Text>
+      <RetryAfterMessage secondsLeft={retrySecondsLeft} />
 
       <Button
         mt="0.5rem"
         type="submit"
         loading={isPending}
+        disabled={isRetryBlocked}
         loadingText={t(`${baseLocale}.submitButtonLoadingText`)}
       >
         {t(`${baseLocale}.submitButton`)}
@@ -145,29 +135,6 @@ export const SignInByLoginForm = () => {
     </Box>
   );
 };
-
-function getSignInErrorMessage(
-  t: TFunction<"translation", undefined>,
-  message?: string,
-) {
-  switch (message) {
-    case "Login or password is not correct":
-      return t(`${baseLocale}.errors.invalidCredentials`);
-    default:
-      return t(`${baseLocale}.errors.unknown`);
-  }
-}
-
-function showSignInErrorToast(
-  t: TFunction<"translation", undefined>,
-  message?: string,
-) {
-  toast.error(getSignInErrorMessage(t, message), {
-    position: "top-center",
-    draggable: true,
-    toastId: "error_sign_in",
-  });
-}
 
 function getTranslatedError(
   t: TFunction<"translation", undefined>,

@@ -9,18 +9,18 @@ import {
   Text,
   VersionIcon,
 } from "~/shared/ui";
-import { AddTodayActivitiesDialog } from "./AddTodayActivityDialog";
+import { AddActivitiesDialog } from "../AddActivitiesDialog";
 import { useTodayActivities } from "./useTodayActivities";
 import {
   useFinishActivity,
   usePauseActivity,
   useStartActivity,
-  useAddTodayActivities,
-} from "./mutations";
+  useCurrentActivity,
+} from "~/features";
+import { useAddTodayActivities } from "./mutations";
 import { useTranslation } from "~/shared/hooks";
 import { TodayActivityGroup } from "./TodayActivityGroup";
 import type { ActivityState } from "~/shared/api/services";
-import { useCurrentActivity } from "~/features";
 
 export const TodayActivityList = () => {
   const { t } = useTranslation();
@@ -29,7 +29,7 @@ export const TodayActivityList = () => {
   const { currentActivity, setCurrentActivity, updateData } =
     useCurrentActivity();
 
-  const { planId, activityGroup, isLoading, isError } = useTodayActivities();
+  const { activityGroup, isLoading, isError } = useTodayActivities();
 
   const currentActivityId = currentActivity?.id;
   const hasRunningActivity = currentActivity?.status === "active";
@@ -86,9 +86,7 @@ export const TodayActivityList = () => {
     });
   };
 
-  const { mutateAsync: addTodayActivities } = useAddTodayActivities({
-    planId,
-  });
+  const { mutateAsync: addTodayActivities } = useAddTodayActivities();
 
   const renderContent = () => {
     if (isLoading) {
@@ -151,9 +149,6 @@ export const TodayActivityList = () => {
 
   return (
     <>
-      <Flex align="center" justify="center" h="30px" position="relative">
-        <Box w="full" h="1px" bg="bg.emphasized" />
-      </Flex>
       <Stack.VStack w="full" p="0.5rem" alignItems="stretch">
         <Flex gap="1rem" alignItems="center">
           <Text textStyle="2xl" fontWeight="bolder">
@@ -170,9 +165,9 @@ export const TodayActivityList = () => {
         </Flex>
         <Box w="full">{content}</Box>
       </Stack.VStack>
-      <AddTodayActivitiesDialog
+      <AddActivitiesDialog
         dialog={addTodayActivityDialog}
-        selectedActivityIds={activityGroup.activities.map(
+        excludeActivityIds={activityGroup.activities.map(
           (item) => item.activity.id,
         )}
         onSubmit={addTodayActivities}

@@ -1,6 +1,11 @@
 import type { ActivityDTO, ActivityStatusDTO } from "@time-tracker/shared";
 import type { MouseEvent } from "react";
-import { Flex, PauseCircleIcon, PlayCircleIcon, StopIcon } from "~/shared/ui";
+import {
+  Flex,
+  PauseCircleIcon,
+  PlayCircleIcon,
+  StopCircleIcon,
+} from "~/shared/ui";
 import { IconButton } from "@chakra-ui/react";
 
 type ActivityCardControlsProps = {
@@ -35,7 +40,7 @@ export function ActivityCardControls({
           onFinish?.(activityId);
         }}
       >
-        <StopIcon />
+        <StopCircleIcon />
       </IconButton>
     );
   }
@@ -51,7 +56,7 @@ export function ActivityCardControls({
             onFinish?.(activityId);
           }}
         >
-          <StopIcon />
+          <StopCircleIcon />
         </IconButton>
         <IconButton
           variant="ghost"
@@ -81,7 +86,7 @@ export function ActivityCardControls({
             onFinish?.(activityId);
           }}
         >
-          <StopIcon />
+          <StopCircleIcon />
         </IconButton>
         <IconButton
           variant="ghost"

@@ -1,0 +1,13 @@
+.chevron {
+  transition: transform 0.48s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.chevronCollapsed {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}

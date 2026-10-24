@@ -1,6 +1,8 @@
 import { SignOutButton } from "~/features/auth";
-import { Flex, Stack } from "~/shared/ui";
-import { AccountSettings, AuthUserInfo } from "~/widgets";
+import { AuthUserInfo, HelpInfoSettings } from "~/widgets";
+import { Stack } from "~/shared/ui";
+import { AccountSettings } from "./AccountSettings";
+import { InterfaceSettings } from "./InterfaceSettings";
 
 export function SettingsPage() {
   return (
@@ -9,14 +11,18 @@ export function SettingsPage() {
       maxW="520px"
       mx="auto"
       p="1rem"
-      gap="2rem"
+      gap="1rem"
       alignItems="stretch"
     >
-      <AuthUserInfo />
+      <Stack.HStack justify="center">
+        <AuthUserInfo />
+      </Stack.HStack>
       <AccountSettings />
-      <Flex justifyContent="center">
+      <InterfaceSettings />
+      <HelpInfoSettings />
+      <Stack.HStack justifyContent="center">
         <SignOutButton />
-      </Flex>
+      </Stack.HStack>
     </Stack.VStack>
   );
 }

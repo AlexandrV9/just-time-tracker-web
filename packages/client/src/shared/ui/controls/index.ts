@@ -1,2 +1,2 @@
 export * from "./BackButton";
-export * from "./CloseButton";
+export { CloseButton, type CloseButtonProps } from "./CloseButton";

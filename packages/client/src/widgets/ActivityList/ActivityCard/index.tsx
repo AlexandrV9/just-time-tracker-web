@@ -15,9 +15,13 @@ import { ActivityCardView } from "~/entities/Activity";
 
 type ActivityCardProps = {
   activity: ActivityDTO;
+  interactive?: boolean;
 };
 
-export const ActivityCard = ({ activity }: ActivityCardProps) => {
+export const ActivityCard = ({
+  activity,
+  interactive = true,
+}: ActivityCardProps) => {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
 
@@ -41,11 +45,16 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
 
   return (
     <ActivityCardView
-      onClick={() =>
-        navigate({
-          to: "/activities/$activityId",
-          params: { activityId: activity.id },
-        })
+      cursor={interactive ? "pointer" : "default"}
+      _hover={interactive ? { bg: "bg.subtle" } : undefined}
+      onClick={
+        interactive
+          ? () =>
+              navigate({
+                to: "/activities/$activityId",
+                params: { activityId: activity.id },
+              })
+          : undefined
       }
     >
       <ActivityCardView.Body>
