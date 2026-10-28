@@ -5,6 +5,7 @@ export {
   SignOutButton,
   SignInByLoginForm,
   SignUpForm,
+  StyledFormWrapper,
   YandexLoginButton,
   AuthUser,
 } from "./ui";

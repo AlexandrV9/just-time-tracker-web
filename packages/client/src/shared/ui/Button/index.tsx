@@ -3,10 +3,18 @@ import {
   type ButtonProps as BaseButtonProps,
 } from "@chakra-ui/react";
 
-export type ButtonProps = BaseButtonProps;
+export type ButtonVariant =
+  | NonNullable<BaseButtonProps["variant"]>
+  | "accent";
 
-export const Button = (props: ButtonProps) => {
-  return <BaseButton {...props} />;
+export type ButtonProps = Omit<BaseButtonProps, "variant"> & {
+  variant?: ButtonVariant;
+};
+
+export const Button = ({ variant, ...props }: ButtonProps) => {
+  return (
+    <BaseButton {...props} variant={variant as BaseButtonProps["variant"]} />
+  );
 };
 
 export { IconButton, type IconButtonProps } from "./IconButton";

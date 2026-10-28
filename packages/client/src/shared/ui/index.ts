@@ -42,3 +42,5 @@ export * from "./Image";
 
 export * from "./icons";
 export * from "./controls";
+
+export * from "./Design";

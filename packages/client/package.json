@@ -16,7 +16,9 @@
     "preview": "vite preview",
     "deps:circular": "madge --circular --extensions ts,tsx src",
     "deps:graph": "madge --image graph.svg --extensions ts,tsx src",
-    "deps:dot": "madge --dot --extensions ts,tsx src > graph.dot"
+    "deps:dot": "madge --dot --extensions ts,tsx src > graph.dot",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@ark-ui/react": "^5.25.1",
@@ -55,6 +57,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@storybook/react-vite": "10.6.3",
     "@tanstack/router-plugin": "^1.131.35",
     "@types/node": "^20.19.16",
     "@types/react": "^19.1.10",
@@ -66,8 +69,9 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
-    "rollup-plugin-visualizer": "^7.1.1",
     "madge": "^8.0.0",
+    "rollup-plugin-visualizer": "^7.1.1",
+    "storybook": "10.6.3",
     "tsx": "^4.7.1",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",

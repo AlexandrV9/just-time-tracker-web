@@ -1,155 +1,72 @@
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "@tanstack/react-router";
 import {
+  Brand,
   Box,
   Link,
-  List,
-  ScrollArea,
-  Stack,
+  NavigationItem,
   Text,
   type BoxProps,
 } from "~/shared/ui";
 import { navItems } from "../NavBar/constants";
 import { useTranslation } from "~/shared/hooks";
-import { useLocation } from "@tanstack/react-router";
 import { AuthUser } from "~/features/auth";
-
-import shineStyles from "~/shared/styles/shineRing.module.css";
+import styles from "./SideBar.module.css";
 
 export type SideBarProps = BoxProps;
 
-type IndicatorRect = {
-  top: number;
-  height: number;
-};
-
 export const SideBar = (props: SideBarProps) => {
   const { t } = useTranslation();
-  const location = useLocation();
-
-  const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
-  const [indicator, setIndicator] = useState<IndicatorRect | null>(null);
-  const [canAnimate, setCanAnimate] = useState(false);
-
-  const activeHref = useMemo(
-    () =>
-      navItems.find((item) => checkIsActive(item.href, location.pathname))
-        ?.href ?? null,
-    [location.pathname],
-  );
-
-  useLayoutEffect(() => {
-    if (!activeHref) return;
-
-    const activeEl = itemRefs.current.get(activeHref);
-    if (!activeEl) return;
-
-    setIndicator({
-      top: activeEl.offsetTop,
-      height: activeEl.offsetHeight,
-    });
-
-    if (!canAnimate) {
-      const id = requestAnimationFrame(() => setCanAnimate(true));
-      return () => cancelAnimationFrame(id);
-    }
-  }, [activeHref, canAnimate]);
-
+  const { pathname } = useLocation();
   return (
-    <Box
-      as="aside"
-      display="flex"
-      gap="0.5rem"
-      flexDirection="column"
-      h="full"
-      {...props}
-    >
-      <Stack.HStack padding="0px 24px 0 12px">
-        <Text
-          textStyle="md"
-          fontWeight="semibold"
-          className={shineStyles.shineText}
-        >
-          Just Time Tracker
-        </Text>
-      </Stack.HStack>
-      <ScrollArea.Root as="nav" flexGrow={1} {...props}>
-        <ScrollArea.Viewport>
-          <List.Root
-            position="relative"
-            listStyleType="none"
-            justifyContent="center"
-            _before={{
-              content: '""',
-              position: "absolute",
-              left: 0,
-              width: "2px",
-              bg: "purple.focusRing",
-              borderRadius: "12px",
-              pointerEvents: "none",
-              transition: canAnimate
-                ? "top 0.25s ease, height 0.25s ease, opacity 0.2s ease"
-                : "none",
-              top: `${indicator?.top ?? 0}px`,
-              height: `${indicator?.height ?? 0}px`,
-              opacity: indicator ? 1 : 0,
-            }}
+    <Box as="aside" className={styles.sidebar} {...props}>
+      <Link to="/" className={styles.brand}>
+        <Brand />
+      </Link>
+      <nav
+        className={styles.navigation}
+        aria-label={t("pages.dashboard.navigation")}
+      >
+        {navItems.map((item) => (
+          <NavigationItem
+            key={item.id}
+            asChild
+            active={
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href)
+            }
           >
-            {navItems.map((item) => {
-              const isActive = checkIsActive(item.href, location.pathname);
-
-              return (
-                <List.Item
-                  key={item.id}
-                  ref={(el) => {
-                    if (el) itemRefs.current.set(item.href, el);
-                    else itemRefs.current.delete(item.href);
-                  }}
-                >
-                  <Box
-                    asChild
-                    display="flex"
-                    alignItems="center"
-                    padding="12px 24px 12px 12px"
-                    borderRadius="50px"
-                    color={isActive ? "purple.focusRing" : "gray"}
-                    _hover={{
-                      color: "white",
-                    }}
-                    _focusVisible={{
-                      color: "white",
-                      outline: "none",
-                    }}
-                  >
-                    <Link to={item.href}>
-                      <Stack.HStack gap={{ base: 1, md: 1.5 }}>
-                        <item.icon size={24} />
-                        <Text
-                          fontSize="md"
-                          fontWeight="semibold"
-                          lineHeight="shorter"
-                        >
-                          {t(`widgets.navbar.menuItems.${item.title}`)}
-                        </Text>
-                      </Stack.HStack>
-                    </Link>
-                  </Box>
-                </List.Item>
-              );
-            })}
-          </List.Root>
-        </ScrollArea.Viewport>
-      </ScrollArea.Root>
-
-      <Box pt="1rem">
-        <Stack.HStack>
-          <AuthUser.Avatar />
-          <AuthUser.Name />
-        </Stack.HStack>
-      </Box>
+            <Link
+              to={item.href}
+              aria-current={
+                (
+                  item.href === "/"
+                    ? pathname === "/"
+                    : pathname.startsWith(item.href)
+                )
+                  ? "page"
+                  : undefined
+              }
+            >
+              <item.icon size={18} aria-hidden="true" />
+              <Text fontSize="inherit">
+                {t(`widgets.navbar.menuItems.${item.title}`)}
+              </Text>
+            </Link>
+          </NavigationItem>
+        ))}
+      </nav>
+      <div className={styles.note} aria-hidden="true">
+        <span>✧</span>
+        <p>{t("pages.dashboard.sidebarNote")}</p>
+      </div>
+      <div className={styles.profile}>
+        <AuthUser.Avatar />
+        <div>
+          <AuthUser.Name fontSize="sm" lineClamp={1} />
+          <Link to="/settings">{t("pages.dashboard.account")}</Link>
+        </div>
+      </div>
     </Box>
   );
 };
-
-function checkIsActive(href: string, path: string) {
-  return href === "/" ? path === "/" : path.startsWith(href);
-}

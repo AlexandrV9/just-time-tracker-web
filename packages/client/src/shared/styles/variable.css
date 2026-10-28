@@ -1,15 +1,295 @@
 :root {
   --fonts-font-family-default: "Inter";
   --fonts-font-family-accent: "Hagrid Text";
-  --page-content-max-width: 1280px;
+  --page-content-max-width: 1120px;
+  --input-border-radius: 8px;
+  --app-radius-panel: 14px;
 }
 
 [data-theme="light"] {
-  /* --toast-success-color: red; */
-  /* --toast-bg: rgba(255, 255, 255, 1); */
+  --app-page-bg: #f8f6fc;
+  --app-page-fg: #241c31;
+  --app-page-header-border: color-mix(in srgb, #241c31 8%, transparent);
+
+  --app-primary: #6932bc;
+
+  --app-secondary-bg: #ffffff;
+  --app-secondary-hover-bg: #e0d4f5;
+  --app-secondary-hover-soft: color-mix(
+    in srgb,
+    var(--app-secondary-hover-bg) 20%,
+    transparent
+  );
+  --app-secondary-card-gradient: linear-gradient(145deg, #eee8f7, #f3eef9 80%);
+  --app-secondary-chip-gradient: linear-gradient(120deg, #eee8f7, #ffffff);
+  --app-secondary-form-gradient: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--app-secondary-bg) 78%, transparent),
+    color-mix(in srgb, var(--app-secondary-bg) 60%, transparent)
+  );
+  --app-secondary-form-shadow: inset 0 1px 0
+      color-mix(in srgb, #8750df 9%, transparent),
+    0 24px 64px color-mix(in srgb, #241c31 35%, transparent);
+  --app-secondary-card-shadow: 0 -1px 0 color-mix(in srgb, #8750df 9.8%, transparent),
+    0 20px 40px color-mix(in srgb, #241c31 40%, transparent);
+  --app-secondary-chip-shadow: 0 6px 26px color-mix(in srgb, #241c31 46.7%, transparent);
+
+  --app-accent-text: #7948bd;
+  --app-accent-soft-bg: color-mix(in srgb, #8750df 13%, #ffffff);
+  --app-accent-soft-border: color-mix(in srgb, #91889f 18.8%, transparent);
+  --app-accent-border: color-mix(in srgb, var(--app-accent-text) 27.5%, transparent);
+  --app-accent-border-strong: color-mix(
+    in srgb,
+    var(--app-accent-text) 47.8%,
+    transparent
+  );
+  --app-accent-border-soft: color-mix(
+    in srgb,
+    var(--app-accent-text) 22.7%,
+    transparent
+  );
+  --app-accent-title-gradient: linear-gradient(100deg, #8750df, var(--app-primary));
+  --app-accent-chip-gradient: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--app-accent-text) 8.6%, transparent),
+    color-mix(in srgb, var(--app-accent-text) 2.4%, transparent)
+  );
+  --app-accent-spotlight: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--app-accent-text) 17.3%, transparent),
+    color-mix(in srgb, var(--app-accent-text) 2.7%, transparent) 52%,
+    transparent 72%
+  );
+  --app-accent-text-shadow: 0 0 25px
+    color-mix(in srgb, var(--app-accent-text) 36.1%, transparent);
+  --app-accent-button-fg: #ffffff;
+  --app-accent-button-bg: linear-gradient(120deg, #8750df, #6932bc);
+  --app-accent-button-border: var(--app-accent-soft-border);
+  --app-accent-button-shadow: inset 0 1px 0
+    color-mix(in srgb, #ffffff 7.8%, transparent);
+  --app-accent-button-hover-shadow: 0 4px 24px
+    color-mix(in srgb, #8750df 20%, transparent);
+
+  --app-muted-text: #766887;
+  --app-muted-subtle: #91889f;
+  --app-muted-border: color-mix(in srgb, var(--app-muted-text) 32.2%, transparent);
+  --app-muted-border-soft: color-mix(
+    in srgb,
+    var(--app-muted-text) 23.9%,
+    transparent
+  );
+  --app-muted-hover-bg: color-mix(in srgb, var(--app-muted-text) 7.5%, transparent);
+
+  --app-success: #1f9a7a;
+  --app-success-dot-shadow: 0 0 10px
+    color-mix(in srgb, var(--app-success) 20.8%, transparent);
+
+  --app-info: #3d8fbc;
+  --app-info-border: color-mix(in srgb, var(--app-info) 22%, transparent);
+
+  --app-input-accent-bg: #ffffff;
+  --app-input-accent-text: #241c31;
+  --app-input-accent-placeholder: #766887;
+  --app-input-accent-border: color-mix(in srgb, #91889f 32%, transparent);
+  --app-input-accent-focus-border: #7948bd;
+  --app-input-accent-invalid: #91889f;
+  --app-input-accent-autofill-bg: #eee8f7;
+
+  --app-page-stars: radial-gradient(
+      1px 1px at 3% 18%,
+      var(--app-accent-text) 98%,
+      transparent
+    ),
+    radial-gradient(
+      1px 1px at 41% 9%,
+      var(--app-muted-text) 98%,
+      transparent
+    ),
+    radial-gradient(
+      1px 1px at 34% 78%,
+      var(--app-accent-text) 98%,
+      transparent
+    ),
+    radial-gradient(
+      1.3px 1.3px at 93% 14%,
+      var(--app-accent-text) 98%,
+      transparent
+    ),
+    radial-gradient(
+      1px 1px at 84% 82%,
+      var(--app-accent-text) 98%,
+      transparent
+    );
+
+  /* Landing (marketing) palette */
+  --landing-page-bg: #f8f6fc;
+  --landing-page-fg: #241c31;
+  --landing-page-border: color-mix(in srgb, #241c31 8%, transparent);
+  --landing-page-shadow: #241c31;
+  --landing-bright: #ffffff;
+  --landing-contrast-fg: #241c31;
+
+  --landing-primary: #6932bc;
+  --landing-primary-bright: #8750df;
+  --landing-primary-deep: #4f2494;
+
+  --landing-secondary-bg: #ffffff;
+  --landing-secondary-elevated-bg: #eee8f7;
+  --landing-secondary-deep-bg: #f3eef9;
+  --landing-secondary-hover-bg: #e0d4f5;
+  --landing-secondary-muted-bg: #eee8f7;
+
+  --landing-accent-text: #7948bd;
+  --landing-accent-strong: #7948bd;
+
+  --landing-muted-text: #766887;
+  --landing-muted-subtle: #91889f;
+  --landing-muted-soft: #766887;
+
+  --landing-success: #1f9a7a;
+  --landing-info: #3d8fbc;
 }
 
 [data-theme="dark"] {
-  /* --toast-success-color: blue; */
-  /* --toast-bg: rgba(0, 0, 0, 1); */
+  --app-page-bg: #050507;
+  --app-page-fg: #f1edf8;
+  --app-page-header-border: color-mix(in srgb, #ffffff 4.3%, transparent);
+
+  --app-primary: #8750df;
+
+  --app-secondary-bg: #111016;
+  --app-secondary-hover-bg: #35234f;
+  --app-secondary-hover-soft: color-mix(
+    in srgb,
+    var(--app-secondary-hover-bg) 20%,
+    transparent
+  );
+  --app-secondary-card-gradient: linear-gradient(145deg, #1b1525, #0d0a12 80%);
+  --app-secondary-chip-gradient: linear-gradient(120deg, #1b1525, #111016);
+  --app-secondary-form-gradient: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--app-secondary-bg) 78%, transparent),
+    color-mix(in srgb, var(--app-secondary-bg) 60%, transparent)
+  );
+  --app-secondary-form-shadow: inset 0 1px 0
+      color-mix(in srgb, #d6baff 9%, transparent),
+    0 24px 64px color-mix(in srgb, #000000 35%, transparent);
+  --app-secondary-card-shadow: 0 -1px 0 color-mix(in srgb, #d6baff 9.8%, transparent),
+    0 20px 40px color-mix(in srgb, #000000 40%, transparent);
+  --app-secondary-chip-shadow: 0 6px 26px color-mix(in srgb, #000000 46.7%, transparent);
+
+  --app-accent-text: #b99aef;
+  --app-accent-soft-bg: color-mix(in srgb, #8750df 13%, #111016);
+  --app-accent-soft-border: color-mix(in srgb, #b99aef 18%, transparent);
+  --app-accent-border: color-mix(in srgb, var(--app-accent-text) 27.5%, transparent);
+  --app-accent-border-strong: color-mix(
+    in srgb,
+    var(--app-accent-text) 47.8%,
+    transparent
+  );
+  --app-accent-border-soft: color-mix(
+    in srgb,
+    var(--app-accent-text) 22.7%,
+    transparent
+  );
+  --app-accent-title-gradient: linear-gradient(100deg, #d6baff, var(--app-primary));
+  --app-accent-chip-gradient: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--app-accent-text) 8.6%, transparent),
+    color-mix(in srgb, var(--app-accent-text) 2.4%, transparent)
+  );
+  --app-accent-spotlight: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--app-accent-text) 17.3%, transparent),
+    color-mix(in srgb, var(--app-accent-text) 2.7%, transparent) 52%,
+    transparent 72%
+  );
+  --app-accent-text-shadow: 0 0 25px
+    color-mix(in srgb, var(--app-accent-text) 36.1%, transparent);
+  --app-accent-button-fg: #ffffff;
+  --app-accent-button-bg: linear-gradient(120deg, #8750df, #6932bc);
+  --app-accent-button-border: var(--app-accent-soft-border);
+  --app-accent-button-shadow: inset 0 1px 0
+    color-mix(in srgb, #ffffff 7.8%, transparent);
+  --app-accent-button-hover-shadow: 0 4px 24px
+    color-mix(in srgb, #8750df 20%, transparent);
+
+  --app-muted-text: #91889f;
+  --app-muted-subtle: #6d5f79;
+  --app-muted-border: color-mix(in srgb, var(--app-muted-text) 32.2%, transparent);
+  --app-muted-border-soft: color-mix(
+    in srgb,
+    var(--app-muted-text) 23.9%,
+    transparent
+  );
+  --app-muted-hover-bg: color-mix(in srgb, var(--app-muted-text) 7.5%, transparent);
+
+  --app-success: #3eddb7;
+  --app-success-dot-shadow: 0 0 10px
+    color-mix(in srgb, var(--app-success) 20.8%, transparent);
+
+  --app-info: #78bde4;
+  --app-info-border: color-mix(in srgb, var(--app-info) 22%, transparent);
+
+  --app-input-accent-bg: #0d0a12;
+  --app-input-accent-text: #eee8f7;
+  --app-input-accent-placeholder: #6d5f79;
+  --app-input-accent-border: color-mix(in srgb, #91889f 19.6%, transparent);
+  --app-input-accent-focus-border: #b99aef;
+  --app-input-accent-invalid: #91889f;
+  --app-input-accent-autofill-bg: #1b1525;
+
+  --app-page-stars: radial-gradient(
+      1px 1px at 3% 18%,
+      var(--app-accent-text) 98%,
+      transparent
+    ),
+    radial-gradient(
+      1px 1px at 41% 9%,
+      var(--app-muted-text) 98%,
+      transparent
+    ),
+    radial-gradient(
+      1px 1px at 34% 78%,
+      var(--app-accent-text) 98%,
+      transparent
+    ),
+    radial-gradient(
+      1.3px 1.3px at 93% 14%,
+      var(--app-accent-text) 98%,
+      transparent
+    ),
+    radial-gradient(
+      1px 1px at 84% 82%,
+      var(--app-accent-text) 98%,
+      transparent
+    );
+
+  /* Landing (marketing) palette */
+  --landing-page-bg: #050507;
+  --landing-page-fg: #f1edf8;
+  --landing-page-border: color-mix(in srgb, #ffffff 7.1%, transparent);
+  --landing-page-shadow: #000000;
+  --landing-bright: #ffffff;
+  --landing-contrast-fg: #241c31;
+
+  --landing-primary: #8750df;
+  --landing-primary-bright: #d6baff;
+  --landing-primary-deep: #6932bc;
+
+  --landing-secondary-bg: #111016;
+  --landing-secondary-elevated-bg: #1b1525;
+  --landing-secondary-deep-bg: #0d0a12;
+  --landing-secondary-hover-bg: #35234f;
+  --landing-secondary-muted-bg: #eee8f7;
+
+  --landing-accent-text: #b99aef;
+  --landing-accent-strong: #7948bd;
+
+  --landing-muted-text: #91889f;
+  --landing-muted-subtle: #6d5f79;
+  --landing-muted-soft: #766887;
+
+  --landing-success: #3eddb7;
+  --landing-info: #78bde4;
 }

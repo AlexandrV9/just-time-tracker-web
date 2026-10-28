@@ -3,7 +3,7 @@ import { useHeaderStore } from "./useHeaderStore";
 
 export function useHeaderContent(
   position: "left" | "center" | "right",
-  content: ReactNode
+  content: ReactNode,
 ) {
   const getContent = useHeaderStore((state) => state.getContent);
   const setContent = useHeaderStore((state) => state.setContent);

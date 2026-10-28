@@ -8,10 +8,11 @@ import {
 import type { TFunction } from "i18next";
 import { useCallback, useEffect, useState } from "react";
 import z from "zod";
+import { StyledFormWrapper } from "~/features/auth";
 import { useTranslation } from "~/shared/hooks";
 import {
   Box,
-  Button,
+  ActionButton,
   ButtonGroup,
   Field,
   Group,
@@ -139,16 +140,16 @@ export function ResetPasswordForm({
       </Field.Root>
       <RetryAfterMessage secondsLeft={resetPassword.emailRetrySecondsLeft} />
       <ButtonGroup justify="space-between">
-        <Button variant="outline" onClick={goToSignIn}>
+        <ActionButton tone="outline" onClick={goToSignIn}>
           {t(`${baseLocale}.backButton`)}
-        </Button>
-        <Button
+        </ActionButton>
+        <ActionButton
           onClick={handleStart}
           loading={resetPassword.isStartPending}
           disabled={resetPassword.isEmailRateLimited}
         >
           {t(`${baseLocale}.sendCodeButton`)}
-        </Button>
+        </ActionButton>
       </ButtonGroup>
     </>
   );
@@ -199,23 +200,23 @@ export function ResetPasswordForm({
             })}
           </Text>
         ) : (
-          <Button
-            variant="ghost"
+          <ActionButton
+            tone="ghost"
             size="sm"
             onClick={resetPassword.resend}
             disabled={!resetPassword.canResend || resetPassword.isResendPending}
             loading={resetPassword.isResendPending}
           >
             {t(`${baseLocale}.resendButton`)}
-          </Button>
+          </ActionButton>
         )}
       </Stack.VStack>
 
       <ButtonGroup justify="space-between">
-        <Button variant="outline" onClick={resetPassword.backToEmail}>
+        <ActionButton tone="outline" onClick={resetPassword.backToEmail}>
           {t(`${baseLocale}.backButton`)}
-        </Button>
-        <Button
+        </ActionButton>
+        <ActionButton
           onClick={handleVerify}
           loading={resetPassword.isVerifyPending}
           disabled={
@@ -225,7 +226,7 @@ export function ResetPasswordForm({
           }
         >
           {t(`${baseLocale}.verifyButton`)}
-        </Button>
+        </ActionButton>
       </ButtonGroup>
     </>
   );
@@ -269,39 +270,41 @@ export function ResetPasswordForm({
           </Field.ErrorText>
         </Field.Root>
 
-        <Button type="submit" loading={resetPassword.isConfirmPending}>
+        <ActionButton type="submit" loading={resetPassword.isConfirmPending}>
           {t(`${baseLocale}.submitButton`)}
-        </Button>
+        </ActionButton>
       </Stack.VStack>
     </Box>
   );
 
   return (
-    <Box
-      as="form"
-      display="flex"
-      flexDirection="column"
-      gap="1rem"
-      width="full"
-    >
-      <Stack.VStack align="stretch" gap={4}>
-        <Text as="h1" textStyle="2xl" fontWeight="semibold">
-          {t(`${baseLocale}.title`)}
-        </Text>
-        {resetPassword.isStatusLoading ? (
-          <Stack.VStack align="stretch" gap={4}>
-            <Skeleton height="5" />
-            <Skeleton height="10" />
-          </Stack.VStack>
-        ) : (
-          <>
-            {resetPassword.step === "email" && renderEmailStep()}
-            {resetPassword.step === "code" && renderCodeStep()}
-            {resetPassword.step === "password" && renderPasswordStep()}
-          </>
-        )}
-      </Stack.VStack>
-    </Box>
+    <StyledFormWrapper>
+      <Box
+        as="form"
+        display="flex"
+        flexDirection="column"
+        gap={{ base: "0.75rem", lg: "1rem" }}
+        width="full"
+      >
+        <Stack.VStack align="stretch" gap={4}>
+          <Text as="h1" textStyle="4xl" m={0} fontWeight="semibold">
+            {t(`${baseLocale}.title`)}
+          </Text>
+          {resetPassword.isStatusLoading ? (
+            <Stack.VStack align="stretch" gap={4}>
+              <Skeleton height="5" />
+              <Skeleton height="10" />
+            </Stack.VStack>
+          ) : (
+            <>
+              {resetPassword.step === "email" && renderEmailStep()}
+              {resetPassword.step === "code" && renderCodeStep()}
+              {resetPassword.step === "password" && renderPasswordStep()}
+            </>
+          )}
+        </Stack.VStack>
+      </Box>
+    </StyledFormWrapper>
   );
 }
 

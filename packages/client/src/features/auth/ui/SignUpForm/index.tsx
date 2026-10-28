@@ -7,10 +7,9 @@ import { Controller } from "react-hook-form";
 import z from "zod";
 import { authManager } from "~/features/auth";
 import { useTranslation } from "~/shared/hooks";
-import shineStyles from "~/shared/styles/shineRing.module.css";
 import {
   Box,
-  Button,
+  ActionButton,
   Checkbox,
   Field,
   Input,
@@ -19,6 +18,7 @@ import {
   Text,
   toast,
   useForm,
+  Flex,
 } from "~/shared/ui";
 
 import {
@@ -26,6 +26,7 @@ import {
   minLengthPassword,
   signUpFormSchema,
 } from "./constants";
+import { StyledFormWrapper } from "../components/StyledFormWrapper";
 
 const baseLocale = "features.auth.signUpForm";
 
@@ -89,152 +90,157 @@ export const SignUpForm = () => {
   });
 
   return (
-    <Box
-      as="form"
-      display="flex"
-      flexDirection="column"
-      gap="1rem"
-      onSubmit={submitHandler}
-    >
-      <Text
-        as="h1"
-        textStyle="4xl"
-        m={0}
-        fontWeight="semibold"
-        className={shineStyles.shineTextWhenHeaderHidden}
+    <StyledFormWrapper>
+      <Box
+        as="form"
+        display="flex"
+        flexDirection="column"
+        gap={{ base: "0.75rem", lg: "1rem" }}
+        onSubmit={submitHandler}
       >
-        {t(`${baseLocale}.title`)}
-      </Text>
-
-      <Field.Root invalid={!!errors.firstName}>
-        <Field.Label color="fg">
-          {t(`${baseLocale}.firstNameInput.label`)}
-        </Field.Label>
-        <Input
-          truncate
-          color="fg"
-          placeholder={t(`${baseLocale}.firstNameInput.placeholder`)}
-          autoComplete="false"
-          {...register("firstName")}
-        />
-        <Field.ErrorText color="fg.error">
-          {getTranslatedError(t, errors.firstName?.message)}
-        </Field.ErrorText>
-      </Field.Root>
-
-      <Field.Root invalid={!!errors.login}>
-        <Field.Label color="fg">
-          {t(`${baseLocale}.loginInput.label`)}
-        </Field.Label>
-        <Input
-          truncate
-          placeholder={t(`${baseLocale}.loginInput.placeholder`)}
-          autoComplete="off"
-          {...register("login")}
-        />
-        <Field.ErrorText color="fg.error">
-          {getTranslatedError(t, errors.login?.message)}
-        </Field.ErrorText>
-      </Field.Root>
-
-      <Field.Root invalid={!!errors.password}>
-        <Field.Label color="fg">
-          {t(`${baseLocale}.passwordInput.label`)}
-        </Field.Label>
-        <Input.Password
-          color="fg"
-          truncate
-          autoComplete="off"
-          paddingRight="52px !important" // TODO: убрать это и сделать иначе
-          placeholder={t(`${baseLocale}.passwordInput.placeholder`)}
-          {...register("password")}
-        />
-        <Field.ErrorText color="fg.error">
-          {getTranslatedError(t, errors.password?.message)}
-        </Field.ErrorText>
-      </Field.Root>
-
-      <Field.Root invalid={!!errors.repeatPassword}>
-        <Field.Label color="fg">
-          {t(`${baseLocale}.repeatPasswordInput.label`)}
-        </Field.Label>
-        <Input.Password
-          color="fg"
-          truncate
-          showVisibilityButton={false}
-          autoComplete="off"
-          placeholder={t(`${baseLocale}.repeatPasswordInput.placeholder`)}
-          {...register("repeatPassword")}
-        />
-        <Field.ErrorText color="fg.error">
-          {getTranslatedError(t, errors.repeatPassword?.message)}
-        </Field.ErrorText>
-      </Field.Root>
-
-      <Stack.VStack align="stretch" gap={3} mt="0.25rem">
-        <Controller
-          name="acceptTerms"
-          control={control}
-          render={({ field: { value, onChange, onBlur, ref, name } }) => (
-            <ConsentCheckbox
-              name={name}
-              checked={value}
-              invalid={!!errors.acceptTerms}
-              disabled={signUpMutatuin.isPending}
-              inputRef={ref}
-              onBlur={onBlur}
-              onCheckedChange={onChange}
-            >
-              {t(`${baseLocale}.acceptTerms.prefix`)}{" "}
-              <ConsentLink to="/terms-of-service">
-                {t(`${baseLocale}.acceptTerms.link`)}
-              </ConsentLink>
-            </ConsentCheckbox>
-          )}
-        />
-
-        <Controller
-          name="acceptPrivacy"
-          control={control}
-          render={({ field: { value, onChange, onBlur, ref, name } }) => (
-            <ConsentCheckbox
-              name={name}
-              checked={value}
-              invalid={!!errors.acceptPrivacy}
-              disabled={signUpMutatuin.isPending}
-              inputRef={ref}
-              onBlur={onBlur}
-              onCheckedChange={onChange}
-            >
-              {t(`${baseLocale}.acceptPrivacy.prefix`)}{" "}
-              <ConsentLink to="/privacy-policy">
-                {t(`${baseLocale}.acceptPrivacy.link`)}
-              </ConsentLink>
-            </ConsentCheckbox>
-          )}
-        />
-      </Stack.VStack>
-
-      <Button
-        mt="1rem"
-        type="submit"
-        loading={signUpMutatuin.isPending}
-        loadingText={t(`${baseLocale}.submitButtonLoadingText`)}
-      >
-        {t(`${baseLocale}.submitButton`)}
-      </Button>
-
-      <Stack.HStack justify="center">
-        <Text fontWeight="medium" color="fg">
-          <Text as="span" mr="5px">
-            {t(`${baseLocale}.subtitleText`)}
+        <Flex direction="column" gap="0.5rem">
+          <Text as="h1" textStyle="4xl" m={0} fontWeight="semibold">
+            {t(`${baseLocale}.title`)}
           </Text>
-          <Text asChild color="fg.info" fontWeight="600">
-            <Link to="/signin">{t(`${baseLocale}.linkText`)}</Link>
+          <Text color="fg.muted" textStyle="xs" lineHeight="1.8">
+            {t("pages.auth.signUp.formDescription")}
           </Text>
-        </Text>
-      </Stack.HStack>
-    </Box>
+        </Flex>
+        <Field.Root invalid={!!errors.firstName}>
+          <Field.Label color="fg">
+            {t(`${baseLocale}.firstNameInput.label`)}
+          </Field.Label>
+          <Input
+            truncate
+            color="fg"
+            placeholder={t(`${baseLocale}.firstNameInput.placeholder`)}
+            autoComplete="false"
+            {...register("firstName")}
+          />
+          <Field.ErrorText color="fg.error">
+            {getTranslatedError(t, errors.firstName?.message)}
+          </Field.ErrorText>
+        </Field.Root>
+
+        <Field.Root invalid={!!errors.login}>
+          <Field.Label color="fg">
+            {t(`${baseLocale}.loginInput.label`)}
+          </Field.Label>
+          <Input
+            truncate
+            placeholder={t(`${baseLocale}.loginInput.placeholder`)}
+            autoComplete="off"
+            {...register("login")}
+          />
+          <Field.ErrorText color="fg.error">
+            {getTranslatedError(t, errors.login?.message)}
+          </Field.ErrorText>
+        </Field.Root>
+
+        <Field.Root invalid={!!errors.password}>
+          <Field.Label color="fg">
+            {t(`${baseLocale}.passwordInput.label`)}
+          </Field.Label>
+          <Input.Password
+            color="fg"
+            truncate
+            autoComplete="off"
+            paddingRight="52px !important" // TODO: убрать это и сделать иначе
+            placeholder={t(`${baseLocale}.passwordInput.placeholder`)}
+            {...register("password")}
+          />
+          <Field.ErrorText color="fg.error">
+            {getTranslatedError(t, errors.password?.message)}
+          </Field.ErrorText>
+        </Field.Root>
+
+        <Field.Root invalid={!!errors.repeatPassword}>
+          <Field.Label color="fg">
+            {t(`${baseLocale}.repeatPasswordInput.label`)}
+          </Field.Label>
+          <Input.Password
+            color="fg"
+            truncate
+            showVisibilityButton={false}
+            autoComplete="off"
+            placeholder={t(`${baseLocale}.repeatPasswordInput.placeholder`)}
+            {...register("repeatPassword")}
+          />
+          <Field.ErrorText color="fg.error">
+            {getTranslatedError(t, errors.repeatPassword?.message)}
+          </Field.ErrorText>
+        </Field.Root>
+
+        <Stack.VStack align="stretch" gap={3} mt="0.25rem">
+          <Controller
+            name="acceptTerms"
+            control={control}
+            render={({ field: { value, onChange, onBlur, ref, name } }) => (
+              <ConsentCheckbox
+                name={name}
+                checked={value}
+                invalid={!!errors.acceptTerms}
+                disabled={signUpMutatuin.isPending}
+                inputRef={ref}
+                onBlur={onBlur}
+                onCheckedChange={onChange}
+              >
+                {t(`${baseLocale}.acceptTerms.prefix`)}{" "}
+                <ConsentLink to="/terms-of-service">
+                  {t(`${baseLocale}.acceptTerms.link`)}
+                </ConsentLink>
+              </ConsentCheckbox>
+            )}
+          />
+
+          <Controller
+            name="acceptPrivacy"
+            control={control}
+            render={({ field: { value, onChange, onBlur, ref, name } }) => (
+              <ConsentCheckbox
+                name={name}
+                checked={value}
+                invalid={!!errors.acceptPrivacy}
+                disabled={signUpMutatuin.isPending}
+                inputRef={ref}
+                onBlur={onBlur}
+                onCheckedChange={onChange}
+              >
+                {t(`${baseLocale}.acceptPrivacy.prefix`)}{" "}
+                <ConsentLink to="/privacy-policy">
+                  {t(`${baseLocale}.acceptPrivacy.link`)}
+                </ConsentLink>
+              </ConsentCheckbox>
+            )}
+          />
+        </Stack.VStack>
+
+        <ActionButton
+          mt="1rem"
+          type="submit"
+          fontSize={{ base: "14px", lg: "12px" }}
+          loading={signUpMutatuin.isPending}
+          loadingText={t(`${baseLocale}.submitButtonLoadingText`)}
+        >
+          {t(`${baseLocale}.submitButton`)}
+        </ActionButton>
+
+        <Stack.HStack justify="center">
+          <Text
+            fontWeight="medium"
+            color="fg"
+            fontSize={{ base: "12px", lg: "14px" }}
+          >
+            <Text as="span" mr="5px">
+              {t(`${baseLocale}.subtitleText`)}
+            </Text>
+            <Text asChild color="fg.info" fontWeight="600">
+              <Link to="/signin">{t(`${baseLocale}.linkText`)}</Link>
+            </Text>
+          </Text>
+        </Stack.HStack>
+      </Box>
+    </StyledFormWrapper>
   );
 };
 
@@ -277,6 +283,7 @@ function ConsentCheckbox({
       </Checkbox.Control>
       <Checkbox.Label
         fontWeight="normal"
+        fontSize={{ base: "11px", lg: "13px" }}
         lineHeight="1.45"
         color={invalid ? "fg.error" : "fg.muted"}
         css={{ textWrap: "pretty" }}

@@ -1,6 +1,11 @@
 import { Spinner } from "@chakra-ui/react";
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { useCallback, useLayoutEffect } from "react";
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useLocation,
+} from "@tanstack/react-router";
+import { useLayoutEffect } from "react";
 import { useActivityEvents } from "~/features";
 import { authManager, useAuthStore } from "~/features/auth";
 import {
@@ -8,24 +13,23 @@ import {
   usePushNotifications,
 } from "~/features/notifications";
 import { PwaInstallDialog } from "~/features/pwa-install";
-import {
-  useDeviceDetect,
-  useOrientation,
-  useTranslation,
-} from "~/shared/hooks";
+import { useDeviceDetect, useTranslation } from "~/shared/hooks";
 import { buildLocationRedirectPath } from "~/shared/libs";
 import { useSeo } from "~/shared/seo";
-import { Box, Flex, PageLayout } from "~/shared/ui";
 import {
-  Header,
-  HeaderAppTitle,
-  NavBar,
-  SideBar,
-  useHeaderStore,
-} from "~/widgets";
+  Box,
+  Flex,
+  PageLayout,
+  DesignTheme,
+  Link,
+  NavigationItem,
+} from "~/shared/ui";
+import { Header, HeaderAppTitle, SideBar, useHeaderStore } from "~/widgets";
 import { prefetchNavTabForPath } from "./_private/_lib/prefetchNavTabs";
 import { usePreloadNavTabs } from "./_private/_lib/usePreloadNavTabs";
 import { AuthUser } from "~/features/auth/ui";
+import { navItems } from "~/widgets/NavBar/constants";
+import styles from "./Private.module.css";
 
 function PrivateRoutePending() {
   const { t } = useTranslation();
@@ -96,10 +100,9 @@ export const Route = createFileRoute("/(private)/_private")({
 });
 
 function PrivateLayout() {
-  const { setContent } = useHeaderStore();
+  const setContent = useHeaderStore((state) => state.setContent);
 
   const { type: deviceType } = useDeviceDetect();
-  console.log("deviceType", deviceType);
 
   useSeo({ noIndex: true });
   useActivityEvents();
@@ -108,9 +111,7 @@ function PrivateLayout() {
   useLayoutEffect(() => {
     setContent("left", <AuthUser.Avatar />);
 
-    if (deviceType === "mobile") {
-      setContent("center", <HeaderAppTitle />);
-    }
+    setContent("center", deviceType === "mobile" ? <HeaderAppTitle /> : null);
 
     setContent(
       "right",
@@ -120,268 +121,54 @@ function PrivateLayout() {
     );
   }, [deviceType, setContent]);
 
-  const renderLayoutComponent = useCallback(() => {
-    switch (deviceType) {
-      case "desktop":
-        return <DesktopLayout />;
-      case "tablet":
-        return <TabletLayout />;
-      case "mobile":
-        return <MobileLayout />;
-      default:
-        return <MobileLayout />;
-    }
-  }, [deviceType]);
-
-  const layoutComponent = renderLayoutComponent();
-
   return (
-    <>
-      {layoutComponent}
-      <PwaInstallDialog />
-    </>
-  );
-}
-
-function DesktopLayout() {
-  return (
-    <PageLayout
-      display="flex"
-      flexDirection="row"
-      justifyContent="stretch"
-      alignContent="stretch"
-      p="0.5rem"
-      gap="0.5rem"
-    >
-      <Box w="300px" flexShrink={0} overflow="hidden">
-        <Box h="full" rounded="0.5rem" p="0.5rem" pb="1.2rem">
+    <DesignTheme appearance="inherit" className={styles.page}>
+      <div className={styles.workspace}>
+        <div className={styles.sidebar}>
           <SideBar />
-        </Box>
-      </Box>
-      <Box
-        display="flex"
-        flexDirection="column"
-        w="full"
-        minW={0}
-        minH={0}
-        gap="inherit"
-      >
-        <Box w="full" h="80px" flexShrink={0}>
-          <Box h="full" rounded="0.5rem" p="0.5rem">
+        </div>
+        <div className={styles.main}>
+          <div className={styles.header}>
             <Header />
-          </Box>
-        </Box>
-        <PageLayout.MainContainer>
-          <Outlet />
-        </PageLayout.MainContainer>
-      </Box>
-    </PageLayout>
+          </div>
+          <PageLayout.MainContainer
+            contentProps={{ maxW: "none" }}
+            className={styles.viewport}
+          >
+            <Outlet />
+          </PageLayout.MainContainer>
+        </div>
+        <MobileNavigation />
+      </div>
+      <PwaInstallDialog />
+    </DesignTheme>
   );
 }
 
-function TabletLayout() {
+function MobileNavigation() {
+  const { pathname } = useLocation();
+  const { t } = useTranslation();
   return (
-    <PageLayout>
-      <PageLayout.TopContainer
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        borderBottom="1px solid"
-        borderColor="border.emphasized"
-      >
-        <Header />
-      </PageLayout.TopContainer>
-      <PageLayout.MainContainer>
-        <Outlet />
-      </PageLayout.MainContainer>
-      <PageLayout.BottomContainer>
-        <NavBar />
-      </PageLayout.BottomContainer>
-    </PageLayout>
+    <nav
+      className={styles.mobileNav}
+      aria-label={t("pages.dashboard.navigation")}
+    >
+      {navItems.map((item) => {
+        const active =
+          item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+        return (
+          <NavigationItem key={item.id} asChild active={active}>
+            <Link
+              to={item.href}
+              aria-label={t(`widgets.navbar.menuItems.${item.title}`)}
+              aria-current={active ? "page" : undefined}
+            >
+              <item.icon size={21} aria-hidden="true" />
+              <span>{t(`widgets.navbar.menuItems.${item.title}`)}</span>
+            </Link>
+          </NavigationItem>
+        );
+      })}
+    </nav>
   );
-}
-
-function MobileLayout() {
-  const { orientation } = useOrientation();
-  console.log(orientation);
-
-  switch (orientation) {
-    case "landscape-primary":
-      return (
-        <PageLayout
-          display="flex"
-          paddingLeft="var(--safe-area-inset-right, 0px)"
-        >
-          <Box
-            flexGrow={1}
-            display="flex"
-            flexDirection="column"
-            overflow="hidden"
-            borderLeft="1px solid"
-            borderColor="border.emphasized"
-          >
-            <PageLayout.TopContainer
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              borderBottom="1px solid"
-              borderColor="border.emphasized"
-            >
-              <Header />
-            </PageLayout.TopContainer>
-            <PageLayout.MainContainer>
-              <Outlet />
-            </PageLayout.MainContainer>
-          </Box>
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            borderLeft="1px solid"
-            borderColor="border.emphasized"
-          >
-            <NavBar
-              position="absolute"
-              bottom="10px"
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-            />
-          </Box>
-        </PageLayout>
-      );
-    case "landscape-secondary":
-      return (
-        <PageLayout
-          display="flex"
-          paddingRight="var(--safe-area-inset-right, 0px)"
-        >
-          <Box
-            display="flex"
-            justifyContent="center"
-            borderRight="1px solid"
-            borderColor="border.emphasized"
-          >
-            <NavBar
-              isVertical
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              paddingLeft="10px"
-            />
-          </Box>
-          <Box
-            flexGrow={1}
-            display="flex"
-            flexDirection="column"
-            overflow="hidden"
-            borderRight="1px solid"
-            borderColor="border.emphasized"
-          >
-            <PageLayout.TopContainer
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              borderBottom="1px solid"
-              borderColor="border.emphasized"
-            >
-              <Header />
-            </PageLayout.TopContainer>
-            <PageLayout.MainContainer>
-              <Outlet />
-            </PageLayout.MainContainer>
-          </Box>
-        </PageLayout>
-      );
-    case "portrait-secondary":
-      return (
-        <PageLayout
-          display="flex"
-          paddingLeft="var(--safe-area-inset-right, 0px)"
-        >
-          <Box
-            flexGrow={1}
-            display="flex"
-            flexDirection="column"
-            overflow="hidden"
-            borderLeft="1px solid"
-            borderColor="border.emphasized"
-          >
-            <PageLayout.TopContainer
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              borderBottom="1px solid"
-              borderColor="border.emphasized"
-            >
-              <Header />
-            </PageLayout.TopContainer>
-            <PageLayout.MainContainer>
-              <Outlet />
-            </PageLayout.MainContainer>
-          </Box>
-          <Box
-            display="flex"
-            justifyContent="center"
-            borderLeft="1px solid"
-            borderColor="border.emphasized"
-          >
-            <NavBar
-              isVertical
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-            />
-          </Box>
-        </PageLayout>
-      );
-    case "portrait-primary": {
-      return (
-        <PageLayout position="relative">
-          <PageLayout.TopContainer
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            borderBottom="1px solid"
-            borderColor="border.emphasized"
-          >
-            <Header />
-          </PageLayout.TopContainer>
-          <PageLayout.MainContainer pb="65px">
-            <Outlet />
-          </PageLayout.MainContainer>
-          <PageLayout.BottomContainer
-            position="absolute"
-            bottom="10px"
-            border="none"
-            bg="transparent"
-            contentProps={{ w: "fit-content" }}
-          >
-            <NavBar />
-          </PageLayout.BottomContainer>
-        </PageLayout>
-      );
-    }
-    default: {
-      return (
-        <PageLayout>
-          <PageLayout.TopContainer
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            borderBottom="1px solid"
-            borderColor="border.emphasized"
-          >
-            <Header />
-          </PageLayout.TopContainer>
-          <PageLayout.MainContainer>
-            <Outlet />
-          </PageLayout.MainContainer>
-          <PageLayout.BottomContainer>
-            <NavBar />
-          </PageLayout.BottomContainer>
-        </PageLayout>
-      );
-    }
-  }
 }

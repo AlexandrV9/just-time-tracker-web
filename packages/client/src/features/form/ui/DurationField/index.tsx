@@ -60,13 +60,6 @@ export const DurationField = ({
           onChange={handleNativeChange}
           disabled={disabled}
           fontFamily="Roboto Mono, monospace"
-          css={{
-            appearance: "none",
-            "&::-webkit-calendar-picker-indicator": {
-              display: "none",
-              appearance: "none",
-            },
-          }}
         />
       )}
     </Field.Root>

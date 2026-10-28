@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { Box, type BoxProps } from "~/shared/ui";
 import { MainContainerProvider } from "./MainContainerProvider";
 
+import scrollStyles from "~/shared/styles/scrollArea.module.css";
 import styles from "./MainContainer.module.css";
 
 export type MainContainerProps = BoxProps & {
@@ -34,7 +35,7 @@ export const MainContainer = ({
       <Box
         as="main"
         ref={viewportRef}
-        className={clsx(styles.root, className)}
+        className={clsx(styles.root, scrollStyles.scrollArea, className)}
         {...props}
       >
         <Box

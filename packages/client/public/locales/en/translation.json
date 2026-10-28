@@ -7,34 +7,116 @@
   "pages": {
     "landing": {
       "title": "Stop guessing where your day goes",
-      "subtitle": "Plan activities, track time with one tap, and see where your hours actually go. All in one app — no spreadsheets, no extra steps.",
+      "subtitle": "Plan activities, track time with one tap, and see where your hours actually go. All in one app — no spreadsheets, no extra steps",
       "featuresTitle": "What you can do in the app",
       "features": [
         {
-          "title": "Track time with one tap",
-          "body": "Start, pause, and finish activities in seconds. The timer stays in sync and always shows the current time."
+          "title": "Just start. Your timer is ready",
+          "body": "Start, pause, and finish sessions with a tap. While you focus on what you’re doing, the app keeps track of time"
         },
         {
-          "title": "Plan your day",
-          "body": "Add activities to your plan ahead of time and start them when you actually begin work. The plan helps you remember what matters and see your load for the day."
+          "title": "A day plan at your pace",
+          "body": "Choose what you want to make time for today. Your activities are right there when you’re ready to begin"
         },
         {
-          "title": "Build your own activity library",
-          "body": "Create, edit, and delete activities. Reuse them in a few taps and track how much time you spend on each one."
+          "title": "Your activities. Your space",
+          "body": "Work, reading, or a new passion. Create activities, add tags, and return to them whenever you want"
         },
         {
-          "title": "Analyze your history",
-          "body": "Go back to past days, review sessions, and see how much time went to each activity."
+          "title": "See more than numbers",
+          "body": "Session history and daily analytics show where your time goes and how your day comes together"
         },
         {
-          "title": "Make the app yours",
-          "body": "Choose a theme and interface language, set up push notifications, and manage your account security."
+          "title": "Make focus feel like you",
+          "body": "Goals, reminders, language, and appearance. Adjust the app to fit your own rhythm"
         }
       ],
       "signUpButton": "Get started",
       "signInButton": "Sign in",
       "aboutAppButton": "About the app",
-      "signInPageLink": "Already registered? Sign in"
+      "signInPageLink": "Already registered? Sign in",
+      "design": {
+        "navigation": "Page navigation",
+        "language": "Interface language",
+        "theme": "Theme",
+        "preferencesTitle": "Preferences",
+        "featuresNav": "Features",
+        "stepsNav": "How it works",
+        "previewNav": "Try it out",
+        "eyebrow": "Give your time the attention it deserves",
+        "titleLead": "Your time",
+        "titleAccent": "In your hands",
+        "primaryAction": "Start tracking",
+        "previewAction": "See it in action",
+        "heroNote": "Plan your day. Find your focus. See your progress",
+        "demoNote": "Interactive preview with sample data. Give the timer a try",
+        "demoLabel": "Interactive app demonstration with sample data",
+        "capabilities": "App capabilities",
+        "timerLabel": "Timer",
+        "planLabel": "Day plan",
+        "insightsLabel": "Analytics",
+        "remindersLabel": "Reminders",
+        "activitiesLabel": "Activities",
+        "sessionsLabel": "Sessions",
+        "featuresHeading": "Everything you need to focus",
+        "featuresAccent": "All in one space",
+        "featuresSubtitle": "From your first tap on the timer to a clear picture of your day. No spreadsheets or extra steps",
+        "stepsHeading": "From a plan to a clearer day",
+        "stepsSubtitle": "Three simple steps to understand your time",
+        "steps": {
+          "choose": {
+            "title": "Choose your activities",
+            "body": "Create activities and add the things you want to make time for to today’s plan"
+          },
+          "track": {
+            "title": "Start the timer",
+            "body": "One click and you’re on your way. Take a break and pick up when you’re ready"
+          },
+          "reflect": {
+            "title": "See what you’ve done",
+            "body": "Explore your history and analytics to see how your day came together"
+          }
+        },
+        "closingLabel": "Time for what matters",
+        "closingTitle": "Make your time work for you",
+        "closingBody": "Less guessing about where your day went. More attention to what matters to you",
+        "footerNote": "Made for your time",
+        "legal": "Legal information",
+        "privacy": "Privacy policy",
+        "terms": "Terms of service",
+        "sideNote": "Small steps. Meaningful progress",
+        "demoBadge": "Demo mode",
+        "previewGreeting": "A good day to get started",
+        "previewHeading": "Make today yours",
+        "livePreview": "Interactive preview",
+        "dailyFocus": "Focused time",
+        "dailyTime": "2h 48m",
+        "currentSession": "Current session",
+        "running": "In progress",
+        "paused": "Paused",
+        "elapsed": "Demo session elapsed time",
+        "focusCaption": "One activity. Your full attention",
+        "play": "Start timer",
+        "pause": "Pause",
+        "reset": "Reset demo timer",
+        "selectActivity": "Choose a demo activity",
+        "weekLabel": "Your week",
+        "previewTip": "Goals and reminders help you find your rhythm",
+        "activities": {
+          "work": "Work",
+          "reading": "Reading",
+          "learning": "Learning"
+        },
+        "weekdays": {
+          "0": "Mo",
+          "1": "Tu",
+          "2": "We",
+          "3": "Th",
+          "4": "Fr",
+          "5": "Sa",
+          "6": "Su"
+        }
+      }
     },
     "home": {
       "selectActivity": "Select activity",
@@ -376,6 +458,73 @@
           "description": "We may update this Privacy Policy periodically. Updates will indicate a new revision date.\n\nWhere materially required under law or our practices change significantly, we will provide additional notice or obtain consent consistent with regulatory expectations."
         }
       ]
+    },
+    "auth": {
+      "language": "Interface language",
+      "backToLanding": "About the app",
+      "account": "Your personal space",
+      "accountNote": "Your plans and history in one account",
+      "footer": "More time for what matters",
+      "legal": "Legal information",
+      "privacy": "Privacy policy",
+      "terms": "Terms of service",
+      "focus": "Focused time",
+      "activity": "Work",
+      "focusCaption": "One activity. Your full attention",
+      "progressTitle": "Every minute in its place",
+      "progressCaption": "From your first start to a clearer day",
+      "timer": "Timer",
+      "plan": "Day plan",
+      "analytics": "Analytics",
+      "signIn": {
+        "eyebrow": "Welcome back to your rhythm",
+        "title": "Your focus",
+        "accent": "starts here",
+        "description": "Pick up what matters to you. Your activities, plans, and history are waiting in your own space",
+        "formDescription": "Sign in to get back to your activities and plans"
+      },
+      "signUp": {
+        "eyebrow": "Start with a single minute",
+        "title": "Your time",
+        "accent": "in your hands",
+        "description": "Make space for your activities. Plan your day, find your focus, and see your progress",
+        "formDescription": "Create an account and make time for what matters"
+      },
+      "recover": {
+        "eyebrow": "Back to your plans",
+        "title": "Find your way",
+        "accent": "back to your day",
+        "description": "Recover access to your account and get back to your activities and your own rhythm"
+      }
+    },
+    "dashboard": {
+      "title": "Make today yours",
+      "welcome": "A good day to get started",
+      "greeting": "Welcome back, {{name}}",
+      "focus": "Focused time",
+      "activities": "Activities today",
+      "planned": "In your plan",
+      "plan": "Day plan",
+      "week": "Last 7 days",
+      "weekError": "Could not load analytics",
+      "weekEmpty": "Your activity over the last seven days will appear here",
+      "openHistory": "Open history",
+      "tip": "Goals and reminders in activity settings help you find your rhythm",
+      "currentSession": "Current session",
+      "running": "In progress",
+      "paused": "Paused",
+      "ready": "Ready to start",
+      "start": "Start timer",
+      "pause": "Pause",
+      "finish": "Finish session",
+      "elapsed": "Current session active time",
+      "goal": "Daily goal: {{time}}",
+      "chooseHint": "Choose an activity from your day plan",
+      "focusCaption": "One activity — your full attention",
+      "actionError": "Could not update the session. Please try again",
+      "navigation": "Main navigation",
+      "sidebarNote": "Track time. Build habits. Change your life",
+      "account": "Account settings"
     }
   },
   "widgets": {

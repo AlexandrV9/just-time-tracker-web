@@ -4,10 +4,12 @@ import { Box, type BoxProps } from "~/shared/ui";
 
 import styles from "./TopContainer.module.css";
 import type { CSSProperties } from "react";
+import {
+  TOP_CONTAINER_CONTENT_WIDTH,
+  TOP_CONTAINER_HEIGHT_PX,
+} from "./constants";
 
 export type TopContainerProps = BoxProps;
-
-export const TOP_CONTAINER_HEIGHT_PX = 70;
 
 export const TopContainer = ({
   children,
@@ -29,7 +31,9 @@ export const TopContainer = ({
       }
       {...props}
     >
-      <Box className={styles.content}>{children}</Box>
+      <Box className={styles.content} w={TOP_CONTAINER_CONTENT_WIDTH}>
+        {children}
+      </Box>
     </Box>
   );
 };

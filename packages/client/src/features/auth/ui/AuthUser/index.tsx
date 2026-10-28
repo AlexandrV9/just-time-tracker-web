@@ -7,7 +7,7 @@ import { UserAvatar, type UserAvatarProps } from "~/entities";
 type AuthUserNameProps = TextProps;
 
 const AuthUserName = (props: AuthUserNameProps) => {
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
   if (!user) return;
 
   return <Text {...props}>{user.name}</Text>;
@@ -16,7 +16,7 @@ const AuthUserName = (props: AuthUserNameProps) => {
 type AuthUserAvatarProps = Omit<UserAvatarProps, "userName" | "src">;
 
 const AuthUserAvatar = (props: AuthUserAvatarProps) => {
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
 
   if (!user) return null;
 

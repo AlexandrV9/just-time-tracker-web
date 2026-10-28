@@ -1,0 +1,30 @@
+.panel {
+  min-width: 0;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.collapsed {
+  padding: 20px 0;
+  text-align: center;
+}
+.collapsed span {
+  display: block;
+  color: var(--design-muted);
+  font-size: 12px;
+}
+.collapsed strong {
+  display: block;
+  font-weight: 500;
+  font-size: 32px;
+  font-variant-numeric: tabular-nums;
+  margin-top: 8px;
+}
+.hint {
+  color: var(--design-muted);
+  font-size: 10px;
+  text-align: center;
+  margin: 20px 0 0;
+}

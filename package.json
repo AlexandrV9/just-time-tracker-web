@@ -16,6 +16,7 @@
     "i18n:check": "pnpm --filter @time-tracker/client i18n:check",
     "test": "pnpm --filter @time-tracker/server test",
     "verify": "pnpm lint && pnpm i18n:check && pnpm build:shared && pnpm test && pnpm build",
+    "storybook": "pnpm --filter @time-tracker/client storybook",
     "prepare": "husky"
   },
   "keywords": [],

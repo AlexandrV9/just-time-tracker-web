@@ -6,7 +6,8 @@ import { useHeaderStore } from "~/widgets";
 
 export function TermsOfServicePage() {
   const { t } = useTranslation();
-  const { setContent } = useHeaderStore();
+  const setContent = useHeaderStore((state) => state.setContent);
+  const backLabel = t("pages.termsOfService.backButton");
 
   useSeo({
     description: t("pages.termsOfService.intro"),
@@ -18,11 +19,8 @@ export function TermsOfServicePage() {
   }) as { title: string; description: string }[];
 
   useLayoutEffect(() => {
-    setContent(
-      "left",
-      <BackButton aria-label={t("pages.termsOfService.backButton")} />,
-    );
-  }, [setContent, t]);
+    setContent("left", <BackButton aria-label={backLabel} />);
+  }, [setContent, backLabel]);
 
   return (
     <Box w="full" maxW="720px" mx="auto" p="1rem">

@@ -7,34 +7,116 @@
   "pages": {
     "landing": {
       "title": "别再猜测一天时间去哪了",
-      "subtitle": "提前规划活动，一键追踪时间，看清时间真正花在哪里。一个应用搞定——没有复杂表格，也没有多余操作。",
+      "subtitle": "提前规划活动，一键追踪时间，看清时间真正花在哪里。一个应用搞定——没有复杂表格，也没有多余操作",
       "featuresTitle": "你能在应用里做什么",
       "features": [
         {
-          "title": "一键追踪时间",
-          "body": "几秒内开始、暂停并结束活动。计时器始终同步，显示当前准确时间。"
+          "title": "只管开始，计时器已就绪",
+          "body": "轻点即可开始、暂停或结束。当你全心投入活动时，应用帮你记录时间"
         },
         {
-          "title": "规划你的一天",
-          "body": "提前把活动加入计划，真正开始工作时再启动。计划帮你记住重要事项，并看清当天负荷。"
+          "title": "按自己的节奏规划一天",
+          "body": "选择今天想留出时间的事。活动就在手边，准备好就可以开始"
         },
         {
-          "title": "创建自己的活动库",
-          "body": "创建、编辑和删除活动。几次点击即可复用，并追踪你在每项活动上投入了多少时间。"
+          "title": "你的活动，你的空间",
+          "body": "工作、阅读或新爱好。创建活动、添加标签，随时回来继续"
         },
         {
-          "title": "分析你的历史",
-          "body": "回到过去的日子，查看会话，并分析每项活动花了多少时间。"
+          "title": "看见数字以外的故事",
+          "body": "活动历史与每日分析，帮你看清时间的去向，了解一天的全貌"
         },
         {
-          "title": "按自己的方式设置应用",
-          "body": "选择主题和界面语言，配置推送通知，并管理账户安全。"
+          "title": "找到适合自己的专注方式",
+          "body": "目标、提醒、语言与外观，让应用配合你的日常节奏"
         }
       ],
       "signUpButton": "开始使用",
       "signInButton": "登录",
       "aboutAppButton": "关于应用",
-      "signInPageLink": "已有账号？去登录"
+      "signInPageLink": "已有账号？去登录",
+      "design": {
+        "navigation": "页面导航",
+        "language": "界面语言",
+        "theme": "主题",
+        "preferencesTitle": "设置",
+        "featuresNav": "功能",
+        "stepsNav": "如何使用",
+        "previewNav": "试用体验",
+        "eyebrow": "让你的时间得到应有的重视",
+        "titleLead": "你的时间，",
+        "titleAccent": "由你掌控",
+        "primaryAction": "开始记录时间",
+        "previewAction": "看看实际效果",
+        "heroNote": "规划一天，保持专注，看见进步",
+        "demoNote": "这是使用示例数据的互动预览，试试启动计时器吧",
+        "demoLabel": "使用示例数据的应用互动演示",
+        "capabilities": "应用功能",
+        "timerLabel": "计时器",
+        "planLabel": "今日计划",
+        "insightsLabel": "分析",
+        "remindersLabel": "提醒",
+        "activitiesLabel": "活动",
+        "sessionsLabel": "时段",
+        "featuresHeading": "专注所需的一切，",
+        "featuresAccent": "尽在一个空间",
+        "featuresSubtitle": "从第一次启动计时器，到清楚看见一天的全貌，无需表格或多余操作",
+        "stepsHeading": "从计划到清晰的一天",
+        "stepsSubtitle": "三个简单步骤，了解自己的时间",
+        "steps": {
+          "choose": {
+            "title": "选择自己的活动",
+            "body": "创建活动，把今天想留出时间的事情加入计划"
+          },
+          "track": {
+            "title": "启动计时器",
+            "body": "轻轻一点，即刻开始。随时休息，准备好后继续"
+          },
+          "reflect": {
+            "title": "回顾今天的成果",
+            "body": "查看历史与分析，了解一天的时间如何安排"
+          }
+        },
+        "closingLabel": "把时间留给重要的事",
+        "closingTitle": "让时间为你所用",
+        "closingBody": "少一点猜测时间去了哪里，多一点专注于真正重要的事",
+        "footerNote": "为你的时间而设计",
+        "legal": "法律信息",
+        "privacy": "隐私政策",
+        "terms": "服务条款",
+        "sideNote": "小小步伐，实在进步",
+        "demoBadge": "演示模式",
+        "previewGreeting": "今天正适合开始",
+        "previewHeading": "让今天属于你",
+        "livePreview": "互动预览",
+        "dailyFocus": "专注时间",
+        "dailyTime": "2小时48分",
+        "currentSession": "当前时段",
+        "running": "进行中",
+        "paused": "已暂停",
+        "elapsed": "演示活动已用时间",
+        "focusCaption": "一项活动，全心投入",
+        "play": "开始计时",
+        "pause": "暂停",
+        "reset": "重置演示计时器",
+        "selectActivity": "选择演示活动",
+        "weekLabel": "你的一周",
+        "previewTip": "目标和提醒帮你保持自己的节奏",
+        "activities": {
+          "work": "工作",
+          "reading": "阅读",
+          "learning": "学习"
+        },
+        "weekdays": {
+          "0": "一",
+          "1": "二",
+          "2": "三",
+          "3": "四",
+          "4": "五",
+          "5": "六",
+          "6": "日"
+        }
+      }
     },
     "home": {
       "selectActivity": "选择活动",
@@ -376,6 +458,73 @@
           "description": "我们可能不时更新本隐私政策，更新将标明新的修订日期。\n\n在法律有实质要求或我们的做法发生重大变化时，我们将提供额外通知或按监管期望取得同意。"
         }
       ]
+    },
+    "auth": {
+      "language": "界面语言",
+      "backToLanding": "关于应用",
+      "account": "你的个人空间",
+      "accountNote": "计划与历史记录，都在一个账户中",
+      "footer": "为重要的事多留时间",
+      "legal": "法律信息",
+      "privacy": "隐私政策",
+      "terms": "服务条款",
+      "focus": "专注时间",
+      "activity": "工作",
+      "focusCaption": "一项活动，全心投入",
+      "progressTitle": "每一分钟，各得其所",
+      "progressCaption": "从第一次开始，到清晰的一天",
+      "timer": "计时器",
+      "plan": "今日计划",
+      "analytics": "分析",
+      "signIn": {
+        "eyebrow": "欢迎回到自己的节奏",
+        "title": "你的专注",
+        "accent": "从这里开始",
+        "description": "继续对你重要的事，你的活动、计划与历史记录都在自己的空间中等着你",
+        "formDescription": "登录账户，回到自己的活动与计划"
+      },
+      "signUp": {
+        "eyebrow": "从一分钟开始",
+        "title": "你的时间",
+        "accent": "由你掌控",
+        "description": "为自己的活动留出空间，规划一天、保持专注、看见进步",
+        "formDescription": "创建账户，为重要的事留出时间"
+      },
+      "recover": {
+        "eyebrow": "回到你的计划",
+        "title": "重新找回",
+        "accent": "一天的节奏",
+        "description": "恢复账户访问权限，继续自己的活动，回到熟悉的节奏"
+      }
+    },
+    "dashboard": {
+      "title": "让今天属于你",
+      "welcome": "今天正适合开始",
+      "greeting": "欢迎回来，{{name}}",
+      "focus": "专注时间",
+      "activities": "今日活动",
+      "planned": "计划中的活动",
+      "plan": "今日计划",
+      "week": "最近七天",
+      "weekError": "无法加载分析数据",
+      "weekEmpty": "最近七天的活动将显示在这里",
+      "openHistory": "查看历史",
+      "tip": "活动设置中的目标和提醒帮你保持节奏",
+      "currentSession": "当前时段",
+      "running": "进行中",
+      "paused": "已暂停",
+      "ready": "准备开始",
+      "start": "开始计时",
+      "pause": "暂停",
+      "finish": "结束时段",
+      "elapsed": "当前时段的工作时间",
+      "goal": "每日目标：{{time}}",
+      "chooseHint": "从今日计划中选择一项活动",
+      "focusCaption": "一项活动，全心投入",
+      "actionError": "无法更新活动时段，请重试",
+      "navigation": "主导航",
+      "sidebarNote": "追踪时间。养成习惯。改变生活",
+      "account": "账户设置"
     }
   },
   "widgets": {

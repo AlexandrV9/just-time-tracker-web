@@ -2,7 +2,6 @@ import { useCallback } from "react";
 import { LuChevronDown } from "react-icons/lu";
 import { useTranslation } from "~/shared/hooks";
 import { Flex, Select, Text } from "~/shared/ui";
-import { LangFlag } from "./LangFlag";
 import { languageListCollection, type Language } from "./constants";
 import { useLanguage } from "./useLanguage";
 import { isSupportedLanguage } from "./utils";
@@ -42,8 +41,8 @@ export const LangSwitcher = ({ isShort = true }: LangSwitcherProps) => {
           _hover={{ cursor: "pointer", bg: "bg.muted" }}
         >
           <Flex alignItems="center" gap="0.35rem">
-            <LangFlag code={lang} size={22} />
-            <Select.ValueText color="fg" fontWeight="semibold">
+            {/* <LangFlag code={lang} size={18} /> */}
+            <Select.ValueText color="fg" fontWeight="semibold" fontSize="xs">
               {renderLabel(lang)}
             </Select.ValueText>
             <LuChevronDown size={14} />
@@ -63,8 +62,8 @@ export const LangSwitcher = ({ isShort = true }: LangSwitcherProps) => {
                 _hover={{ cursor: "pointer" }}
               >
                 <Flex alignItems="center" gap="0.5rem">
-                  <LangFlag code={ln} size={22} />
-                  <Text fontWeight="medium" textWrap="nowrap">
+                  {/* <LangFlag code={ln} size={18} /> */}
+                  <Text fontWeight="medium" textWrap="nowrap" fontSize="xs">
                     {renderLabel(ln)}
                   </Text>
                 </Flex>

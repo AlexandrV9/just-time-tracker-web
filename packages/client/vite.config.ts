@@ -24,6 +24,7 @@ export default defineConfig(({ mode }) => {
       tanstackRouter({
         target: "react",
         autoCodeSplitting: true,
+        routeFileIgnorePattern: "_ui",
       }),
       react(),
       sitemapPlugin(getSiteUrl(env)),

@@ -1,0 +1,52 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 28px 16px 20px;
+  border-right: 1px solid var(--design-border);
+  background: var(--design-panel);
+}
+.brand {
+  display: inline-flex;
+  padding: 0 7px;
+  color: var(--design-fg);
+}
+.navigation {
+  display: grid;
+  gap: 8px;
+  margin-top: 35px;
+}
+.note {
+  margin-top: auto;
+  padding: 35px 12px;
+}
+.note > span {
+  display: block;
+  font-size: 43px;
+  color: var(--design-accent);
+}
+.note > p {
+  color: var(--design-muted);
+  font-size: 11px;
+  line-height: 1.8;
+  max-width: 150px;
+  margin-top: 7px;
+}
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 8px 0;
+  border-top: 1px solid var(--design-border);
+  min-width: 0;
+}
+.profile > div {
+  min-width: 0;
+}
+.profile > div > a {
+  display: inline-block;
+  font-size: 10px;
+  color: var(--design-muted);
+  margin-top: 4px;
+}

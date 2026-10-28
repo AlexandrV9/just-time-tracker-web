@@ -36,3 +36,5 @@ export const applyResolvedTheme = (resolved: ResolvedTheme) => {
 export const getInitialThemePreference = (): Theme => {
   return getStoredThemePreference() ?? THEMES.system;
 };
+
+export const isValidTheme = (value: string): value is Theme => value in THEMES;

@@ -1,0 +1,42 @@
+.input {
+  appearance: none;
+
+  border-radius: var(--input-border-radius);
+
+  &::-webkit-calendar-picker-indicator {
+    display: none;
+    appearance: none;
+  }
+}
+
+.variant_accent {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid var(--chakra-colors-app-input-accent-border);
+  background: var(--chakra-colors-app-input-accent-bg);
+  color: var(--chakra-colors-app-input-accent-text);
+  transition:
+    border-color 160ms,
+    box-shadow 160ms;
+
+  &::placeholder {
+    color: var(--chakra-colors-app-input-accent-placeholder);
+  }
+
+  &:focus-visible {
+    border-color: var(--chakra-colors-app-input-accent-focus-border);
+    outline: none;
+  }
+
+  &[aria-invalid="true"] {
+    border-color: var(--chakra-colors-app-input-accent-invalid);
+    box-shadow: none;
+  }
+
+  &:-webkit-autofill {
+    -webkit-text-fill-color: var(--chakra-colors-app-input-accent-text);
+    box-shadow: 0 0 0 100px var(--chakra-colors-app-input-accent-autofill-bg)
+      inset;
+    caret-color: var(--chakra-colors-app-input-accent-text);
+  }
+}

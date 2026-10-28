@@ -8,6 +8,7 @@ declare module "*.PNG" {
 interface ImportMetaEnv {
   readonly VITE_API_ENDPOINT: string;
   readonly VITE_APP_VERSION: string;
+  readonly VITE_STORYBOOK: boolean;
 }
 
 interface ImportMeta {

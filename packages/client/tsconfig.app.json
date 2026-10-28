@@ -28,5 +28,21 @@
       "@time-tracker/shared": ["../shared/src"]
     },
   },
-  "include": ["src"]
+"include": [
+    "src",
+    "e2e",
+    ".storybook/*.tsx",
+    "playwright.config.ts",
+    "vite.config.ts",
+    "vitest.config.ts"
+  ],
+  "exclude": [
+    "dist",
+    ".output",
+    "dist",
+    ".nitro",
+    "node_modules",
+    "**/node_modules",
+    "**/.*/"
+  ]
 }

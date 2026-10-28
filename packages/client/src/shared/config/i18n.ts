@@ -4,7 +4,7 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 import { I18_LANG_KEY } from "../constants";
 
-i18n
+const initI18n = i18n
   .use(HttpBackend)
   .use(LanguageDetector)
   .use(initReactI18next) // passes i18n down to react-i18next
@@ -35,6 +35,8 @@ i18n
       htmlTag: document.documentElement,
     },
   });
+
+export { i18n, initI18n };
 
 i18n.on("languageChanged", (lng) => {
   if (typeof document !== "undefined") {
